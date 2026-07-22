@@ -5,7 +5,7 @@ type: software
 authors:
   - given-names: "Alexandre"
     family-names: "do Vale Brostel"
-version: 1.0.0
+version: 1.0.1
 date-released: 2026-07-22
 license: Apache-2.0
 abstract: >-
