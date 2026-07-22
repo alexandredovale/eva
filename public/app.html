@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#0a0a0a">
+    <title>EVA - Evidence Algorithm</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cascadia+Mono:wght@400;500;600;700&family=Share+Tech&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/app.css?v=20260722-5">
+    <link rel="icon" type="image/x-icon" href="public/logo/icone.png">
+    <link rel="apple-touch-icon" href="public/logo/icone.png">
+    <link rel="shortcut icon" href="public/logo/icone.png">
+
+</head>
+<body class="auth-locked">
+    <header class="topbar">
+        <a class="brand" href="#overview" data-view="overview" aria-label="Ir para a página inicial">
+            <span class="brand-logo-slot" aria-hidden="true"><img id="brand-logo" alt="EVA logo" src="logo/logo.svg"><span class="brand-mark" id="brand-mark"></span></span>
+            <span class="brand-copy"><strong id="brand-name">EVA</strong><small id="brand-tagline">Evidency Algorithm</small></span>
+        </a>
+        <button type="button" class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="top-navigation"><span></span><span></span><span></span><span class="sr-only">Abrir menu</span></button>
+        <nav class="top-navigation" id="top-navigation" aria-label="Navegação principal">
+            <a href="#overview" data-view="overview" data-admin-only class="active"><span class="nav-index">01</span><span>Visão geral</span></a>
+            <a href="#documents" data-view="documents" data-admin-only><span class="nav-index">02</span><span>Documentos</span></a>
+            <a href="#query" data-view="query"><span class="nav-index">03</span><span>Chat</span></a>
+            <a href="#users" data-view="users" data-admin-only><span class="nav-index">04</span><span>Usuários</span></a>
+            <a href="#projects" data-view="projects" data-admin-only><span class="nav-index">05</span><span>Projetos</span></a>
+            <a href="#jobs" data-view="jobs" data-admin-only><span class="nav-index">06</span><span>Processamento</span></a>
+            <a href="#audit" data-view="audit" data-admin-only><span class="nav-index">07</span><span>Auditoria</span></a>
+            <a href="#settings" data-view="settings" data-user-only hidden><span class="nav-index">02</span><span>Alterar senha</span></a>
+        </nav>
+        <div class="top-actions">
+            <button type="button" class="icon-button" id="refresh-button" title="Atualizar dados" aria-label="Atualizar dados">↻</button>
+            <div class="connection-state" id="connection-state" data-state="offline"><span aria-hidden="true"></span><span id="connection-label">Desconectado</span></div>
+            <span class="session-user" id="session-user"></span>
+            <button type="button" class="button button-quiet button-session" id="disconnect-button">Sair</button>
+        </div>
+    </header>
+
+    <main id="workspace" tabindex="-1">
+        <section class="view active" id="view-overview" data-view-panel="overview" data-admin-only>
+            <div class="page-heading"><div><p class="eyebrow">Produto / visão geral</p><h1>Memória documental,<br><span>sem ruído.</span></h1><p>Uma leitura direta do acervo, das evidências e do processamento cognitivo.</p></div></div>
+            <div class="metric-grid" id="metric-grid" aria-live="polite"></div>
+            <div class="card guidance"><div><p class="eyebrow">Execução</p><h2>Worker cognitivo</h2><p>Processe toda a fila atual com confirmação explícita de chamadas reais.</p></div><code>php bin/queue-worker.php --live --drain</code></div>
+        </section>
+
+        <section class="view" id="view-documents" data-view-panel="documents" data-admin-only hidden>
+            <div class="page-heading"><div><p class="eyebrow">Base de conhecimento</p><h1>Documentos<span>.</span></h1><p>Envie Markdown, JSON ou XML e acompanhe a transferência em tempo real.</p></div></div>
+            <form id="upload-form" class="card upload-card">
+                <div class="form-field file-field"><label for="document-file">Arquivo</label><input id="document-file" name="document" type="file" accept=".md,.markdown,.json,.xml" required><small>MD, JSON ou XML</small></div>
+                <div class="form-field"><label for="document-title">Título opcional</label><input id="document-title" name="title" type="text" maxlength="255" placeholder="Nome para identificação"></div>
+                <button type="submit" class="button button-primary">Anexar documento</button>
+                <div class="upload-progress" id="upload-progress" hidden><div class="progress-copy"><span id="upload-progress-label">Preparando envio…</span><strong id="upload-progress-value">0%</strong></div><progress id="upload-progress-bar" max="100" value="0">0%</progress><small id="upload-progress-meta"></small></div>
+            </form>
+            <div class="card table-card"><div class="card-heading"><h2>Acervo</h2><span id="document-count">0 documentos</span></div><div class="table-wrap"><table><thead><tr><th>Documento</th><th>Formato</th><th>Nós</th><th>Primárias</th><th>Sínteses</th><th>Embeddings</th><th>Ação</th></tr></thead><tbody id="documents-body"></tbody></table></div></div>
+        </section>
+
+        <section class="view view-query" id="view-query" data-view-panel="query" hidden>
+            <div class="page-heading query-heading"><div><p class="eyebrow">Consulta documental</p><h1>Converse com<br><span>as evidências.</span></h1></div><p>A resposta é limitada às obras permitidas e mantém a rastreabilidade das fontes.</p></div>
+            <div class="chat-shell">
+                <div id="query-result" class="query-result" aria-live="polite"><div class="chat-empty"><span class="chat-empty-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-right-text" viewBox="0 0 16 16"><path d="M2 1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h9.586a2 2 0 0 1 1.414.586l2 2V2a1 1 0 0 0-1-1zm12-1a2 2 0 0 1 2 2v12.793a.5.5 0 0 1-.854.353l-2.853-2.853a1 1 0 0 0-.707-.293H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2z"/><path d="M3 3.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M3 6a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 6m0 2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5"/></svg></span><h2>Pronta para investigar.</h2><p>Selecione um projeto ou uma obra e faça uma pergunta.</p></div></div>
+                <form id="query-form" class="query-form"><div class="composer-document"><span class="composer-label">Projetos e obras</span><button class="scope-picker-toggle" id="query-scope-toggle" type="button" aria-expanded="false" aria-controls="query-scope-panel"><span id="query-scope-summary">Selecione o escopo da consulta</span><svg class="scope-picker-chevron" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"></path></svg></button><div class="query-scope-panel" id="query-scope-panel" hidden><div id="query-scopes" class="permission-tree query-scope-tree"></div></div></div><div class="composer-input"><label class="sr-only" for="query-input">Pergunta ou referência</label><textarea id="query-input" rows="2" maxlength="2000" required placeholder="Pergunte sobre o acervo…"></textarea><div class="composer-actions"><button type="button" class="button button-quiet" id="restart-chat">Reiniciar chat</button><button type="submit" class="button button-primary">Consultar <span aria-hidden="true">↗</span></button></div></div></form>
+            </div>
+        </section>
+
+        <section class="view" id="view-users" data-view-panel="users" data-admin-only hidden>
+            <div class="page-heading"><div><p class="eyebrow">Controle de acesso</p><h1>Usuários<span>.</span></h1><p>Cadastre credenciais e defina exatamente os projetos e obras disponíveis para cada pessoa.</p></div></div>
+            <form id="user-form" class="card compact-form"><div class="form-field"><label for="new-username">Username</label><input id="new-username" maxlength="80" autocomplete="off" required></div><div class="form-field"><label for="new-user-password">Senha inicial</label><input id="new-user-password" type="password" minlength="8" maxlength="200" autocomplete="new-password" required></div><button class="button button-primary" type="submit">Cadastrar usuário</button></form>
+            <div class="card table-card"><div class="card-heading"><h2>Usuários cadastrados</h2><span id="user-count">0 usuários</span></div><div class="table-wrap"><table><thead><tr><th>Username</th><th>Estado</th><th>Último acesso</th><th>Permissões</th><th>Ações</th></tr></thead><tbody id="users-body"></tbody></table></div></div>
+            <form id="permission-form" class="card permission-card" hidden><div class="card-heading"><div><p class="eyebrow">Permissões de consulta</p><h2 id="permission-title">Usuário</h2></div><button type="button" class="button button-quiet" id="permission-cancel">Fechar</button></div><input id="permission-user-id" type="hidden"><fieldset class="permission-scope"><legend>Projetos e obras</legend><p class="field-help">Marque o projeto para conceder acesso completo ou selecione somente as obras desejadas.</p><div id="permission-tree" class="permission-tree"></div></fieldset><button class="button button-primary" type="submit">Salvar permissões</button></form>
+        </section>
+
+        <section class="view" id="view-projects" data-view-panel="projects" data-admin-only hidden>
+            <div class="page-heading"><div><p class="eyebrow">Organização do acervo</p><h1>Projetos<span>.</span></h1><p>Agrupe obras para conceder acesso ao conjunto completo com um único checkbox.</p></div></div>
+            <form id="project-form" class="card"><input id="project-id" type="hidden"><div class="compact-form project-name-row"><div class="form-field"><label for="project-name">Nome do projeto</label><input id="project-name" maxlength="180" required placeholder="Ex.: Pentateuco Espírita"></div><button class="button button-primary" type="submit">Salvar projeto</button><button class="button button-quiet" id="project-cancel" type="button" hidden>Cancelar edição</button></div><fieldset class="project-documents"><legend>Obras do projeto</legend><div id="project-documents" class="check-list check-grid"></div></fieldset></form>
+            <div id="projects-list" class="project-grid"></div>
+        </section>
+
+        <section class="view" id="view-jobs" data-view-panel="jobs" data-admin-only hidden>
+            <div class="page-heading"><div><p class="eyebrow">Fila operacional</p><h1>Processamento<span>.</span></h1><p>Estado das sínteses e embeddings do Evidence Algorithm.</p></div></div>
+            <div class="card worker-monitor" id="worker-monitor" data-state="idle" aria-live="polite"><span class="worker-indicator" aria-hidden="true"></span><div><p class="eyebrow">Worker cognitivo</p><strong id="worker-state-label">Sem trabalhos ativos.</strong><small id="worker-state-detail">A tela é atualizada automaticamente durante o processamento.</small></div><code>php bin/queue-worker.php --live --drain</code></div>
+            <div class="card table-card"><div class="table-wrap"><table><thead><tr><th>Trabalho</th><th>Documento</th><th>Etapa</th><th>Estado</th><th>Progresso</th><th>Execuções</th><th>Falhas</th><th>Ação</th></tr></thead><tbody id="jobs-body"></tbody></table></div></div>
+        </section>
+
+        <section class="view" id="view-audit" data-view-panel="audit" data-admin-only hidden>
+            <div class="page-heading"><div><p class="eyebrow">Rastreabilidade</p><h1>Auditoria<span>.</span></h1><p>Eventos administrativos sem tokens, inputs documentais ou endereços de rede expostos.</p></div></div>
+            <div class="card table-card"><div class="table-wrap"><table><thead><tr><th>Evento</th><th>Entidade</th><th>Identificador</th><th>Momento</th><th>Metadados</th></tr></thead><tbody id="audit-body"></tbody></table></div></div>
+        </section>
+
+        <section class="view" id="view-settings" data-view-panel="settings" data-user-only hidden>
+            <div class="page-heading"><div><p class="eyebrow">Segurança da conta</p><h1>Alterar senha<span>.</span></h1><p>Atualize sua senha ou gere um novo código de recuperação de 16 caracteres.</p></div></div>
+            <div class="settings-grid">
+                <form id="password-form" class="card"><h2>Nova senha</h2><div class="form-field"><label for="current-password">Senha atual</label><input id="current-password" type="password" autocomplete="current-password" required></div><div class="form-field"><label for="changed-password">Nova senha</label><input id="changed-password" type="password" minlength="8" maxlength="200" autocomplete="new-password" required></div><button class="button button-primary" type="submit">Alterar senha</button></form>
+                <form id="recovery-code-form" class="card"><h2>Novo código de recuperação</h2><p>O código anterior será invalidado. Confirme sua senha e guarde o novo código em local seguro.</p><div class="form-field"><label for="recovery-current-password">Senha atual</label><input id="recovery-current-password" type="password" autocomplete="current-password" required></div><button class="button button-quiet" type="submit">Gerar código de 16 caracteres</button></form>
+            </div>
+        </section>
+    </main>
+
+    <div class="access-panel" id="access-panel" role="dialog" aria-modal="true" aria-labelledby="access-title">
+        <div class="access-modal">
+            <div class="access-brand" aria-hidden="true"><img alt="EVA logo popup" src="logo/logo.svg" /></div>
+            <p class="eyebrow">Acesso seguro</p><h1 id="access-title">Bem-vindo<span>.</span></h1><p>Entre com seu username e senha. O superadmin também pode usar o token administrativo.</p>
+            <form id="access-form" class="access-form"><label for="access-username">Username</label><input id="access-username" autocomplete="username" required autofocus><label for="access-password">Senha</label><input id="access-password" type="password" autocomplete="current-password" required><button type="submit" class="button button-primary">Entrar na EVA <span aria-hidden="true">↗</span></button></form>
+            <button type="button" class="text-button" id="show-recovery">Recuperar senha com código de 16 caracteres</button>
+            <details class="admin-access"><summary>Acesso do superadmin</summary><form id="admin-access-form" class="access-form"><label for="access-token">Token administrativo</label><input id="access-token" type="password" autocomplete="current-password" minlength="24"><button type="submit" class="button button-quiet">Entrar como superadmin</button></form></details>
+            <form id="recover-form" class="access-form" hidden><label for="recover-username">Username</label><input id="recover-username" autocomplete="username" required><label for="recover-code">Código de recuperação</label><input id="recover-code" minlength="16" maxlength="19" autocomplete="one-time-code" required><label for="recover-password">Nova senha</label><input id="recover-password" type="password" minlength="8" maxlength="200" autocomplete="new-password" required><button type="submit" class="button button-primary">Redefinir senha</button><button type="button" class="button button-quiet" id="cancel-recovery">Voltar ao login</button></form>
+            <small class="privacy-note">A credencial permanece somente nesta aba.</small>
+        </div>
+    </div>
+
+    <div class="access-panel secret-dialog" id="secret-dialog" role="dialog" aria-modal="true" aria-labelledby="secret-title" hidden><div class="access-modal"><p class="eyebrow">Exibição única</p><h2 id="secret-title">Código de recuperação</h2><p>Guarde este código em local seguro. Ele não poderá ser consultado novamente.</p><code class="recovery-secret" id="recovery-secret"></code><div class="secret-actions"><button class="button button-primary" id="copy-secret" type="button">Copiar código</button><button class="button button-quiet" id="download-secret" type="button">Salvar arquivo</button><button class="button button-quiet" id="close-secret" type="button">Já guardei</button></div></div></div>
+    <div class="access-panel confirmation-dialog" id="confirmation-dialog" role="dialog" aria-modal="true" aria-labelledby="confirmation-title" aria-describedby="confirmation-consequence" hidden>
+        <form class="access-modal confirmation-modal" id="confirmation-form">
+            <div class="danger-mark" aria-hidden="true">!</div>
+            <p class="eyebrow">Ação permanente</p>
+            <h2 id="confirmation-title">Confirmar exclusão</h2>
+            <p id="confirmation-consequence"></p>
+            <div class="confirmation-instruction"><span>Digite exatamente para confirmar:</span><code id="confirmation-target"></code></div>
+            <div class="form-field"><label for="confirmation-input">Confirmação</label><input id="confirmation-input" autocomplete="off" spellcheck="false" required></div>
+            <p class="confirmation-error" id="confirmation-error" role="alert" hidden></p>
+            <div class="confirmation-actions"><button class="button button-quiet" id="confirmation-cancel" type="button">Cancelar</button><button class="button button-danger" id="confirmation-submit" type="submit">Excluir permanentemente</button></div>
+        </form>
+    </div>
+    <div class="access-panel password-reset-dialog" id="password-reset-dialog" role="dialog" aria-modal="true" aria-labelledby="password-reset-title" hidden>
+        <form class="access-modal confirmation-modal" id="admin-password-reset-form">
+            <div class="access-brand compact-brand" aria-hidden="true"><span>•••</span></div>
+            <p class="eyebrow">Credencial do usuário</p>
+            <h2 id="password-reset-title">Definir nova senha</h2>
+            <p>A sessão atual do usuário será encerrada e um novo código de recuperação será emitido.</p>
+            <p class="account-reference">Usuário: <strong id="password-reset-username"></strong></p>
+            <div class="form-field"><label for="admin-reset-password">Nova senha</label><input id="admin-reset-password" type="password" minlength="8" maxlength="200" autocomplete="new-password" required></div>
+            <div class="confirmation-actions"><button class="button button-quiet" id="password-reset-cancel" type="button">Cancelar</button><button class="button button-primary" type="submit">Salvar nova senha</button></div>
+        </form>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+    <script src="assets/app.js?v=20260722-8" defer></script>
+</body>
+</html>

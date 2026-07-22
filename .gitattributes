@@ -1,0 +1,16 @@
+* text=auto eol=lf
+
+*.php text diff=php
+*.md text diff=markdown
+*.sql text
+*.json text
+*.xml text
+*.js text
+*.css text
+*.html text
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+

@@ -1,0 +1,24 @@
+php_flag display_errors Off
+php_flag log_errors On
+php_flag expose_php Off
+
+Options -Indexes -MultiViews
+DirectoryIndex index.php
+CGIPassAuth On
+
+<IfModule mod_setenvif.c>
+    SetEnvIfNoCase Authorization "^(.+)$" HTTP_AUTHORIZATION=$1
+</IfModule>
+
+<Files "app.html">
+    Require all denied
+</Files>
+
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]
