@@ -45,7 +45,7 @@ The project has no Composer or Node.js runtime dependency.
 1. Clone the repository and enter it:
 
    ```bash
-   git clone https://github.com/YOUR-ACCOUNT/eva.git
+   git clone https://github.com/alexandredovale/eva.git
    cd eva
    ```
 
