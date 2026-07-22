@@ -1,5 +1,7 @@
 # EVA — Evidence Algorithm
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
+
 EVA is a provider-neutral PHP system for building and querying **verifiable documentary memory**. It preserves document hierarchy, keeps literal source evidence separate from generated summaries, and validates every answer against the primary evidence recovered for the current query.
 
 `Cnode` is the transient understanding of an explicit semantic interaction between recovered evidence. It is not a persistent entity, score, graph edge, or embedding.
