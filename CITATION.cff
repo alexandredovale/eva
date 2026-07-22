@@ -6,6 +6,7 @@ authors:
   - given-names: "Alexandre"
     family-names: "do Vale Brostel"
 version: 1.0.1
+doi: "10.5281/zenodo.21500612"
 date-released: 2026-07-22
 license: Apache-2.0
 abstract: >-
