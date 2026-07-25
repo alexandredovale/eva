@@ -50,15 +50,18 @@ function total(group) { return Object.values(group || {}).reduce((sum, value) =>
 function apiPath(path) { return `api/${String(path).replace(/^\/+/, '')}`; }
 
 async function api(path, options = {}) {
+    const normalizedPath = String(path).replace(/^\/+/, '');
+    const requestToken = state.token;
     const headers = new Headers(options.headers || {});
-    if (state.token) headers.set('Authorization', `Bearer ${state.token}`);
+    const publicRoute = normalizedPath === 'branding' || normalizedPath.startsWith('auth/');
+    if (!publicRoute && requestToken) headers.set('Authorization', `Bearer ${requestToken}`);
     if (options.body && !(options.body instanceof FormData)) headers.set('Content-Type', 'application/json');
-    const response = await fetch(apiPath(path), { ...options, headers });
+    const response = await fetch(apiPath(normalizedPath), { ...options, headers, cache: 'no-store' });
     const payload = await response.json().catch(() => ({
         error: `O servidor retornou uma resposta não reconhecida (HTTP ${response.status}).`,
     }));
     if (!response.ok) {
-        if (response.status === 401 && !String(path).startsWith('auth/')) disconnect(false);
+        if (response.status === 401 && !publicRoute && state.token === requestToken) disconnect(false);
         throw new Error(payload.error || `Falha HTTP ${response.status}.`);
     }
     return payload;
@@ -637,10 +640,24 @@ function closeSecret() { elements.recoverySecret.textContent = ''; elements.secr
 
 elements.accessForm.addEventListener('submit', async event => {
     event.preventDefault();
+    const button = event.currentTarget.querySelector('button[type="submit"]');
+    button.disabled = true;
+    state.token = '';
+    sessionStorage.removeItem('eva_access_token');
+
     try {
         const payload = await api('auth/login', { method: 'POST', body: JSON.stringify({ username: elements.accessUsername.value.trim(), password: elements.accessPassword.value }) });
-        state.token = payload.token; await initializeSession(); elements.accessForm.reset(); notify('Sessão iniciada.');
-    } catch (error) { state.token = ''; notify(error.message, true); }
+        state.token = payload.token;
+        sessionStorage.setItem('eva_access_token', state.token);
+        await initializeSession();
+        elements.accessForm.reset();
+        notify('Sessão iniciada.');
+    } catch (error) {
+        disconnect(false);
+        notify(error.message, true);
+    } finally {
+        button.disabled = false;
+    }
 });
 
 elements.adminAccessForm.addEventListener('submit', async event => {
