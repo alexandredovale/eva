@@ -89,7 +89,7 @@ Na consulta conceitual ou relacional, `DocumentContextRetriever` compara o embed
 
 ## Execução cognitiva responsável
 
-A construção com provedores reais é exclusiva da linha de comando e exige etapa explícita:
+A construção com provedores reais pode ser iniciada pela linha de comando ou pela interface administrativa e sempre exige confirmação explícita:
 
 ```powershell
 php bin/build-cognitive.php <document-id> --stage=summaries --live
@@ -149,6 +149,8 @@ php bin/queue-worker.php --live --drain
 ```
 
 A execução continua protegida pela dupla confirmação `AI_LIVE_ENABLED=true` e `--live`.
+
+Na área administrativa, o botão **Processar fila no navegador** chama `POST /api/admin/queue/run` repetidamente até a fila ficar ociosa. Cada requisição executa uma única passagem do worker e exige `confirm_live: true`; o servidor continua exigindo `AI_LIVE_ENABLED=true`. A aba deve permanecer aberta durante o processamento.
 
 ## Pastas
 

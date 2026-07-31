@@ -278,6 +278,7 @@ textarea { resize: vertical; }
 .guidance { display: flex; align-items: center; justify-content: space-between; gap: 32px; }
 .guidance p { margin-bottom: 0; }
 .guidance code { padding: 12px 15px; border: 1px solid var(--line-strong); border-radius: 9px; color: var(--accent); background: #0a0a0a; white-space: nowrap; font-family: "Cascadia Mono", monospace; font-size: .77rem; }
+.worker-run-button { min-width: 224px; }
 
 .upload-card { display: grid; grid-template-columns: minmax(260px, 1.3fr) minmax(230px, 1fr) auto; align-items: end; gap: 18px; }
 .form-field { min-width: 0; display: grid; gap: 8px; }
@@ -308,6 +309,7 @@ input[type="file"]::file-selector-button {
 .worker-monitor strong { display: block; color: var(--ink); font-weight: 500; }
 .worker-monitor small { display: block; margin-top: 4px; color: var(--muted); }
 .worker-monitor code { padding: 9px 11px; border: 1px solid var(--line); border-radius: 8px; color: var(--accent); background: #0a0a0a; font-family: "Cascadia Mono", monospace; font-size: .72rem; white-space: nowrap; }
+.worker-monitor .worker-run-button { justify-self: end; }
 .worker-indicator { width: 11px; height: 11px; border-radius: 50%; background: #666; box-shadow: 0 0 0 5px rgba(255, 255, 255, .03); }
 .worker-monitor[data-state="waiting"] .worker-indicator { background: var(--accent); box-shadow: 0 0 0 5px rgba(223, 255, 0, .06); }
 .worker-monitor[data-state="running"] .worker-indicator { background: #73bfff; box-shadow: 0 0 16px rgba(115, 191, 255, .7); }
@@ -747,10 +749,12 @@ legend {
     .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .guidance { align-items: stretch; flex-direction: column; }
     .guidance code { white-space: normal; overflow-wrap: anywhere; }
+    .guidance .worker-run-button { width: 100%; }
     .upload-card { grid-template-columns: 1fr; }
     .upload-progress { grid-column: auto; }
     .worker-monitor { grid-template-columns: auto minmax(0, 1fr); }
     .worker-monitor code { grid-column: 1 / -1; white-space: normal; overflow-wrap: anywhere; }
+    .worker-monitor .worker-run-button { width: 100%; grid-column: 1 / -1; justify-self: stretch; }
     .chat-shell { min-height: calc(100vh - 230px); border-radius: 18px; }
     .query-form { grid-template-columns: 1fr; }
     .compact-form, .project-name-row { grid-template-columns: 1fr; }

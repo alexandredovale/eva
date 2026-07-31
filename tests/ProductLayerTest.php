@@ -95,6 +95,33 @@ try {
         'A API white label não deve expor vínculos internos de modelo ou fornecedor.'
     );
 
+    $workerMethodBlocked = $api->handle('GET', '/api/admin/queue/run', $authorized, [], [], '');
+    assertProduct($workerMethodBlocked->status === 405, 'O worker web deve aceitar somente POST.');
+    $workerConfirmationBlocked = $api->handle(
+        'POST',
+        '/api/admin/queue/run',
+        $authorized,
+        [],
+        [],
+        json_encode(['confirm_live' => false], JSON_THROW_ON_ERROR)
+    );
+    assertProduct(
+        $workerConfirmationBlocked->status === 422,
+        'O worker web deve exigir confirmação explícita de chamadas reais.'
+    );
+    $workerLiveBlocked = $api->handle(
+        'POST',
+        '/api/admin/queue/run',
+        $authorized,
+        [],
+        [],
+        json_encode(['confirm_live' => true], JSON_THROW_ON_ERROR)
+    );
+    assertProduct(
+        $workerLiveBlocked->status === 409,
+        'O worker web deve permanecer bloqueado quando AI_LIVE_ENABLED=false.'
+    );
+
     $metrics = $api->handle('GET', '/api/metrics', $authorized, [], [], '');
     assertProduct($metrics->status === 200, 'As métricas não foram retornadas.');
     assertProduct(($metrics->payload['metrics']['jobs']['queued'] ?? 0) >= 2, 'As métricas não contabilizaram a fila.');

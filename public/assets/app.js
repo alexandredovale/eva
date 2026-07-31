@@ -11,6 +11,7 @@ const state = {
     queryHistory: [],
     secretOwner: '',
     jobPollTimer: null,
+    workerDrainActive: false,
 };
 
 sessionStorage.removeItem('eva_admin_token');
@@ -25,6 +26,7 @@ const elements = {
     queryScopes: document.querySelector('#query-scopes'), queryScopeToggle: document.querySelector('#query-scope-toggle'), queryScopePanel: document.querySelector('#query-scope-panel'), queryScopeSummary: document.querySelector('#query-scope-summary'),
     queryResult: document.querySelector('#query-result'), restartChat: document.querySelector('#restart-chat'), jobsBody: document.querySelector('#jobs-body'), auditBody: document.querySelector('#audit-body'),
     workerMonitor: document.querySelector('#worker-monitor'), workerStateLabel: document.querySelector('#worker-state-label'), workerStateDetail: document.querySelector('#worker-state-detail'),
+    workerRunButtons: document.querySelectorAll('[data-run-worker]'),
     usersBody: document.querySelector('#users-body'), userCount: document.querySelector('#user-count'), projectsList: document.querySelector('#projects-list'),
     permissionForm: document.querySelector('#permission-form'), permissionTree: document.querySelector('#permission-tree'),
     projectDocuments: document.querySelector('#project-documents'), menuToggle: document.querySelector('#menu-toggle'), navigation: document.querySelector('#top-navigation'),
@@ -307,6 +309,14 @@ function renderWorkerMonitor(jobs) {
     const running = jobs.filter(job => job.status === 'running');
     const queued = jobs.filter(job => job.status === 'queued');
     const failed = jobs.filter(job => job.status === 'failed');
+    updateWorkerRunButtons();
+
+    if (state.workerDrainActive) {
+        elements.workerMonitor.dataset.state = 'running';
+        elements.workerStateLabel.textContent = 'Worker ativo pelo navegador.';
+        elements.workerStateDetail.textContent = 'A fila está sendo consumida; mantenha esta aba aberta.';
+        return;
+    }
 
     if (running.length) {
         elements.workerMonitor.dataset.state = 'running';
@@ -318,7 +328,7 @@ function renderWorkerMonitor(jobs) {
     if (queued.length) {
         elements.workerMonitor.dataset.state = 'waiting';
         elements.workerStateLabel.textContent = `Worker inativo: ${queued.length} etapa(s) aguardando execução.`;
-        elements.workerStateDetail.textContent = 'A fila não avança sozinha. Execute o comando exibido ao lado no terminal do projeto.';
+        elements.workerStateDetail.textContent = 'Use “Processar fila no navegador” para iniciar as etapas pendentes.';
         return;
     }
 
@@ -332,6 +342,15 @@ function renderWorkerMonitor(jobs) {
     elements.workerMonitor.dataset.state = 'idle';
     elements.workerStateLabel.textContent = 'Sem trabalhos ativos.';
     elements.workerStateDetail.textContent = 'A tela é atualizada automaticamente durante o processamento.';
+}
+
+function updateWorkerRunButtons() {
+    const queued = state.jobs.some(job => job.status === 'queued');
+
+    elements.workerRunButtons.forEach(button => {
+        button.disabled = state.workerDrainActive || !queued || state.user?.role !== 'superadmin';
+        button.textContent = state.workerDrainActive ? 'Processando fila…' : 'Processar fila no navegador';
+    });
 }
 
 function renderAudit(events) {
@@ -590,7 +609,7 @@ function scheduleJobPolling() {
     state.jobPollTimer = setTimeout(refreshProcessingState, 3000);
 }
 
-async function refreshProcessingState() {
+async function refreshProcessingState(reschedule = true) {
     try {
         const [metrics, documents, jobs] = await Promise.all([api('metrics'), api('documents'), api('jobs')]);
         renderMetrics(metrics.metrics);
@@ -601,6 +620,55 @@ async function refreshProcessingState() {
             elements.workerStateDetail.textContent = 'Não foi possível atualizar o progresso agora; uma nova tentativa será feita automaticamente.';
         }
     } finally {
+        if (reschedule) scheduleJobPolling();
+    }
+}
+
+async function drainQueueFromBrowser() {
+    if (state.workerDrainActive) return;
+
+    if (!state.jobs.some(job => job.status === 'queued')) {
+        notify('Não há etapas pendentes na fila.');
+        return;
+    }
+
+    if (!window.confirm('Processar toda a fila atual? Esta ação pode realizar chamadas reais ao provedor de IA.')) {
+        return;
+    }
+
+    state.workerDrainActive = true;
+    stopJobPolling();
+    renderWorkerMonitor(state.jobs);
+    let processedRuns = 0;
+    let failedRuns = 0;
+
+    try {
+        while (state.workerDrainActive && state.user?.role === 'superadmin') {
+            const { worker } = await api('admin/queue/run', {
+                method: 'POST',
+                body: JSON.stringify({ confirm_live: true }),
+            });
+            const status = worker?.status || 'idle';
+
+            if (status === 'idle') break;
+            processedRuns++;
+            if (status === 'failed') failedRuns++;
+            await refreshProcessingState(false);
+        }
+
+        await refreshAll();
+        notify(
+            failedRuns > 0
+                ? `Fila consumida com ${failedRuns} execução(ões) com falha.`
+                : `Fila consumida em ${processedRuns} execução(ões).`,
+            failedRuns > 0
+        );
+    } catch (error) {
+        try { await refreshProcessingState(false); } catch (_) {}
+        notify(error.message, true);
+    } finally {
+        state.workerDrainActive = false;
+        renderWorkerMonitor(state.jobs);
         scheduleJobPolling();
     }
 }
@@ -679,6 +747,7 @@ elements.recoverForm.addEventListener('submit', async event => {
 
 document.querySelector('#disconnect-button').addEventListener('click', async () => { try { await api('logout', { method: 'POST' }); } catch (_) {} disconnect(); });
 document.querySelector('#refresh-button').addEventListener('click', () => refreshAll().then(() => notify('Dados atualizados.')).catch(error => notify(error.message, true)));
+elements.workerRunButtons.forEach(button => button.addEventListener('click', drainQueueFromBrowser));
 elements.menuToggle.addEventListener('click', () => { const expanded = elements.menuToggle.getAttribute('aria-expanded') === 'true'; elements.menuToggle.setAttribute('aria-expanded', String(!expanded)); document.body.classList.toggle('menu-open', !expanded); });
 document.querySelectorAll('[data-view]').forEach(link => link.addEventListener('click', event => { event.preventDefault(); switchView(link.dataset.view); }));
 

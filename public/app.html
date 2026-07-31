@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cascadia+Mono:wght@400;500;600;700&family=Share+Tech&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/app.css?v=20260722-5">
+    <link rel="stylesheet" href="assets/app.css?v=20260731-1">
     <link rel="icon" type="image/x-icon" href="public/logo/icone.png">
     <link rel="apple-touch-icon" href="public/logo/icone.png">
     <link rel="shortcut icon" href="public/logo/icone.png">
@@ -44,7 +44,7 @@
         <section class="view active" id="view-overview" data-view-panel="overview" data-admin-only>
             <div class="page-heading"><div><p class="eyebrow">Produto / visão geral</p><h1>Memória documental,<br><span>sem ruído.</span></h1><p>Uma leitura direta do acervo, das evidências e do processamento cognitivo.</p></div></div>
             <div class="metric-grid" id="metric-grid" aria-live="polite"></div>
-            <div class="card guidance"><div><p class="eyebrow">Execução</p><h2>Worker cognitivo</h2><p>Processe toda a fila atual com confirmação explícita de chamadas reais.</p></div><code>php bin/queue-worker.php --live --drain</code></div>
+            <div class="card guidance"><div><p class="eyebrow">Execução</p><h2>Worker cognitivo</h2><p>Processe toda a fila atual pelo navegador, com confirmação explícita de chamadas reais.</p></div><button type="button" class="button button-primary worker-run-button" data-run-worker disabled>Processar fila no navegador</button></div>
         </section>
 
         <section class="view" id="view-documents" data-view-panel="documents" data-admin-only hidden>
@@ -81,7 +81,7 @@
 
         <section class="view" id="view-jobs" data-view-panel="jobs" data-admin-only hidden>
             <div class="page-heading"><div><p class="eyebrow">Fila operacional</p><h1>Processamento<span>.</span></h1><p>Estado das sínteses e embeddings do Evidence Algorithm.</p></div></div>
-            <div class="card worker-monitor" id="worker-monitor" data-state="idle" aria-live="polite"><span class="worker-indicator" aria-hidden="true"></span><div><p class="eyebrow">Worker cognitivo</p><strong id="worker-state-label">Sem trabalhos ativos.</strong><small id="worker-state-detail">A tela é atualizada automaticamente durante o processamento.</small></div><code>php bin/queue-worker.php --live --drain</code></div>
+            <div class="card worker-monitor" id="worker-monitor" data-state="idle" aria-live="polite"><span class="worker-indicator" aria-hidden="true"></span><div><p class="eyebrow">Worker cognitivo</p><strong id="worker-state-label">Sem trabalhos ativos.</strong><small id="worker-state-detail">A tela é atualizada automaticamente durante o processamento.</small></div><button type="button" class="button button-primary worker-run-button" data-run-worker disabled>Processar fila no navegador</button></div>
             <div class="card table-card"><div class="table-wrap"><table><thead><tr><th>Trabalho</th><th>Documento</th><th>Etapa</th><th>Estado</th><th>Progresso</th><th>Execuções</th><th>Falhas</th><th>Ação</th></tr></thead><tbody id="jobs-body"></tbody></table></div></div>
         </section>
 
@@ -136,6 +136,6 @@
         </form>
     </div>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-    <script src="assets/app.js?v=20260725-1" defer></script>
+    <script src="assets/app.js?v=20260731-1" defer></script>
 </body>
 </html>

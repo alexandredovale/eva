@@ -12,6 +12,7 @@ and the project uses [Semantic Versioning](https://semver.org/).
 - Public contribution and security policies.
 - Sanitized environment template.
 - English project documentation and GitHub community files.
+- Superadmin browser control for explicitly confirmed queue draining without shell access.
 
 ## [1.0.0] - 2026-07-22
 
@@ -25,4 +26,3 @@ and the project uses [Semantic Versioning](https://semver.org/).
 - Evidence-gated answer generation and bounded conversational continuity.
 - White-label web interface, authenticated API, queue, audit, and metrics.
 - Operational, architectural, scientific, and energy-sustainability documentation.
-

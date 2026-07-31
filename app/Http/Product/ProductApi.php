@@ -17,6 +17,7 @@ use Eva\Application\Query\InputType;
 use Eva\Application\Query\InputTypeDetector;
 use Eva\Application\Query\QueryException;
 use Eva\Application\Queue\CognitiveJobPlanner;
+use Eva\Application\Queue\CognitiveQueueWorker;
 use Eva\Application\Queue\ProcessingQueueService;
 use Eva\Application\Queue\QueueException;
 use Eva\Http\Security\AccessException;
@@ -288,6 +289,69 @@ final readonly class ProductApi
         }
 
         $management = new AccessManagementService($this->database, $auth);
+
+        if ($path === '/api/admin/queue/run') {
+            if ($method !== 'POST') {
+                return $this->methodNotAllowed('POST');
+            }
+
+            $payload = (new JsonRequestParser())->parse($rawBody);
+
+            if (($payload['confirm_live'] ?? null) !== true) {
+                throw new ProductHttpException('Confirme explicitamente o processamento com chamadas reais.', 422);
+            }
+
+            if (($this->container['ai']['live_enabled'] ?? false) !== true) {
+                throw new ProductHttpException('O worker exige AI_LIVE_ENABLED=true no servidor.', 409);
+            }
+
+            ignore_user_abort(true);
+
+            if (function_exists('set_time_limit')) {
+                set_time_limit(0);
+            }
+
+            $queue = new ProcessingQueueService(
+                $this->database,
+                (int) $this->container['queue']['max_failures']
+            );
+            $worker = new CognitiveQueueWorker(
+                $this->database,
+                $queue,
+                new CognitiveProviderFactory($this->container['ai']),
+                $this->container['ai'],
+                $audit,
+                $this->logger
+            );
+            $workerId = mb_substr(
+                (string) $this->container['queue']['worker_id'] . '-web',
+                0,
+                120,
+                'UTF-8'
+            );
+            $result = $worker->runOnce($workerId);
+            $audit->record(
+                'processing_queue_run_requested',
+                'processing_queue',
+                null,
+                $actor->fingerprint,
+                $networkAddress,
+                [
+                    'status' => $result['status'] ?? 'idle',
+                    'job_id' => $result['job']['id'] ?? null,
+                    'document_id' => $result['job']['document_id'] ?? null,
+                    'stage' => $result['job']['stage'] ?? null,
+                ]
+            );
+
+            $workerResponse = ['status' => $result['status'] ?? 'idle'];
+
+            if (isset($result['job']) && is_array($result['job'])) {
+                $workerResponse['job'] = $result['job'];
+            }
+
+            return new HttpResponse(200, ['worker' => $workerResponse]);
+        }
 
         if ($path === '/api/admin/users') {
             if ($method === 'GET') {

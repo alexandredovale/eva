@@ -21,6 +21,7 @@ A raiz HTTP encaminha somente rotas virtuais e assets para `public`. Arquivos ou
 | `GET` | `/api/documents` | Lista o acervo e contagens documentais |
 | `POST` | `/api/documents` | Persiste Markdown, JSON ou XML |
 | `POST` | `/api/documents/{id}/process` | Agenda sínteses e embeddings |
+| `POST` | `/api/admin/queue/run` | Executa uma passagem confirmada do worker; exclusivo do superadmin |
 | `GET` | `/api/jobs` | Lista o estado da fila |
 | `POST` | `/api/jobs/{id}/retry` | Retoma explicitamente um trabalho com falha |
 | `POST` | `/api/query` | Executa consulta documental validada |
@@ -56,6 +57,8 @@ php bin/queue-worker.php --live --drain
 ```
 
 A interface consulta a fila automaticamente a cada três segundos enquanto houver etapas `queued` ou `running`. O progresso de sínteses é calculado pelas unidades hierárquicas persistidas; embeddings são persistidos por lote para que a barra avance durante o processamento.
+
+O superadmin também pode usar **Processar fila no navegador**. A interface confirma o possível consumo real e envia `POST /api/admin/queue/run` com `confirm_live: true` sucessivamente até o worker retornar `idle`. Cada requisição executa somente uma passagem, `AI_LIVE_ENABLED=true` continua obrigatório no servidor e a aba deve permanecer aberta. A rota instancia `CognitiveQueueWorker` diretamente e não expõe execução arbitrária de comandos.
 
 ## White label
 

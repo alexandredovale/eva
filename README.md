@@ -115,6 +115,8 @@ php bin/queue-worker.php --live
 
 Use `--drain` only when you intentionally want to process the complete current queue.
 
+The superadmin interface can also drain the queue from the browser. Each authenticated `POST /api/admin/queue/run` request performs one worker pass, and the interface repeats these requests until the queue is idle. This path requires both `AI_LIVE_ENABLED=true` on the server and the explicit `confirm_live: true` request field. Keep the browser tab open while it runs.
+
 ## API surface
 
 | Method | Route | Purpose |
@@ -124,6 +126,7 @@ Use `--drain` only when you intentionally want to process the complete current q
 | `GET` | `/api/documents` | List documents allowed by the current scope |
 | `POST` | `/api/documents` | Ingest Markdown, JSON, or XML |
 | `POST` | `/api/documents/{id}/process` | Queue summaries and embeddings |
+| `POST` | `/api/admin/queue/run` | Run one explicitly confirmed worker pass (superadmin only) |
 | `GET` | `/api/jobs` | Inspect queue state |
 | `POST` | `/api/jobs/{id}/retry` | Explicitly retry an allowed failed job |
 | `POST` | `/api/query` | Run a validated documentary query |
@@ -186,4 +189,3 @@ Read [`CONTRIBUTING.md`](CONTRIBUTING.md) before opening a pull request. Report 
 Copyright 2026 EVA Project contributors.
 
 Licensed under the [Apache License 2.0](LICENSE). The license permits use, modification, and distribution subject to its terms. It does not grant trademark rights; see [`NOTICE`](NOTICE).
-

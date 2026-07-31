@@ -21,6 +21,8 @@ php bin/queue-worker.php --live --drain
 
 Both commands still require `AI_LIVE_ENABLED=true`. `--drain` can consume many real provider calls and should be used deliberately.
 
+The superadmin interface offers the same deliberate drain flow without shell access. `POST /api/admin/queue/run` executes one worker pass and requires both `AI_LIVE_ENABLED=true` and a JSON body containing `{"confirm_live": true}`. The browser repeats that request until the returned worker status is `idle`; the tab must remain open during processing. The endpoint invokes `CognitiveQueueWorker` directly and never exposes arbitrary command execution.
+
 ## Audit and metrics
 
 Audit records contain event type, entity, identifier, and sanitized operational metadata. Secrets, passwords, prompts, request bodies, inputs, and documentary content are redacted. Network addresses are stored only as hashes.
@@ -38,4 +40,3 @@ Deleting a work cascades through its nodes, evidence, derivations, embeddings, j
 - query input is limited to 20,000 bytes;
 - uploads obey `DOCUMENT_MAX_BYTES`;
 - jobs are unique by version and processed individually by default.
-
