@@ -38,6 +38,8 @@ const elements = {
     confirmationTitle: document.querySelector('#confirmation-title'), confirmationConsequence: document.querySelector('#confirmation-consequence'),
     confirmationTarget: document.querySelector('#confirmation-target'), confirmationInput: document.querySelector('#confirmation-input'),
     confirmationError: document.querySelector('#confirmation-error'),
+    processingConfirmationDialog: document.querySelector('#processing-confirmation-dialog'), processingConfirmationForm: document.querySelector('#processing-confirmation-form'),
+    processingConfirmationCancel: document.querySelector('#processing-confirmation-cancel'),
     passwordResetDialog: document.querySelector('#password-reset-dialog'), passwordResetForm: document.querySelector('#admin-password-reset-form'),
     passwordResetUsername: document.querySelector('#password-reset-username'), adminResetPassword: document.querySelector('#admin-reset-password'),
 };
@@ -438,6 +440,37 @@ function closeTypedDeletion(result) {
     resolve(result);
 }
 
+function confirmQueueProcessing() {
+    if (typeof confirmQueueProcessing.resolve === 'function') {
+        confirmQueueProcessing.resolve(false);
+    }
+
+    confirmQueueProcessing.trigger = document.activeElement;
+    elements.processingConfirmationDialog.hidden = false;
+    elements.topbar.inert = true;
+    elements.workspace.inert = true;
+    document.body.classList.add('auth-locked');
+    setTimeout(() => elements.processingConfirmationCancel.focus(), 0);
+
+    return new Promise(resolve => {
+        confirmQueueProcessing.resolve = resolve;
+    });
+}
+
+function closeQueueProcessingConfirmation(result) {
+    if (typeof confirmQueueProcessing.resolve !== 'function') return;
+    const resolve = confirmQueueProcessing.resolve;
+    confirmQueueProcessing.resolve = null;
+    elements.processingConfirmationDialog.hidden = true;
+    elements.processingConfirmationForm.reset();
+    elements.topbar.inert = !state.user;
+    elements.workspace.inert = !state.user;
+    document.body.classList.toggle('auth-locked', !state.user || !elements.secretDialog.hidden);
+    if (confirmQueueProcessing.trigger instanceof HTMLElement) confirmQueueProcessing.trigger.focus();
+    confirmQueueProcessing.trigger = null;
+    resolve(result);
+}
+
 function openPasswordReset(user) {
     openPasswordReset.user = user;
     openPasswordReset.trigger = document.activeElement;
@@ -637,7 +670,7 @@ async function drainQueueFromBrowser() {
         return;
     }
 
-    if (!window.confirm('Processar toda a fila atual? Esta ação pode realizar chamadas reais ao provedor de IA.')) {
+    if (!await confirmQueueProcessing()) {
         return;
     }
 
@@ -1117,6 +1150,11 @@ elements.confirmationForm.addEventListener('submit', event => {
     closeTypedDeletion(true);
 });
 document.querySelector('#confirmation-cancel').addEventListener('click', () => closeTypedDeletion(false));
+elements.processingConfirmationForm.addEventListener('submit', event => {
+    event.preventDefault();
+    closeQueueProcessingConfirmation(true);
+});
+elements.processingConfirmationCancel.addEventListener('click', () => closeQueueProcessingConfirmation(false));
 elements.passwordResetForm.addEventListener('submit', async event => {
     event.preventDefault();
     const user = openPasswordReset.user;
@@ -1149,6 +1187,12 @@ document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && !elements.confirmationDialog.hidden) {
         event.preventDefault();
         closeTypedDeletion(false);
+        return;
+    }
+
+    if (event.key === 'Escape' && !elements.processingConfirmationDialog.hidden) {
+        event.preventDefault();
+        closeQueueProcessingConfirmation(false);
         return;
     }
 

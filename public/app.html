@@ -124,6 +124,16 @@
             <div class="confirmation-actions"><button class="button button-quiet" id="confirmation-cancel" type="button">Cancelar</button><button class="button button-danger" id="confirmation-submit" type="submit">Excluir permanentemente</button></div>
         </form>
     </div>
+    <div class="access-panel confirmation-dialog" id="processing-confirmation-dialog" role="dialog" aria-modal="true" aria-labelledby="processing-confirmation-title" aria-describedby="processing-confirmation-consequence" hidden>
+        <form class="access-modal confirmation-modal" id="processing-confirmation-form">
+            <div class="access-brand compact-brand" aria-hidden="true"><span>IA</span></div>
+            <p class="eyebrow">Execução cognitiva</p>
+            <h2 id="processing-confirmation-title">Processar toda a fila atual?</h2>
+            <p id="processing-confirmation-consequence">Esta ação pode realizar chamadas reais ao provedor de IA.</p>
+            <div class="confirmation-instruction"><span>A fila será consumida pelo navegador. Mantenha esta aba aberta durante o processamento.</span></div>
+            <div class="confirmation-actions"><button class="button button-quiet" id="processing-confirmation-cancel" type="button">Cancelar</button><button class="button button-primary" type="submit">Processar fila</button></div>
+        </form>
+    </div>
     <div class="access-panel password-reset-dialog" id="password-reset-dialog" role="dialog" aria-modal="true" aria-labelledby="password-reset-title" hidden>
         <form class="access-modal confirmation-modal" id="admin-password-reset-form">
             <div class="access-brand compact-brand" aria-hidden="true"><span>•••</span></div>
@@ -136,6 +146,6 @@
         </form>
     </div>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-    <script src="assets/app.js?v=20260731-2" defer></script>
+    <script src="assets/app.js?v=20260731-3" defer></script>
 </body>
 </html>
