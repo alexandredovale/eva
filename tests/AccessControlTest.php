@@ -80,10 +80,15 @@ try {
         [],
         json_encode([
             'name' => 'Projeto de acesso ' . bin2hex(random_bytes(3)),
+            'response_profile' => 'Auxilie o público de teste com linguagem didática.',
             'document_ids' => [$documents[0]->documentId],
         ], JSON_THROW_ON_ERROR)
     );
     assertAccess($project->status === 201, 'O projeto não foi criado.');
+    assertAccess(
+        $project->payload['project']['response_profile'] === 'Auxilie o público de teste com linguagem didática.',
+        'O perfil de respostas do projeto não foi persistido.'
+    );
     $projectId = (int) $project->payload['project']['id'];
 
     $adminScopes = $api->handle('GET', '/api/scopes', $admin, [], [], '');
@@ -145,6 +150,20 @@ try {
             ['type' => 'document', 'id' => $documents[0]->documentId],
         ]) === [$documents[0]->documentId],
         'A seleção múltipla não eliminou obras duplicadas.'
+    );
+    $projectProfiles = $access->responseProfiles($actor, [['type' => 'project', 'id' => $projectId]]);
+    assertAccess(
+        count($projectProfiles) === 1
+        && $projectProfiles[0]['response_profile'] === 'Auxilie o público de teste com linguagem didática.'
+        && in_array('Obra permitida', $projectProfiles[0]['documents'], true),
+        'O projeto selecionado não ativou seu perfil de respostas com o escopo documental.'
+    );
+    assertAccess(
+        $access->responseProfiles($actor, [[
+            'type' => 'document',
+            'id' => $documents[0]->documentId,
+        ]]) === [],
+        'Uma obra selecionada individualmente ativou implicitamente o perfil do projeto.'
     );
 
     $individualPermissions = $api->handle(

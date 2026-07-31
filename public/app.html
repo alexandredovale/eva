@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cascadia+Mono:wght@400;500;600;700&family=Share+Tech&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/app.css?v=20260731-1">
+    <link rel="stylesheet" href="assets/app.css?v=20260731-2">
     <link rel="icon" type="image/x-icon" href="public/logo/icone.png">
     <link rel="apple-touch-icon" href="public/logo/icone.png">
     <link rel="shortcut icon" href="public/logo/icone.png">
@@ -75,7 +75,7 @@
 
         <section class="view" id="view-projects" data-view-panel="projects" data-admin-only hidden>
             <div class="page-heading"><div><p class="eyebrow">Organização do acervo</p><h1>Projetos<span>.</span></h1><p>Agrupe obras para conceder acesso ao conjunto completo com um único checkbox.</p></div></div>
-            <form id="project-form" class="card"><input id="project-id" type="hidden"><div class="compact-form project-name-row"><div class="form-field"><label for="project-name">Nome do projeto</label><input id="project-name" maxlength="180" required placeholder="Ex.: Pentateuco Espírita"></div><button class="button button-primary" type="submit">Salvar projeto</button><button class="button button-quiet" id="project-cancel" type="button" hidden>Cancelar edição</button></div><fieldset class="project-documents"><legend>Obras do projeto</legend><div id="project-documents" class="check-list check-grid"></div></fieldset></form>
+            <form id="project-form" class="card"><input id="project-id" type="hidden"><div class="compact-form project-name-row"><div class="form-field"><label for="project-name">Nome do projeto</label><input id="project-name" maxlength="180" required placeholder="Ex.: Pentateuco Espírita"></div><button class="button button-primary" type="submit">Salvar projeto</button><button class="button button-quiet" id="project-cancel" type="button" hidden>Cancelar edição</button></div><div class="form-field project-profile-field"><label for="project-response-profile">Perfil de respostas</label><textarea id="project-response-profile" rows="6" maxlength="6000" placeholder="Ex.: Você auxiliará professores de Matemática na elaboração de questões e no esclarecimento de atividades extraclasse."></textarea><small>Governança complementar aplicada somente quando este projeto estiver habilitado no chat. As regras documentais e de citação da EVA continuam obrigatórias.</small></div><fieldset class="project-documents"><legend>Obras do projeto</legend><div id="project-documents" class="check-list check-grid"></div></fieldset></form>
             <div id="projects-list" class="project-grid"></div>
         </section>
 
@@ -102,12 +102,12 @@
     <div class="access-panel" id="access-panel" role="dialog" aria-modal="true" aria-labelledby="access-title">
         <div class="access-modal">
             <div class="access-brand" aria-hidden="true"><img alt="EVA logo popup" src="logo/logo.svg" /></div>
-            <p class="eyebrow">Acesso seguro</p><h1 id="access-title">Bem-vindo<span>.</span></h1><p>Entre com seu username e senha. O superadmin também pode usar o token administrativo.</p>
+            <p class="eyebrow">Acesso seguro</p><h1 id="access-title">Bem-vindo/a<span>.</span></h1><p>Entre com seu username e senha.</p>
             <form id="access-form" class="access-form"><label for="access-username">Username</label><input id="access-username" autocomplete="username" required autofocus><label for="access-password">Senha</label><input id="access-password" type="password" autocomplete="current-password" required><button type="submit" class="button button-primary">Entrar na EVA <span aria-hidden="true">↗</span></button></form>
             <button type="button" class="text-button" id="show-recovery">Recuperar senha com código de 16 caracteres</button>
             <details class="admin-access"><summary>Acesso do superadmin</summary><form id="admin-access-form" class="access-form"><label for="access-token">Token administrativo</label><input id="access-token" type="password" autocomplete="current-password" minlength="24"><button type="submit" class="button button-quiet">Entrar como superadmin</button></form></details>
             <form id="recover-form" class="access-form" hidden><label for="recover-username">Username</label><input id="recover-username" autocomplete="username" required><label for="recover-code">Código de recuperação</label><input id="recover-code" minlength="16" maxlength="19" autocomplete="one-time-code" required><label for="recover-password">Nova senha</label><input id="recover-password" type="password" minlength="8" maxlength="200" autocomplete="new-password" required><button type="submit" class="button button-primary">Redefinir senha</button><button type="button" class="button button-quiet" id="cancel-recovery">Voltar ao login</button></form>
-            <small class="privacy-note">A credencial permanece somente nesta aba.</small>
+
         </div>
     </div>
 
@@ -136,6 +136,6 @@
         </form>
     </div>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-    <script src="assets/app.js?v=20260731-1" defer></script>
+    <script src="assets/app.js?v=20260731-2" defer></script>
 </body>
 </html>

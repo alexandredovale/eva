@@ -587,9 +587,13 @@ legend {
 .document-actions .status { white-space: nowrap; }
 .project-actions { margin-top: 18px; }
 .project-name-row { grid-template-columns: minmax(260px, 1fr) auto auto; padding: 0; margin-bottom: 22px; }
+.project-profile-field { margin-bottom: 22px; }
+.project-profile-field textarea { min-height: 132px; line-height: 1.55; }
 .project-documents { margin-top: 8px; }
 .project-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .project-card { margin: 0; }
+.project-profile-status { margin: 10px 0 14px; color: var(--muted); font-family: "Cascadia Mono", monospace; font-size: .7rem; }
+.project-profile-status.is-configured { color: var(--accent); }
 .project-card ul { min-height: 52px; padding-left: 20px; color: var(--muted-strong); }
 .settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 .settings-grid .card { display: grid; align-content: start; gap: 14px; }

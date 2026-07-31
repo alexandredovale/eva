@@ -13,6 +13,7 @@ Persistir a memória documental com integridade e rastreabilidade, sem duplicar 
 - **evidence_embeddings:** vetores versionados usados para localização.
 - **processing_jobs:** fila das etapas `summaries` e `embeddings`.
 - **audit_events:** eventos administrativos sanitizados.
+- **projects:** agrupamentos de obras, permissões e perfil complementar de respostas administrado pelo superadmin.
 
 Não existem tabelas `cnodes`, `cnode_evidences`, `cnode_embeddings` ou `interaction_analyses`.
 
@@ -42,5 +43,6 @@ O esquema não armazena confiança, pontuação, similaridade cognitiva, intensi
 - Exclusão de documento remove seus registros dependentes; o arquivo exige tratamento explícito.
 - Operações que alteram árvore e evidências usam transação.
 - Interações de consulta nunca alteram o núcleo persistente.
+- O perfil de respostas de um projeto orienta a geração somente quando esse projeto é selecionado explicitamente e não substitui as regras documentais do sistema.
 
 O esquema inicial está em `database/schema.sql` e evolui por migrações incrementais.

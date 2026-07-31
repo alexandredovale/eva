@@ -56,6 +56,23 @@ Resultados literais, lexicais e estruturais são candidatos, não conclusões. T
 
 Quando uma evidência derivada é localizada, `evidence_derivations` é percorrida até suas fontes primárias. A resposta recebe conteúdo literal completo; a similaridade usada para ordenar resultados é descartada.
 
+## Governança de respostas por projeto
+
+O superadmin pode preencher o campo **Perfil de respostas** de um projeto com orientações complementares de público, papel de auxílio, vocabulário, tom, foco ou apresentação. O perfil não altera o acervo nem substitui o `SYSTEM_PROMPT` padrão: regras de evidência primária, citações, limitações, validação de interações e saída JSON continuam prioritárias.
+
+A ativação é determinada pelo escopo explicitamente enviado pelo chat:
+
+- marcar o projeto na raiz ativa seu perfil e inclui todas as obras prontas vinculadas;
+- marcar somente uma obra, ainda que ela pertença a um projeto, não ativa o perfil desse projeto;
+- marcar vários projetos ativa separadamente os perfis configurados de cada um;
+- marcar um projeto e uma obra avulsa aplica o perfil somente à parcela documental do projeto.
+
+O backend resolve as obras de todos os escopos autorizados, reúne seus IDs e aplica deduplicação antes da recuperação. Assim, se os projetos A e B possuírem a mesma obra e ambos forem marcados, essa obra participa da consulta uma única vez. A deduplicação documental não desativa governança: os perfis de A e B permanecem presentes no prompt, identificados pelos respectivos projetos e conjuntos de obras.
+
+Perfis compatíveis podem ser combinados. Se dois perfis incidirem sobre o mesmo aspecto de uma obra compartilhada com orientações incompatíveis, o provedor deve preservar as regras-base e usar formulação neutra, sem escolher arbitrariamente um perfil ou ampliar o conteúdo das evidências.
+
+Uma obra selecionada individualmente pode aparecer em diferentes projetos concedidos ao usuário sem revelar ou ativar implicitamente nenhum perfil. Essa separação impede que relações administrativas invisíveis mudem o comportamento da resposta sem uma seleção explícita do projeto.
+
 ## Parâmetros do CORE da consulta
 
 Os limites da consulta são carregados por `config/ai.php`, consumidos pela API e aplicados por `DocumentContextRetriever`, `DocumentQueryService` e `QueryAnswerProvider`. Eles delimitam duas responsabilidades diferentes e não são intercambiáveis.

@@ -10,6 +10,10 @@ The browser keeps the administrative credential only in `sessionStorage` for the
 
 The superadmin can manage users, projects, and work-level access. A project grant includes its associated works; a work grant does not expose other works from the same project.
 
+Projects may also contain an optional superadmin-managed response profile. The profile activates only when the project root is selected in chat; selecting a work individually does not inherit it. Multiple selected projects contribute their configured profiles independently. Shared works are deduplicated by document ID before retrieval, so they are queried once even though all selected-project profiles remain active.
+
+Profile content is not exposed to normal users or written to audit metadata. Audit events record only whether a project profile is configured and how many profiles were active for a query.
+
 ## Queue
 
 Processing jobs are idempotent by document, stage, and capability version. The normal worker claims one job. Summary work interrupted by the configured safe limit returns to the queue with progress preserved. Failed jobs require an explicit allowed retry.

@@ -302,8 +302,8 @@ $queryProvider = new QueryAnswerProvider(
 );
 $queryAnswer = $queryProvider->answer('Explique a unidade.', $queryContext);
 $queryMessage = $queryHttp->requests[0]['payload']['messages'][1]['content'];
-$queryMessageLines = explode("\n", $queryMessage, 3);
-$queryJson = $queryMessageLines[2] ?? '';
+$queryJsonStart = strpos($queryMessage, '{"input":');
+$queryJson = $queryJsonStart === false ? '' : substr($queryMessage, $queryJsonStart);
 $queryPayload = json_decode($queryJson, true, 512, JSON_THROW_ON_ERROR);
 
 assertAiAdapter(
@@ -341,6 +341,55 @@ assertAiAdapter(count($queryAnswer->interactions) === 1, 'A interação transit�
 assertAiAdapter($queryAnswer->interactions[0]->interactionType === 'simetry', 'A classificação simetry foi perdida.');
 assertAiAdapter(!array_key_exists('id', $queryAnswer->interactions[0]->toArray()), 'A interação transitória não deve possuir identidade persistente.');
 assertAiAdapter(str_contains($queryAnswer->answer, '[EVA-E000001]'), 'A resposta perdeu a citacao documental.');
+
+$profiledContext = new QueryContext(
+    $queryContext->understanding,
+    $queryContext->evidences,
+    $queryContext->interactionLimit,
+    $queryContext->routingPoints,
+    $queryContext->limitations,
+    [[
+        'project_id' => 7,
+        'project_name' => 'Projeto Educacional',
+        'response_profile' => 'Auxilie professores na elaboração de atividades.',
+        'documents' => ['Documento real'],
+    ]]
+);
+$profiledQueryHttp = new CapturingJsonHttpClient([[
+    'choices' => [[
+        'message' => ['content' => json_encode([
+            'answer' => 'Resposta governada [EVA-E000001].',
+            'used_evidence_ids' => ['EVA-E000001'],
+            'interactions' => [],
+            'limitations' => [],
+        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE)],
+    ]],
+]]);
+(new QueryAnswerProvider(
+    $profiledQueryHttp,
+    'test-key',
+    'language-model-test',
+    'https://language-provider.test/v1/chat/completions'
+))->answer('Explique a unidade para um professor.', $profiledContext);
+$baseQuerySystemPrompt = $queryHttp->requests[0]['payload']['messages'][0]['content'];
+$profiledSystemPrompt = $profiledQueryHttp->requests[0]['payload']['messages'][0]['content'];
+
+assertAiAdapter(
+    !str_contains($baseQuerySystemPrompt, 'active_project_response_profiles'),
+    'Uma consulta sem projeto governado não deve receber perfis de respostas.'
+);
+assertAiAdapter(
+    str_starts_with($profiledSystemPrompt, $baseQuerySystemPrompt)
+    && str_contains($profiledSystemPrompt, 'active_project_response_profiles')
+    && str_contains($profiledSystemPrompt, 'Projeto Educacional')
+    && str_contains($profiledSystemPrompt, 'Auxilie professores na elaboração de atividades.')
+    && str_contains($profiledSystemPrompt, 'Documento real'),
+    'O perfil ativo deve complementar integralmente o prompt base com projeto, comportamento e obras.'
+);
+assertAiAdapter(
+    str_contains($profiledSystemPrompt, 'nunca substituem nem flexibilizam as regras-base'),
+    'A governança por projeto deve permanecer subordinada às regras documentais do EVA.'
+);
 
 $recoveredQueryPayload = [
     'answer' => 'Resposta regenerada e sustentada [EVA-E000001] [EVA-E000002].',

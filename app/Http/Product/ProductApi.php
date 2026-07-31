@@ -256,6 +256,8 @@ final readonly class ProductApi
                 $documentIds = $scopeAccess->resolveDocumentIds($actor, $scopeType, (int) $scopeId);
             }
 
+            $responseProfiles = $scopeAccess->responseProfiles($actor, $selectedScopes);
+
             $factory = new CognitiveProviderFactory($this->container['ai']);
             $detector = new InputTypeDetector();
             $understanding = $detector->detect($input);
@@ -270,11 +272,13 @@ final readonly class ProductApi
                 $documentIds,
                 $input,
                 (int) $this->container['ai']['query']['max_evidence'],
-                (int) $this->container['ai']['query']['max_interactions']
+                (int) $this->container['ai']['query']['max_interactions'],
+                $responseProfiles
             );
             $audit->record('document_queried', 'scope_selection', null, $actor->fingerprint, $networkAddress, [
                 'scope_count' => count($selectedScopes),
                 'document_count' => count($documentIds),
+                'response_profile_count' => count($responseProfiles),
                 'input_types' => $result->understanding->toArray()['types'],
                 'evidence_count' => count($result->usedEvidences),
                 'simetry_count' => count($result->simetryInteractions),
@@ -433,9 +437,12 @@ final readonly class ProductApi
                 $project = $management->saveProject(
                     null,
                     is_string($payload['name'] ?? null) ? $payload['name'] : '',
-                    is_array($payload['document_ids'] ?? null) ? $payload['document_ids'] : []
+                    is_array($payload['document_ids'] ?? null) ? $payload['document_ids'] : [],
+                    is_string($payload['response_profile'] ?? null) ? $payload['response_profile'] : ''
                 );
-                $audit->record('project_created', 'project', (string) $project['id'], $actor->fingerprint, $networkAddress);
+                $audit->record('project_created', 'project', (string) $project['id'], $actor->fingerprint, $networkAddress, [
+                    'response_profile_configured' => $project['response_profile'] !== '',
+                ]);
 
                 return new HttpResponse(201, ['project' => $project]);
             }
@@ -470,9 +477,12 @@ final readonly class ProductApi
             $project = $management->saveProject(
                 (int) $matches[1],
                 is_string($payload['name'] ?? null) ? $payload['name'] : '',
-                is_array($payload['document_ids'] ?? null) ? $payload['document_ids'] : []
+                is_array($payload['document_ids'] ?? null) ? $payload['document_ids'] : [],
+                is_string($payload['response_profile'] ?? null) ? $payload['response_profile'] : ''
             );
-            $audit->record('project_updated', 'project', $matches[1], $actor->fingerprint, $networkAddress);
+            $audit->record('project_updated', 'project', $matches[1], $actor->fingerprint, $networkAddress, [
+                'response_profile_configured' => $project['response_profile'] !== '',
+            ]);
 
             return new HttpResponse(200, ['project' => $project]);
         }

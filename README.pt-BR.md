@@ -87,6 +87,17 @@ Na consulta conceitual ou relacional, `DocumentContextRetriever` compara o embed
 
 `QueryAnswerProvider` pode declarar interações `simetry` ou `assimetry` na mesma chamada que produz a resposta. `DocumentQueryService` aceita cada interação somente quando os participantes pertencem ao contexto, foram citados e seus fragmentos existem literalmente nas evidências. Nada disso é persistido como Cnode.
 
+Projetos podem definir um **Perfil de respostas** administrado pelo superadmin. Quando um projeto é marcado explicitamente no chat, esse perfil é acrescentado ao `SYSTEM_PROMPT` como uma camada complementar identificada pelo projeto e por suas obras. Selecionar somente uma obra não ativa implicitamente o perfil do projeto. Em consultas com vários projetos, os perfis são enviados separadamente e permanecem subordinados às regras de evidência, citação, limitação e saída JSON da EVA.
+
+| Seleção no chat | Obras consultadas | Perfis aplicados |
+|---|---|---|
+| Uma ou mais obras marcadas individualmente | Somente as obras marcadas | Nenhum perfil de projeto |
+| Projeto marcado na raiz | Todas as obras prontas do projeto | Perfil desse projeto, quando configurado |
+| Vários projetos marcados | União das obras prontas dos projetos | Perfis configurados de todos os projetos marcados |
+| Projeto marcado e obra avulsa | Obras do projeto mais a obra avulsa | Somente o perfil do projeto marcado |
+
+Quando dois projetos marcados compartilham a mesma obra, o ID documental é deduplicado antes da recuperação: a obra e suas evidências são consultadas uma única vez, enquanto os perfis dos dois projetos continuam ativos. Orientações compatíveis podem ser combinadas; se incidirem sobre o mesmo aspecto de forma incompatível, prevalecem as regras-base e a resposta adota formulação neutra.
+
 ## Execução cognitiva responsável
 
 A construção com provedores reais pode ser iniciada pela linha de comando ou pela interface administrativa e sempre exige confirmação explícita:
@@ -120,11 +131,11 @@ Os limites padrão são 8 evidências candidatas e 20 interações transitórias
 
 A interface web é servida em `/` e usa a mesma origem da API. Configure um `ADMIN_API_TOKEN` com pelo menos 24 caracteres antes do primeiro acesso. O navegador conserva o token somente em `sessionStorage`, e as rotas administrativas exigem `Authorization: Bearer`.
 
-O token identifica o superadmin. Pela área **Usuários**, ele cadastra username e senha, redefine senhas, ativa ou desativa contas e concede acesso por projeto completo ou por obra individual. Pela área **Projetos**, documentos podem ser agrupados sem alterar sua ingestão ou estrutura cognitiva.
+O token identifica o superadmin. Pela área **Usuários**, ele cadastra username e senha, redefine senhas, ativa ou desativa contas e concede acesso por projeto completo ou por obra individual. Pela área **Projetos**, documentos podem ser agrupados sem alterar sua ingestão ou estrutura cognitiva, e um perfil complementar de respostas pode ser gerenciado para cada projeto.
 
 Usuários cadastrados acessam apenas o chat e a alteração de senha. Cada senha é persistida exclusivamente por `password_hash()`. Na criação, redefinição ou rotação é exibido uma única vez um código de recuperação de 16 caracteres, cujo valor também é armazenado somente como hash. Sem SMTP, a recuperação exige username, código vigente e nova senha; ao concluir, todas as sessões anteriores são revogadas e um novo código de recuperação é emitido.
 
-As tabelas dessa camada estão na migração `database/migrations/20260721_008_user_access.sql`. A permissão de projeto inclui todas as obras associadas a ele; a permissão de obra não libera as demais obras do mesmo projeto.
+As tabelas dessa camada estão na migração `database/migrations/20260721_008_user_access.sql`; o perfil de respostas foi acrescentado por `database/migrations/20260731_009_project_response_profile.sql`. A permissão de projeto inclui todas as obras associadas a ele; a permissão de obra não libera as demais obras do mesmo projeto.
 
 O superadmin também pode excluir uma obra ou um projeto mediante confirmação digitada. Excluir uma obra remove em cascata seus nós, evidências, derivações, embeddings, trabalhos de processamento, permissões e vínculos com projetos. Excluir um projeto remove igualmente todas as obras nele contidas, mesmo que alguma também esteja associada a outro projeto, e depois remove suas fontes do armazenamento privado.
 

@@ -13,6 +13,7 @@ and the project uses [Semantic Versioning](https://semver.org/).
 - Sanitized environment template.
 - English project documentation and GitHub community files.
 - Superadmin browser control for explicitly confirmed queue draining without shell access.
+- Superadmin-managed project response profiles with explicit scope activation and shared-document deduplication.
 
 ## [1.0.0] - 2026-07-22
 

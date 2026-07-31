@@ -16,19 +16,35 @@ final readonly class DocumentQueryService
         int $documentId,
         string $input,
         int $maxEvidence = 8,
-        int $maxInteractions = 20
+        int $maxInteractions = 20,
+        array $responseProfiles = []
     ): DocumentQueryResult {
         $context = $this->retriever->retrieve($documentId, $input, $maxEvidence, $maxInteractions);
+
+        if ($responseProfiles !== []) {
+            $context = new QueryContext(
+                $context->understanding,
+                $context->evidences,
+                $context->interactionLimit,
+                $context->routingPoints,
+                $context->limitations,
+                $responseProfiles
+            );
+        }
 
         return $this->answerFromContext($input, $context);
     }
 
-    /** @param list<int> $documentIds */
+    /**
+     * @param list<int> $documentIds
+     * @param list<array{project_id: int, project_name: string, response_profile: string, documents: list<string>}> $responseProfiles
+     */
     public function queryDocuments(
         array $documentIds,
         string $input,
         int $maxEvidence = 8,
-        int $maxInteractions = 20
+        int $maxInteractions = 20,
+        array $responseProfiles = []
     ): DocumentQueryResult {
         $documentIds = array_values(array_unique(array_filter(
             array_map('intval', $documentIds),
@@ -40,7 +56,7 @@ final readonly class DocumentQueryService
         }
 
         if (count($documentIds) === 1) {
-            return $this->query($documentIds[0], $input, $maxEvidence, $maxInteractions);
+            return $this->query($documentIds[0], $input, $maxEvidence, $maxInteractions, $responseProfiles);
         }
 
         $contexts = array_map(
@@ -92,7 +108,8 @@ final readonly class DocumentQueryService
             array_values($evidenceByPublicId),
             $maxInteractions,
             array_values(array_unique($routingPoints)),
-            array_values(array_unique($limitations))
+            array_values(array_unique($limitations)),
+            $responseProfiles
         );
 
         return $this->answerFromContext($input, $context);

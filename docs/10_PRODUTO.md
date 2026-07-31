@@ -38,6 +38,21 @@ O estado visual pode conter todas as rodadas da conversa atual, mas somente as t
 
 **Reiniciar chat** limpa o transcript e o contexto curto sem desmarcar os projetos ou obras selecionados. O estado não sobrevive a logout, novo login ou recarregamento e não é persistido no banco, na auditoria ou no armazenamento do navegador.
 
+## Projetos e perfis de respostas
+
+O superadmin gerencia o campo **Perfil de respostas** no cadastro e na edição de projetos. Campo vazio mantém somente o comportamento padrão. O conteúdo configurado é usado como governança complementar e não é exibido aos usuários comuns nem gravado nos metadados de auditoria; a auditoria registra somente presença e quantidade de perfis ativos.
+
+O perfil é ativado apenas quando o usuário marca o projeto na raiz da árvore do chat. Seleções individuais de obras não herdam perfis, mesmo quando a obra pertence a um ou mais projetos. Essa regra torna explícita a mudança de comportamento aplicada à consulta.
+
+Projetos selecionados podem compartilhar documentos. Antes de executar a recuperação, a API transforma os documentos resolvidos em uma lista de IDs únicos. Portanto, marcar dois projetos que contenham a mesma obra não duplica recuperação, evidências ou consumo do limite global de contexto. Os perfis configurados dos dois projetos permanecem ativos porque a governança acompanha a seleção dos projetos, não a quantidade de cópias do documento.
+
+| Escopo selecionado | Resultado |
+|---|---|
+| Obra individual | Consulta a obra sem perfil de projeto |
+| Projeto completo | Consulta suas obras e aplica seu perfil |
+| Dois projetos com obra compartilhada | Consulta a obra compartilhada uma vez e aplica os dois perfis |
+| Projeto completo mais obra individual | Aplica o perfil apenas ao projeto completo |
+
 ## Fila
 
 O agendamento é idempotente por documento, etapa e versão gerencial da capacidade. Repetir o agendamento com a mesma configuração devolve os mesmos trabalhos. A chave interna de versão não é exposta pela API.

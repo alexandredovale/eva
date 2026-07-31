@@ -32,6 +32,7 @@ Core properties:
 - Provider endpoints, models, and credential-variable names remain environment configuration.
 - Real AI use is disabled by default and requires two explicit confirmations.
 - The chat displays the current transcript while sending at most the three previous completed turns as temporary conversational context.
+- Superadmin-managed project response profiles specialize answer behavior without weakening evidence, citation, or output rules.
 
 ## Requirements
 
@@ -93,6 +94,21 @@ EVA names capabilities rather than vendors:
 - `QueryAnswerProvider`
 
 Configure each capability in `.env` with a provider identifier, endpoint, model, and the **name** of the environment variable containing its credential. Never place real credentials in code or documentation.
+
+## Project response governance
+
+The superadmin can assign an optional **Response profile** to each project. A profile can specialize audience, assistance role, vocabulary, tone, focus, or presentation, but it remains subordinate to EVA's primary-evidence, citation, limitation, interaction-validation, and JSON-output rules.
+
+Profiles activate from the explicit chat scope:
+
+| Selected scope | Documents queried | Profiles applied |
+|---|---|---|
+| One or more individual works | Only those works | No project profile |
+| A project root | Every ready work in that project | That project's profile, when configured |
+| Multiple project roots | The union of their ready works | Every configured profile from the selected projects |
+| A project root plus an individual work | Project works plus the individual work | Only the selected project's profile |
+
+If two selected projects share the same work, EVA deduplicates the document ID before retrieval, so the work and its evidence are queried once. Both project profiles remain active. Compatible instructions may be combined; conflicting instructions over the same aspect fall back to the base rules and a neutral formulation.
 
 Real cognitive build commands require both `AI_LIVE_ENABLED=true` and `--live`:
 

@@ -11,6 +11,8 @@ use Throwable;
 
 final readonly class AccessManagementService
 {
+    private const MAX_RESPONSE_PROFILE_LENGTH = 6000;
+
     public function __construct(private PDO $database, private AuthService $auth)
     {
     }
@@ -170,7 +172,7 @@ final readonly class AccessManagementService
     public function projects(): array
     {
         $projects = $this->database->query(
-            'SELECT id, name, active, created_at FROM projects ORDER BY name ASC'
+            'SELECT id, name, response_profile, active, created_at FROM projects ORDER BY name ASC'
         )->fetchAll();
         $relations = $this->database->query(
             'SELECT pd.project_id, d.id, d.public_id, d.title, d.status
@@ -183,6 +185,9 @@ final readonly class AccessManagementService
             $projectId = (int) $project['id'];
             $project['id'] = $projectId;
             $project['active'] = (bool) $project['active'];
+            $project['response_profile'] = is_string($project['response_profile'])
+                ? $project['response_profile']
+                : '';
             $project['documents'] = array_values(array_map(
                 static fn (array $row): array => [
                     'id' => (int) $row['id'],
@@ -199,12 +204,22 @@ final readonly class AccessManagementService
     }
 
     /** @param list<int> $documentIds @return array<string, mixed> */
-    public function saveProject(?int $projectId, string $name, array $documentIds): array
+    public function saveProject(
+        ?int $projectId,
+        string $name,
+        array $documentIds,
+        string $responseProfile = ''
+    ): array
     {
         $name = trim($name);
+        $responseProfile = trim($responseProfile);
 
         if ($name === '' || mb_strlen($name, 'UTF-8') > 180) {
             throw new AccessException('Informe um nome de projeto com até 180 caracteres.', 422);
+        }
+
+        if (mb_strlen($responseProfile, 'UTF-8') > self::MAX_RESPONSE_PROFILE_LENGTH) {
+            throw new AccessException('O perfil de respostas deve ter até 6000 caracteres.', 422);
         }
 
         $documentIds = $this->validatedIds($documentIds, 'documents');
@@ -212,12 +227,23 @@ final readonly class AccessManagementService
 
         try {
             if ($projectId === null) {
-                $statement = $this->database->prepare('INSERT INTO projects (name) VALUES (:name)');
-                $statement->execute(['name' => $name]);
+                $statement = $this->database->prepare(
+                    'INSERT INTO projects (name, response_profile) VALUES (:name, :response_profile)'
+                );
+                $statement->execute([
+                    'name' => $name,
+                    'response_profile' => $responseProfile === '' ? null : $responseProfile,
+                ]);
                 $projectId = (int) $this->database->lastInsertId();
             } else {
-                $statement = $this->database->prepare('UPDATE projects SET name = :name WHERE id = :id');
-                $statement->execute(['name' => $name, 'id' => $projectId]);
+                $statement = $this->database->prepare(
+                    'UPDATE projects SET name = :name, response_profile = :response_profile WHERE id = :id'
+                );
+                $statement->execute([
+                    'name' => $name,
+                    'response_profile' => $responseProfile === '' ? null : $responseProfile,
+                    'id' => $projectId,
+                ]);
 
                 if ($statement->rowCount() === 0 && !$this->projectExists($projectId)) {
                     throw new AccessException('Projeto não localizado.', 404);
@@ -248,7 +274,12 @@ final readonly class AccessManagementService
             throw $exception;
         }
 
-        return ['id' => $projectId, 'name' => $name, 'document_ids' => $documentIds];
+        return [
+            'id' => $projectId,
+            'name' => $name,
+            'response_profile' => $responseProfile,
+            'document_ids' => $documentIds,
+        ];
     }
 
     /** @param list<int> $ids @return list<int> */

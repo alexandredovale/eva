@@ -29,7 +29,8 @@ const elements = {
     workerRunButtons: document.querySelectorAll('[data-run-worker]'),
     usersBody: document.querySelector('#users-body'), userCount: document.querySelector('#user-count'), projectsList: document.querySelector('#projects-list'),
     permissionForm: document.querySelector('#permission-form'), permissionTree: document.querySelector('#permission-tree'),
-    projectDocuments: document.querySelector('#project-documents'), menuToggle: document.querySelector('#menu-toggle'), navigation: document.querySelector('#top-navigation'),
+    projectDocuments: document.querySelector('#project-documents'), projectResponseProfile: document.querySelector('#project-response-profile'),
+    menuToggle: document.querySelector('#menu-toggle'), navigation: document.querySelector('#top-navigation'),
     uploadProgress: document.querySelector('#upload-progress'), uploadProgressBar: document.querySelector('#upload-progress-bar'), uploadProgressLabel: document.querySelector('#upload-progress-label'),
     uploadProgressValue: document.querySelector('#upload-progress-value'), uploadProgressMeta: document.querySelector('#upload-progress-meta'), toast: document.querySelector('#toast'),
     secretDialog: document.querySelector('#secret-dialog'), recoverySecret: document.querySelector('#recovery-secret'),
@@ -365,7 +366,11 @@ function renderUsers(users) {
 
 function renderProjects(projects) {
     state.projects = projects;
-    elements.projectsList.innerHTML = projects.length ? projects.map(project => `<article class="card project-card"><p class="eyebrow">Projeto</p><h2>${escapeHtml(project.name)}</h2><p>${project.documents.length} obra${project.documents.length === 1 ? '' : 's'}</p><ul>${project.documents.map(document => `<li>${escapeHtml(document.title)}</li>`).join('')}</ul><div class="project-actions"><button class="button button-quiet" type="button" data-edit-project="${project.id}">Editar projeto</button><button class="button button-danger" type="button" data-delete-project="${project.id}">Excluir projeto e obras</button></div></article>`).join('') : '<div class="card empty">Nenhum projeto cadastrado.</div>';
+    elements.projectsList.innerHTML = projects.length ? projects.map(project => {
+        const hasResponseProfile = Boolean(String(project.response_profile || '').trim());
+
+        return `<article class="card project-card"><p class="eyebrow">Projeto</p><h2>${escapeHtml(project.name)}</h2><p>${project.documents.length} obra${project.documents.length === 1 ? '' : 's'}</p><p class="project-profile-status ${hasResponseProfile ? 'is-configured' : ''}">${hasResponseProfile ? 'Perfil de respostas configurado' : 'Sem perfil de respostas'}</p><ul>${project.documents.map(document => `<li>${escapeHtml(document.title)}</li>`).join('')}</ul><div class="project-actions"><button class="button button-quiet" type="button" data-edit-project="${project.id}">Editar projeto</button><button class="button button-danger" type="button" data-delete-project="${project.id}">Excluir projeto e obras</button></div></article>`;
+    }).join('') : '<div class="card empty">Nenhum projeto cadastrado.</div>';
     renderProjectDocumentChoices();
 }
 
@@ -964,11 +969,23 @@ elements.permissionForm.addEventListener('submit', async event => {
 });
 
 document.querySelector('#project-form').addEventListener('submit', async event => {
-    event.preventDefault(); const projectId = Number(document.querySelector('#project-id').value), documentIds = Array.from(elements.projectDocuments.querySelectorAll('input:checked')).map(input => Number(input.value)), payload = { name: document.querySelector('#project-name').value.trim(), document_ids: documentIds };
+    event.preventDefault();
+    const projectId = Number(document.querySelector('#project-id').value);
+    const documentIds = Array.from(elements.projectDocuments.querySelectorAll('input:checked')).map(input => Number(input.value));
+    const payload = {
+        name: document.querySelector('#project-name').value.trim(),
+        response_profile: elements.projectResponseProfile.value.trim(),
+        document_ids: documentIds,
+    };
     try { await api(projectId ? `admin/projects/${projectId}` : 'admin/projects', { method: projectId ? 'PUT' : 'POST', body: JSON.stringify(payload) }); resetProjectForm(); notify('Projeto salvo.'); await refreshProjectsAndScopes(); } catch (error) { notify(error.message, true); }
 });
 
-function resetProjectForm() { document.querySelector('#project-form').reset(); document.querySelector('#project-id').value = ''; document.querySelector('#project-cancel').hidden = true; renderProjectDocumentChoices(new Set()); }
+function resetProjectForm() {
+    document.querySelector('#project-form').reset();
+    document.querySelector('#project-id').value = '';
+    document.querySelector('#project-cancel').hidden = true;
+    renderProjectDocumentChoices(new Set());
+}
 document.querySelector('#project-cancel').addEventListener('click', resetProjectForm);
 elements.projectsList.addEventListener('click', async event => {
     const editButton = event.target.closest('[data-edit-project]');
@@ -979,6 +996,7 @@ elements.projectsList.addEventListener('click', async event => {
         if (!project) return;
         document.querySelector('#project-id').value = project.id;
         document.querySelector('#project-name').value = project.name;
+        elements.projectResponseProfile.value = project.response_profile || '';
         document.querySelector('#project-cancel').hidden = false;
         renderProjectDocumentChoices(new Set(project.document_ids.map(Number)));
         document.querySelector('#project-form').scrollIntoView({ behavior: 'smooth' });

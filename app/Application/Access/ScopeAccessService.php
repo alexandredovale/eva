@@ -181,6 +181,73 @@ final readonly class ScopeAccessService
         return $documentIds;
     }
 
+    /**
+     * Retorna somente os perfis dos projetos explicitamente selecionados e autorizados.
+     * Obras selecionadas individualmente não ativam implicitamente o perfil de um projeto.
+     *
+     * @param list<array<string, mixed>> $scopes
+     * @return list<array{project_id: int, project_name: string, response_profile: string, documents: list<string>}>
+     */
+    public function responseProfiles(ActorContext $actor, array $scopes): array
+    {
+        $projectIds = [];
+
+        foreach ($scopes as $scope) {
+            if (!is_array($scope) || ($scope['type'] ?? null) !== 'project') {
+                continue;
+            }
+
+            $projectId = filter_var($scope['id'] ?? null, FILTER_VALIDATE_INT);
+
+            if ($projectId !== false && $projectId > 0) {
+                $projectIds[(int) $projectId] = (int) $projectId;
+            }
+        }
+
+        if ($projectIds === []) {
+            return [];
+        }
+
+        $placeholders = implode(', ', array_fill(0, count($projectIds), '?'));
+        $sql = "SELECT p.id AS project_id, p.name AS project_name, p.response_profile,
+                       d.title AS document_title
+                  FROM projects p
+                  JOIN project_documents pd ON pd.project_id = p.id
+                  JOIN documents d ON d.id = pd.document_id AND d.status = 'ready'
+                 WHERE p.id IN ({$placeholders})
+                   AND p.active = 1
+                   AND p.response_profile IS NOT NULL
+                   AND TRIM(p.response_profile) <> ''";
+        $parameters = array_values($projectIds);
+
+        if (!$actor->isSuperadmin()) {
+            $sql .= ' AND EXISTS (
+                SELECT 1
+                  FROM user_projects up
+                 WHERE up.user_id = ? AND up.project_id = p.id
+            )';
+            $parameters[] = $actor->userId;
+        }
+
+        $sql .= ' ORDER BY p.name, d.title';
+        $statement = $this->database->prepare($sql);
+        $statement->execute($parameters);
+        $profiles = [];
+
+        foreach ($statement->fetchAll() as $row) {
+            $projectId = (int) $row['project_id'];
+            $profiles[$projectId] ??= [
+                'project_id' => $projectId,
+                'project_name' => (string) $row['project_name'],
+                'response_profile' => trim((string) $row['response_profile']),
+                'documents' => [],
+            ];
+            $profiles[$projectId]['documents'][] = (string) $row['document_title'];
+        }
+
+        return array_values($profiles);
+    }
+
     /** @param list<array<string, mixed>> $rows @return list<array<string, mixed>> */
     private function groupProjects(array $rows): array
     {
