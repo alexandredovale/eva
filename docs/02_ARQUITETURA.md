@@ -11,11 +11,12 @@ Separar responsabilidades sem duplicar conceitos e sem permitir que a IA atribua
 3. **Normalizador:** converte os formatos para uma árvore documental comum.
 4. **Evidências:** persiste conteúdo primário, sínteses derivadas e sua proveniência.
 5. **Embeddings:** vetoriza unidades completas previamente organizadas.
-6. **Consulta:** roteia o input e recupera evidências primárias ou derivadas.
-7. **Interação transitória:** compreende `simetry`/`assimetry` entre fontes recuperadas.
-8. **Validação:** exige participantes conhecidos, citações e fragmentos literais.
-9. **Produto:** fornece interface, API, fila, auditoria, métricas e identidade visual.
-10. **Infraestrutura:** banco, arquivos, logs e integrações configuráveis.
+6. **Retriever:** roteia o input e recupera candidatos primários ou derivados.
+7. **Context Intelligence Engine:** estabiliza o Top-k semântico pela distribuição de similaridades.
+8. **Interação transitória:** compreende `simetry`/`assimetry` entre fontes recuperadas.
+9. **Validação:** exige eleição integral, incorporação analítica, participantes conhecidos, citações e fragmentos literais.
+10. **Produto:** fornece interface, API, fila, auditoria, métricas e identidade visual.
+11. **Infraestrutura:** banco, arquivos, logs e integrações configuráveis.
 
 ## Fluxo macro
 
@@ -23,13 +24,16 @@ Separar responsabilidades sem duplicar conceitos e sem permitir que a IA atribua
 Arquivo → parser → árvore → evidências primárias → sínteses → derivações → embeddings
 
 Pergunta → roteamento → busca em evidências primárias/derivadas
+         → Top-k → CIE (μ, σ, CV) → núcleo + convergência
          → resolução da linhagem → fontes primárias
-         → resposta + interações transitórias → validação
+         → contrato determinístico → resposta + interações transitórias → validação
 ```
 
 ## Separação de responsabilidades
 
-Embeddings localizam evidências semanticamente compatíveis. Similaridade existe somente durante a ordenação e não é persistida como força cognitiva.
+Embeddings localizam evidências semanticamente compatíveis. Nas rotas semânticas, a similaridade ordena o Top-k e alimenta somente a análise estatística transitória do CIE. O núcleo (`s ≥ μ + σ`) lidera o contexto final e a faixa de convergência (`μ ≤ s < μ + σ`) entra como análise complementar obrigatória; quando não há núcleo, a convergência assume o papel principal. Nenhum valor é persistido como força cognitiva.
+
+Depois da resolução para fontes primárias, a eleição está concluída. A IA não pode refazer essa seleção: deve aceitar todos os IDs, preservar `core` e `convergence` e incorporar cada fonte à prosa analítica. Citação ausente ou inventário isolado de IDs invalida a resposta; a aplicação não completa marcadores omitidos.
 
 As interações são produzidas pela mesma capacidade linguística que responde à consulta. Elas não recebem identidade permanente e não são analisadas antecipadamente por combinação massiva de pares. A camada local valida tipo, orientação, participantes e literalidade dos fragmentos.
 
@@ -43,6 +47,7 @@ Fornecedor, endpoint, modelo e nome da variável de credencial ficam exclusivame
 
 - O parser não gera inferências.
 - Similaridade não confirma interação.
+- O CIE não julga documentos nem cria notas, pesos ou reranking por IA.
 - A IA não atribui confiança, intensidade, qualidade, prioridade ou relevância.
 - A IA não classifica relações por taxonomias julgamentais.
 - Assimetria não significa hierarquia ou superioridade.

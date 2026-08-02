@@ -8,6 +8,8 @@ Install PHP 8.2+, MariaDB/MySQL, and the required PHP extensions: `curl`, `dom`,
 
 Copy `.env.example` to `.env`. Set application URL, database connection, branding, query limits, and queue identity. Generate a unique `ADMIN_API_TOKEN` with at least 24 characters.
 
+Set `QUERY_CANDIDATE_LIMIT=30` for the default CIE Top-k. This limit is per document and independent from the final `QUERY_MAX_EVIDENCE` context cap.
+
 Leave provider fields empty and `AI_LIVE_ENABLED=false` until the local installation and offline tests are complete.
 
 ## 3. Database
@@ -46,4 +48,3 @@ Enable `mod_rewrite`, `mod_headers`, and `AllowOverride All`. Production Apache 
 For each capability, configure provider identifier, endpoint, model, and credential-variable name. Store the actual credential only in the named local environment variable.
 
 Real calls require `AI_LIVE_ENABLED=true`; CLI build and query commands additionally require `--live`. This double confirmation prevents accidental external consumption.
-

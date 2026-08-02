@@ -527,9 +527,9 @@ function permissionDocumentNode(document, explicit, inherited) {
 }
 
 function renderQuery(result, question, index) {
-    const evidences = result.evidences_used || [], simetry = result.simetry_interactions || [], assimetry = result.assimetry_interactions || [], limitations = result.limitations || [];
+    const evidences = result.evidences_used || [], simetry = result.simetry_interactions || [], assimetry = result.assimetry_interactions || [], limitations = result.limitations || [], contextIntelligence = result.context_intelligence || [];
     const technicalDetails = state.user?.role === 'superadmin'
-        ? `<div class="result-section"><h2>Interações simetry</h2>${renderList(simetry, item => item.summary)}</div><div class="result-section"><h2>Interações assimetry</h2>${renderList(assimetry, item => item.summary)}</div><div class="result-section"><h2>Limitações</h2>${renderList(limitations, item => item)}</div>`
+        ? `${renderContextIntelligence(contextIntelligence)}<div class="result-section"><h2>Interações simetry</h2>${renderList(simetry, item => item.summary)}</div><div class="result-section"><h2>Interações assimetry</h2>${renderList(assimetry, item => item.summary)}</div><div class="result-section"><h2>Limitações</h2>${renderList(limitations, item => item)}</div>`
         : '';
 
     return `<section class="chat-turn"><article class="chat-message-user"><p class="eyebrow">Você</p><p>${escapeHtml(question)}</p></article><article class="card chat-message-assistant"><p class="eyebrow">Resposta documental</p><div class="answer">${escapeHtml(result.answer || '')}</div><div class="result-section"><h2>Evidências utilizadas</h2>${renderEvidenceList(evidences)}</div><div class="copy-result-action"><button type="button" class="button button-quiet button-copy-result" data-copy-query="${index}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copiar pergunta e resposta</span></button></div>${technicalDetails}</article></section>`;
@@ -560,6 +560,24 @@ function rememberConversationTurn(user, result) {
 }
 
 function renderList(items, label) { return items.length ? `<ul>${items.map(item => `<li>${escapeHtml(label(item))}</li>`).join('')}</ul>` : '<p>Nenhum registro.</p>'; }
+
+function renderContextIntelligence(analyses) {
+    if (!analyses.length) return '';
+
+    const formatMetric = value => value === null || !Number.isFinite(Number(value))
+        ? 'indefinido'
+        : Number(value).toFixed(6);
+    const regionLabels = { core: 'núcleo', convergence: 'convergência', empty: 'vazio' };
+
+    return `<div class="result-section"><h2>Context Intelligence Engine</h2><ul>${analyses.map((analysis, index) => {
+        const coreCount = Array.isArray(analysis.core) ? analysis.core.length : 0;
+        const convergenceCount = Array.isArray(analysis.convergence) ? analysis.convergence.length : 0;
+        const discardedCount = Array.isArray(analysis.discarded) ? analysis.discarded.length : 0;
+        const region = regionLabels[analysis.selected_region] || analysis.selected_region || 'vazio';
+        const source = analysis.document ? `${analysis.document}${analysis.document_id ? ` (${analysis.document_id})` : ''}` : `Distribuição ${index + 1}`;
+        return `<li><strong>${escapeHtml(source)}:</strong> ${Number(analysis.candidate_count || 0)} candidatos · μ ${formatMetric(analysis.mean)} · σ ${formatMetric(analysis.standard_deviation)} · CV ${formatMetric(analysis.coefficient_of_variation)} · contexto: ${escapeHtml(region)} (${Number(analysis.selected_count || 0)}) · regiões ${coreCount}/${convergenceCount}/${discardedCount}</li>`;
+    }).join('')}</ul></div>`;
+}
 
 function renderEvidenceList(evidences) {
     if (!evidences.length) return '<p>Nenhum registro.</p>';

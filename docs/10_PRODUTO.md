@@ -91,6 +91,8 @@ Cada requisição pública recebe um `X-Request-Id` aleatório, também disponí
 
 As métricas são contagens agrupadas de documentos, classes e tipos de evidência, derivações, embeddings e trabalhos. Interações transitórias não são convertidas em métricas persistentes. As contagens não produzem ranking, relevância, confiança, intensidade ou qualquer peso cognitivo.
 
+A resposta de `POST /api/query` inclui `context_intelligence`. Em rotas semânticas, o campo permite auditar por documento a média, o desvio padrão, o CV, os limites e os candidatos de cada região do CIE. Em rotas não vetoriais, ele é uma lista vazia. O detalhamento pertence à resposta atual e não é persistido como métrica, evento ou memória.
+
 ## Limites operacionais
 
 - listagens retornam no máximo 100 registros pela API atual;

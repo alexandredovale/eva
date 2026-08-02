@@ -266,7 +266,8 @@ final readonly class ProductApi
             $retriever = new DocumentContextRetriever(
                 $this->database,
                 $needsEmbedding ? $factory->embeddings() : null,
-                $detector
+                $detector,
+                (int) $this->container['ai']['query']['candidate_limit']
             );
             $result = (new DocumentQueryService($retriever, $factory->queryAnswers()))->queryDocuments(
                 $documentIds,

@@ -50,11 +50,13 @@ A ausência de um aspecto nunca autoriza conhecimento externo e não apaga os de
 
 Consultas diretas, estruturais e amplas percorrem a árvore e suas evidências primárias. Consultas conceituais e relacionais geram um embedding transitório do input e pesquisam evidências `primary` e `derived`.
 
-Resultados literais, lexicais e estruturais são candidatos, não conclusões. Todos os candidatos recuperados dentro do limite da consulta são entregues ao provedor de resposta, inclusive os que possam ser intrusos. A IA analisa o conjunto, cita somente os textos que sustentam o input e não elimina uma resposta válida pela presença de candidatos irrelevantes.
+Resultados literais, lexicais e estruturais são candidatos, não conclusões. Nessas rotas não vetoriais, a aplicação forma o contexto final dentro do limite e o entrega como eleição integral. O provedor deve incorporar todas as evidências recebidas sem transformá-las em conclusões além de seu conteúdo literal.
 
 `simetry` e `assimetry` são operadores cognitivos internos e permanecem no contexto integral da consulta relacional. Eles orientam a compreensão da IA, mas não são tratados como expressões que a fonte documental precise conter.
 
-Quando uma evidência derivada é localizada, `evidence_derivations` é percorrida até suas fontes primárias. A resposta recebe conteúdo literal completo; a similaridade usada para ordenar resultados é descartada.
+Na recuperação semântica, o Retriever ordena até `QUERY_CANDIDATE_LIMIT` candidatos e o Context Intelligence Engine calcula média, desvio padrão populacional e coeficiente de variação. Candidatos abaixo da média são descartados. O núcleo acima ou igual a `μ + σ` lidera o contexto final; a faixa entre `μ` e `μ + σ` entra como análise complementar obrigatória. Se o núcleo estiver vazio, a convergência assume o papel principal. O processo é determinístico e não executa reranking por IA.
+
+Quando uma evidência derivada é selecionada pelo CIE, `evidence_derivations` é percorrida até suas fontes primárias. A resolução distribui o limite entre os candidatos eleitos e ordena as fontes de cada linhagem pela similaridade da consulta, evitando esgotar o contexto na primeira linhagem ampla. A resposta recebe conteúdo literal completo e o papel `core` ou `convergence`; similaridades e estatísticas não são enviadas como autoridade documental nem persistidas.
 
 ## Governança de respostas por projeto
 
@@ -75,7 +77,21 @@ Uma obra selecionada individualmente pode aparecer em diferentes projetos conced
 
 ## Parâmetros do CORE da consulta
 
-Os limites da consulta são carregados por `config/ai.php`, consumidos pela API e aplicados por `DocumentContextRetriever`, `DocumentQueryService` e `QueryAnswerProvider`. Eles delimitam duas responsabilidades diferentes e não são intercambiáveis.
+Os limites da consulta são carregados por `config/ai.php`, consumidos pela API e aplicados por `DocumentContextRetriever`, `DocumentQueryService` e `QueryAnswerProvider`. Eles delimitam três responsabilidades diferentes e não são intercambiáveis.
+
+### `QUERY_CANDIDATE_LIMIT`
+
+Define o Top-k vetorial analisado pelo CIE em cada documento para consultas conceituais ou relacionais.
+
+- **Fallback do código:** `30`.
+- **Intervalo efetivo:** de `1` a `200`.
+- **Escopo:** por documento e somente em recuperação semântica.
+- **Função:** definir a população usada nos cálculos de `μ`, `σ` e `CV`; não define quantos textos chegam ao provedor.
+- **Persistência:** candidatos, similaridades e análise permanecem transitórios.
+
+```env
+QUERY_CANDIDATE_LIMIT=30
+```
 
 ### `QUERY_MAX_EVIDENCE`
 
@@ -85,10 +101,10 @@ Define a quantidade máxima de evidências primárias candidatas que compõem o 
 - **Fallback do código:** `8` quando a variável não estiver definida.
 - **Intervalo efetivo:** de `1` a `50`; a configuração carregada é normalizada para esse intervalo.
 - **Escopo:** é um limite global por consulta, não um limite por projeto ou por obra na chamada final à IA.
-- **Seleção:** as rotas direta, estrutural, ampla e semântica produzem candidatos; depois da deduplicação, somente os primeiros candidatos dentro do limite permanecem no contexto.
+- **Seleção:** nas rotas semânticas, o limite é aplicado às fontes primárias resolvidas depois do CIE; nas demais rotas, é aplicado diretamente aos candidatos hierárquicos ou literais.
 - **Múltiplas obras:** cada obra pode produzir seu contexto de recuperação, mas `DocumentQueryService` intercala os resultados entre as obras e encerra a composição quando atinge o limite global.
-- **Rastreabilidade:** uma evidência candidata não é automaticamente uma evidência utilizada. A IA deve declarar em `used_evidence_ids` somente as candidatas que sustentam efetivamente a resposta.
-- **Impacto operacional:** valores maiores ampliam cobertura e consumo de tokens; também podem aumentar a presença de candidatos intrusos. Valores menores reduzem contexto e custo, mas podem retirar evidências necessárias para cobrir todos os aspectos do input.
+- **Rastreabilidade:** as evidências finais já foram eleitas deterministicamente. A IA deve reproduzir o conjunto integral em `used_evidence_ids`, usar o núcleo como referência principal e incorporar cada convergência à análise complementar; qualquer redução, omissão textual ou inventário isolado de citações é rejeitado.
+- **Impacto operacional:** valores maiores ampliam cobertura e consumo de tokens. Valores menores reduzem contexto e custo, mas podem retirar evidências necessárias para cobrir todos os aspectos do input.
 
 Exemplo:
 
@@ -105,12 +121,12 @@ Define a quantidade máxima de interações transitórias `simetry` e `assimetry
 - **Função:** limitar a saída relacional produzida sobre as evidências recuperadas e citadas.
 - **Fallback do código:** `20` quando a variável não estiver definida.
 - **Intervalo efetivo:** de `0` a `100`; a configuração carregada é normalizada para esse intervalo.
-- **Ativação:** interações só são solicitadas quando `InputTypeDetector` identifica o input como relacional e o limite é maior que zero.
+- **Ativação:** interações são analisadas sempre que há pelo menos duas evidências eleitas e o limite é maior que zero, independentemente do tipo inicial do input.
 - **Desativação:** o valor `0` desativa a geração de interações; a resposta documental e suas citações continuam funcionando.
 - **Contrato com a IA:** o valor é enviado ao `QueryAnswerProvider` como `interaction_limit`. Uma resposta acima do limite é rejeitada.
 - **Validação:** cada interação aceita deve usar exatamente duas evidências pertencentes ao contexto, declaradas como utilizadas e citadas, além de conter fragmentos literais verificáveis de ambas.
 - **Persistência:** o limite não cria pares antecipadamente, não executa combinação massiva e não altera o banco. As interações existem somente durante aquela consulta.
-- **Independência:** aumentar esse valor não aumenta a quantidade de evidências recuperadas; essa responsabilidade pertence exclusivamente a `QUERY_MAX_EVIDENCE`.
+- **Independência:** aumentar esse valor não aumenta o Top-k analisado pelo CIE nem o contexto documental; essas responsabilidades pertencem a `QUERY_CANDIDATE_LIMIT` e `QUERY_MAX_EVIDENCE`.
 
 Exemplo:
 
@@ -118,7 +134,7 @@ Exemplo:
 QUERY_MAX_INTERACTIONS=20
 ```
 
-Nesse caso, uma consulta relacional pode retornar no máximo vinte interações validadas. Consultas não relacionais continuam retornando zero interações.
+Nesse caso, qualquer consulta com ao menos duas evidências pode retornar no máximo vinte interações validadas, desde que a relação seja demonstrada literalmente.
 
 ### `AI_QUERY_MAX_OUTPUT_TOKENS`
 
@@ -153,7 +169,7 @@ Os argumentos da CLI não alteram o `.env`. Em processos PHP persistentes, alter
 
 ## Interações transitórias
 
-Em inputs relacionais, `QueryAnswerProvider` pode declarar interações entre pares das evidências recuperadas:
+Sempre que houver ao menos duas evidências eleitas, `QueryAnswerProvider` deve avaliar interações entre seus pares:
 
 - `simetry`: dois papéis `participant`;
 - `assimetry`: um papel `origin` e um `destination`.
@@ -164,7 +180,7 @@ Quando a primeira geração termina por limite de saída, a regeneração compac
 
 Cada interação contém descrição neutra e um fragmento literal de cada participante. Ela não possui ID público, registro no banco, modelo persistido, confiança, intensidade ou pontuação.
 
-Os nomes `simetry` e `assimetry` não precisam aparecer no documento. Primeiro, o provedor deve responder à questão substantiva com as evidências recuperadas e citadas. A classificação interna é uma camada opcional: quando não puder ser demonstrada por fragmentos literais, a resposta documental válida é preservada, a interação candidata é descartada e uma limitação relacional é apresentada.
+Os nomes `simetry` e `assimetry` não precisam aparecer no documento. Primeiro, o provedor deve responder à questão substantiva com as evidências recuperadas e citadas. A avaliação interna é obrigatória, mas a emissão de uma interação depende de demonstração literal. Quando ela não puder ser validada, a resposta documental é preservada, `interactions` permanece vazio e a limitação correspondente é apresentada.
 
 `simetry` e `assimetry` participam da compreensão cognitiva do input e permanecem separados da comprovação de cobertura dos conceitos solicitados. Um conceito Z é informado como ausente quando não possui evidência; os operadores cognitivos não são marcados como ausentes apenas por não constarem literalmente na fonte.
 
@@ -177,16 +193,15 @@ O adaptador descarta uma interação candidata e acrescenta limitação quando s
 - uma evidência usada não pertence ao contexto;
 - uma citação visível aponta para evidência fora do contexto;
 - uma interação excede o limite da consulta;
-- uma interação aparece em input não relacional;
 - um participante não foi recuperado e citado;
 - uma interação admitida pelo adaptador contém fragmento que não existe literalmente na evidência indicada;
 - `simetry` recebe orientação;
 - `assimetry` não possui origem e destino distintos.
 
-Quando a recuperação não encontra candidato algum, o sistema informa a limitação sem chamar o provedor de resposta. Quando há candidatos, mas a análise da IA conclui que nenhum é utilizável, a saída sem `used_evidence_ids` é aceita somente se não contiver citações ou interações e trouxer limitação documental explícita.
+Quando a recuperação não encontra evidência alguma, o sistema informa a limitação sem chamar o provedor de resposta. Quando há contexto eleito, `used_evidence_ids` deve reproduzi-lo integralmente e na mesma ordem; a IA não possui autoridade para refazer a eleição.
 
-Os identificadores de `used_evidence_ids` são validados contra o contexto. Se o provedor omitir no texto um marcador já validado, a aplicação acrescenta deterministicamente um bloco `Evidências: [EVA-E000000]`; ela não inventa nem substitui identificadores.
+Os identificadores de `used_evidence_ids` são validados contra o contexto, mas sua presença formal não basta. Cada evidência eleita deve aparecer citada em uma frase ou parágrafo analítico que exponha sua contribuição. A aplicação não acrescenta citações ausentes e rejeita listas isoladas como `Evidências: [EVA-E000000]`, pois elas não demonstram incorporação analítica.
 
 ## Saída
 
-O resultado separa `answer`, `evidences_used`, `simetry_interactions`, `assimetry_interactions`, pontos de roteamento e limitações. As interações descrevem o contexto daquela consulta e não alteram a memória persistente.
+O resultado separa `answer`, `evidences_used`, `evidence_selection`, `simetry_interactions`, `assimetry_interactions`, `routing_points`, `context_intelligence` e `limitations`. Cada evidência utilizada também expõe `selection_region`; `evidence_selection` lista os IDs de núcleo e convergência. `context_intelligence` fica vazio em rotas não semânticas; quando presente, expõe a análise transitória por documento com `μ`, `σ`, `CV`, limites e regiões da distribuição. Nem essa análise nem as interações alteram a memória persistente.

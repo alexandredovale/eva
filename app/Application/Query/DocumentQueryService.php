@@ -19,7 +19,17 @@ final readonly class DocumentQueryService
         int $maxInteractions = 20,
         array $responseProfiles = []
     ): DocumentQueryResult {
-        $context = $this->retriever->retrieve($documentId, $input, $maxEvidence, $maxInteractions);
+        $context = $this->retriever->retrieve(
+            $documentId,
+            $input,
+            $maxEvidence,
+            $maxInteractions,
+            false
+        );
+
+        if ($context->evidences === []) {
+            $context = $this->retriever->retrieve($documentId, $input, $maxEvidence, $maxInteractions);
+        }
 
         if ($responseProfiles !== []) {
             $context = new QueryContext(
@@ -28,7 +38,9 @@ final readonly class DocumentQueryService
                 $context->interactionLimit,
                 $context->routingPoints,
                 $context->limitations,
-                $responseProfiles
+                $responseProfiles,
+                $context->contextIntelligenceAnalyses,
+                $context->evidenceSelection
             );
         }
 
@@ -64,19 +76,47 @@ final readonly class DocumentQueryService
                 $documentId,
                 $input,
                 $maxEvidence,
-                $maxInteractions
+                $maxInteractions,
+                false
             ),
             $documentIds
         );
+
+        $hasDeterministicEvidence = array_filter(
+            $contexts,
+            static fn (QueryContext $context): bool => $context->evidences !== []
+        ) !== [];
+
+        if (!$hasDeterministicEvidence) {
+            $contexts = array_map(
+                fn (int $documentId): QueryContext => $this->retriever->retrieve(
+                    $documentId,
+                    $input,
+                    $maxEvidence,
+                    $maxInteractions
+                ),
+                $documentIds
+            );
+        }
         $routingPoints = [];
         $limitations = [];
+        $contextIntelligenceAnalyses = [];
 
         foreach ($contexts as $context) {
             $routingPoints = [...$routingPoints, ...$context->routingPoints];
-            $limitations = [...$limitations, ...$context->limitations];
+
+            if (!$hasDeterministicEvidence || $context->evidences !== []) {
+                $limitations = [...$limitations, ...$context->limitations];
+            }
+
+            $contextIntelligenceAnalyses = [
+                ...$contextIntelligenceAnalyses,
+                ...$context->contextIntelligenceAnalyses,
+            ];
         }
 
         $evidenceByPublicId = [];
+        $evidenceSelection = [];
         $position = 0;
 
         while (count($evidenceByPublicId) < $maxEvidence) {
@@ -89,6 +129,12 @@ final readonly class DocumentQueryService
 
                 $evidence = $context->evidences[$position];
                 $evidenceByPublicId[$evidence->publicId] = $evidence;
+                $region = $context->evidenceSelection[$evidence->publicId] ?? 'core';
+
+                if (($evidenceSelection[$evidence->publicId] ?? null) !== 'core') {
+                    $evidenceSelection[$evidence->publicId] = $region;
+                }
+
                 $added = true;
 
                 if (count($evidenceByPublicId) >= $maxEvidence) {
@@ -109,7 +155,9 @@ final readonly class DocumentQueryService
             $maxInteractions,
             array_values(array_unique($routingPoints)),
             array_values(array_unique($limitations)),
-            $responseProfiles
+            $responseProfiles,
+            $contextIntelligenceAnalyses,
+            $evidenceSelection
         );
 
         return $this->answerFromContext($input, $context);
@@ -126,7 +174,9 @@ final readonly class DocumentQueryService
                 [],
                 [],
                 $context->routingPoints,
-                $context->limitations
+                $context->limitations,
+                $context->contextIntelligenceAnalyses,
+                $context->evidenceSelection
             );
         }
 
@@ -138,11 +188,16 @@ final readonly class DocumentQueryService
         }
 
         $usedIds = array_values(array_unique($generated->usedEvidenceIds));
+        $electedIds = array_keys($available);
 
         foreach ($usedIds as $evidenceId) {
             if (!isset($available[$evidenceId])) {
                 throw new QueryException('A resposta citou uma evidência fora do contexto recuperado.');
             }
+        }
+
+        if ($usedIds !== $electedIds) {
+            throw new QueryException('A resposta não aceitou integralmente as evidências eleitas pelo contexto.');
         }
 
         preg_match_all('/\[(EVA-E\d{6,})\]/', $generated->answer, $citationMatches);
@@ -153,38 +208,11 @@ final readonly class DocumentQueryService
             }
         }
 
-        if ($usedIds === []) {
-            if (($citationMatches[1] ?? []) !== []) {
-                throw new QueryException('A resposta citou evidências sem declará-las como utilizadas.');
-            }
-
-            if ($generated->interactions !== []) {
-                throw new QueryException('Uma resposta sem evidências utilizadas não pode declarar interações.');
-            }
-
-            if ($generated->limitations === []) {
-                throw new QueryException('A análise dos candidatos não indicou evidência utilizada nem limitação documental.');
-            }
-
-            return new DocumentQueryResult(
-                $context->understanding,
-                $generated->answer,
-                [],
-                [],
-                [],
-                $context->routingPoints,
-                array_values(array_unique([...$context->limitations, ...$generated->limitations]))
-            );
-        }
-
-        $answer = $this->renderMissingCitations($generated->answer, $usedIds);
+        $this->assertAnalyticalEvidenceCoverage($generated->answer, $usedIds);
+        $answer = $generated->answer;
 
         if (count($generated->interactions) > $context->interactionLimit) {
             throw new QueryException('A resposta excedeu o limite de interações transitórias.');
-        }
-
-        if (!$context->understanding->has(InputType::Relational) && $generated->interactions !== []) {
-            throw new QueryException('Uma consulta não relacional retornou interações cognitivas.');
         }
 
         $simetry = [];
@@ -223,27 +251,62 @@ final readonly class DocumentQueryService
             $simetry,
             $assimetry,
             $context->routingPoints,
-            array_values(array_unique([...$context->limitations, ...$generated->limitations]))
+            array_values(array_unique([...$context->limitations, ...$generated->limitations])),
+            $context->contextIntelligenceAnalyses,
+            $context->evidenceSelection
         );
     }
 
     /** @param list<string> $usedIds */
-    private function renderMissingCitations(string $answer, array $usedIds): string
+    private function assertAnalyticalEvidenceCoverage(string $answer, array $usedIds): void
     {
-        $missing = array_values(array_filter(
-            $usedIds,
-            static fn (string $evidenceId): bool => !str_contains($answer, '[' . $evidenceId . ']')
-        ));
+        $segments = preg_split('/(?<=[.!?])\s+|\R+/u', $answer);
 
-        if ($missing === []) {
-            return $answer;
+        if (!is_array($segments)) {
+            throw new QueryException('A resposta não pôde ser validada quanto ao uso analítico das evidências.');
         }
 
-        $citations = implode(' ', array_map(
-            static fn (string $evidenceId): string => '[' . $evidenceId . ']',
-            $missing
-        ));
+        foreach ($usedIds as $evidenceId) {
+            $marker = '[' . $evidenceId . ']';
+            $analyticalUseFound = false;
 
-        return rtrim($answer) . "\n\nEvidências: " . $citations;
+            foreach ($segments as $segment) {
+                if (!str_contains($segment, $marker)) {
+                    continue;
+                }
+
+                $withoutCitations = preg_replace('/\[EVA-E\d{6,}\]/u', '', $segment);
+                $withoutLabel = is_string($withoutCitations)
+                    ? preg_replace('/^\s*(?:evidências?|fontes?|citações?)\s*:?\s*/iu', '', $withoutCitations)
+                    : null;
+
+                if (!is_string($withoutLabel)) {
+                    continue;
+                }
+
+                preg_match_all('/\p{L}+/u', $withoutLabel, $words);
+
+                if (count($words[0] ?? []) >= 4) {
+                    $analyticalUseFound = true;
+                    break;
+                }
+            }
+
+            if (!$analyticalUseFound) {
+                throw new QueryException(sprintf(
+                    'A resposta não incorporou analiticamente a evidência eleita %s.',
+                    $evidenceId
+                ));
+            }
+        }
+
+        if (preg_match(
+            '/(?:^|\R)\s*(?:evidências?|fontes?|citações?)\s*:\s*(?:\[EVA-E\d{6,}\]\s*)+\.?\s*(?:\R|$)/iu',
+            $answer
+        ) === 1) {
+            throw new QueryException(
+                'A resposta apenas inventariou evidências sem incorporá-las à análise.'
+            );
+        }
     }
 }

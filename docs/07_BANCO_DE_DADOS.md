@@ -25,7 +25,7 @@ Sínteses geram evidências `derived` do tipo `node_summary`. `generation_model`
 
 ## Embeddings
 
-Cada vetor referencia uma evidência persistida e registra modelo, dimensão e hash do texto estruturado. Vetores de versões diferentes não são misturados. Similaridades calculadas em consulta não são armazenadas.
+Cada vetor referencia uma evidência persistida e registra modelo, dimensão e hash do texto estruturado. Vetores de versões diferentes não são misturados. Similaridades, média, desvio padrão, coeficiente de variação, regiões do CIE e contexto final calculados em consulta não são armazenados.
 
 ## Interações cognitivas
 

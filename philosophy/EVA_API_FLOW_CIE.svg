@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="820" viewBox="0 0 1600 820" role="img" aria-labelledby="title desc">
+  <title id="title">Fluxo arquitetural do EVA com Context Intelligence Engine</title>
+  <desc id="desc">Construção da memória documental e consulta, com o CIE elegendo núcleo principal e convergência complementar antes da incorporação analítica.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#041326"/>
+      <stop offset="1" stop-color="#071d32"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#09233c"/>
+      <stop offset="1" stop-color="#061a2d"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000" flood-opacity=".32"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8edcff"/>
+    </marker>
+    <style>
+      .panel { fill:url(#panel); stroke:#168fca; stroke-width:2; }
+      .node { fill:#0a2946; stroke:#25b9f3; stroke-width:2; filter:url(#shadow); }
+      .node-ai { fill:#282416; stroke:#ffbd3f; }
+      .node-cie { fill:#173314; stroke:#a9ed4b; stroke-width:3; }
+      .node-db { fill:#12351f; stroke:#68d579; }
+      .arrow { fill:none; stroke:#8edcff; stroke-width:3; marker-end:url(#arrow); }
+      .skip { fill:none; stroke:#8edcff; stroke-width:2; stroke-dasharray:8 8; marker-end:url(#arrow); opacity:.82; }
+      .title { fill:#35c8ff; font:700 34px Arial, sans-serif; letter-spacing:1px; }
+      .subtitle { fill:#9edcf5; font:400 18px Arial, sans-serif; }
+      .label { fill:#f5fbff; font:700 18px Arial, sans-serif; text-anchor:middle; }
+      .small { fill:#b8d8e8; font:400 14px Arial, sans-serif; text-anchor:middle; }
+      .accent { fill:#c9ff77; font:700 14px Arial, sans-serif; text-anchor:middle; }
+      .note { fill:#b8d8e8; font:400 16px Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="820" fill="url(#bg)"/>
+  <text id="header" x="800" y="54" class="title" text-anchor="middle">EVA — FLUXO COM CONTEXT INTELLIGENCE ENGINE</text>
+  <text x="800" y="84" class="subtitle" text-anchor="middle">Memória documental verificável · seleção matemática transitória · resposta validada</text>
+
+  <rect x="28" y="112" width="1544" height="268" rx="24" class="panel"/>
+  <text x="62" y="154" class="title" font-size="25">CONSTRUÇÃO DA MEMÓRIA</text>
+
+  <g transform="translate(58 188)">
+    <rect width="170" height="116" rx="16" class="node"/>
+    <text x="85" y="45" class="label">Documento</text>
+    <text x="85" y="73" class="small">Markdown · JSON · XML</text>
+  </g>
+  <path d="M228 246 H266" class="arrow"/>
+  <g transform="translate(266 188)">
+    <rect width="170" height="116" rx="16" class="node"/>
+    <text x="85" y="45" class="label">Parser local</text>
+    <text x="85" y="73" class="small">sem inferência</text>
+  </g>
+  <path d="M436 246 H474" class="arrow"/>
+  <g transform="translate(474 188)">
+    <rect width="170" height="116" rx="16" class="node"/>
+    <text x="85" y="45" class="label">Árvore</text>
+    <text x="85" y="73" class="small">estrutura preservada</text>
+  </g>
+  <path d="M644 246 H682" class="arrow"/>
+  <g transform="translate(682 188)">
+    <rect width="170" height="116" rx="16" class="node-db"/>
+    <text x="85" y="45" class="label">Evidências</text>
+    <text x="85" y="73" class="small">primárias + linhagem</text>
+  </g>
+  <path d="M852 246 H890" class="arrow"/>
+  <g transform="translate(890 188)">
+    <rect width="170" height="116" rx="16" class="node node-ai"/>
+    <text x="85" y="45" class="label">Sínteses</text>
+    <text x="85" y="73" class="small">derivadas e rastreáveis</text>
+  </g>
+  <path d="M1060 246 H1098" class="arrow"/>
+  <g transform="translate(1098 188)">
+    <rect width="170" height="116" rx="16" class="node node-ai"/>
+    <text x="85" y="45" class="label">Embeddings</text>
+    <text x="85" y="73" class="small">unidades completas</text>
+  </g>
+  <path d="M1268 246 H1306" class="arrow"/>
+  <g transform="translate(1306 188)">
+    <rect width="210" height="116" rx="16" class="node-db"/>
+    <text x="105" y="45" class="label">Memória pronta</text>
+    <text x="105" y="73" class="small">documentos · evidências</text>
+    <text x="105" y="94" class="small">derivações · vetores</text>
+  </g>
+
+  <rect x="28" y="404" width="1544" height="334" rx="24" class="panel"/>
+  <text x="62" y="448" class="title" font-size="25">CONSULTA</text>
+
+  <g transform="translate(58 500)">
+    <rect width="150" height="118" rx="16" class="node"/>
+    <text x="75" y="43" class="label">Input</text>
+    <text x="75" y="72" class="small">consulta atual</text>
+  </g>
+  <path d="M208 559 H242" class="arrow"/>
+  <g transform="translate(242 500)">
+    <rect width="160" height="118" rx="16" class="node"/>
+    <text x="80" y="43" class="label">Roteamento</text>
+    <text x="80" y="70" class="small">direto · estrutural</text>
+    <text x="80" y="91" class="small">amplo · semântico</text>
+  </g>
+  <path d="M402 559 H436" class="arrow"/>
+  <g transform="translate(436 500)">
+    <rect width="160" height="118" rx="16" class="node"/>
+    <text x="80" y="43" class="label">Retriever</text>
+    <text x="80" y="70" class="small">cosseno nas rotas</text>
+    <text x="80" y="91" class="small">conceitual/relacional</text>
+  </g>
+  <path d="M596 559 H630" class="arrow"/>
+  <g transform="translate(630 500)">
+    <rect width="150" height="118" rx="16" class="node"/>
+    <text x="75" y="43" class="label">Top-k</text>
+    <text x="75" y="72" class="small">30 por padrão</text>
+  </g>
+  <path d="M780 559 H814" class="arrow"/>
+  <g transform="translate(814 484)">
+    <rect width="210" height="150" rx="18" class="node-cie" filter="url(#shadow)"/>
+    <text x="105" y="38" class="label">CIE</text>
+    <text x="105" y="66" class="accent">μ · σ · CV</text>
+    <text x="105" y="94" class="small">núcleo principal</text>
+    <text x="105" y="116" class="small">+ convergência</text>
+    <text x="105" y="136" class="small">complementar</text>
+  </g>
+  <path d="M1024 559 H1058" class="arrow"/>
+  <g transform="translate(1058 500)">
+    <rect width="176" height="118" rx="16" class="node-db"/>
+    <text x="88" y="43" class="label">Fontes primárias</text>
+    <text x="88" y="72" class="small">eleição integral</text>
+  </g>
+  <path d="M1234 559 H1268" class="arrow"/>
+  <g transform="translate(1268 500)">
+    <rect width="128" height="118" rx="16" class="node node-ai"/>
+    <text x="64" y="43" class="label">LLM</text>
+    <text x="64" y="72" class="small">incorpora todas</text>
+  </g>
+  <path d="M1396 559 H1430" class="arrow"/>
+  <g transform="translate(1430 500)">
+    <rect width="104" height="118" rx="16" class="node"/>
+    <text x="52" y="39" class="label" font-size="15">Validação</text>
+    <text x="52" y="67" class="small">cobertura</text>
+    <text x="52" y="88" class="small">analítica</text>
+  </g>
+
+  <path d="M322 618 V681 H1146 V620" class="skip"/>
+  <text x="700" y="706" class="small">Rotas direta, estrutural e ampla não usam embedding nem CIE</text>
+
+  <rect x="28" y="762" width="1544" height="42" rx="14" fill="#061829" stroke="#3e7898" stroke-dasharray="7 6"/>
+  <text x="800" y="789" class="note" text-anchor="middle">Transitórios: embedding do input, similaridades, análise do CIE, contexto, resposta e interações · Persistentes: documentos, evidências, derivações e embeddings do acervo</text>
+</svg>

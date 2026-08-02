@@ -1,7 +1,8 @@
 # EVA — Benchmark Baseline de Consulta Documental
 
-**Versão:** 1.1  
+**Versão:** 1.2
 **Data da execução:** 20 de julho de 2026  
+**Revisão arquitetural:** 2 de agosto de 2026
 **Documento:** `EVA-D000060` — *O Livro dos Médiuns*  
 **Tipo de execução:** sequência única, sem concorrência
 
@@ -244,6 +245,8 @@ Essa execução confirma funcionalmente o padrão esperado: relação solicitada
 
 ## 10. Verificação da recuperação lexical e estrutural sem descarte
 
+Este caso permanece como registro histórico da recuperação estrutural anterior ao contrato de eleição integral. O CIE não altera a localização direta, lexical, estrutural ou ampla, mas a versão vigente já não delega ao provedor a escolha final entre candidatos: a aplicação forma o contexto autorizado e exige incorporação analítica integral. Portanto, as métricas de seleção pela IA abaixo não devem ser usadas como descrição do comportamento atual.
+
 O caso estrutural que havia sido bloqueado na linha de base foi repetido após a introdução da triagem de candidatos pela IA.
 
 **Pergunta de verificação**
@@ -271,7 +274,7 @@ O recuperador entregou oito evidências candidatas ao provedor. O conjunto ainda
 | Tokens totais | 10.667 | 11.236 |
 | Tamanho do request | 39.805 bytes | 41.734 bytes |
 
-O teste confirma o comportamento esperado: recuperação produz candidatos; a IA analisa todos os candidatos entregues; somente textos sustentadores tornam-se evidências utilizadas; toda afirmação documental permanece acompanhada de citação; intrusos não invalidam nem contaminam a resposta.
+Na arquitetura então avaliada, o teste confirmou que a recuperação produzia candidatos e a IA selecionava os textos sustentadores. Esse resultado é preservado como baseline histórico. Na arquitetura vigente, a eleição final pertence à aplicação, todas as fontes entregues devem participar da análise e listas artificiais de citações são rejeitadas.
 
 ## 11. Protocolo multidisciplinar a executar
 
@@ -304,3 +307,15 @@ O estudo também deverá distinguir três conceitos:
 - **completude multidisciplinar:** presença das disciplinas pertinentes dentro do limite de contexto.
 
 Uma síntese conceitual emergente será considerada válida somente quando seus componentes forem rastreáveis e sua formulação não ultrapassar o conjunto citado. Mesmo válida, continuará sendo resultado transitório da consulta, não nova evidência ou verdade incorporada ao acervo.
+
+## 12. Baseline do Context Intelligence Engine a executar
+
+As execuções registradas em 20 de julho de 2026 antecedem o CIE e não demonstram seus efeitos. Elas permanecem como baseline histórico sem estabilização estatística. A próxima rodada deve repetir as mesmas consultas conceituais e relacionais, preservando corpus, modelos, prompts, limites finais e condições operacionais, e comparar:
+
+1. Top-k vetorial direto;
+2. Top-k vetorial seguido pelo CIE;
+3. reranker de referência, quando disponível sob orçamento comparável.
+
+Além das métricas já registradas, a rodada deve capturar `QUERY_CANDIDATE_LIMIT`, `μ`, `σ`, `CV`, quantidade em cada região, fontes primárias após resolução, cobertura analítica de núcleo e convergência, precision/recall, tokens de contexto, latência local e estabilidade entre paráfrases. Resultados precisam separar núcleo principal, convergência complementar e promoção da convergência quando o núcleo estiver vazio, além de reportar distribuições assimétricas ou com média próxima de zero.
+
+O teste matemático offline comprova a execução determinística das fórmulas e fronteiras; não substitui essa avaliação empírica de qualidade de recuperação.

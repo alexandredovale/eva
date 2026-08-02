@@ -16,7 +16,7 @@ Many retrieval systems begin with arbitrary token chunks and later try to recons
 Source → normalized tree → literal primary evidence
        → traceable hierarchical summaries → contextual embeddings
 
-Query → local input routing → recovered evidence → primary sources
+Semantic query → local routing → vector Top-k → CIE → primary sources
       → one bounded answer → local citation and interaction validation
 ```
 
@@ -27,6 +27,8 @@ Core properties:
 - Embeddings represent complete, previously organized semantic units rather than arbitrary cuts.
 - Direct, structural, and broad queries can avoid a transient query embedding.
 - Conceptual and relational queries use semantic retrieval and resolve summaries back to primary evidence.
+- CIE deterministically elects a leading vector core plus mandatory complementary convergence context from mean and population standard deviation before lineage resolution.
+- The answer model must accept every elected primary source and cite it where its analytical contribution is explained; citation-only inventories are rejected.
 - Answer generation is skipped when no primary evidence is recovered.
 - `simetry` and `assimetry` interactions exist only for the current query and require two cited primary sources with literal excerpts.
 - Provider endpoints, models, and credential-variable names remain environment configuration.
@@ -167,6 +169,8 @@ Run relevant tests individually after configuring an isolated test database, for
 php tests/ParsersTest.php
 php tests/DocumentIngestionTest.php
 php tests/CognitiveBuildTest.php
+php tests/ContextIntelligenceEngineTest.php
+php tests/ContextIntelligenceIntegrationTest.php
 php tests/QueryTest.php
 ```
 
@@ -188,6 +192,7 @@ The public schema and all versioned migrations remain included so a new installa
 
 - [Documentation index](docs/README.md)
 - [Architecture](docs/en/02_ARCHITECTURE.md)
+- [Context Intelligence Engine](docs/en/09_CONTEXT_INTELLIGENCE_ENGINE.md)
 - [Installation](docs/en/03_INSTALLATION.md)
 - [Ingestion and cognitive build](docs/en/04_INGESTION_AND_BUILD.md)
 - [Query and conversational continuity](docs/en/05_QUERY_AND_CHAT.md)

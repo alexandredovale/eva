@@ -269,7 +269,7 @@ $secondQueryEvidence = new RetrievedEvidence(
     $rightContent
 );
 $queryContext = new QueryContext(
-    new InputUnderstanding([InputType::Relational, InputType::Conceptual], []),
+    new InputUnderstanding([InputType::Conceptual], []),
     [$queryEvidence, $secondQueryEvidence],
     3,
     ['evidence:EVA-E000001:primary:node_content'],
@@ -322,14 +322,24 @@ assertAiAdapter(
     str_contains($queryMessage, 'interaction_limit é um teto de segurança, não uma meta'),
     'O comando de saída deve impedir o preenchimento artificial do limite de interações.'
 );
-assertAiAdapter($queryPayload['analyze_interactions'] === true, 'A consulta relacional deve ativar interações transitórias.');
+assertAiAdapter($queryPayload['analyze_interactions'] === true, 'Duas evidências eleitas devem ativar a análise transitória de interações.');
+assertAiAdapter(
+    $queryPayload['evidence_selection_contract']['required_evidence_ids'] === ['EVA-E000001', 'EVA-E000002']
+        && $queryPayload['primary_evidences'][0]['selection_region'] === 'core',
+    'O payload deve preservar a eleição determinística e o papel das evidências.'
+);
 assertAiAdapter(
     str_contains($queryHttp->requests[0]['payload']['messages'][0]['content'], 'operadores cognitivos internos e essenciais'),
     'O prompt deve preservar simetry e assimetry na compreensão cognitiva.'
 );
 assertAiAdapter(
-    str_contains($queryHttp->requests[0]['payload']['messages'][0]['content'], 'conjunto de candidatos'),
-    'O prompt deve exigir análise dos candidatos lexicais sem descarte por intrusos.'
+    str_contains($queryHttp->requests[0]['payload']['messages'][0]['content'], 'já foram eleitas deterministicamente'),
+    'O prompt deve impedir que a IA refaça a eleição local das evidências.'
+);
+assertAiAdapter(
+    str_contains($queryHttp->requests[0]['payload']['messages'][0]['content'], 'A aceitação formal de um identificador não equivale ao uso da evidência')
+        && str_contains($queryMessage, 'uma lista isolada de citações é inválida'),
+    'O prompt deve exigir incorporação analítica de núcleo e convergência, não apenas a devolução de IDs.'
 );
 assertAiAdapter(
     str_contains($queryHttp->requests[0]['payload']['messages'][0]['content'], 'avalie por si mesmo se a solicitação atual é continuidade')
@@ -358,8 +368,8 @@ $profiledContext = new QueryContext(
 $profiledQueryHttp = new CapturingJsonHttpClient([[
     'choices' => [[
         'message' => ['content' => json_encode([
-            'answer' => 'Resposta governada [EVA-E000001].',
-            'used_evidence_ids' => ['EVA-E000001'],
+            'answer' => 'Resposta governada [EVA-E000001] [EVA-E000002].',
+            'used_evidence_ids' => ['EVA-E000001', 'EVA-E000002'],
             'interactions' => [],
             'limitations' => [],
         ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE)],
@@ -508,7 +518,7 @@ assertAiAdapter(
 assertAiAdapter(
     array_filter(
         $answerWithDiscardedInteraction->limitations,
-        static fn (string $limitation): bool => str_contains($limitation, 'ambiente relacional')
+        static fn (string $limitation): bool => str_contains($limitation, 'simetry ou assimetry')
     ) !== [],
     'O descarte de todas as interações deve produzir limitação relacional explícita.'
 );
@@ -524,8 +534,8 @@ assertAiAdapter(
 $forbiddenHttp = new CapturingJsonHttpClient([[
     'choices' => [[
         'message' => ['content' => json_encode([
-            'answer' => 'Resposta sustentada [EVA-E000001].',
-            'used_evidence_ids' => ['EVA-E000001'],
+            'answer' => 'Resposta sustentada [EVA-E000001] [EVA-E000002].',
+            'used_evidence_ids' => ['EVA-E000001', 'EVA-E000002'],
             'interactions' => [['confidence' => 0.9]],
             'limitations' => [],
         ], JSON_THROW_ON_ERROR)],

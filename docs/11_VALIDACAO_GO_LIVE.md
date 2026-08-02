@@ -12,6 +12,10 @@ O diagnóstico inicial confirmou dois defeitos no CORE da consulta: detecção i
 
 Este parecer cobre aplicação, banco, permissões, autenticação, consultas reais ao provedor configurado, navegador e infraestrutura local. Métricas de concorrência locais não substituem a observação de capacidade da hospedagem depois da publicação.
 
+> Atualização de 2 de agosto de 2026: a matriz ao vivo e as contagens históricas abaixo antecedem a introdução do Context Intelligence Engine. O CIE possui teste matemático offline próprio, mas consultas conceituais e relacionais precisam ser revalidadas com `QUERY_CANDIDATE_LIMIT=30` antes de qualquer publicação. Este documento não deve ser interpretado como aceite ao vivo da nova camada enquanto essa reexecução estiver pendente.
+
+> Validação dirigida em 2 de agosto de 2026: uma consulta conceitual real sobre *O Livro dos Espíritos*, com Top-30, três evidências finais de núcleo e sete de convergência, terminou sem truncamento em 24,32 segundos. As dez evidências foram incorporadas à prosa analítica e nenhuma apareceu apenas em inventário de citações. Esse resultado aprova o contrato determinístico e a validação fechada no caso de referência, mas não substitui a matriz comparativa ainda pendente sobre um corpus representativo.
+
 ## Ambiente e escopo
 
 A validação utilizou o projeto ativo `Pentateuco Espírita` e suas duas obras prontas:
@@ -96,6 +100,12 @@ Na regressão final, foram executadas 15 suítes sem chamadas pagas, totalizando
 - inventário completo e comentado do `.env`;
 - diagnóstico seguro nos logs;
 - backup e restauração da infraestrutura.
+
+### Context Intelligence Engine — atualização de 2 de agosto de 2026
+
+Foram adicionadas as suítes `tests/ContextIntelligenceEngineTest.php` e `tests/ContextIntelligenceIntegrationTest.php`. A primeira independe de banco e cobre fórmulas populacionais, núcleo, fallback para convergência, média zero, distribuição homogênea, distribuição vazia, tolerância de fronteira e saída auditável. A segunda monta um documento controlado com cinco vetores em transação, verifica o contexto final e desfaz os dados ao final. `tests/QueryTest.php` também verifica a integração do CIE com a recuperação semântica e a resolução para fontes primárias.
+
+O esquema vazio foi importado no banco local por conter somente criações idempotentes. O teste matemático foi aprovado com 13 asserções, a integração controlada com 10 e `tests/QueryTest.php` com 49. Nenhuma chamada externa ou paga foi feita. A revalidação ao vivo de qualidade e estabilidade continua pendente antes de publicação.
 
 ## Bloqueadores encontrados no diagnóstico inicial
 

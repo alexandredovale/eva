@@ -2,6 +2,8 @@
 
 Este documento apresenta, em diagramas de texto, o fluxo vigente do EVA desde o anexo de um documento até a resposta ao input do usuário.
 
+O diagrama visual atualizado está em [`EVA_API_FLOW_CIE.svg`](EVA_API_FLOW_CIE.svg). O arquivo `EVA_API_FLOW.png` permanece somente como registro visual anterior ao CIE.
+
 ## 1. Anexo e construção da memória documental
 
 ```text
@@ -160,13 +162,26 @@ POST /api/query                              <- API interna do EVA
            |                                     [SIMILARIDADE CALCULADA
            |                                      LOCALMENTE CONTRA O ACERVO]
            |                                                   |
+           |                                                   v
+           |                                     [TOP-K VETORIAL]
+           |                                                   |
+           |                                                   v
+           |                                     [CONTEXT INTELLIGENCE ENGINE]
+           |                                     - média, desvio padrão e CV
+           |                                     - descarte abaixo da média
+           |                                     - núcleo principal + convergência complementar
+           |                                                   |
            +--------------------------+------------------------+
                                       |
                                       v
-                     [EVIDÊNCIAS CANDIDATAS]
+                     [ROTAS ELEITAS PELO CIE]
+                     - core: referência principal
+                     - convergence: análise complementar obrigatória
                                       |
                                       v
                      [RESOLUÇÃO PARA FONTES PRIMÁRIAS]
+                     - eleição final determinística
+                     - nenhuma reeleição pela LLM
                                       |
                                       v
                             < HÁ EVIDÊNCIA? >
@@ -183,9 +198,10 @@ POST /api/query                              <- API interna do EVA
                              |              ╚═══════════════════════════════╝
                              |                              |
                              |                              v
-                             |                 [VALIDAÇÃO LOCAL DA SAÍDA]
-                             |                 - IDs conhecidos
-                             |                 - citações recuperadas
+                              |                 [VALIDAÇÃO LOCAL DA SAÍDA]
+                              |                 - IDs eleitos aceitos integralmente
+                              |                 - cada fonte incorporada à análise
+                              |                 - sem inventário isolado de citações
                              |                 - fragmentos literais
                              |                 - simetry/assimetry
                              |                 - campos proibidos
@@ -197,6 +213,7 @@ POST /api/query                              <- API interna do EVA
                                     - texto documental
                                     - evidências utilizadas
                                     - interações válidas
+                                    - análise transitória do CIE
                                     - limitações
                                             |
                                             v
@@ -225,6 +242,9 @@ POST /api/query                              <- API interna do EVA
            +--> candidatos de C
            |
            v
+[CIE INDEPENDENTE POR DOCUMENTO]
+           |
+           v
 [INTERCALAÇÃO EM CONTEXTO GLOBAL LIMITADO]
            |
            v
@@ -234,13 +254,17 @@ POST /api/query                              <- API interna do EVA
 ╔═════════════════════════════════════════════════════════════╗
 ║ API EXTERNA — GERAÇÃO DA RESPOSTA                          ║
 ║                                                             ║
-║ Articula somente as evidências recuperadas, identifica      ║
+║ Articula todas as evidências eleitas, preserva core e       ║
+║ convergence, identifica                                     ║
 ║ simetry/assimetry quando pertinente e declara lacunas.       ║
 ╚═════════════════════════════════════════════════════════════╝
            |
            v
 [VALIDAÇÃO LOCAL MULTIDOCUMENTAL]
 - cada ID pertence ao contexto autorizado
+- todos os IDs eleitos foram aceitos na mesma ordem
+- cada evidência possui contribuição analítica citada
+- listas isoladas de citações são rejeitadas
 - cada evidência mantém seu documento de origem
 - participantes são citados
 - fragmentos são verificáveis
@@ -275,6 +299,7 @@ CONSULTA DIRETA / ESTRUTURAL / AMPLA
 
 CONSULTA CONCEITUAL / RELACIONAL
   ├── 1 chamada de embedding do input
+  ├── 1 análise local do CIE por documento, sem chamada externa
   └── 1 chamada de resposta, somente se houver evidência
 
 CONSULTA SEM EVIDÊNCIA
@@ -302,6 +327,12 @@ INPUT DO USUÁRIO                  |
    |                              |
    +----------> RECUPERAÇÃO <-----+
                      |
+              TOP-K → CIE
+                     |
+         NÚCLEO + CONVERGÊNCIA
+                     |
+          FONTES PRIMÁRIAS ELEITAS
+                     |
               há evidência?
                 /       \
               não       sim
@@ -320,6 +351,7 @@ NÃO SÃO PERSISTIDOS COMO MEMÓRIA DOCUMENTAL:
 
 - embedding transitório do input;
 - escores de similaridade;
+- média, desvio padrão, CV e regiões do CIE;
 - contexto recuperado;
 - resposta gerada;
 - interações cognitivas;
