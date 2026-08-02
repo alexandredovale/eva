@@ -8,7 +8,7 @@
 6. Gerar embeddings somente de unidades organizadas, nunca por cortes arbitrários de tamanho.
 7. Manter evidências, derivações e embeddings como núcleo persistente do Evidence Algorithm.
 8. Não persistir Cnodes, pares candidatos, análises de interação ou métricas relacionais.
-9. Produzir interações somente em consultas relacionais e dentro do limite solicitado.
+9. Avaliar interações sempre que houver ao menos duas evidências eleitas e produzi-las somente dentro do limite solicitado.
 10. Usar exclusivamente `simetry` e `assimetry` para descrever interações.
 11. Não classificar relações por taxonomias julgamentais.
 12. Não transformar similaridade vetorial em conclusão.
@@ -38,13 +38,13 @@
 36. Responder cada aspecto sustentado com evidências citadas.
 37. Nomear separadamente cada aspecto sem evidência suficiente no contexto recuperado.
 38. Nunca apagar uma relação parcial válida apenas porque outro aspecto do input não possui evidência.
-39. Tratar resultados literais, lexicais e estruturais como candidatos sujeitos à análise da IA.
-40. Entregar ao provedor todos os candidatos recuperados dentro do limite, inclusive possíveis intrusos.
-41. Citar somente candidatos que sustentem efetivamente a resposta.
-42. Não descartar uma resposta válida pela presença de candidatos intrusos.
-43. Aceitar ausência de evidências utilizadas após análise somente com limitação explícita e sem citações ou interações.
-44. Tratar `QUERY_MAX_EVIDENCE` como limite global de evidências candidatas entregues ao provedor em cada consulta.
-45. Não confundir evidência candidata com evidência utilizada; somente a IA pode selecionar, dentro do contexto permitido, quais candidatas sustentam a resposta.
+39. Tratar resultados recuperados como candidatos até a eleição determinística concluída pela aplicação.
+40. Entregar ao provedor somente o contexto final autorizado, com fontes primárias e papéis explícitos de núcleo ou convergência nas rotas semânticas.
+41. Exigir que toda evidência eleita seja citada no trecho analítico em que contribui para a resposta.
+42. Rejeitar omissão textual, marcador isolado ou inventário de citações que não demonstre incorporação analítica.
+43. Nunca acrescentar automaticamente uma citação omitida pelo provedor para fazer a resposta aparentar conformidade.
+44. Tratar `QUERY_MAX_EVIDENCE` como limite global de evidências primárias entregues ao provedor em cada consulta, aplicado depois do CIE nas rotas semânticas.
+45. Não confundir candidato recuperado com evidência eleita; a aplicação seleciona o contexto final e a IA não pode reelegê-lo, rejeitá-lo ou reduzi-lo.
 46. Tratar `QUERY_MAX_INTERACTIONS` como limite de saída relacional transitória, nunca como quantidade de evidências, pares persistidos ou combinações antecipadas.
 47. Desativar interações quando `QUERY_MAX_INTERACTIONS` for zero sem desativar a resposta documental baseada em evidências.
 48. Detectar a intenção relacional localmente, por regras determinísticas normalizadas, sem criar uma chamada de IA anterior à recuperação.
@@ -54,4 +54,16 @@
 52. Validar a compatibilidade de todas as unidades pendentes com o limite de entrada do provedor antes de enviar qualquer lote de embeddings.
 53. Nunca truncar, cortar ou fragmentar arbitrariamente uma evidência para produzir seu embedding.
 54. Representar uma primária excedente pelo embedding de uma síntese derivada válida somente quando a linhagem até a evidência primária integral estiver persistida.
-55. Interromper a vetorização com o identificador da evidência quando uma primária excedente não possuir síntese derivada compatível, exigindo subdivisão estrutural real.
+55. Aplicar o CIE somente às distribuições vetoriais das rotas conceitual e relacional.
+56. Limitar o conjunto estatístico por `QUERY_CANDIDATE_LIMIT`, com padrão 30 e intervalo efetivo de 1 a 200 candidatos por documento.
+57. Calcular média e desvio padrão populacionais sobre o Top-k e calcular `CV = σ / μ`, usando `null` quando `μ = 0`.
+58. Classificar como descarte `s < μ`, convergência `μ ≤ s < μ + σ` e núcleo `s ≥ μ + σ`.
+59. Usar o núcleo como referência principal e a faixa de convergência como análise complementar obrigatória; quando o núcleo estiver vazio, promover a convergência ao papel principal.
+60. Preservar a ordem do Retriever dentro das regiões; não criar nota, peso, heurística subjetiva ou reranking por IA.
+61. Resolver candidatos derivados selecionados pelo CIE até suas fontes primárias antes de aplicar o limite global e chamar o provedor de resposta.
+62. Não persistir candidatos, similaridades, estatísticas, regiões ou seleção do CIE como memória documental.
+63. Interromper a vetorização com o identificador da evidência quando uma primária excedente não possuir síntese derivada compatível, exigindo subdivisão estrutural real.
+64. Exigir que `used_evidence_ids` reproduza integralmente e na mesma ordem a eleição final da aplicação.
+65. Preservar `core` como precedência argumentativa e incorporar cada `convergence` como reforço, contexto, limite ou contraponto sustentado literalmente.
+66. Não inventar relações para acomodar uma evidência eleita; incorporação obrigatória continua limitada ao conteúdo documental.
+67. Manter a calibração semântica estrita de `simetry` e `assimetry` separada da validade documental da resposta.

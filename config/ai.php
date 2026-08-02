@@ -48,6 +48,7 @@ return [
         ],
     ],
     'query' => [
+        'candidate_limit' => max(1, min(200, (int) Env::get('QUERY_CANDIDATE_LIMIT', '30'))),
         'max_evidence' => max(1, min(50, (int) Env::get('QUERY_MAX_EVIDENCE', '8'))),
         'max_interactions' => max(0, min(100, (int) Env::get('QUERY_MAX_INTERACTIONS', '20'))),
     ],

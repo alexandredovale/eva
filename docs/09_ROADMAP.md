@@ -48,7 +48,29 @@
 - interações exclusivamente contextuais e não persistentes — concluído;
 - documentação, produto e testes atualizados — concluído.
 
-As cinco fases e o upgrade arquitetural estão concluídos. Novas fases devem partir de uso real do produto sem reintroduzir entidades ou pesos relacionais redundantes.
+As cinco fases e o primeiro upgrade arquitetural estão concluídos. Novas fases devem partir de uso real do produto sem reintroduzir entidades ou pesos relacionais redundantes.
+
+## Upgrade arquitetural — Context Intelligence Engine
+
+- separação entre Top-k do Retriever e contexto final — concluído;
+- média, desvio padrão populacional e coeficiente de variação — concluído;
+- regiões de descarte, convergência e núcleo — concluído;
+- fallback determinístico para convergência quando não houver núcleo — concluído;
+- resolução de linhagem somente após a seleção estatística — concluído;
+- saída transitória auditável em `context_intelligence` — concluído;
+- núcleo como referência principal e convergência como análise complementar obrigatória — concluído;
+- contrato integral de `used_evidence_ids` sem reeleição pela LLM — concluído;
+- validação fechada da incorporação analítica, sem preenchimento automático ou inventário de citações — concluído;
+- validação real de referência com 10/10 evidências incorporadas e sem truncamento — concluído;
+- testes isolados sem banco ou chamadas externas — concluído;
+- revalidação comparativa de qualidade, estabilidade, latência e tokens em corpus representativo — pendente.
+
+## Evolução futura — semântica estrita das interações
+
+- distinguir convergência temática de reciprocidade `simetry` por contrato demonstrável — futuro;
+- exigir base explícita para as duas direções de `simetry` — futuro;
+- reforçar a demonstração de origem e destino em `assimetry` sem inferir causalidade ou hierarquia — futuro;
+- preservar a resposta documental válida quando nenhuma interação estrita puder ser comprovada — princípio vigente.
 
 ## Critério de avanço
 

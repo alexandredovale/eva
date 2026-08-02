@@ -26,7 +26,7 @@ foreach ($assertions as $needle => $message) {
     }
 }
 
-if (!preg_match('~assets/app\.js\?v=20260725-1~', $html)) {
+if (!preg_match('~assets/app\.js\?v=20260802-1~', $html)) {
     throw new RuntimeException('A versão pública do JavaScript não foi atualizada.');
 }
 

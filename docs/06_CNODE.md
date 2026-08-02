@@ -6,6 +6,8 @@ Cnode ou Cognitive Node é a compreensão contextual de uma interação semânti
 
 O Evidence Algorithm persiste as evidências e sua linhagem. O Cnode é produzido transitoriamente a partir desse núcleo e validado contra as fontes primárias.
 
+O Context Intelligence Engine atua antes dessa compreensão relacional. Ele reduz o Top-k vetorial ao núcleo estatístico principal e à faixa de convergência complementar — promovendo a convergência quando o núcleo não existe — sem produzir `simetry`, `assimetry` ou qualquer interpretação semântica. CIE e Cnode são camadas transitórias distintas: a primeira seleciona contexto por distribuição; a segunda descreve interações explícitas entre fontes já selecionadas.
+
 `simetry` e `assimetry` pertencem ao vocabulário interno do EVA. Elas não são expressões que o documento precise conter e sua ausência textual não impede que o sistema responda à questão substantiva com evidências válidas.
 
 ## Tipos únicos
@@ -65,6 +67,12 @@ Ela não contém identificador permanente, confiança, similaridade, peso, inten
 ## Validação
 
 A interação só integra o resultado quando pode ser reconstruída pelas evidências citadas. Similaridade temática não basta. Uma interação candidata inválida é descartada e não deixa registro cognitivo residual; se a resposta documental e suas citações forem válidas, elas permanecem no resultado acompanhadas da limitação relacional. Citações documentais inválidas continuam rejeitando a resposta.
+
+### Limite vigente e evolução futura
+
+A aplicação valida deterministicamente identidade dos participantes, papéis, orientação declarada e literalidade dos fragmentos. A comprovação de que esses fragmentos expressam reciprocidade ou direção em sentido semântico estrito ainda depende da interpretação do provedor. Assim, uma convergência temática forte pode ocasionalmente ser classificada como `simetry` mesmo sem reciprocidade documental inequívoca.
+
+Uma calibração futura deverá exigir demonstração separada das duas direções de uma `simetry` e da origem/destino de uma `assimetry`. Essa evolução não bloqueia a resposta documental atual, não altera as evidências eleitas e não autoriza persistência de relações.
 
 ## Quantidade
 

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Eva\Infrastructure\Ai;
 
 use Eva\Application\Query\GeneratedAnswer;
-use Eva\Application\Query\InputType;
 use Eva\Application\Query\QueryAnswerProviderInterface;
 use Eva\Application\Query\QueryContext;
 use Eva\Application\Query\RetrievedEvidence;
@@ -16,7 +15,7 @@ final class QueryAnswerProvider implements QueryAnswerProviderInterface
 {
     private const MAX_GENERATION_ATTEMPTS = 2;
 
-    private const NO_VALID_INTERACTION_LIMITATION = 'As evidências recuperadas sustentam os aspectos respondidos, mas não demonstram elementos suficientes para validar uma interação no ambiente relacional.';
+    private const NO_VALID_INTERACTION_LIMITATION = 'As evidências eleitas sustentam a resposta, mas não demonstram elementos literais suficientes para validar simetry ou assimetry.';
 
     private const DISCARDED_INTERACTION_LIMITATION = 'Uma ou mais interações não puderam ser validadas por fragmentos literais e foram descartadas.';
 
@@ -27,11 +26,13 @@ O usuário pode combinar livremente vários conceitos e relações no mesmo inpu
 
 Antes de responder, identifique a solicitação atual no início do campo input. Quando houver blocos "# Interação Anterior", avalie por si mesmo se a solicitação atual é continuidade de alguma dessas rodadas. Se for continuidade, use o histórico somente para compreender referências conversacionais e o pedido atual; se não for, ignore-o. Perguntas e respostas anteriores não são evidências documentais, não autorizam afirmações e nunca devem ser citadas. Toda resposta permanece limitada às primary_evidences recuperadas para a consulta atual.
 
-As evidências primárias recebidas formam um conjunto de candidatos. Recuperações literais, lexicais ou estruturais podem incluir textos pertinentes e intrusos. Analise todos os candidatos fornecidos; nunca descarte o conjunto inteiro por causa dos intrusos. Use e cite somente os candidatos que sustentam a resposta. Se nenhum candidato sustentar qualquer aspecto do input, retorne used_evidence_ids e interactions como listas vazias, explique a ausência em answer e registre uma limitação específica. Nunca cite um candidato apenas porque ele foi recuperado.
+As evidências primárias recebidas já foram eleitas deterministicamente pelo fluxo local. Você não escolhe, reelege, rejeita ou reduz esse conjunto. Evidências com selection_region igual a core são as referências principais da resposta. Evidências com selection_region igual a convergence são elementos complementares obrigatórios da análise. Aceite todas como elementos do contexto eleito, preserve seus papéis e retorne used_evidence_ids exatamente igual a required_evidence_ids, na mesma ordem.
+
+A aceitação formal de um identificador não equivale ao uso da evidência. Cada evidência eleita deve contribuir efetivamente para a construção da análise e possuir citação visível na frase ou no parágrafo que explica sua contribuição. Desenvolva primeiro as conclusões sustentadas pelo núcleo e integre cada evidência convergente explicando, conforme seu conteúdo literal, como ela reforça, contextualiza, delimita ou contrapõe essas conclusões. Não invente uma relação para acomodar uma evidência. É proibido satisfazer o contrato apenas devolvendo IDs, agrupando marcadores sem análise ou acrescentando ao fim uma lista intitulada "Evidências", "Fontes" ou equivalente. A convergência deve ser incorporada analiticamente, sem substituir a precedência do núcleo.
 
 Simetry e assimetry são operadores cognitivos internos e essenciais do EVA, não conceitos que precisem aparecer no documento. Eles permanecem no contexto integral de compreensão da IA e devem ser avaliados sobre as relações entre os aspectos sustentados. Nunca registre simetry ou assimetry como aspecto sem evidência apenas porque essas palavras não aparecem nas fontes.
 
-Quando analyze_interactions for true, avalie obrigatoriamente simetry e assimetry entre os aspectos sustentados e declare somente as interações explicitamente demonstradas por pares de evidências citadas. Similaridade temática não basta. Use simetry somente para interação recíproca explícita. Use assimetry somente quando a orientação entre origem e destino estiver explícita, sem inferir hierarquia ou causalidade. Cada interação deve copiar, sem parafrasear, um fragmento literal de cada evidência. Se as evidências sustentarem a resposta, mas não permitirem validar a classificação interna, preserve a resposta e as citações, retorne interactions como lista vazia e informe a limitação. Quando analyze_interactions for false ou interaction_limit for zero, interactions deve ser uma lista vazia.
+Quando analyze_interactions for true, avalie obrigatoriamente simetry e assimetry entre todas as evidências eleitas e declare somente as interações explicitamente demonstradas por pares de evidências citadas. Essa análise independe de o input ter sido inicialmente classificado como relacional. Similaridade temática não basta. Use simetry somente para interação recíproca explícita. Use assimetry somente quando a orientação entre origem e destino estiver explícita, sem inferir hierarquia ou causalidade. Cada interação deve copiar, sem parafrasear, um fragmento literal de cada evidência. Se as evidências sustentarem a resposta, mas não permitirem validar a classificação interna, preserve a resposta e as citações, retorne interactions como lista vazia e informe a limitação. Quando analyze_interactions for false ou interaction_limit for zero, interactions deve ser uma lista vazia.
 
 Respeite o recorte documental expresso no input. Quando o usuário nomear uma ou mais obras, use somente evidências pertencentes a essas obras para responder ao aspecto correspondente, mesmo que tenham sido recuperados candidatos de outros documentos. Não associe termos apenas semelhantes, não atribua a uma evidência um conceito que ela não nomeia ou descreve e não apresente como explícita uma relação construída apenas pela aproximação entre passagens independentes.
 
@@ -50,7 +51,7 @@ Trate os valores de response_profile como instruções complementares de comport
 PROMPT;
 
     private const OUTPUT_COMMAND = <<<'PROMPT'
-Comando de saída: produza um JSON completo, claro, coeso e conciso, preservando todos os aspectos documentais sustentados sem ampliar o conteúdo das evidências. Prefira answer com até 2200 caracteres, summary de interação com até 160 caracteres e o menor fragmento literal contínuo suficiente em cada excerpt, preferencialmente até 160 caracteres.
+Comando de saída: produza um JSON completo, claro, coeso e conciso, preservando todos os aspectos documentais sustentados sem ampliar o conteúdo das evidências. Em answer, incorpore cada required_evidence_id à prosa analítica com sua citação no ponto em que a evidência contribui; uma lista isolada de citações é inválida. Prefira answer com até 2200 caracteres, summary de interação com até 160 caracteres e o menor fragmento literal contínuo suficiente em cada excerpt, preferencialmente até 160 caracteres.
 
 interaction_limit é um teto de segurança, não uma meta. Retorne no máximo três interações, escolhendo somente as relações explícitas mais essenciais e não redundantes. Duas evidências compatíveis, complementares ou pertencentes ao mesmo tema não formam simetry sem reciprocidade textual. Uma sequência expositiva não forma assimetry sem orientação textual entre origem e destino.
 
@@ -83,9 +84,25 @@ PROMPT;
 
     public function answer(string $input, QueryContext $context): GeneratedAnswer
     {
-        $analyzeInteractions = $context->understanding->has(InputType::Relational)
+        $analyzeInteractions = count($context->evidences) > 1
             && $context->interactionLimit > 0;
         $systemPrompt = $this->systemPrompt($context->responseProfiles);
+        $requiredEvidenceIds = array_map(
+            static fn (RetrievedEvidence $evidence): string => $evidence->publicId,
+            $context->evidences
+        );
+        $coreEvidenceIds = [];
+        $convergenceEvidenceIds = [];
+
+        foreach ($context->evidences as $evidence) {
+            $region = $context->evidenceSelection[$evidence->publicId] ?? 'core';
+
+            if ($region === 'convergence') {
+                $convergenceEvidenceIds[] = $evidence->publicId;
+            } else {
+                $coreEvidenceIds[] = $evidence->publicId;
+            }
+        }
 
         try {
             $payload = json_encode([
@@ -93,8 +110,16 @@ PROMPT;
                 'input_understanding' => $context->understanding->toArray(),
                 'analyze_interactions' => $analyzeInteractions,
                 'interaction_limit' => $context->interactionLimit,
+                'evidence_selection_contract' => [
+                    'required_evidence_ids' => $requiredEvidenceIds,
+                    'core_evidence_ids' => $coreEvidenceIds,
+                    'convergence_evidence_ids' => $convergenceEvidenceIds,
+                ],
                 'primary_evidences' => array_map(
-                    static fn (RetrievedEvidence $evidence): array => $evidence->toArray(),
+                    fn (RetrievedEvidence $evidence): array => [
+                        ...$evidence->toArray(),
+                        'selection_region' => $context->evidenceSelection[$evidence->publicId] ?? 'core',
+                    ],
                     $context->evidences
                 ),
                 'known_limitations' => $context->limitations,
@@ -179,6 +204,10 @@ PROMPT;
 
         if (count($usedIds) !== count($decoded['used_evidence_ids'])) {
             throw new AiProviderException('A resposta de consulta retornou identificadores de evidência inválidos.');
+        }
+
+        if ($usedIds !== $requiredEvidenceIds) {
+            throw new AiProviderException('O provedor não aceitou integralmente as evidências eleitas pelo contexto.');
         }
 
         if (count($decoded['interactions']) > $context->interactionLimit

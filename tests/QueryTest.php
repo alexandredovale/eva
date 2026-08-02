@@ -118,14 +118,13 @@ final class CitingFakeAnswerProvider implements QueryAnswerProviderInterface
     public function answer(string $input, QueryContext $context): GeneratedAnswer
     {
         $this->calls++;
-        $used = [$context->evidences[0]->publicId];
+        $used = array_map(static fn ($evidence): string => $evidence->publicId, $context->evidences);
         $interactions = [];
 
         if ($context->understanding->has(InputType::Relational) && isset($context->evidences[2])) {
             $first = $context->evidences[0];
             $second = $context->evidences[1];
             $third = $context->evidences[2];
-            $used = [$first->publicId, $second->publicId, $third->publicId];
             $interactions = [
                 new RetrievedInteraction('simetry', 'Interação recíproca explícita de teste.', [
                     ['evidence_id' => $first->publicId, 'role' => 'participant', 'excerpt_reference' => $first->sourceReference, 'excerpt' => $first->content],
@@ -174,6 +173,28 @@ final class MissingVisibleCitationAnswerProvider implements QueryAnswerProviderI
             'Resposta documental com fonte estruturada, mas sem marcador produzido pelo provedor.',
             [$context->evidences[0]->publicId]
         );
+    }
+}
+
+final class CitationInventoryAnswerProvider implements QueryAnswerProviderInterface
+{
+    public function model(): string
+    {
+        return 'citation-inventory-v1';
+    }
+
+    public function answer(string $input, QueryContext $context): GeneratedAnswer
+    {
+        $used = array_map(
+            static fn ($evidence): string => $evidence->publicId,
+            $context->evidences
+        );
+        $citations = implode(' ', array_map(
+            static fn (string $id): string => '[' . $id . ']',
+            $used
+        ));
+
+        return new GeneratedAnswer('Evidências: ' . $citations, $used);
     }
 }
 
@@ -302,14 +323,11 @@ try {
     assertQuery($directResult->usedEvidences[0]->publicId === $intelligence['public_id'], 'A consulta direta recuperou outra evidência.');
     assertQuery(count($embeddingProvider->batches) === 1, 'A consulta direta não deve consumir embedding de query.');
 
-    $structuralContext = $retriever->retrieve($documentId, 'O que consta no capítulo IV sobre princípio vital?', 8, 20);
+    $structuralContext = $retriever->retrieve($documentId, 'Explain Chapter IV — Lifecycle.', 8, 20);
     assertQuery($structuralContext->understanding->has(InputType::Structural), 'A consulta de capítulo deve ser estrutural.');
     assertQuery(
-        array_filter(
-            $structuralContext->evidences,
-            static fn ($evidence): bool => str_contains($evidence->structuralPath, '/capítulo-iv-do-princípio-vital')
-        ) !== [],
-        'O roteamento estrutural não desceu ao capítulo indicado.'
+        in_array('node:/part-one/chapter-iv-lifecycle', $structuralContext->routingPoints, true),
+        'O roteamento estrutural não identificou o capítulo indicado.'
     );
     assertQuery(count($embeddingProvider->batches) === 1, 'A consulta estrutural não deve consumir embedding de query.');
 
@@ -318,7 +336,20 @@ try {
     assertQuery(count($broadContext->evidences) === 6, 'A consulta ampla deve respeitar o limite de unidades primárias.');
     assertQuery(str_starts_with($broadContext->routingPoints[0], 'node:') || str_starts_with($broadContext->routingPoints[0], 'root:'), 'A consulta ampla não iniciou na hierarquia.');
 
-    $conceptualContext = $retriever->retrieve($documentId, 'inteligência e instinto', 5, 20);
+    $literalResult = $queryService->query(
+        $documentId,
+        'Intelligence in this fixture denotes explicit processing rules rather than a human trait?'
+    );
+    assertQuery(
+        $literalResult->usedEvidences[0]->publicId === $intelligence['public_id'],
+        'A correspondência textual exata deve preceder a recuperação vetorial.'
+    );
+    assertQuery(
+        count($embeddingProvider->batches) === 1,
+        'Uma correspondência textual exata não deve consumir embedding de consulta.'
+    );
+
+    $conceptualContext = $retriever->retrieve($documentId, 'intelligence and instinct', 5, 20);
     assertQuery($conceptualContext->understanding->has(InputType::Conceptual), 'A consulta temática deve ser conceitual.');
     assertQuery(
         array_filter(
@@ -328,6 +359,27 @@ try {
         'A recuperação conceitual não incluiu a unidade adequada.'
     );
     assertQuery(count($embeddingProvider->batches) === 2, 'A consulta conceitual deve usar um embedding transitório.');
+    $retriever->retrieve($documentId, 'intelligence and instinct', 5, 20);
+    assertQuery(
+        count($embeddingProvider->batches) === 2,
+        'O embedding transitório deve ser reutilizado no mesmo escopo multiobra.'
+    );
+    assertQuery(
+        count($conceptualContext->contextIntelligenceAnalyses) === 1,
+        'A recuperação semântica deve produzir uma análise do CIE.'
+    );
+    $contextAnalysis = $conceptualContext->contextIntelligenceAnalyses[0];
+    assertQuery(
+        $contextAnalysis->toArray()['candidate_count'] <= 30
+            && $contextAnalysis->selectedCandidates !== [],
+        'O CIE deve analisar no máximo o Top-30 e produzir um contexto estatístico.'
+    );
+    assertQuery(
+        $contextAnalysis->coreCandidates !== []
+            ? $contextAnalysis->selectedRegion === 'core'
+            : $contextAnalysis->selectedRegion === 'convergence',
+        'O CIE não aplicou a precedência entre núcleo e faixa de convergência.'
+    );
 
     $retriever->retrieve(
         $documentId,
@@ -342,35 +394,61 @@ try {
         'Os operadores cognitivos devem permanecer no contexto integral da consulta relacional.'
     );
 
-    $relationalResult = $queryService->query($documentId, 'Como inteligência e instinto interagem?', 8, 20);
+    $relationalResult = $queryService->query($documentId, 'How do intelligence and instinct interact?', 8, 20);
     assertQuery($relationalResult->understanding->has(InputType::Relational), 'A consulta relacional perdeu seu tipo.');
     assertQuery(count($relationalResult->simetryInteractions) >= 1, 'A expansão simetry não foi recuperada.');
     assertQuery(count($relationalResult->assimetryInteractions) >= 1, 'A expansão assimetry não foi recuperada.');
     $assimetryRoles = array_column($relationalResult->assimetryInteractions[0]->evidences, 'role');
     assertQuery($assimetryRoles[0] === 'origin' && $assimetryRoles[1] === 'destination', 'A orientação assimétrica foi perdida.');
     assertQuery(str_contains($relationalResult->answer, '[EVA-E'), 'A resposta validada deve mostrar citação primária.');
-    assertQuery(count($relationalResult->usedEvidences) === 3, 'A resposta relacional deve validar todas as fontes primárias das interações.');
+    assertQuery(count($relationalResult->usedEvidences) >= 3, 'A resposta deve aceitar todo o contexto eleito e validar as fontes das interações.');
 
-    $citationFallback = (new DocumentQueryService($retriever, new MissingVisibleCitationAnswerProvider()))
-        ->query($documentId, 'Explique ' . $intelligence['public_id']);
+    $missingAnalyticalCitationRejected = false;
+
+    try {
+        (new DocumentQueryService($retriever, new MissingVisibleCitationAnswerProvider()))
+            ->query($documentId, 'Explique ' . $intelligence['public_id']);
+    } catch (QueryException $exception) {
+        $missingAnalyticalCitationRejected = str_contains(
+            $exception->getMessage(),
+            'não incorporou analiticamente'
+        );
+    }
+
     assertQuery(
-        str_contains($citationFallback->answer, '[' . $intelligence['public_id'] . ']'),
-        'A aplicação deve renderizar a citação estruturada ausente no texto do provedor.'
+        $missingAnalyticalCitationRejected,
+        'Uma evidência apenas declarada em used_evidence_ids não deve ser aceita sem uso analítico no texto.'
     );
+
+    $citationInventoryRejected = false;
+
+    try {
+        (new DocumentQueryService($retriever, new CitationInventoryAnswerProvider()))
+            ->query($documentId, 'Explique ' . $intelligence['public_id']);
+    } catch (QueryException $exception) {
+        $citationInventoryRejected = str_contains(
+            $exception->getMessage(),
+            'não incorporou analiticamente'
+        ) || str_contains($exception->getMessage(), 'apenas inventariou evidências');
+    }
+
     assertQuery(
-        str_contains($citationFallback->answer, 'Evidências:'),
-        'A citação acrescentada deve possuir rótulo documental explícito.'
+        $citationInventoryRejected,
+        'Uma lista isolada de citações não deve substituir a incorporação analítica das evidências.'
     );
 
     $candidateLimitationProvider = new CandidateLimitationAnswerProvider();
-    $candidateLimitationResult = (new DocumentQueryService($retriever, $candidateLimitationProvider))
-        ->query($documentId, 'Explique ' . $intelligence['public_id']);
-    assertQuery($candidateLimitationProvider->calls === 1, 'Candidatos recuperados devem ser analisados pelo provedor.');
-    assertQuery($candidateLimitationResult->usedEvidences === [], 'Um candidato intruso não deve ser citado como evidência usada.');
-    assertQuery(
-        $candidateLimitationResult->limitations !== [],
-        'A ausência de candidato utilizável deve retornar limitação sem descartar a análise.'
-    );
+    $candidateElectionRejected = false;
+
+    try {
+        (new DocumentQueryService($retriever, $candidateLimitationProvider))
+            ->query($documentId, 'Explique ' . $intelligence['public_id']);
+    } catch (QueryException $exception) {
+        $candidateElectionRejected = str_contains($exception->getMessage(), 'não aceitou integralmente');
+    }
+
+    assertQuery($candidateLimitationProvider->calls === 1, 'As evidências eleitas devem ser entregues ao provedor.');
+    assertQuery($candidateElectionRejected, 'O provedor não deve refazer a eleição determinística das evidências.');
 
     $emptyCandidateRejected = false;
 
@@ -378,19 +456,19 @@ try {
         (new DocumentQueryService($retriever, new EmptyCandidateAnswerProvider()))
             ->query($documentId, 'Explique ' . $intelligence['public_id']);
     } catch (QueryException $exception) {
-        $emptyCandidateRejected = str_contains($exception->getMessage(), 'nem limitação');
+        $emptyCandidateRejected = str_contains($exception->getMessage(), 'não aceitou integralmente');
     }
 
     assertQuery(
         $emptyCandidateRejected,
-        'Uma análise sem evidência utilizada deve justificar explicitamente a limitação documental.'
+        'Uma resposta não pode rejeitar o conjunto de evidências já eleito.'
     );
 
     $invalidService = new DocumentQueryService($retriever, new InvalidCitationAnswerProvider());
     $invalidRejected = false;
 
     try {
-        $invalidService->query($documentId, 'inteligência e instinto');
+        $invalidService->query($documentId, 'intelligence and instinct');
     } catch (QueryException $exception) {
         $invalidRejected = str_contains($exception->getMessage(), 'fora do contexto');
     }

@@ -12,6 +12,7 @@ English is the primary language of the public repository. The original Portugues
 6. [API and operations](en/06_API_AND_OPERATIONS.md)
 7. [Security and deployment](en/07_SECURITY_AND_DEPLOYMENT.md)
 8. [Scientific scope and energy sustainability](en/08_SCIENTIFIC_AND_ENERGY.md)
+9. [Context Intelligence Engine](en/09_CONTEXT_INTELLIGENCE_ENGINE.md)
 
 ## Original Portuguese specifications
 
@@ -30,6 +31,6 @@ English is the primary language of the public repository. The original Portugues
 | [`11_VALIDACAO_GO_LIVE.md`](11_VALIDACAO_GO_LIVE.md) | Go-live validation record |
 | [`12_HOMOLOGACAO_PRE_DEPLOY.md`](12_HOMOLOGACAO_PRE_DEPLOY.md) | Pre-deployment acceptance record |
 | [`13_SUSTENTABILIDADE_ENERGETICA.md`](13_SUSTENTABILIDADE_ENERGETICA.md) | Energy-efficiency mechanisms and validation protocol |
+| [`14_CONTEXT_INTELLIGENCE_ENGINE.md`](14_CONTEXT_INTELLIGENCE_ENGINE.md) | Statistical stabilization between vector retrieval and cognitive layers |
 
 Private test books and operational corpora are intentionally not part of this repository.
-

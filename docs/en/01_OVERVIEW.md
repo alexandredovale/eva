@@ -25,7 +25,7 @@ It does not contain persistent relationships, cognitive scores, confidence, impo
 
 ```text
 Build: source → tree → primary evidence → derived summaries → embeddings
-Query: input → adaptive retrieval → primary evidence → bounded answer
+Semantic query: input → adaptive retrieval → Top-k → CIE → primary evidence → bounded answer
 Interaction: cited sources → transient simetry/assimetry → literal validation
 ```
 
@@ -33,7 +33,8 @@ Interaction: cited sources → transient simetry/assimetry → literal validatio
 
 The system describes evidence and explicit interactions without assigning truth, superiority, quality, priority, intensity, or importance. Provider brands, endpoints, models, and credential-variable names remain configurable and do not appear in domain contracts.
 
+For vector routes, the Context Intelligence Engine (CIE) uses the candidate distribution's mean, population standard deviation, and coefficient of variation to elect a leading convergence core plus mandatory complementary convergence context before cognitive processing. When no core exists, convergence assumes the primary role. The answer model must incorporate every resolved primary source. This local election is deterministic and model-independent.
+
 ## Product scope
 
 The implementation includes a white-label web interface, authenticated API, user/project/document access scopes, explicit processing queue, sanitized audit trail, descriptive metrics, deletion workflows, and short-lived conversational continuity.
-

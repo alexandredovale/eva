@@ -27,10 +27,10 @@ Operational dumps, uploaded documents, logs, user records, access grants, and pa
 6. Restrict filesystem permissions for `.env`, storage, and logs.
 7. Back up and restore the private database in an isolated verification environment.
 8. Run offline regression tests and the deployment verifier.
-9. Enable live providers only after limits, models, endpoints, and billing controls are reviewed.
+9. Enable live providers only after CIE candidate limits, final-context limits, models, endpoints, and billing controls are reviewed.
 10. Verify sanitized error responses, audit records, CSP, security headers, and access scopes online.
+11. Run one controlled semantic query and verify its `context_intelligence` regions before production traffic.
 
 ## Vulnerability reporting
 
 Follow the private process in the repository root [`SECURITY.md`](../../SECURITY.md). Never publish an active exploit or real secret in an issue.
-

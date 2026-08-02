@@ -7,6 +7,7 @@ EVA proposes an evidence-centered alternative to architectures that begin with a
 - structural units can improve documentary provenance;
 - separating primary and derived evidence can improve auditability;
 - resolving derived retrieval back to primary sources can constrain generated answers;
+- distribution-based context stabilization can reduce semantic-retrieval noise without an AI reranker;
 - transient evidence interactions can avoid persistent graph expansion;
 - local routing and evidence gating can reduce unnecessary external computation.
 
@@ -14,7 +15,7 @@ These are architectural hypotheses. Functional tests demonstrate implemented beh
 
 ## Current empirical baseline
 
-The project records a small operational baseline covering literal, structural, conceptual, relational, and negative-control queries. It measures external calls, tokens, latency, evidence use, and validation failures. The sample is intentionally described as a baseline, not a conclusive comparative study.
+The project records a small operational baseline covering literal, structural, conceptual, relational, and negative-control queries. Offline tests also verify deterministic CIE classification, leading-core plus complementary-convergence composition, zero-mean behavior, homogeneous distributions, auditable serialization, and rejection of citation-only evidence coverage. A directed real-provider case incorporated ten of ten elected primary sources without truncation. These checks establish implemented behavior, not retrieval-quality superiority. The operational sample is intentionally described as a baseline, not a conclusive comparative study.
 
 Future comparisons should use the same corpus, questions, providers, hardware, and quality requirements across EVA, fixed-block vector RAG, long-context retrieval, GraphRAG, and agentic RAG. They should report precision/recall, citation validity, correct refusal, latency percentiles, tokens, cost, memory, and stability.
 
@@ -27,6 +28,7 @@ EVA can potentially reduce avoidable computation by:
 - reusing summaries and embeddings by model and content hash;
 - producing the answer and transient interactions in one bounded call;
 - limiting evidence context, chat history, output, and retries;
+- filtering a vector Top-k locally through CIE before sending primary context to the answer provider;
 - avoiding precomputed all-pairs relationships and persistent interaction graphs.
 
 At scale, fewer external calls, tokens, retries, and GPU-hours may reduce server and cooling demand. Provider neutrality also permits migration to more efficient models and infrastructure without replacing the documentary core.
@@ -47,4 +49,3 @@ The validation protocol should report joules per query, kWh per thousand queries
 - [Chung et al., The ML.ENERGY Benchmark, NeurIPS 2025](https://papers.nips.cc/paper_files/paper/2025/hash/9dc510e3d7b0b3b2a58ffed7a3ad6b0f-Abstract-Datasets_and_Benchmarks_Track.html)
 - [Portuguese scientific paper](../../philosophy/01_EVA_SCIENTIFIC_PAPER.md)
 - [Operational benchmark baseline](../../philosophy/02_EVA_BENCHMARK_BASELINE.md)
-

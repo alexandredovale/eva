@@ -33,6 +33,8 @@ Audit records contain event type, entity, identifier, and sanitized operational 
 
 Metrics are descriptive counts of documents, evidence classes/types, derivations, embeddings, and jobs. They do not assign relevance, confidence, quality, intensity, or cognitive weight.
 
+Successful query payloads include `context_intelligence`. It is empty for non-vector routes and otherwise contains one transient CIE analysis per document: candidate count, mean, population standard deviation, coefficient of variation, convergence bounds, selected region, and core/convergence/discard groups. This supports reconstruction of the mathematical selection but is not written to documentary memory or the sanitized audit log.
+
 ## Deletion
 
 Deleting a work cascades through its nodes, evidence, derivations, embeddings, jobs, permissions, and project links, then removes its private source file. Deleting a project also removes every work still contained in it, including works shared with another project. Shared works that must survive need to be detached and saved before project deletion.

@@ -14,7 +14,7 @@ One input can activate more than one route. Detection is local and deterministic
 
 Direct, structural, and broad routes navigate identifiers and document hierarchy. Conceptual and relational routes create a transient input embedding and search primary and derived evidence.
 
-Derived candidates are resolved through `evidence_derivations` until primary sources are available. Similarity is discarded after ordering. All candidates inside the configured limit reach the answer provider; the provider must identify only the evidence that actually supports its response.
+For semantic routes, Retriever orders up to `QUERY_CANDIDATE_LIMIT` candidates and CIE calculates the mean, population standard deviation, and coefficient of variation. Candidates below the mean are discarded. The convergence core leads the final semantic selection; the convergence range follows as complementary analysis context. If no core exists, convergence becomes the primary context. Selected derived candidates are then resolved through `evidence_derivations` until primary sources are available. The answer provider receives the deterministic `core`/`convergence` role, but not similarity values as documentary authority.
 
 ## Project response governance
 
@@ -31,19 +31,22 @@ The backend merges authorized document IDs and deduplicates them before retrieva
 
 ## Evidence gate
 
-If retrieval finds no primary candidate, EVA returns an explicit documentary limitation without calling the answer provider. If candidates exist but none supports the requested aspect, a response without used evidence is accepted only when it has no citations/interactions and contains an explicit limitation.
+If retrieval finds no primary evidence, EVA returns an explicit documentary limitation without calling the answer provider. When context exists, the answer provider must accept the complete deterministic election in `used_evidence_ids`; it cannot re-elect or reject evidence. Formal acceptance is not sufficient: every elected evidence must be cited where its analytical contribution is explained. Core evidence leads the answer, convergence evidence provides mandatory complementary analysis, and citation-only inventories are rejected.
 
 ## Query limits
 
+- `QUERY_CANDIDATE_LIMIT`: semantic Top-k analyzed by CIE per document, default `30`, effective range `1..200`.
 - `QUERY_MAX_EVIDENCE`: global primary-candidate limit, default `8`, effective range `1..50`.
 - `QUERY_MAX_INTERACTIONS`: accepted transient-interaction limit, default `20`, effective range `0..100`.
 - `AI_QUERY_MAX_OUTPUT_TOKENS`: per-attempt output ceiling, default `1800`, effective range `100..3000`.
+
+`QUERY_CANDIDATE_LIMIT` defines the statistical population before lineage resolution. `QUERY_MAX_EVIDENCE` caps the primary context after CIE and remains global across all selected works.
 
 A response truncated by the provider is never partially decoded. EVA allows at most one complete retry with an additional compactness instruction.
 
 ## Interactions
 
-Relational answers may declare:
+Whenever at least two elected evidences are available and the interaction limit is greater than zero, the answer call must analyze:
 
 ```text
 simetry:    participant ↔ participant
@@ -51,6 +54,8 @@ assimetry:  origin → destination
 ```
 
 Each accepted interaction requires two cited primary evidence records and one literal excerpt from each. It has no persistent identifier, confidence, weight, score, or embedding.
+
+The public result exposes `selection_region` on each used evidence and an `evidence_selection` object with the elected core and convergence IDs, so the provider contract remains auditable after generation.
 
 ## Conversational continuity
 

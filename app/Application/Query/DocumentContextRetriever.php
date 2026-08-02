@@ -9,20 +9,29 @@ use Eva\Application\Cognitive\StructuredEmbeddingUnit;
 use JsonException;
 use PDO;
 
-final readonly class DocumentContextRetriever
+final class DocumentContextRetriever
 {
+    /** @var array<string, list<float>> */
+    private array $queryVectorCache = [];
+
     public function __construct(
-        private PDO $database,
-        private ?EmbeddingProviderInterface $embeddingProvider = null,
-        private InputTypeDetector $detector = new InputTypeDetector()
+        private readonly PDO $database,
+        private readonly ?EmbeddingProviderInterface $embeddingProvider = null,
+        private readonly InputTypeDetector $detector = new InputTypeDetector(),
+        private readonly int $semanticCandidateLimit = 30,
+        private readonly ContextIntelligenceEngine $contextIntelligenceEngine = new ContextIntelligenceEngine()
     ) {
+        if ($this->semanticCandidateLimit < 1 || $this->semanticCandidateLimit > 200) {
+            throw new QueryException('O limite de candidatos semânticos do CIE é inválido.');
+        }
     }
 
     public function retrieve(
         int $documentId,
         string $input,
         int $maxEvidence = 8,
-        int $maxInteractions = 20
+        int $maxInteractions = 20,
+        bool $includeSemantic = true
     ): QueryContext {
         if ($documentId < 1 || $maxEvidence < 1 || $maxEvidence > 50
             || $maxInteractions < 0 || $maxInteractions > 100) {
@@ -35,10 +44,26 @@ final readonly class DocumentContextRetriever
         $evidenceById = [];
         $routingPoints = [];
         $limitations = [];
+        $contextIntelligenceAnalyses = [];
+        $evidenceSelection = [];
+
+        if ($understanding->has(InputType::Conceptual) || $understanding->has(InputType::Relational)) {
+            $literalEvidences = $this->loadLiteralEvidence($documentId, $input, $maxEvidence);
+
+            foreach ($literalEvidences as $evidence) {
+                $evidenceById[$evidence->id] = $evidence;
+                $evidenceSelection[$evidence->publicId] = 'core';
+            }
+
+            if ($literalEvidences !== []) {
+                $routingPoints[] = 'literal_phrase';
+            }
+        }
 
         if ($understanding->has(InputType::Direct)) {
             foreach ($this->loadDirectEvidence($documentId, $understanding, $input) as $evidence) {
                 $evidenceById[$evidence->id] = $evidence;
+                $evidenceSelection[$evidence->publicId] = 'core';
             }
             $routingPoints[] = 'direct_reference';
         }
@@ -52,6 +77,7 @@ final readonly class DocumentContextRetriever
 
             foreach ($this->loadPrimaryEvidenceByPaths($documentId, $paths, $maxEvidence) as $evidence) {
                 $evidenceById[$evidence->id] = $evidence;
+                $evidenceSelection[$evidence->publicId] = 'core';
             }
         }
 
@@ -60,14 +86,16 @@ final readonly class DocumentContextRetriever
 
             foreach ($this->loadBroadPrimaryEvidence($documentId, $maxEvidence) as $evidence) {
                 $evidenceById[$evidence->id] = $evidence;
+                $evidenceSelection[$evidence->publicId] = 'core';
             }
         }
 
-        if ($understanding->has(InputType::Conceptual) || $understanding->has(InputType::Relational)) {
+        if ($includeSemantic
+            && ($understanding->has(InputType::Conceptual) || $understanding->has(InputType::Relational))) {
             if ($this->embeddingProvider === null) {
                 $limitations[] = 'A recuperação conceitual exige um provedor de embedding configurado.';
             } else {
-                [$semanticEvidences, $semanticRoutes] = $this->loadSemanticEvidence(
+                [$semanticEvidences, $semanticRoutes, $analysis, $semanticSelection] = $this->loadSemanticEvidence(
                     $documentId,
                     $input,
                     $maxEvidence
@@ -75,13 +103,27 @@ final readonly class DocumentContextRetriever
 
                 foreach ($semanticEvidences as $evidence) {
                     $evidenceById[$evidence->id] = $evidence;
+                    $region = $semanticSelection[$evidence->publicId] ?? 'convergence';
+
+                    if (($evidenceSelection[$evidence->publicId] ?? null) !== 'core') {
+                        $evidenceSelection[$evidence->publicId] = $region;
+                    }
                 }
 
                 $routingPoints = [...$routingPoints, ...$semanticRoutes];
+                $contextIntelligenceAnalyses[] = $analysis->forDocument(
+                    $document['public_id'],
+                    $document['title']
+                );
             }
         }
 
         $evidences = array_slice(array_values($evidenceById), 0, $maxEvidence);
+        $selectedPublicIds = array_fill_keys(array_map(
+            static fn (RetrievedEvidence $evidence): string => $evidence->publicId,
+            $evidences
+        ), true);
+        $evidenceSelection = array_intersect_key($evidenceSelection, $selectedPublicIds);
 
         if ($evidences === []) {
             $limitations[] = 'Nenhuma evidência primária foi localizada para o input.';
@@ -92,7 +134,40 @@ final readonly class DocumentContextRetriever
             $evidences,
             $maxInteractions,
             array_values(array_unique($routingPoints)),
-            array_values(array_unique($limitations))
+            array_values(array_unique($limitations)),
+            [],
+            $contextIntelligenceAnalyses,
+            $evidenceSelection
+        );
+    }
+
+    /** @return list<RetrievedEvidence> */
+    private function loadLiteralEvidence(int $documentId, string $input, int $limit): array
+    {
+        $phrase = preg_replace('/^[\p{P}\p{Z}]+|[\p{P}\p{Z}]+$/u', '', trim($input));
+
+        if (!is_string($phrase) || mb_strlen($phrase, 'UTF-8') < 3) {
+            return [];
+        }
+
+        $statement = $this->database->prepare(
+            "SELECT e.id
+               FROM evidences e
+              WHERE e.document_id = :document_id
+                AND e.evidence_class = 'primary'
+                AND e.status = 'validated'
+                AND e.content LIKE :phrase
+              ORDER BY CHAR_LENGTH(e.content) ASC, e.id ASC
+              LIMIT " . (int) $limit
+        );
+        $statement->execute([
+            'document_id' => $documentId,
+            'phrase' => '%' . $this->escapeLike($phrase) . '%',
+        ]);
+
+        return $this->loadEvidenceByIds(
+            $documentId,
+            array_map('intval', array_column($statement->fetchAll(), 'id'))
         );
     }
 
@@ -254,16 +329,10 @@ final readonly class DocumentContextRetriever
         return $this->loadEvidenceByIds($documentId, array_map('intval', array_column($statement->fetchAll(), 'id')));
     }
 
-    /** @return array{list<RetrievedEvidence>, list<string>} */
+    /** @return array{list<RetrievedEvidence>, list<string>, ContextIntelligenceAnalysis, array<string, 'core'|'convergence'>} */
     private function loadSemanticEvidence(int $documentId, string $input, int $limit): array
     {
-        $unit = new StructuredEmbeddingUnit('EVA-Q' . substr(hash('sha256', $input), 0, 16), $input);
-        $batch = $this->embeddingProvider?->embed([$unit]);
-        $queryVector = $batch?->vectors[0] ?? null;
-
-        if ($queryVector === null || $queryVector->evidencePublicId !== $unit->evidencePublicId) {
-            throw new QueryException('O provedor não retornou o embedding transitório da consulta.');
-        }
+        $queryVector = $this->queryVector($input);
 
         $statement = $this->database->prepare(
             "SELECT e.id, e.public_id, e.evidence_class, e.evidence_type, ee.vector_data
@@ -300,7 +369,7 @@ final readonly class DocumentContextRetriever
             $vector = array_map(static fn (mixed $value): float => is_numeric($value)
                 ? (float) $value
                 : throw new QueryException('Um embedding documental contém componente inválido.'), $decoded);
-            $similarity = $this->cosine($queryVector->vector, $vector);
+            $similarity = $this->cosine($queryVector, $vector);
 
             if ($similarity !== null) {
                 $ranked[] = [
@@ -316,45 +385,151 @@ final readonly class DocumentContextRetriever
         usort($ranked, static fn (array $left, array $right): int =>
             ($right['similarity'] <=> $left['similarity']) ?: ($left['id'] <=> $right['id'])
         );
+        $similarityById = [];
 
-        $matches = array_slice($ranked, 0, $limit);
-        $primaryIds = $this->resolvePrimaryEvidenceIds($documentId, $matches, $limit);
-        $routes = array_map(
-            static fn (array $match): string => sprintf(
-                'evidence:%s:%s:%s',
+        foreach ($ranked as $match) {
+            $similarityById[$match['id']] = $match['similarity'];
+        }
+
+        $candidates = array_map(
+            static fn (array $match): ContextCandidate => new ContextCandidate(
+                $match['id'],
                 $match['public_id'],
                 $match['evidence_class'],
-                $match['evidence_type']
+                $match['evidence_type'],
+                $match['similarity']
             ),
-            $matches
+            array_slice($ranked, 0, $this->semanticCandidateLimit)
+        );
+        $analysis = $this->contextIntelligenceEngine->analyze($candidates);
+        $candidateRegions = [];
+
+        foreach ($analysis->coreCandidates as $candidate) {
+            $candidateRegions[$candidate->evidenceId] = 'core';
+        }
+
+        foreach ($analysis->convergenceCandidates as $candidate) {
+            $candidateRegions[$candidate->evidenceId] = 'convergence';
+        }
+
+        $matches = array_map(
+            static fn (ContextCandidate $candidate): array => [
+                'id' => $candidate->evidenceId,
+                'evidence_class' => $candidate->evidenceClass,
+                'region' => $candidateRegions[$candidate->evidenceId] ?? 'convergence',
+            ],
+            $analysis->selectedCandidates
+        );
+        [$primaryIds, $selectionByInternalId] = $this->resolvePrimaryEvidenceIds(
+            $documentId,
+            $matches,
+            $limit,
+            $similarityById
+        );
+        $routes = array_map(
+            static fn (ContextCandidate $candidate): string => sprintf(
+                'evidence:%s:%s:%s',
+                $candidate->publicId,
+                $candidate->evidenceClass,
+                $candidate->evidenceType
+            ),
+            $analysis->selectedCandidates
         );
 
-        return [$this->loadEvidenceByIds($documentId, $primaryIds), $routes];
+        $evidences = $this->loadEvidenceByIds($documentId, $primaryIds);
+        $selectionByPublicId = [];
+
+        foreach ($evidences as $evidence) {
+            $selectionByPublicId[$evidence->publicId] = $selectionByInternalId[$evidence->id] ?? 'convergence';
+        }
+
+        return [$evidences, $routes, $analysis, $selectionByPublicId];
+    }
+
+    /** @return list<float> */
+    private function queryVector(string $input): array
+    {
+        $cacheKey = hash('sha256', $input);
+
+        if (isset($this->queryVectorCache[$cacheKey])) {
+            return $this->queryVectorCache[$cacheKey];
+        }
+
+        $unit = new StructuredEmbeddingUnit('EVA-Q' . substr($cacheKey, 0, 16), $input);
+        $batch = $this->embeddingProvider?->embed([$unit]);
+        $queryVector = $batch?->vectors[0] ?? null;
+
+        if ($queryVector === null || $queryVector->evidencePublicId !== $unit->evidencePublicId) {
+            throw new QueryException('O provedor não retornou o embedding transitório da consulta.');
+        }
+
+        return $this->queryVectorCache[$cacheKey] = $queryVector->vector;
     }
 
     /**
-     * @param list<array{id: int, evidence_class: string}> $matches
-     * @return list<int>
+     * @param list<array{id: int, evidence_class: string, region: 'core'|'convergence'}> $matches
+     * @param array<int, float> $similarityById
+     * @return array{list<int>, array<int, 'core'|'convergence'>}
      */
-    private function resolvePrimaryEvidenceIds(int $documentId, array $matches, int $limit): array
-    {
-        $primaryIds = [];
+    private function resolvePrimaryEvidenceIds(
+        int $documentId,
+        array $matches,
+        int $limit,
+        array $similarityById
+    ): array {
+        $groups = [];
 
         foreach ($matches as $match) {
             $sources = $match['evidence_class'] === 'primary'
                 ? [$match['id']]
                 : $this->primarySourcesForEvidence($documentId, $match['id']);
 
-            foreach ($sources as $sourceId) {
-                $primaryIds[$sourceId] = $sourceId;
+            usort($sources, static fn (int $left, int $right): int =>
+                (($similarityById[$right] ?? -INF) <=> ($similarityById[$left] ?? -INF))
+                    ?: ($left <=> $right)
+            );
+            $groups[] = [
+                'region' => $match['region'],
+                'sources' => $sources,
+            ];
+        }
+
+        $primaryIds = [];
+        $selection = [];
+
+        while (count($primaryIds) < $limit) {
+            $added = false;
+
+            foreach ($groups as &$group) {
+                while ($group['sources'] !== []) {
+                    $sourceId = array_shift($group['sources']);
+
+                    if (isset($primaryIds[$sourceId])) {
+                        if ($group['region'] === 'core') {
+                            $selection[$sourceId] = 'core';
+                        }
+
+                        continue;
+                    }
+
+                    $primaryIds[$sourceId] = $sourceId;
+                    $selection[$sourceId] = $group['region'];
+                    $added = true;
+                    break;
+                }
 
                 if (count($primaryIds) >= $limit) {
-                    break 2;
+                    break;
                 }
+            }
+            unset($group);
+
+            if (!$added) {
+                break;
             }
         }
 
-        return array_values($primaryIds);
+        return [array_values($primaryIds), $selection];
     }
 
     /** @return list<int> */
