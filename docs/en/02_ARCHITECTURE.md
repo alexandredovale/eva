@@ -1,5 +1,9 @@
 # Architecture
 
+## Purpose
+
+The architecture separates responsibilities without duplicating concepts and without allowing AI to assign judgment or weight to documentary interactions.
+
 ## Modules
 
 1. **Input:** validates format, size, integrity, and encoding.
@@ -14,12 +18,25 @@
 10. **Answer:** produces one structured documentary response.
 11. **Validation:** verifies evidence identifiers, visible citations, participants, orientation, and literal excerpts.
 12. **Product:** exposes the interface, API, queue, access control, audit, metrics, and branding.
+13. **Infrastructure:** provides the database, private files, logs, and configurable external integrations.
+
+## Macro flow
+
+```text
+File → parser → tree → primary evidence → summaries → derivations → embeddings
+
+Question → routing → primary/derived retrieval → Top-k → CIE (μ, σ, CV)
+         → core + convergence → lineage resolution → primary sources
+         → deterministic contract → answer + transient interactions → validation
+```
 
 ## Separation of responsibilities
 
 Embeddings locate semantically compatible evidence. Similarity orders the semantic Top-k and is then observed by CIE. Candidates below the mean are discarded; the convergence core (`s ≥ μ + σ`) leads the final context, while the convergence range (`μ ≤ s < μ + σ`) provides mandatory complementary analysis. When the core is empty, convergence assumes the primary role. The analysis remains transient.
 
 Derived evidence can guide retrieval, but the answer receives its resolved primary sources with explicit `core` or `convergence` roles. This is a completed deterministic election: the answer provider cannot reject or reduce it. Every source must be cited where its analytical contribution is explained; missing citations and citation-only inventories are rejected. The answer provider may declare `simetry` or `assimetry` in the same call that produces the answer. Local code accepts an interaction only when both participants belong to the recovered context, were cited, and contain the declared literal excerpts.
+
+CIE and Cnode remain different transient responsibilities. CIE classifies the vector distribution without semantic interpretation. Cnode describes an explicit interaction only after evidence selection and does not create persistent pairs or relationship vectors.
 
 ## Provider boundaries
 
@@ -41,6 +58,7 @@ The factory resolves implementations from environment configuration. Changing pr
 - Similarity does not prove an interaction.
 - CIE does not judge documents or create AI scores, subjective weights, or a learned reranking stage.
 - Asymmetry does not imply superiority or inferred causality.
+- Relationship taxonomies, cognitive confidence, intensity, quality, priority, and importance are outside the model.
 - Interactions are transient and never become ranking signals.
 - The web interface never accesses the database directly.
 - Only `public/` is exposed by the web server.

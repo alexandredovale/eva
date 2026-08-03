@@ -7,6 +7,20 @@ and the project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Complete English coverage for the Portuguese technical specifications, including Cnode, database, mandatory rules, roadmap, and dated validation records.
+- Portuguese and English configuration catalogs at the end of `.env.example`.
+- Silent server-side regeneration for locally rejected answers, limited to three total attempts with the same elected context.
+
+### Changed
+
+- Reduced the default semantic candidate population from Top-30 to Top-20 through `.env.example`, configuration fallback, Retriever default, tests, and current documentation.
+
+### Fixed
+
+- Internal evidence-validation messages no longer reach users on an isolated generation failure; only three consecutive failures return a generic error.
+
 ## [1.1.0] - 2026-08-02
 
 ### Added

@@ -6,6 +6,11 @@ namespace Eva\Application\Query;
 
 final readonly class DocumentQueryService
 {
+    private const MAX_ANSWER_VALIDATION_ATTEMPTS = 3;
+
+    private const PUBLIC_VALIDATION_FAILURE_MESSAGE =
+        'Não foi possível concluir a resposta documental após três tentativas. Tente novamente em alguns instantes.';
+
     public function __construct(
         private DocumentContextRetriever $retriever,
         private QueryAnswerProviderInterface $answerProvider
@@ -18,7 +23,8 @@ final readonly class DocumentQueryService
         int $maxEvidence = 8,
         int $maxInteractions = 20,
         array $responseProfiles = []
-    ): DocumentQueryResult {
+    ): DocumentQueryResult
+    {
         $context = $this->retriever->retrieve(
             $documentId,
             $input,
@@ -165,7 +171,6 @@ final readonly class DocumentQueryService
 
     private function answerFromContext(string $input, QueryContext $context): DocumentQueryResult
     {
-
         if ($context->evidences === []) {
             return new DocumentQueryResult(
                 $context->understanding,
@@ -180,12 +185,36 @@ final readonly class DocumentQueryService
             );
         }
 
-        $generated = $this->answerProvider->answer($input, $context);
         $available = [];
 
         foreach ($context->evidences as $evidence) {
             $available[$evidence->publicId] = $evidence;
         }
+
+        $lastValidationException = null;
+
+        for ($attempt = 1; $attempt <= self::MAX_ANSWER_VALIDATION_ATTEMPTS; $attempt++) {
+            try {
+                return $this->generateValidatedResult($input, $context, $available);
+            } catch (QueryException $exception) {
+                $lastValidationException = $exception;
+            }
+        }
+
+        throw new QueryException(
+            self::PUBLIC_VALIDATION_FAILURE_MESSAGE,
+            0,
+            $lastValidationException
+        );
+    }
+
+    /** @param array<string, RetrievedEvidence> $available */
+    private function generateValidatedResult(
+        string $input,
+        QueryContext $context,
+        array $available
+    ): DocumentQueryResult {
+        $generated = $this->answerProvider->answer($input, $context);
 
         $usedIds = array_values(array_unique($generated->usedEvidenceIds));
         $electedIds = array_keys($available);

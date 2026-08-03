@@ -12,9 +12,11 @@ O diagnóstico inicial confirmou dois defeitos no CORE da consulta: detecção i
 
 Este parecer cobre aplicação, banco, permissões, autenticação, consultas reais ao provedor configurado, navegador e infraestrutura local. Métricas de concorrência locais não substituem a observação de capacidade da hospedagem depois da publicação.
 
-> Atualização de 2 de agosto de 2026: a matriz ao vivo e as contagens históricas abaixo antecedem a introdução do Context Intelligence Engine. O CIE possui teste matemático offline próprio, mas consultas conceituais e relacionais precisam ser revalidadas com `QUERY_CANDIDATE_LIMIT=30` antes de qualquer publicação. Este documento não deve ser interpretado como aceite ao vivo da nova camada enquanto essa reexecução estiver pendente.
+> Atualização de 2 de agosto de 2026: a matriz ao vivo e as contagens históricas abaixo antecedem a introdução do Context Intelligence Engine. Naquele momento, o CIE possuía apenas o teste matemático offline próprio, e as consultas conceituais e relacionais ainda precisavam ser revalidadas com `QUERY_CANDIDATE_LIMIT=30`. Este trecho registra a condição daquela data e não substitui os ajustes operacionais posteriores.
 
 > Validação dirigida em 2 de agosto de 2026: uma consulta conceitual real sobre *O Livro dos Espíritos*, com Top-30, três evidências finais de núcleo e sete de convergência, terminou sem truncamento em 24,32 segundos. As dez evidências foram incorporadas à prosa analítica e nenhuma apareceu apenas em inventário de citações. Esse resultado aprova o contrato determinístico e a validação fechada no caso de referência, mas não substitui a matriz comparativa ainda pendente sobre um corpus representativo.
+
+> Ajuste operacional em 3 de agosto de 2026: o padrão corrente foi reduzido para `QUERY_CANDIDATE_LIMIT=20` após uma consulta dirigida sobre *O Evangelho Segundo o Espiritismo* produzir contexto mais concentrado e resposta documental de melhor foco. Esse caso orienta o novo padrão, mas permanece uma observação operacional; a matriz comparativa representativa continua pendente.
 
 ## Ambiente e escopo
 

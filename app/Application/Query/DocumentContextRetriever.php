@@ -18,7 +18,7 @@ final class DocumentContextRetriever
         private readonly PDO $database,
         private readonly ?EmbeddingProviderInterface $embeddingProvider = null,
         private readonly InputTypeDetector $detector = new InputTypeDetector(),
-        private readonly int $semanticCandidateLimit = 30,
+        private readonly int $semanticCandidateLimit = 20,
         private readonly ContextIntelligenceEngine $contextIntelligenceEngine = new ContextIntelligenceEngine()
     ) {
         if ($this->semanticCandidateLimit < 1 || $this->semanticCandidateLimit > 200) {

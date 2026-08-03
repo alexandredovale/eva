@@ -94,7 +94,7 @@ O teste de segurança confirmou a remoção de senha, segredo, token, chave de A
 
 Foram executadas 15 suítes sem chamadas pagas ao provedor, com **883 asserções aprovadas**. Também passaram a validação sintática do JavaScript, o inventário completo e comentado das 46 variáveis do `.env`, o teste real de backup/restauração e o verificador de deploy local.
 
-Esse total registra a homologação anterior ao CIE. Para o update de 2 de agosto de 2026, `tests/ContextIntelligenceEngineTest.php` foi aprovado com 13 asserções, `tests/ContextIntelligenceIntegrationTest.php` com 10 e `tests/QueryTest.php` com 49, sem chamadas externas. Antes do próximo deploy, ainda é necessário executar a regressão completa e uma consulta semântica controlada ao vivo; a configuração precisa incluir `QUERY_CANDIDATE_LIMIT=30` ou outro valor explicitamente homologado entre 1 e 200.
+Esse total registra a homologação anterior ao CIE. Para o update de 2 de agosto de 2026, `tests/ContextIntelligenceEngineTest.php` foi aprovado com 13 asserções, `tests/ContextIntelligenceIntegrationTest.php` com 10 e `tests/QueryTest.php` com 49, sem chamadas externas. Antes do próximo deploy, ainda é necessário executar a regressão completa e uma consulta semântica controlada ao vivo. O padrão corrente é `QUERY_CANDIDATE_LIMIT=20`; outro valor entre 1 e 200 exige validação explícita.
 
 ## Procedimento obrigatório depois do upload
 

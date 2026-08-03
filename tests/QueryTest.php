@@ -149,6 +149,8 @@ final class CitingFakeAnswerProvider implements QueryAnswerProviderInterface
 
 final class InvalidCitationAnswerProvider implements QueryAnswerProviderInterface
 {
+    public int $calls = 0;
+
     public function model(): string
     {
         return 'invalid-query-answer-v1';
@@ -156,12 +158,16 @@ final class InvalidCitationAnswerProvider implements QueryAnswerProviderInterfac
 
     public function answer(string $input, QueryContext $context): GeneratedAnswer
     {
+        $this->calls++;
+
         return new GeneratedAnswer('Citação inexistente [EVA-E999999].', ['EVA-E999999']);
     }
 }
 
 final class MissingVisibleCitationAnswerProvider implements QueryAnswerProviderInterface
 {
+    public int $calls = 0;
+
     public function model(): string
     {
         return 'missing-visible-citation-v1';
@@ -169,6 +175,8 @@ final class MissingVisibleCitationAnswerProvider implements QueryAnswerProviderI
 
     public function answer(string $input, QueryContext $context): GeneratedAnswer
     {
+        $this->calls++;
+
         return new GeneratedAnswer(
             'Resposta documental com fonte estruturada, mas sem marcador produzido pelo provedor.',
             [$context->evidences[0]->publicId]
@@ -178,6 +186,8 @@ final class MissingVisibleCitationAnswerProvider implements QueryAnswerProviderI
 
 final class CitationInventoryAnswerProvider implements QueryAnswerProviderInterface
 {
+    public int $calls = 0;
+
     public function model(): string
     {
         return 'citation-inventory-v1';
@@ -185,6 +195,7 @@ final class CitationInventoryAnswerProvider implements QueryAnswerProviderInterf
 
     public function answer(string $input, QueryContext $context): GeneratedAnswer
     {
+        $this->calls++;
         $used = array_map(
             static fn ($evidence): string => $evidence->publicId,
             $context->evidences
@@ -222,6 +233,8 @@ final class CandidateLimitationAnswerProvider implements QueryAnswerProviderInte
 
 final class EmptyCandidateAnswerProvider implements QueryAnswerProviderInterface
 {
+    public int $calls = 0;
+
     public function model(): string
     {
         return 'empty-candidate-answer-v1';
@@ -229,7 +242,45 @@ final class EmptyCandidateAnswerProvider implements QueryAnswerProviderInterface
 
     public function answer(string $input, QueryContext $context): GeneratedAnswer
     {
+        $this->calls++;
+
         return new GeneratedAnswer('Nenhuma fonte candidata foi utilizada.', []);
+    }
+}
+
+final class RecoveringAnswerProvider implements QueryAnswerProviderInterface
+{
+    public int $calls = 0;
+
+    public function model(): string
+    {
+        return 'recovering-query-answer-v1';
+    }
+
+    public function answer(string $input, QueryContext $context): GeneratedAnswer
+    {
+        $this->calls++;
+        $used = array_map(
+            static fn ($evidence): string => $evidence->publicId,
+            $context->evidences
+        );
+
+        if ($this->calls < 3) {
+            return new GeneratedAnswer(
+                'Resposta documental sem incorporação analítica visível.',
+                $used
+            );
+        }
+
+        $citations = implode(' ', array_map(
+            static fn (string $id): string => '[' . $id . ']',
+            $used
+        ));
+
+        return new GeneratedAnswer(
+            'A terceira tentativa incorporou corretamente todo o contexto eleito ' . $citations . '.',
+            $used
+        );
     }
 }
 
@@ -370,9 +421,9 @@ try {
     );
     $contextAnalysis = $conceptualContext->contextIntelligenceAnalyses[0];
     assertQuery(
-        $contextAnalysis->toArray()['candidate_count'] <= 30
+        $contextAnalysis->toArray()['candidate_count'] <= 20
             && $contextAnalysis->selectedCandidates !== [],
-        'O CIE deve analisar no máximo o Top-30 e produzir um contexto estatístico.'
+        'O CIE deve analisar no máximo o Top-20 e produzir um contexto estatístico.'
     );
     assertQuery(
         $contextAnalysis->coreCandidates !== []
@@ -403,38 +454,60 @@ try {
     assertQuery(str_contains($relationalResult->answer, '[EVA-E'), 'A resposta validada deve mostrar citação primária.');
     assertQuery(count($relationalResult->usedEvidences) >= 3, 'A resposta deve aceitar todo o contexto eleito e validar as fontes das interações.');
 
+    $recoveringProvider = new RecoveringAnswerProvider();
+    $recoveredResult = (new DocumentQueryService($retriever, $recoveringProvider))
+        ->query($documentId, 'Explique ' . $intelligence['public_id']);
+    assertQuery(
+        $recoveringProvider->calls === 3,
+        'Uma resposta inválida deve ser regenerada silenciosamente até a terceira tentativa.'
+    );
+    assertQuery(
+        str_contains($recoveredResult->answer, 'terceira tentativa'),
+        'Uma tentativa posterior válida deve substituir integralmente as gerações rejeitadas.'
+    );
+
+    $missingVisibleCitationProvider = new MissingVisibleCitationAnswerProvider();
     $missingAnalyticalCitationRejected = false;
+    $missingAnalyticalReasonPreserved = false;
 
     try {
-        (new DocumentQueryService($retriever, new MissingVisibleCitationAnswerProvider()))
+        (new DocumentQueryService($retriever, $missingVisibleCitationProvider))
             ->query($documentId, 'Explique ' . $intelligence['public_id']);
     } catch (QueryException $exception) {
         $missingAnalyticalCitationRejected = str_contains(
             $exception->getMessage(),
-            'não incorporou analiticamente'
+            'após três tentativas'
         );
+        $missingAnalyticalReasonPreserved = $exception->getPrevious() instanceof QueryException
+            && str_contains($exception->getPrevious()->getMessage(), 'não incorporou analiticamente')
+            && !str_contains($exception->getMessage(), 'EVA-E');
     }
 
     assertQuery(
-        $missingAnalyticalCitationRejected,
-        'Uma evidência apenas declarada em used_evidence_ids não deve ser aceita sem uso analítico no texto.'
+        $missingAnalyticalCitationRejected && $missingVisibleCitationProvider->calls === 3,
+        'Uma evidência apenas declarada deve acionar três tentativas antes do erro público.'
+    );
+    assertQuery(
+        $missingAnalyticalReasonPreserved,
+        'O motivo técnico deve permanecer encadeado sem expor o identificador da evidência ao usuário.'
     );
 
+    $citationInventoryProvider = new CitationInventoryAnswerProvider();
     $citationInventoryRejected = false;
 
     try {
-        (new DocumentQueryService($retriever, new CitationInventoryAnswerProvider()))
+        (new DocumentQueryService($retriever, $citationInventoryProvider))
             ->query($documentId, 'Explique ' . $intelligence['public_id']);
     } catch (QueryException $exception) {
         $citationInventoryRejected = str_contains(
             $exception->getMessage(),
-            'não incorporou analiticamente'
-        ) || str_contains($exception->getMessage(), 'apenas inventariou evidências');
+            'após três tentativas'
+        );
     }
 
     assertQuery(
-        $citationInventoryRejected,
-        'Uma lista isolada de citações não deve substituir a incorporação analítica das evidências.'
+        $citationInventoryRejected && $citationInventoryProvider->calls === 3,
+        'Uma lista isolada de citações deve ser regenerada três vezes antes do erro público.'
     );
 
     $candidateLimitationProvider = new CandidateLimitationAnswerProvider();
@@ -444,36 +517,44 @@ try {
         (new DocumentQueryService($retriever, $candidateLimitationProvider))
             ->query($documentId, 'Explique ' . $intelligence['public_id']);
     } catch (QueryException $exception) {
-        $candidateElectionRejected = str_contains($exception->getMessage(), 'não aceitou integralmente');
+        $candidateElectionRejected = str_contains($exception->getMessage(), 'após três tentativas');
     }
 
-    assertQuery($candidateLimitationProvider->calls === 1, 'As evidências eleitas devem ser entregues ao provedor.');
+    assertQuery($candidateLimitationProvider->calls === 3, 'As evidências eleitas devem ser entregues em cada regeneração.');
     assertQuery($candidateElectionRejected, 'O provedor não deve refazer a eleição determinística das evidências.');
 
+    $emptyCandidateProvider = new EmptyCandidateAnswerProvider();
     $emptyCandidateRejected = false;
 
     try {
-        (new DocumentQueryService($retriever, new EmptyCandidateAnswerProvider()))
+        (new DocumentQueryService($retriever, $emptyCandidateProvider))
             ->query($documentId, 'Explique ' . $intelligence['public_id']);
     } catch (QueryException $exception) {
-        $emptyCandidateRejected = str_contains($exception->getMessage(), 'não aceitou integralmente');
+        $emptyCandidateRejected = str_contains($exception->getMessage(), 'após três tentativas');
     }
 
     assertQuery(
-        $emptyCandidateRejected,
+        $emptyCandidateRejected && $emptyCandidateProvider->calls === 3,
         'Uma resposta não pode rejeitar o conjunto de evidências já eleito.'
     );
 
-    $invalidService = new DocumentQueryService($retriever, new InvalidCitationAnswerProvider());
+    $invalidCitationProvider = new InvalidCitationAnswerProvider();
+    $invalidService = new DocumentQueryService($retriever, $invalidCitationProvider);
     $invalidRejected = false;
+    $invalidReasonPreserved = false;
 
     try {
         $invalidService->query($documentId, 'intelligence and instinct');
     } catch (QueryException $exception) {
-        $invalidRejected = str_contains($exception->getMessage(), 'fora do contexto');
+        $invalidRejected = str_contains($exception->getMessage(), 'após três tentativas');
+        $invalidReasonPreserved = $exception->getPrevious() instanceof QueryException
+            && str_contains($exception->getPrevious()->getMessage(), 'fora do contexto');
     }
 
-    assertQuery($invalidRejected, 'Uma citação fora do contexto deve invalidar a resposta.');
+    assertQuery(
+        $invalidRejected && $invalidReasonPreserved && $invalidCitationProvider->calls === 3,
+        'Uma citação fora do contexto deve ser rejeitada sem expor o motivo antes de três tentativas.'
+    );
 
     $callsBeforeMissing = $answerProvider->calls;
     $missingResult = $queryService->query($documentId, 'Explique EVA-E999999');

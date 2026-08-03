@@ -29,6 +29,7 @@ Core properties:
 - Conceptual and relational queries use semantic retrieval and resolve summaries back to primary evidence.
 - CIE deterministically elects a leading vector core plus mandatory complementary convergence context from mean and population standard deviation before lineage resolution.
 - The answer model must accept every elected primary source and cite it where its analytical contribution is explained; citation-only inventories are rejected.
+- Locally rejected answer generations are retried silently up to three total attempts; only the third consecutive validation failure reaches the user as a generic error.
 - Answer generation is skipped when no primary evidence is recovered.
 - `simetry` and `assimetry` interactions exist only for the current query and require two cited primary sources with literal excerpts.
 - Provider endpoints, models, and credential-variable names remain environment configuration.
@@ -137,21 +138,26 @@ The superadmin interface can also drain the queue from the browser. Each authent
 
 ## API surface
 
+Selected routes are shown below. The complete implemented route and access matrix is documented in [`docs/en/06_API_AND_OPERATIONS.md`](docs/en/06_API_AND_OPERATIONS.md).
+
 | Method | Route | Purpose |
 |---|---|---|
 | `GET` | `/api/health` | Public application and database health |
 | `GET` | `/api/branding` | Sanitized public branding |
-| `GET` | `/api/documents` | List documents allowed by the current scope |
-| `POST` | `/api/documents` | Ingest Markdown, JSON, or XML |
-| `POST` | `/api/documents/{id}/process` | Queue summaries and embeddings |
+| `POST` | `/api/auth/login` | Start a normal-user session |
+| `POST` | `/api/auth/recover` | Recover a normal-user password |
+| `GET` | `/api/scopes` | List projects and works available to the authenticated actor |
+| `POST` | `/api/query` | Run a validated query over authorized scopes |
+| `GET` | `/api/documents` | List works and counts (superadmin) |
+| `POST` | `/api/documents` | Ingest Markdown, JSON, or XML (superadmin) |
+| `POST` | `/api/documents/{id}/process` | Queue summaries and embeddings (superadmin) |
 | `POST` | `/api/admin/queue/run` | Run one explicitly confirmed worker pass (superadmin only) |
-| `GET` | `/api/jobs` | Inspect queue state |
-| `POST` | `/api/jobs/{id}/retry` | Explicitly retry an allowed failed job |
-| `POST` | `/api/query` | Run a validated documentary query |
-| `GET` | `/api/metrics` | Return descriptive counts |
-| `GET` | `/api/audit` | Return sanitized administrative events |
+| `GET` | `/api/jobs` | Inspect queue state (superadmin) |
+| `POST` | `/api/jobs/{id}/retry` | Explicitly retry an allowed failed job (superadmin) |
+| `GET` | `/api/metrics` | Return descriptive counts (superadmin) |
+| `GET` | `/api/audit` | Return sanitized administrative events (superadmin) |
 
-Except for health and public branding, routes require an authenticated user session or the administrative bearer token according to route policy.
+Health, branding, login, and recovery are public according to their individual contracts. Other routes require an authenticated user session or administrative bearer token and then enforce their route-specific role and scope policy.
 
 ## Tests
 
@@ -199,6 +205,12 @@ The public schema and all versioned migrations remain included so a new installa
 - [API and operations](docs/en/06_API_AND_OPERATIONS.md)
 - [Security and deployment](docs/en/07_SECURITY_AND_DEPLOYMENT.md)
 - [Scientific scope and energy sustainability](docs/en/08_SCIENTIFIC_AND_ENERGY.md)
+- [Cnode and cognitive interactions](docs/en/10_CNODE.md)
+- [Database](docs/en/11_DATABASE.md)
+- [Mandatory rules](docs/en/12_MANDATORY_RULES.md)
+- [Roadmap](docs/en/13_ROADMAP.md)
+- [Go-live readiness validation](docs/en/14_GO_LIVE_VALIDATION.md)
+- [Pre-deployment acceptance](docs/en/15_PRE_DEPLOYMENT_ACCEPTANCE.md)
 - [Scientific and philosophical material](philosophy/README.md)
 
 ## Contributing and security

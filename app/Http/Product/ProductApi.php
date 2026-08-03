@@ -132,6 +132,17 @@ final readonly class ProductApi
         } catch (QueueException $exception) {
             return new HttpResponse(409, ['error' => $exception->getMessage()]);
         } catch (QueryException $exception) {
+            if ($exception->getPrevious() instanceof QueryException) {
+                $this->logger->warning(
+                    'query_answer_validation_exhausted',
+                    SafeFailureDiagnostics::context($exception->getPrevious(), [
+                        'route' => $path,
+                        'request_id' => $this->requestId,
+                        'attempt_count' => 3,
+                    ])
+                );
+            }
+
             return new HttpResponse(422, ['error' => $exception->getMessage()]);
         } catch (AiProviderException $exception) {
             $this->logger->warning('product_ai_unavailable', SafeFailureDiagnostics::context($exception, [

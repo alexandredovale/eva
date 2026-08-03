@@ -83,14 +83,14 @@ Os limites da consulta são carregados por `config/ai.php`, consumidos pela API 
 
 Define o Top-k vetorial analisado pelo CIE em cada documento para consultas conceituais ou relacionais.
 
-- **Fallback do código:** `30`.
+- **Fallback do código:** `20`.
 - **Intervalo efetivo:** de `1` a `200`.
 - **Escopo:** por documento e somente em recuperação semântica.
 - **Função:** definir a população usada nos cálculos de `μ`, `σ` e `CV`; não define quantos textos chegam ao provedor.
 - **Persistência:** candidatos, similaridades e análise permanecem transitórios.
 
 ```env
-QUERY_CANDIDATE_LIMIT=30
+QUERY_CANDIDATE_LIMIT=20
 ```
 
 ### `QUERY_MAX_EVIDENCE`
@@ -156,6 +156,16 @@ AI_QUERY_MAX_OUTPUT_TOKENS=1800
 ```
 
 O valor foi calibrado a partir da matriz relacional real. Reduzi-lo exige nova validação ao vivo porque o JSON inclui resposta, citações, interações, fragmentos literais e limitações.
+
+### Regeneração silenciosa por falha de validação
+
+Quando uma geração chega completa ao backend, mas viola o contrato local de evidências, citações, incorporação analítica ou interações, `DocumentQueryService` descarta integralmente essa saída e solicita nova geração com o mesmo contexto eleito. São permitidas no máximo três tentativas totais de resposta validada dentro da mesma requisição da API.
+
+As tentativas rejeitadas não aparecem no transcript, não alteram a eleição do CIE e não reutilizam texto parcial. Enquanto houver tentativa disponível, a interface permanece em **Consultando evidências…** e não exibe o identificador nem a regra técnica que causou a rejeição.
+
+Uma tentativa posterior válida substitui completamente as anteriores. Somente depois de três falhas consecutivas de validação a API retorna erro ao navegador, usando mensagem genérica sem identificador de evidência. O esgotamento é registrado no log por categoria segura, quantidade de tentativas e `request_id`; o último motivo técnico permanece encadeado internamente sem ser exposto ao usuário.
+
+Esse mecanismo é distinto da recuperação de truncamento do provedor. Uma tentativa individual ainda pode admitir a única regeneração compacta específica para `finish_reason=length`; ela não autoriza repetição ilimitada nem altera o teto configurado.
 
 ### Aplicação na API, interface e CLI
 

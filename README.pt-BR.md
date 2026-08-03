@@ -84,7 +84,7 @@ A ingestão não produz resumos ou embeddings. A construção cognitiva é uma e
 
 `EvidenceEmbeddingService` vetoriza evidências primárias e resumos derivados com título do documento, caminho, nó e conteúdo organizado. Antes de chamar o provedor, todas as unidades pendentes são validadas contra `AI_EMBEDDING_MAX_INPUT_TOKENS`, com margem preventiva de 10%. Lotes técnicos agrupam unidades completas e nunca fragmentam nenhuma delas. Se uma primária exceder o limite, uma síntese derivada válida e rastreável assume sua rota semântica; sem essa síntese, a etapa para com o identificador da evidência e exige subdivisão estrutural real. Uma versão já existente para o mesmo modelo e hash é reutilizada antes de chamar o provedor.
 
-Na consulta conceitual ou relacional, `DocumentContextRetriever` compara o embedding transitório do input com evidências primárias e derivadas. O Retriever produz um Top-k de 30 candidatos por padrão; o CIE calcula média, desvio padrão populacional e CV, elege o núcleo principal e a convergência complementar e só então resolve sínteses por `evidence_derivations` até suas fontes primárias. Quando não há núcleo, a convergência assume o papel principal. A LLM deve incorporar integralmente as fontes eleitas; similaridades e estatísticas permanecem transitórias.
+Na consulta conceitual ou relacional, `DocumentContextRetriever` compara o embedding transitório do input com evidências primárias e derivadas. O Retriever produz um Top-k de 20 candidatos por padrão; o CIE calcula média, desvio padrão populacional e CV, elege o núcleo principal e a convergência complementar e só então resolve sínteses por `evidence_derivations` até suas fontes primárias. Quando não há núcleo, a convergência assume o papel principal. A LLM deve incorporar integralmente as fontes eleitas; similaridades e estatísticas permanecem transitórias.
 
 `QueryAnswerProvider` pode declarar interações `simetry` ou `assimetry` na mesma chamada que produz a resposta. `DocumentQueryService` aceita cada interação somente quando os participantes pertencem ao contexto, foram citados e seus fragmentos existem literalmente nas evidências. Nada disso é persistido como Cnode.
 
@@ -114,7 +114,7 @@ Além de `--live`, `AI_LIVE_ENABLED=true` deve estar configurado. Resumos criam 
 
 `InputTypeDetector` reconhece inputs diretos, estruturais, conceituais, relacionais e amplos sem consumir IA. `DocumentContextRetriever` escolhe a rota correspondente, usa embedding transitório e CIE apenas nas buscas conceituais/relacionais e retorna evidências primárias completas por acesso direto ou pela linhagem das sínteses derivadas.
 
-`DocumentQueryService` aceita somente identificadores pertencentes ao contexto recuperado. Citações desconhecidas são rejeitadas; marcadores válidos omitidos pelo provedor são apresentados deterministicamente pela aplicação como `[EVA-E000000]`. Evidências utilizadas, `simetry`, `assimetry` e limitações permanecem em campos separados.
+`DocumentQueryService` aceita somente identificadores pertencentes ao contexto recuperado. Citações desconhecidas, marcadores omitidos e inventários sem incorporação analítica são rejeitados; a aplicação não acrescenta citações ausentes para aparentar conformidade. Uma saída rejeitada pela validação local é regenerada silenciosamente até o limite de três tentativas totais com o mesmo contexto eleito. Somente a terceira falha consecutiva chega ao usuário como mensagem genérica, sem identificador de evidência. Evidências utilizadas, `simetry`, `assimetry` e limitações permanecem em campos separados.
 
 Na interface web, todas as rodadas concluídas permanecem visíveis no box do chat durante a sessão atual. A partir da segunda consulta, o navegador anexa ao input no máximo as três rodadas anteriores, em ordem cronológica, para que a IA avalie se o pedido atual é continuidade. Esse histórico auxilia referências conversacionais, mas não constitui evidência: perguntas e respostas anteriores nunca substituem nem ampliam as evidências primárias recuperadas para a consulta atual.
 
@@ -126,7 +126,7 @@ A consulta real também exige dupla confirmação:
 php bin/query-document.php <document-id> --live "pergunta"
 ```
 
-Os limites padrão são Top-k de 30 candidatos vetoriais por documento, 8 evidências primárias no contexto final e 20 interações transitórias. Na API e na interface web, configure-os por `QUERY_CANDIDATE_LIMIT`, `QUERY_MAX_EVIDENCE` e `QUERY_MAX_INTERACTIONS`. Na linha de comando, os dois limites finais também podem ser substituídos na execução por `--evidence-limit=N` e `--interaction-limit=N`.
+Os limites padrão são Top-k de 20 candidatos vetoriais por documento, 8 evidências primárias no contexto final e 20 interações transitórias. Na API e na interface web, configure-os por `QUERY_CANDIDATE_LIMIT`, `QUERY_MAX_EVIDENCE` e `QUERY_MAX_INTERACTIONS`. Na linha de comando, os dois limites finais também podem ser substituídos na execução por `--evidence-limit=N` e `--interaction-limit=N`.
 
 ## Produto administrativo
 

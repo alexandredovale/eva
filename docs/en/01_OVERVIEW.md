@@ -25,8 +25,9 @@ It does not contain persistent relationships, cognitive scores, confidence, impo
 
 ```text
 Build: source → tree → primary evidence → derived summaries → embeddings
-Semantic query: input → adaptive retrieval → Top-k → CIE → primary evidence → bounded answer
-Interaction: cited sources → transient simetry/assimetry → literal validation
+Semantic query: input → Retriever → Top-k → CIE → primary sources
+Interaction: recovered sources → transient simetry/assimetry → literal validation
+Answer: cited evidence → answer and limitations
 ```
 
 ## Neutrality
@@ -38,3 +39,13 @@ For vector routes, the Context Intelligence Engine (CIE) uses the candidate dist
 ## Product scope
 
 The implementation includes a white-label web interface, authenticated API, user/project/document access scopes, explicit processing queue, sanitized audit trail, descriptive metrics, deletion workflows, and short-lived conversational continuity.
+
+## Energy sustainability
+
+EVA contains computational-containment mechanisms: it reuses the cognitive build, avoids transient embeddings on non-semantic routes, does not call the answer provider when no primary evidence is recovered, and does not precompute documentary relationships.
+
+These properties may reduce energy demand at scale, but net savings still require experimental validation. The implemented mechanisms, scientific limits, and measurement protocol are documented in [Scientific scope and energy sustainability](08_SCIENTIFIC_AND_ENERGY.md).
+
+## Documentation map
+
+Start with [Architecture](02_ARCHITECTURE.md), [Installation](03_INSTALLATION.md), and [Ingestion and cognitive build](04_INGESTION_AND_BUILD.md). The system invariants are consolidated in [Mandatory rules](12_MANDATORY_RULES.md); dated verification results are preserved separately in [Go-live readiness validation](14_GO_LIVE_VALIDATION.md) and [Pre-deployment acceptance](15_PRE_DEPLOYMENT_ACCEPTANCE.md).

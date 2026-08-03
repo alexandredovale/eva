@@ -10,9 +10,21 @@
 
 One input can activate more than one route. Detection is local and deterministic; it does not call an AI provider.
 
+Relational detection normalizes case and diacritics, recognizes tested morphological families such as Portuguese `relação`, `relacionam`, and `relacionado`, English `interact`/`interaction`, and formal operators such as `↔` and `→`. This rule set is deterministic and extensible, but it does not claim universal multilingual intent inference. New linguistic roots must be added explicitly and protected by regression tests.
+
+## Partial input coverage
+
+A user may combine supported and unsupported concepts or relationships. Documentary sufficiency is evaluated per aspect. If a requested relationship involves X, Y, and Z but recovered evidence covers only X and Y, EVA answers the supported X–Y portion with citations and names the missing support for Z.
+
+An unsupported aspect never authorizes external knowledge and does not erase other supported aspects. Generation is blocked completely only when no primary evidence is recovered.
+
 ## Retrieval
 
 Direct, structural, and broad routes navigate identifiers and document hierarchy. Conceptual and relational routes create a transient input embedding and search primary and derived evidence.
+
+Literal, lexical, and structural matches are candidates rather than conclusions. On non-vector routes, the application composes the final context within the configured limit and delivers it as a complete deterministic election. The provider must incorporate every received evidence record without extending its literal meaning.
+
+`simetry` and `assimetry` are internal cognitive operators. They guide relational understanding but are not treated as expressions that a documentary source must contain.
 
 For semantic routes, Retriever orders up to `QUERY_CANDIDATE_LIMIT` candidates and CIE calculates the mean, population standard deviation, and coefficient of variation. Candidates below the mean are discarded. The convergence core leads the final semantic selection; the convergence range follows as complementary analysis context. If no core exists, convergence becomes the primary context. Selected derived candidates are then resolved through `evidence_derivations` until primary sources are available. The answer provider receives the deterministic `core`/`convergence` role, but not similarity values as documentary authority.
 
@@ -35,7 +47,7 @@ If retrieval finds no primary evidence, EVA returns an explicit documentary limi
 
 ## Query limits
 
-- `QUERY_CANDIDATE_LIMIT`: semantic Top-k analyzed by CIE per document, default `30`, effective range `1..200`.
+- `QUERY_CANDIDATE_LIMIT`: semantic Top-k analyzed by CIE per document, default `20`, effective range `1..200`.
 - `QUERY_MAX_EVIDENCE`: global primary-candidate limit, default `8`, effective range `1..50`.
 - `QUERY_MAX_INTERACTIONS`: accepted transient-interaction limit, default `20`, effective range `0..100`.
 - `AI_QUERY_MAX_OUTPUT_TOKENS`: per-attempt output ceiling, default `1800`, effective range `100..3000`.
@@ -43,6 +55,18 @@ If retrieval finds no primary evidence, EVA returns an explicit documentary limi
 `QUERY_CANDIDATE_LIMIT` defines the statistical population before lineage resolution. `QUERY_MAX_EVIDENCE` caps the primary context after CIE and remains global across all selected works.
 
 A response truncated by the provider is never partially decoded. EVA allows at most one complete retry with an additional compactness instruction.
+
+The per-attempt output limit is a ceiling, not a generation target. The retry uses the same ceiling, discards all partial output, and cannot loop or automatically raise the configured budget.
+
+## Silent regeneration after validation failure
+
+When a generation reaches the backend intact but violates the local contract for evidence, citations, analytical incorporation, or interactions, `DocumentQueryService` discards that output completely and requests another generation with the same elected context. A single API request permits at most three total attempts to obtain a validated answer.
+
+Rejected attempts never enter the transcript, alter the CIE election, or contribute partial text. While another attempt remains, the interface stays on **Consultando evidências…** and exposes neither the evidence identifier nor the technical validation rule.
+
+A later valid attempt replaces every rejected attempt. Only after three consecutive validation failures does the API return a generic browser error without evidence identifiers. Exhaustion is logged with a safe category, attempt count, and `request_id`; the final technical reason remains chained internally and is not exposed to the user.
+
+This mechanism is separate from provider truncation recovery. One answer attempt may still use the single compact regeneration reserved for `finish_reason=length`; that path does not authorize unlimited retries or raise the configured output ceiling.
 
 ## Interactions
 
@@ -55,6 +79,10 @@ assimetry:  origin → destination
 
 Each accepted interaction requires two cited primary evidence records and one literal excerpt from each. It has no persistent identifier, confidence, weight, score, or embedding.
 
+The response and its interactions are generated in the same `QueryAnswerProvider` call configured by `AI_QUERY_MODEL`; there is no separate interaction provider. Evaluation is required when at least two elected evidence records exist and the configured interaction limit is greater than zero, but an interaction is emitted only when it can be demonstrated literally. Otherwise the documentary answer remains and the result contains a relational limitation.
+
+The local layer rejects or discards an interaction when its type, roles, orientation, participants, cited status, or excerpts are invalid. `simetry` accepts two `participant` roles and no direction. `assimetry` requires distinct `origin` and `destination` roles. A provider output with an unknown used evidence ID, an out-of-context visible citation, an excessive interaction count, or an incomplete final election invalidates the response.
+
 The public result exposes `selection_region` on each used evidence and an `evidence_selection` object with the elected core and convergence IDs, so the provider contract remains auditable after generation.
 
 ## Conversational continuity
@@ -64,3 +92,28 @@ The interface keeps the visible transcript while the current page remains open. 
 The answer provider decides whether the current request continues an earlier turn. Previous questions and answers can clarify conversational references, but they never become documentary evidence. Every new response remains restricted to primary evidence recovered for that query.
 
 **Reset chat** clears the transcript and temporary context while preserving selected projects and works. Conversation state is not persisted in the database, audit log, or browser storage.
+
+## Result contract
+
+The public query result separates:
+
+- `answer`;
+- `evidences_used`;
+- `evidence_selection`;
+- `simetry_interactions`;
+- `assimetry_interactions`;
+- `routing_points`;
+- `context_intelligence`;
+- `limitations`.
+
+Each used evidence item exposes `selection_region`. `evidence_selection` lists elected core and convergence IDs. `context_intelligence` is empty on exclusively non-semantic routes and otherwise exposes the transient per-document calculation. Neither CIE analysis nor interactions modify persistent memory.
+
+## CLI
+
+The CLI uses the same configured defaults but permits per-execution evidence and interaction overrides:
+
+```powershell
+php bin\query-document.php <document-id> --live --evidence-limit=10 --interaction-limit=20 "your question"
+```
+
+Arguments do not alter `.env`. Persistent PHP processes must be restarted after environment changes so configuration is reloaded.

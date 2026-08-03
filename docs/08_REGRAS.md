@@ -55,7 +55,7 @@
 53. Nunca truncar, cortar ou fragmentar arbitrariamente uma evidência para produzir seu embedding.
 54. Representar uma primária excedente pelo embedding de uma síntese derivada válida somente quando a linhagem até a evidência primária integral estiver persistida.
 55. Aplicar o CIE somente às distribuições vetoriais das rotas conceitual e relacional.
-56. Limitar o conjunto estatístico por `QUERY_CANDIDATE_LIMIT`, com padrão 30 e intervalo efetivo de 1 a 200 candidatos por documento.
+56. Limitar o conjunto estatístico por `QUERY_CANDIDATE_LIMIT`, com padrão 20 e intervalo efetivo de 1 a 200 candidatos por documento.
 57. Calcular média e desvio padrão populacionais sobre o Top-k e calcular `CV = σ / μ`, usando `null` quando `μ = 0`.
 58. Classificar como descarte `s < μ`, convergência `μ ≤ s < μ + σ` e núcleo `s ≥ μ + σ`.
 59. Usar o núcleo como referência principal e a faixa de convergência como análise complementar obrigatória; quando o núcleo estiver vazio, promover a convergência ao papel principal.
@@ -67,3 +67,5 @@
 65. Preservar `core` como precedência argumentativa e incorporar cada `convergence` como reforço, contexto, limite ou contraponto sustentado literalmente.
 66. Não inventar relações para acomodar uma evidência eleita; incorporação obrigatória continua limitada ao conteúdo documental.
 67. Manter a calibração semântica estrita de `simetry` e `assimetry` separada da validade documental da resposta.
+68. Descartar silenciosamente uma resposta rejeitada pela validação local e permitir no máximo três tentativas totais com o mesmo contexto eleito.
+69. Exibir erro ao usuário somente depois da terceira falha consecutiva de validação, usando mensagem genérica sem identificador de evidência ou regra técnica interna.

@@ -6,9 +6,47 @@
 
 The browser keeps the administrative credential only in `sessionStorage` for the current tab. Logout removes it. User passwords and recovery codes are stored only as hashes.
 
+## Route surface
+
+The table reflects the implemented dispatcher. Request and response bodies are JSON unless the upload row says multipart.
+
+| Access | Method | Route | Purpose |
+|---|---|---|---|
+| Public | `GET` | `/api/health` | Application and database health |
+| Public | `GET` | `/api/branding` | Sanitized branding configuration |
+| Public | `POST` | `/api/auth/login` | Normal-user authentication and session issuance |
+| Public | `POST` | `/api/auth/recover` | Password recovery with a recovery code and new password |
+| Authenticated | `GET` | `/api/me` | Current actor identity and role |
+| Authenticated | `POST` | `/api/logout` | Invalidate the current normal-user session or finish the current client session |
+| Authenticated | `POST` | `/api/me/password` | Change the current normal user's password |
+| Authenticated | `POST` | `/api/me/recovery-code` | Rotate and return a recovery code after password confirmation |
+| Authenticated | `GET` | `/api/scopes` | Projects and works available to the current actor |
+| Authenticated | `POST` | `/api/query` | Query authorized selected scopes |
+| Superadmin | `POST` | `/api/admin/queue/run` | Run one explicitly confirmed worker pass |
+| Superadmin | `GET`, `POST` | `/api/admin/users` | List users or create a normal user |
+| Superadmin | `PATCH` | `/api/admin/users/{id}` | Activate or deactivate a normal user |
+| Superadmin | `POST` | `/api/admin/users/{id}/reset-password` | Reset a password and return a new recovery code |
+| Superadmin | `PUT` | `/api/admin/users/{id}/permissions` | Replace project and individual-work grants |
+| Superadmin | `GET`, `POST` | `/api/admin/projects` | List or create projects |
+| Superadmin | `PUT`, `DELETE` | `/api/admin/projects/{id}` | Update or delete a project |
+| Superadmin | `GET` | `/api/documents` | List works and descriptive counts |
+| Superadmin | `POST` | `/api/documents` | Ingest one Markdown, JSON, or XML multipart upload |
+| Superadmin | `DELETE` | `/api/documents/{id}` | Delete a work and its dependent state |
+| Superadmin | `POST` | `/api/documents/{id}/process` | Idempotently enqueue summaries and embeddings |
+| Superadmin | `GET` | `/api/jobs` | List current processing jobs |
+| Superadmin | `POST` | `/api/jobs/{EVA-J...}/retry` | Explicitly retry an eligible failed job |
+| Superadmin | `GET` | `/api/metrics` | Return descriptive operational counts |
+| Superadmin | `GET` | `/api/audit` | Return sanitized audit events |
+
+Unknown routes return 404. Known routes reject unsupported methods with 405 and an `Allow` header. Authentication, authorization, validation, queue conflicts, query-contract errors, provider unavailability, and unexpected failures remain distinct HTTP conditions with safe client messages.
+
+The administrative token must never appear in documentation, source, URLs, or logs. Normal-user session tokens are stored server-side only as hashes and expire according to security configuration.
+
 ## Access scopes
 
 The superadmin can manage users, projects, and work-level access. A project grant includes its associated works; a work grant does not expose other works from the same project.
+
+The superadmin bypasses assignment checks. A normal user's selected project or work IDs are resolved again on the server; the browser's visible tree is not an authorization boundary. Multiple authorized scopes are combined and document IDs are deduplicated before retrieval.
 
 Projects may also contain an optional superadmin-managed response profile. The profile activates only when the project root is selected in chat; selecting a work individually does not inherit it. Multiple selected projects contribute their configured profiles independently. Shared works are deduplicated by document ID before retrieval, so they are queried once even though all selected-project profiles remain active.
 
@@ -27,9 +65,13 @@ Both commands still require `AI_LIVE_ENABLED=true`. `--drain` can consume many r
 
 The superadmin interface offers the same deliberate drain flow without shell access. `POST /api/admin/queue/run` executes one worker pass and requires both `AI_LIVE_ENABLED=true` and a JSON body containing `{"confirm_live": true}`. The browser repeats that request until the returned worker status is `idle`; the tab must remain open during processing. The endpoint invokes `CognitiveQueueWorker` directly and never exposes arbitrary command execution.
 
+The interface polls queue state every three seconds while work is `queued` or `running`. Summary progress follows persisted hierarchical units; embedding batches are persisted incrementally so their progress can advance during processing.
+
 ## Audit and metrics
 
 Audit records contain event type, entity, identifier, and sanitized operational metadata. Secrets, passwords, prompts, request bodies, inputs, and documentary content are redacted. Network addresses are stored only as hashes.
+
+Every public request receives a random `X-Request-Id`, which is also available to internal diagnostics. Safe categories distinguish truncated AI output, provider HTTP errors, transport failures, invalid responses, database failures, and general application failures without storing exception text or raw provider output.
 
 Metrics are descriptive counts of documents, evidence classes/types, derivations, embeddings, and jobs. They do not assign relevance, confidence, quality, intensity, or cognitive weight.
 
@@ -46,3 +88,5 @@ Deleting a work cascades through its nodes, evidence, derivations, embeddings, j
 - query input is limited to 20,000 bytes;
 - uploads obey `DOCUMENT_MAX_BYTES`;
 - jobs are unique by version and processed individually by default.
+
+Functional scripts and styles are served locally. Web fonts may be loaded only from the Google Fonts domains allowed by the Content Security Policy.

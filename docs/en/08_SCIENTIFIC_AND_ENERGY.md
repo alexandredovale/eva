@@ -1,5 +1,11 @@
 # Scientific scope and energy sustainability
 
+## Scope
+
+EVA may help reduce pressure from AI energy demand by avoiding unnecessary documentary computation and by supporting evidence-based technical decisions. It does not generate energy, control an electrical grid, or replace operational systems such as SCADA, EMS, and protection equipment.
+
+The proposed effect is efficiency: small reductions per query may accumulate into lower processing, cooling, and capacity demand when the system serves a large workload.
+
 ## Scientific position
 
 EVA proposes an evidence-centered alternative to architectures that begin with arbitrary chunks or persist precomputed relations. Its hypotheses include:
@@ -33,13 +39,56 @@ EVA can potentially reduce avoidable computation by:
 
 At scale, fewer external calls, tokens, retries, and GPU-hours may reduce server and cooling demand. Provider neutrality also permits migration to more efficient models and infrastructure without replacing the documentary core.
 
+## Potential aggregate effect
+
+A simplified accounting boundary is:
+
+```text
+total energy = reusable cognitive build
+             + local query processing
+             + required transient embeddings
+             + justified generative answers
+             + bounded additional attempts
+```
+
+EVA acts on these terms by reusing the build, avoiding embeddings on non-semantic routes, blocking generation without evidence, and bounding context, output, and retries. At high query volume, that discipline may mean fewer generative calls and GPU-hours, lower server and cooling demand, less simultaneous compute pressure at peaks, and better use of installed capacity.
+
+The net effect depends on workload composition. A stable corpus queried repeatedly amortizes its build more effectively than a source processed once and rarely queried.
+
+## Use in the energy sector
+
+In addition to containing its own compute workload, EVA can organize verifiable documentary memory for utilities, generators, system operators, industrial organizations, and regulators. Applicable sources include:
+
+- contingency and recovery procedures;
+- technical asset manuals and histories;
+- failure and maintenance reports;
+- standards, contracts, and capacity studies;
+- shutdown, restart, and incident-response plans.
+
+During a crisis, traceable retrieval may reduce the time needed to locate procedures, compare documents, and identify missing documentary support. This role remains advisory. Any connection to live operational data requires authorized connectors, its own validation, human governance, and strict separation from grid-control systems such as SCADA, EMS, and protective systems.
+
 ## Scientific limit
 
 Net energy savings have not yet been experimentally demonstrated. Initial summaries, embeddings, storage, and inference also consume energy. The result depends on workload composition, corpus reuse, model, hardware, output length, data-center efficiency, and electricity supply.
 
 The official claim is therefore limited: **EVA implements verifiable computational-containment mechanisms with the potential to reduce energy demand at scale; the magnitude and net benefit remain to be measured.**
 
-The validation protocol should report joules per query, kWh per thousand queries, amortized build energy, calls and embeddings per query, input/output tokens, GPU time, cache reuse, no-generation rate, latency, answer quality, and infrastructure PUE when available.
+The experiment must compare EVA with fixed-block vector RAG, long-context retrieval, GraphRAG, and agentic RAG while holding the corpus, questions, model or capability class, hardware, quality threshold, and execution conditions constant. Workloads must separately represent direct, structural, broad, conceptual, relational, and negative-control queries. Build energy must be amortized across multiple usage volumes instead of comparing inference alone.
+
+At minimum, report:
+
+- joules per query and kWh per thousand queries;
+- amortized build energy;
+- external calls and embeddings per query;
+- Top-k size, discard ratio, core/convergence composition, and context tokens before and after CIE;
+- input and output tokens;
+- GPU time and p50, p95, and p99 latency;
+- summary and embedding reuse rates;
+- the fraction of queries stopped without generation;
+- precision, recall, citation validity, and correct-refusal rate;
+- energy adjusted by infrastructure PUE when available.
+
+An energy advantage is supported only if EVA consumes less energy at equivalent or better documentary quality. Results must report dispersion, experimental configuration, and the proportion of each query class.
 
 ## References
 

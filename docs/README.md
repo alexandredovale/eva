@@ -4,6 +4,8 @@ English is the primary language of the public repository. The original Portugues
 
 ## English documentation
 
+### System and operation
+
 1. [Overview](en/01_OVERVIEW.md)
 2. [Architecture](en/02_ARCHITECTURE.md)
 3. [Installation](en/03_INSTALLATION.md)
@@ -13,6 +15,40 @@ English is the primary language of the public repository. The original Portugues
 7. [Security and deployment](en/07_SECURITY_AND_DEPLOYMENT.md)
 8. [Scientific scope and energy sustainability](en/08_SCIENTIFIC_AND_ENERGY.md)
 9. [Context Intelligence Engine](en/09_CONTEXT_INTELLIGENCE_ENGINE.md)
+10. [Cnode and cognitive interactions](en/10_CNODE.md)
+11. [Database](en/11_DATABASE.md)
+12. [Mandatory rules](en/12_MANDATORY_RULES.md)
+13. [Roadmap](en/13_ROADMAP.md)
+
+### Validation records
+
+14. [Go-live readiness validation](en/14_GO_LIVE_VALIDATION.md)
+15. [Pre-deployment acceptance](en/15_PRE_DEPLOYMENT_ACCEPTANCE.md)
+
+The English collection covers the complete current technical scope. The two validation records preserve the date, environment, results, and limitations of the original executions; they are historical evidence, not a substitute for validating a new deployment.
+
+### Source coverage
+
+The English edition is organized by reader task rather than as filename-for-filename duplication. This map shows where each original specification is covered.
+
+| Original Portuguese specification | English edition |
+|---|---|
+| `01_VISAO_GERAL.md` | [Overview](en/01_OVERVIEW.md) |
+| `02_ARQUITETURA.md` | [Architecture](en/02_ARCHITECTURE.md) |
+| `03_INGESTAO.md` | [Ingestion and cognitive build](en/04_INGESTION_AND_BUILD.md) |
+| `04_CONSTRUCAO_COGNITIVA.md` | [Ingestion and cognitive build](en/04_INGESTION_AND_BUILD.md) |
+| `05_CONSULTA.md` | [Query and conversational continuity](en/05_QUERY_AND_CHAT.md) |
+| `06_CNODE.md` | [Cnode and cognitive interactions](en/10_CNODE.md) |
+| `07_BANCO_DE_DADOS.md` | [Database](en/11_DATABASE.md) |
+| `08_REGRAS.md` | [Mandatory rules](en/12_MANDATORY_RULES.md) |
+| `09_ROADMAP.md` | [Roadmap](en/13_ROADMAP.md) |
+| `10_PRODUTO.md` | [API and operations](en/06_API_AND_OPERATIONS.md) |
+| `11_VALIDACAO_GO_LIVE.md` | [Go-live readiness validation](en/14_GO_LIVE_VALIDATION.md) |
+| `12_HOMOLOGACAO_PRE_DEPLOY.md` | [Pre-deployment acceptance](en/15_PRE_DEPLOYMENT_ACCEPTANCE.md) |
+| `13_SUSTENTABILIDADE_ENERGETICA.md` | [Scientific scope and energy sustainability](en/08_SCIENTIFIC_AND_ENERGY.md) |
+| `14_CONTEXT_INTELLIGENCE_ENGINE.md` | [Context Intelligence Engine](en/09_CONTEXT_INTELLIGENCE_ENGINE.md) |
+
+[Installation](en/03_INSTALLATION.md) is an additional English operational guide assembled from the current repository configuration and deployment requirements.
 
 ## Original Portuguese specifications
 

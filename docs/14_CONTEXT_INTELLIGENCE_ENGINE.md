@@ -12,7 +12,7 @@ O CIE é aplicado somente às rotas conceitual e relacional, porque apenas elas 
 input conceitual ou relacional
         → embedding transitório do input
         → Retriever
-        → Top-k vetorial (30 por padrão)
+        → Top-k vetorial (20 por padrão)
         → Context Intelligence Engine
         → resolução de evidências derivadas até fontes primárias
         → limite global do contexto final
@@ -66,11 +66,11 @@ Em consultas com múltiplas obras, cada documento produz sua própria distribui�
 ## Configuração
 
 ```env
-QUERY_CANDIDATE_LIMIT=30
+QUERY_CANDIDATE_LIMIT=20
 QUERY_MAX_EVIDENCE=8
 ```
 
-- `QUERY_CANDIDATE_LIMIT`: tamanho do Top-k semântico analisado por documento; padrão `30`, intervalo efetivo `1..200`.
+- `QUERY_CANDIDATE_LIMIT`: tamanho do Top-k semântico analisado por documento; padrão `20`, intervalo efetivo `1..200`.
 - `QUERY_MAX_EVIDENCE`: máximo de evidências primárias no contexto entregue ao provedor; padrão `8`, intervalo efetivo `1..50`.
 
 Os limites não são equivalentes. O primeiro define a população estatística do CIE. O segundo contém o contexto final e o consumo de tokens depois da seleção e da resolução de linhagem.

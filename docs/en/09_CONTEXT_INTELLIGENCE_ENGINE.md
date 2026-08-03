@@ -12,7 +12,7 @@ CIE applies only to conceptual and relational routes because only those routes p
 conceptual or relational input
         → transient input embedding
         → Retriever
-        → vector Top-k (30 by default)
+        → vector Top-k (20 by default)
         → Context Intelligence Engine
         → derived-to-primary lineage resolution
         → global final-context limit
@@ -49,11 +49,11 @@ For multiple works, CIE analyzes each document distribution independently. `Docu
 ## Configuration
 
 ```env
-QUERY_CANDIDATE_LIMIT=30
+QUERY_CANDIDATE_LIMIT=20
 QUERY_MAX_EVIDENCE=8
 ```
 
-- `QUERY_CANDIDATE_LIMIT`: semantic Top-k analyzed per document; default `30`, effective range `1..200`.
+- `QUERY_CANDIDATE_LIMIT`: semantic Top-k analyzed per document; default `20`, effective range `1..200`.
 - `QUERY_MAX_EVIDENCE`: primary-evidence cap delivered to the answer provider; default `8`, effective range `1..50`.
 
 The first limit defines the statistical population. The second bounds the final context after CIE selection and lineage resolution.
