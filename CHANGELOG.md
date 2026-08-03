@@ -7,6 +7,8 @@ and the project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-08-03
+
 ### Added
 
 - Complete English coverage for the Portuguese technical specifications, including Cnode, database, mandatory rules, roadmap, and dated validation records.

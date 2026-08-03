@@ -117,7 +117,7 @@ if ($path === '/api/health') {
         'application' => (new BrandingPresenter($container['branding']))->toArray()['name'],
         'status' => $httpStatus === 200 ? 'ready' : 'degraded',
         'database' => $databaseStatus,
-        'version' => '1.1.0',
+        'version' => '1.1.1',
     ]);
 }
 
