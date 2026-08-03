@@ -48,7 +48,7 @@ Resultados confirmados:
 - `/api/health` pronto e banco disponível;
 - CSP, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `Cross-Origin-Resource-Policy` e `Cache-Control` presentes;
 - `X-Request-Id` aleatório e `X-Powered-By` removido;
-- `.env`, `api_key.md`, logs, dump SQL e `.git` bloqueados pela superfície HTTP;
+- `.env`, bootstrap PHP, logs, dump SQL e `.git` bloqueados pela superfície HTTP;
 - tentativa de travessia para `.env` não encontrou o arquivo;
 - fila sem trabalhos pendentes, em execução ou com falha;
 - configuração duplicada do OpenSSL no PHP CLI corrigida e `httpd -t` aprovado.

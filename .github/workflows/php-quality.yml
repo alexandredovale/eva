@@ -29,8 +29,6 @@ jobs:
         shell: bash
         run: |
           test ! -e .env
-          test ! -e api_key.md
           test ! -e database/actual/eva.sql
           test ! -e docs/doc_test.md
           test ! -d docs/test
-

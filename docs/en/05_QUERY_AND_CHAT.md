@@ -22,6 +22,8 @@ An unsupported aspect never authorizes external knowledge and does not erase oth
 
 Direct, structural, and broad routes navigate identifiers and document hierarchy. Conceptual and relational routes create a transient input embedding and search primary and derived evidence.
 
+On conceptual or relational queries, an exact textual match does not terminate retrieval. The literal evidence enters first as `core`, preserving the direct answer as the anchor, and the same input continues through the vector Top-k and CIE. Semantically elected primary sources complete the context within `QUERY_MAX_EVIDENCE` without leaving the selected works. Exclusively direct, structural, or broad queries still consume no query embedding.
+
 Literal, lexical, and structural matches are candidates rather than conclusions. On non-vector routes, the application composes the final context within the configured limit and delivers it as a complete deterministic election. The provider must incorporate every received evidence record without extending its literal meaning.
 
 `simetry` and `assimetry` are internal cognitive operators. They guide relational understanding but are not treated as expressions that a documentary source must contain.

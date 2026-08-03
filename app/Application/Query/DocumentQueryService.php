@@ -29,13 +29,8 @@ final readonly class DocumentQueryService
             $documentId,
             $input,
             $maxEvidence,
-            $maxInteractions,
-            false
+            $maxInteractions
         );
-
-        if ($context->evidences === []) {
-            $context = $this->retriever->retrieve($documentId, $input, $maxEvidence, $maxInteractions);
-        }
 
         if ($responseProfiles !== []) {
             $context = new QueryContext(
@@ -82,28 +77,15 @@ final readonly class DocumentQueryService
                 $documentId,
                 $input,
                 $maxEvidence,
-                $maxInteractions,
-                false
+                $maxInteractions
             ),
             $documentIds
         );
 
-        $hasDeterministicEvidence = array_filter(
+        $hasEvidence = array_filter(
             $contexts,
             static fn (QueryContext $context): bool => $context->evidences !== []
         ) !== [];
-
-        if (!$hasDeterministicEvidence) {
-            $contexts = array_map(
-                fn (int $documentId): QueryContext => $this->retriever->retrieve(
-                    $documentId,
-                    $input,
-                    $maxEvidence,
-                    $maxInteractions
-                ),
-                $documentIds
-            );
-        }
         $routingPoints = [];
         $limitations = [];
         $contextIntelligenceAnalyses = [];
@@ -111,7 +93,7 @@ final readonly class DocumentQueryService
         foreach ($contexts as $context) {
             $routingPoints = [...$routingPoints, ...$context->routingPoints];
 
-            if (!$hasDeterministicEvidence || $context->evidences !== []) {
+            if (!$hasEvidence || $context->evidences !== []) {
                 $limitations = [...$limitations, ...$context->limitations];
             }
 

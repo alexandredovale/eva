@@ -10,7 +10,7 @@ The application emits a restrictive Content Security Policy, framing, MIME-sniff
 
 ## Secrets
 
-- Never commit `.env`, `api_key.md`, tokens, passwords, provider responses, or production endpoints containing credentials.
+- Never commit `.env`, tokens, passwords, provider responses, or production endpoints containing credentials.
 - Use `.env.example` only for names and safe placeholders.
 - Rotate any credential suspected of exposure; removing a file from the latest commit does not remove it from Git history.
 - Enable GitHub secret scanning and push protection after publication.

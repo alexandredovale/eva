@@ -46,7 +46,7 @@ Confirmed results:
 - `/api/health` ready and the database available;
 - CSP, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `Cross-Origin-Resource-Policy`, and `Cache-Control` present;
 - random `X-Request-Id` and no `X-Powered-By`;
-- `.env`, `api_key.md`, logs, SQL dumps, and `.git` blocked from HTTP access;
+- `.env`, the PHP bootstrap, logs, SQL dumps, and `.git` blocked from HTTP access;
 - a traversal attempt toward `.env` did not expose the file;
 - no queued, running, or failed jobs;
 - duplicate OpenSSL configuration corrected for PHP CLI and `httpd -t` successful.

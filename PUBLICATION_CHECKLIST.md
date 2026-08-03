@@ -7,7 +7,7 @@ This directory is a sanitized public distribution. Upload its **contents** as th
 - [ ] Create an empty GitHub repository without an automatically generated README, license, or `.gitignore`.
 - [ ] Upload or push only the contents of this directory.
 - [ ] Confirm that GitHub detects **Apache License 2.0**.
-- [ ] Confirm that `.env`, `api_key.md`, `database/actual/eva.sql`, `docs/test/`, `docs/doc_test.md`, uploaded documents, and logs are absent.
+- [ ] Confirm that `.env`, `database/actual/eva.sql`, `docs/test/`, `docs/doc_test.md`, uploaded documents, and logs are absent.
 - [ ] Confirm that `database/` contains only `schema.sql` and versioned migrations.
 - [ ] Enable GitHub Actions and verify the **PHP quality** workflow.
 - [ ] Enable secret scanning, push protection, and private vulnerability reporting.
@@ -33,4 +33,3 @@ evidence traceability mysql knowledge-retrieval explainable-ai
 ## Files intentionally excluded
 
 The public repository is complete at the source-code and schema level. It intentionally excludes credentials, runtime configuration, operational databases, user data, uploaded sources, logs, private regression corpora, and third-party books.
-

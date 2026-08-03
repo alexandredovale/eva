@@ -186,7 +186,7 @@ Tests must run with `AI_LIVE_ENABLED=false` unless a test and command explicitly
 
 This public distribution intentionally excludes:
 
-- `.env` and `api_key.md`;
+- `.env` with local runtime configuration and credentials;
 - operational database dumps;
 - uploaded documents and runtime logs;
 - private user or access records;

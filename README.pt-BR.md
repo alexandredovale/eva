@@ -47,7 +47,7 @@ Um Cnode apenas descreve uma interação semântica explícita no contexto consu
 4. Configure o Apache para servir a pasta `public` como raiz pública.
 5. Acesse `/` para abrir o produto. O diagnóstico público está em `GET /api/health`.
 
-Nenhuma chave de API deve ser gravada no código, na documentação, nos logs ou no repositório. O `.env` contém os placeholders comentados das credenciais neutras; `api_key.md` é carregado depois dele e preenche somente placeholders vazios, sem substituir valores já configurados.
+Nenhuma chave de API deve ser gravada no código, na documentação, nos logs ou no repositório. O `.env` é a única fonte local de configuração e contém os placeholders comentados das credenciais neutras; cada instalação deve preencher esses valores somente em seu arquivo privado.
 
 As classes da aplicação são white label e conhecem apenas capacidades. Todos os vínculos com fornecedores, endpoints, modelos e variáveis de credencial ficam exclusivamente no `.env`; `config/ai.php` apenas lê essas variáveis genéricas. Os testes usam provedores simulados e não consomem créditos.
 

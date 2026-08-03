@@ -7,6 +7,11 @@ and the project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Exact textual matches now anchor conceptual and relational answers without suppressing semantic Top-k/CIE enrichment from the selected works.
+- Removed legacy separate credential-file loading and aligned all public guidance with `.env` as the only local configuration source.
+
 ## [1.1.1] - 2026-08-03
 
 ### Added

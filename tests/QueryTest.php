@@ -37,7 +37,10 @@ if ($source === false) {
 $assertions = 0;
 $documentId = null;
 $storagePath = null;
+$secondDocumentId = null;
+$secondStoragePath = null;
 $originalName = 'query-synthetic-' . bin2hex(random_bytes(6)) . '.md';
+$secondOriginalName = 'query-synthetic-copy-' . bin2hex(random_bytes(6)) . '.md';
 $baseline = queryTableCounts($database);
 
 function assertQuery(bool $condition, string $message): void
@@ -396,8 +399,20 @@ try {
         'A correspondência textual exata deve preceder a recuperação vetorial.'
     );
     assertQuery(
-        count($embeddingProvider->batches) === 1,
-        'Uma correspondência textual exata não deve consumir embedding de consulta.'
+        count($literalResult->usedEvidences) > 1,
+        'Uma correspondência textual exata conceitual deve receber evidências semânticas complementares.'
+    );
+    assertQuery(
+        count($literalResult->contextIntelligenceAnalyses) === 1,
+        'Uma correspondência textual exata conceitual deve executar a análise do CIE.'
+    );
+    assertQuery(
+        ($literalResult->evidenceSelection[$intelligence['public_id']] ?? null) === 'core',
+        'A correspondência textual exata deve permanecer no núcleo do contexto enriquecido.'
+    );
+    assertQuery(
+        count($embeddingProvider->batches) === 2,
+        'Uma correspondência textual exata conceitual deve consumir um embedding transitório.'
     );
 
     $conceptualContext = $retriever->retrieve($documentId, 'intelligence and instinct', 5, 20);
@@ -409,10 +424,10 @@ try {
         ) !== [],
         'A recuperação conceitual não incluiu a unidade adequada.'
     );
-    assertQuery(count($embeddingProvider->batches) === 2, 'A consulta conceitual deve usar um embedding transitório.');
+    assertQuery(count($embeddingProvider->batches) === 3, 'A consulta conceitual deve usar um embedding transitório.');
     $retriever->retrieve($documentId, 'intelligence and instinct', 5, 20);
     assertQuery(
-        count($embeddingProvider->batches) === 2,
+        count($embeddingProvider->batches) === 3,
         'O embedding transitório deve ser reutilizado no mesmo escopo multiobra.'
     );
     assertQuery(
@@ -430,6 +445,39 @@ try {
             ? $contextAnalysis->selectedRegion === 'core'
             : $contextAnalysis->selectedRegion === 'convergence',
         'O CIE não aplicou a precedência entre núcleo e faixa de convergência.'
+    );
+
+    $secondIngested = $ingestion->ingest(
+        $secondOriginalName,
+        $source,
+        'Synthetic Systems Operations Manual Copy'
+    );
+    $secondDocumentId = $secondIngested->documentId;
+    $secondStoragePath = $secondIngested->storagePath;
+    $secondEmbeddingBuild = (new EvidenceEmbeddingService($database, $embeddingProvider))
+        ->buildForDocument($secondDocumentId);
+    assertQuery(
+        $secondEmbeddingBuild->createdEmbeddings === 77,
+        'A segunda obra sintética não foi vetorizada para a regressão multiobra.'
+    );
+
+    $multiLiteralResult = $queryService->queryDocuments(
+        [$documentId, $secondDocumentId],
+        'Intelligence in this fixture denotes explicit processing rules rather than a human trait?',
+        8,
+        20
+    );
+    $multiDocumentTitles = array_values(array_unique(array_map(
+        static fn ($evidence): string => $evidence->documentTitle,
+        $multiLiteralResult->usedEvidences
+    )));
+    assertQuery(
+        count($multiLiteralResult->contextIntelligenceAnalyses) === 2,
+        'A correspondência literal conceitual deve executar o CIE em cada obra selecionada.'
+    );
+    assertQuery(
+        count($multiDocumentTitles) === 2,
+        'A composição multiobra deve preservar âncoras e complementos de todas as obras selecionadas.'
     );
 
     $retriever->retrieve(
@@ -567,8 +615,17 @@ try {
         $statement->execute(['id' => $documentId]);
     }
 
+    if ($secondDocumentId !== null) {
+        $statement = $database->prepare('DELETE FROM documents WHERE id = :id');
+        $statement->execute(['id' => $secondDocumentId]);
+    }
+
     if (is_string($storagePath) && $storagePath !== '') {
         $storage->remove($storagePath);
+    }
+
+    if (is_string($secondStoragePath) && $secondStoragePath !== '') {
+        $storage->remove($secondStoragePath);
     }
 }
 

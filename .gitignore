@@ -1,7 +1,6 @@
 .env
 .env.*
 !.env.example
-api_key.md
 
 /database/actual/*
 !/database/actual/.gitkeep
@@ -25,4 +24,3 @@ api_key.md
 *.tar.gz
 Thumbs.db
 .DS_Store
-

@@ -118,7 +118,7 @@ try {
         'HTTP ' . $health['status']
     );
 
-    foreach (['.env', 'api_key.md', 'storage/logs/app.log', 'database/actual/eva.sql', 'public/app.html', '.git/config'] as $path) {
+    foreach (['.env', 'bootstrap/app.php', 'storage/logs/app.log', 'database/actual/eva.sql', 'public/app.html', '.git/config'] as $path) {
         $response = deploymentRequest($baseUrl . '/' . $path, 'GET', $localMode);
         $check(
             'blocked_' . preg_replace('/[^a-z0-9]+/i', '_', $path),

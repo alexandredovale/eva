@@ -22,7 +22,6 @@ spl_autoload_register(static function (string $class) use ($root): void {
 });
 
 Env::load($root . '/.env');
-Env::load($root . '/api_key.md');
 
 return [
     'root' => $root,
@@ -35,4 +34,3 @@ return [
     'security' => require $root . '/config/security.php',
     'queue' => require $root . '/config/queue.php',
 ];
-

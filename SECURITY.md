@@ -19,7 +19,7 @@ Maintainers will acknowledge a complete report as soon as practical, investigate
 
 ## Operational responsibilities
 
-- Keep `.env`, `api_key.md`, database dumps, uploaded documents, and logs outside version control.
+- Keep `.env`, database dumps, uploaded documents, and logs outside version control.
 - Keep `AI_LIVE_ENABLED=false` unless real provider calls are explicitly intended.
 - Rotate any credential that may have been exposed, even if it was later removed from Git history.
 - Serve only the `public/` directory and follow the deployment guidance in `docs/en/07_SECURITY_AND_DEPLOYMENT.md`.

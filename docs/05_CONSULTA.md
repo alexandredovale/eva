@@ -50,6 +50,8 @@ A ausência de um aspecto nunca autoriza conhecimento externo e não apaga os de
 
 Consultas diretas, estruturais e amplas percorrem a árvore e suas evidências primárias. Consultas conceituais e relacionais geram um embedding transitório do input e pesquisam evidências `primary` e `derived`.
 
+Em consultas conceituais ou relacionais, uma correspondência textual exata não encerra a recuperação. A evidência literal entra primeiro como `core`, preservando a resposta direta como âncora, e o mesmo input segue para o Top-k vetorial e para o CIE. As fontes primárias semanticamente eleitas completam o contexto dentro de `QUERY_MAX_EVIDENCE`, sem sair das obras selecionadas. Consultas exclusivamente diretas, estruturais ou amplas continuam sem consumir embedding de consulta.
+
 Resultados literais, lexicais e estruturais são candidatos, não conclusões. Nessas rotas não vetoriais, a aplicação forma o contexto final dentro do limite e o entrega como eleição integral. O provedor deve incorporar todas as evidências recebidas sem transformá-las em conclusões além de seu conteúdo literal.
 
 `simetry` e `assimetry` são operadores cognitivos internos e permanecem no contexto integral da consulta relacional. Eles orientam a compreensão da IA, mas não são tratados como expressões que a fonte documental precise conter.

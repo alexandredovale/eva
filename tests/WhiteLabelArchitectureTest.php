@@ -106,7 +106,13 @@ foreach (['AI_EMBEDDING_API_KEY_ENV', 'AI_SUMMARY_API_KEY_ENV', 'AI_QUERY_API_KE
     $credentialNames[] = $credentialName;
 }
 
-assertWhiteLabel(!is_file($root . '/api_key.md'), 'api_key.md must not exist in the public package.');
+$bootstrapContent = file_get_contents($root . '/bootstrap/app.php');
+assertWhiteLabel(
+    is_string($bootstrapContent)
+        && substr_count($bootstrapContent, 'Env::load(') === 1
+        && str_contains($bootstrapContent, "Env::load(\$root . '/.env');"),
+    'The application must load credentials exclusively from .env.'
+);
 
 foreach ($credentialNames as $credentialName) {
     foreach ($forbidden as $name) {
