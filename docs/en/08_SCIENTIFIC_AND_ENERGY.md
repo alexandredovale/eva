@@ -21,7 +21,7 @@ These are architectural hypotheses. Functional tests demonstrate implemented beh
 
 ## Current empirical baseline
 
-The project records a small operational baseline covering literal, structural, conceptual, relational, and negative-control queries. Offline tests also verify deterministic CIE classification, leading-core plus complementary-convergence composition, zero-mean behavior, homogeneous distributions, auditable serialization, and rejection of citation-only evidence coverage. A directed real-provider case incorporated ten of ten elected primary sources without truncation. These checks establish implemented behavior, not retrieval-quality superiority. The operational sample is intentionally described as a baseline, not a conclusive comparative study.
+The project records a small operational baseline covering literal, structural, conceptual, relational, and negative-control queries. Offline tests also verify deterministic CIE classification, leading-core plus complementary-convergence composition, zero-mean behavior, homogeneous distributions, auditable serialization, and rejection of citation-only evidence coverage. A historical directed real-provider case incorporated ten of ten primary sources under the former full-incorporation contract. On August 4, 2026, a real-provider query completed with four cited sources while six recovered but uncited candidates were discarded, without truncation or whole-answer failure. These checks establish implemented behavior, not retrieval-quality superiority. The operational sample is intentionally described as a baseline, not a conclusive comparative study.
 
 Future comparisons should use the same corpus, questions, providers, hardware, and quality requirements across EVA, fixed-block vector RAG, long-context retrieval, GraphRAG, and agentic RAG. They should report precision/recall, citation validity, correct refusal, latency percentiles, tokens, cost, memory, and stability.
 
@@ -34,6 +34,7 @@ EVA can potentially reduce avoidable computation by:
 - reusing summaries and embeddings by model and content hash;
 - producing the answer and transient interactions in one bounded call;
 - limiting evidence context, chat history, output, and retries;
+- discarding recovered but uncited evidence instead of requiring another generation;
 - filtering a vector Top-k locally through CIE before sending primary context to the answer provider;
 - avoiding precomputed all-pairs relationships and persistent interaction graphs.
 

@@ -38,7 +38,7 @@ Quando `μ = 0`, o CV é matematicamente indefinido e a saída auditável usa `n
 - **Faixa de convergência:** `μ ≤ s < μ + σ`.
 - **Núcleo de convergência:** `s ≥ μ + σ`.
 
-Se o núcleo existir, ele lidera o contexto semântico selecionado e a faixa de convergência o acompanha como análise complementar obrigatória. Se o núcleo estiver vazio, a faixa de convergência assume o papel principal. Uma distribuição homogênea possui `σ = 0`; nesse caso, todos os candidatos iguais à média pertencem ao núcleo.
+Se o núcleo existir, ele lidera o contexto semântico disponível e a faixa de convergência o acompanha como contexto complementar. Se o núcleo estiver vazio, a faixa de convergência assume o papel principal. Uma distribuição homogênea possui `σ = 0`; nesse caso, todos os candidatos iguais à média pertencem ao núcleo.
 
 As comparações de fronteira usam tolerância numérica de `1e-12` na escala da distribuição para impedir que a representação binária de ponto flutuante desloque um valor matematicamente igual à média. Essa tolerância não altera as fórmulas nem os valores expostos.
 

@@ -19,6 +19,7 @@ O fluxo de consulta não aciona indiscriminadamente todas as capacidades externa
 - somente consultas conceituais e relacionais utilizam embedding transitório para recuperação semântica;
 - o CIE reduz localmente o Top-k vetorial ao núcleo principal e à faixa de convergência complementar antes que o contexto seja enviado ao provedor de resposta;
 - a resposta documental e as interações `simetry`/`assimetry` são produzidas na mesma chamada generativa;
+- evidências recuperadas mas não citadas são descartadas da base final sem exigir uma nova geração;
 - uma saída truncada admite no máximo uma regeneração integral e compacta, sem ciclos ilimitados.
 
 Esse desenho reduz o número de operações externas em relação a fluxos que sempre criam embeddings, enviam contexto extenso ou executam múltiplas rodadas agentes para cada pergunta.
@@ -37,7 +38,7 @@ O custo inicial de construção pode, portanto, ser amortizado por consultas pos
 
 ### Ausência de explosão relacional
 
-O EVA não materializa antecipadamente combinações de pares entre evidências, não cria embeddings relacionais e não persiste Cnodes ou análises de interação. `simetry` e `assimetry` existem somente durante a consulta que as justifica.
+O EVA não materializa antecipadamente combinações de pares entre evidências, não cria embeddings relacionais e não transforma a derivação conceitual Cnode em entidade persistente. `simetry` e `assimetry` existem somente durante a consulta que as justifica.
 
 Essa delimitação evita crescimento combinatório de armazenamento e processamento sem demanda real. A memória persistente termina em evidências, derivações e embeddings de unidades documentais organizadas.
 

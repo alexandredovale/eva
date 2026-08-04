@@ -4,11 +4,11 @@
 
 **Initial result on July 22, 2026: NO-GO.**
 
-**CORE revalidation on July 22, 2026: APPROVED after corrections.**
+**EVA query revalidation on July 22, 2026: APPROVED after corrections.**
 
 **Pre-deployment acceptance on July 22, 2026: APPROVED FOR CONTROLLED UPLOAD.**
 
-The initial assessment found two query-CORE defects: incomplete detection of relational questions in Portuguese and intermittent truncation of relational responses at the output limit. Both were corrected, and the live relational matrix then passed without failures. The team subsequently completed the local visual smoke test, infrastructure acceptance, real backup/restore test, and safe diagnostic improvements. Acceptance of the online environment still depends on post-upload verification described in [Pre-deployment acceptance](15_PRE_DEPLOYMENT_ACCEPTANCE.md).
+The initial assessment found two defects in EVA's query flow: incomplete detection of relational questions in Portuguese and intermittent truncation of relational responses at the output limit. Both were corrected, and the live relational matrix then passed without failures. The team subsequently completed the local visual smoke test, infrastructure acceptance, real backup/restore test, and safe diagnostic improvements. Acceptance of the online environment still depends on post-upload verification described in [Pre-deployment acceptance](15_PRE_DEPLOYMENT_ACCEPTANCE.md).
 
 This record covers the application, database, permissions, authentication, real calls to the configured provider, browser behavior, and local infrastructure. Local concurrency figures do not predict hosting-plan capacity after publication.
 
@@ -17,6 +17,8 @@ This record covers the application, database, permissions, authentication, real 
 > Directed validation on August 2, 2026: one real conceptual query over *The Spirits' Book*, using Top-30, three final core evidence records, and seven convergence records, completed without truncation in 24.32 seconds. All ten records were incorporated into analytical prose, and none appeared only in a citation inventory. This approves the deterministic contract and closed validation for the reference case, but does not replace the pending comparative matrix over a representative corpus.
 
 > Operational adjustment on August 3, 2026: the current default was reduced to `QUERY_CANDIDATE_LIMIT=20` after a directed query over *The Gospel According to Spiritism* produced a more concentrated context and a better-focused documentary answer. This case informs the new default but remains an operational observation; the representative comparative matrix is still pending.
+
+> Citation-contract revalidation on August 4, 2026: the former requirement to incorporate every recovered source was replaced by the visible-citation contract. In the real-provider query “O que é ectoplasma?” over an authorized seven-work project, ten evidence records were recovered. Before the correction, the third generation ended normally (`finish_reason=stop`) with 659 of 1800 tokens, cited nine evidence records, and omitted one; the entire answer was nevertheless rejected. After the correction, the query succeeded, cited four evidence records, and discarded the six uncited candidates. The validated generation ended with `finish_reason=stop` and 354 tokens. All 24 non-provider suites also passed. This case confirms that the failure was not caused by the output ceiling and validates the new discard behavior, but it does not replace the representative comparative matrix.
 
 ## Environment and scope
 
@@ -27,7 +29,7 @@ The validation used the active `Pentateuco Espírita` project and two ready work
 
 An existing superadmin and a temporary normal user created only for the test were used. The temporary user and all assignments were removed during cleanup, including on failure. Original user and permission counts were restored.
 
-Effective CORE configuration during the test:
+Effective EVA query configuration during the test:
 
 ```env
 QUERY_MAX_EVIDENCE=10

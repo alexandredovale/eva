@@ -50,13 +50,13 @@ A ausência de um aspecto nunca autoriza conhecimento externo e não apaga os de
 
 Consultas diretas, estruturais e amplas percorrem a árvore e suas evidências primárias. Consultas conceituais e relacionais geram um embedding transitório do input e pesquisam evidências `primary` e `derived`.
 
-Em consultas conceituais ou relacionais, uma correspondência textual exata não encerra a recuperação. A evidência literal entra primeiro como `core`, preservando a resposta direta como âncora, e o mesmo input segue para o Top-k vetorial e para o CIE. As fontes primárias semanticamente eleitas completam o contexto dentro de `QUERY_MAX_EVIDENCE`, sem sair das obras selecionadas. Consultas exclusivamente diretas, estruturais ou amplas continuam sem consumir embedding de consulta.
+Em consultas conceituais ou relacionais, uma correspondência textual exata não encerra a recuperação. A evidência literal entra primeiro como `core`, preservando a resposta direta como âncora, e o mesmo input segue para o Top-k vetorial e para o CIE. As fontes primárias semanticamente selecionadas compõem o contexto disponível dentro de `QUERY_MAX_EVIDENCE`, sem sair das obras selecionadas. Consultas exclusivamente diretas, estruturais ou amplas continuam sem consumir embedding de consulta.
 
-Resultados literais, lexicais e estruturais são candidatos, não conclusões. Nessas rotas não vetoriais, a aplicação forma o contexto final dentro do limite e o entrega como eleição integral. O provedor deve incorporar todas as evidências recebidas sem transformá-las em conclusões além de seu conteúdo literal.
+Resultados literais, lexicais e estruturais são candidatos, não conclusões. Nessas rotas não vetoriais, a aplicação forma o contexto disponível dentro do limite. O provedor mantém na base final somente as evidências incorporadas à resposta com citação visível, sem transformá-las em conclusões além de seu conteúdo literal; candidatas não citadas são descartadas.
 
 `simetry` e `assimetry` são operadores cognitivos internos e permanecem no contexto integral da consulta relacional. Eles orientam a compreensão da IA, mas não são tratados como expressões que a fonte documental precise conter.
 
-Na recuperação semântica, o Retriever ordena até `QUERY_CANDIDATE_LIMIT` candidatos e o Context Intelligence Engine calcula média, desvio padrão populacional e coeficiente de variação. Candidatos abaixo da média são descartados. O núcleo acima ou igual a `μ + σ` lidera o contexto final; a faixa entre `μ` e `μ + σ` entra como análise complementar obrigatória. Se o núcleo estiver vazio, a convergência assume o papel principal. O processo é determinístico e não executa reranking por IA.
+Na recuperação semântica, o Retriever ordena até `QUERY_CANDIDATE_LIMIT` candidatos e o Context Intelligence Engine calcula média, desvio padrão populacional e coeficiente de variação. Candidatos abaixo da média são descartados. O núcleo acima ou igual a `μ + σ` lidera o contexto disponível; a faixa entre `μ` e `μ + σ` fornece contexto complementar. Se o núcleo estiver vazio, a convergência assume o papel principal. O processo é determinístico e não executa reranking por IA.
 
 Quando uma evidência derivada é selecionada pelo CIE, `evidence_derivations` é percorrida até suas fontes primárias. A resolução distribui o limite entre os candidatos eleitos e ordena as fontes de cada linhagem pela similaridade da consulta, evitando esgotar o contexto na primeira linhagem ampla. A resposta recebe conteúdo literal completo e o papel `core` ou `convergence`; similaridades e estatísticas não são enviadas como autoridade documental nem persistidas.
 
@@ -77,7 +77,7 @@ Perfis compatíveis podem ser combinados. Se dois perfis incidirem sobre o mesmo
 
 Uma obra selecionada individualmente pode aparecer em diferentes projetos concedidos ao usuário sem revelar ou ativar implicitamente nenhum perfil. Essa separação impede que relações administrativas invisíveis mudem o comportamento da resposta sem uma seleção explícita do projeto.
 
-## Parâmetros do CORE da consulta
+## Parâmetros da consulta do EVA
 
 Os limites da consulta são carregados por `config/ai.php`, consumidos pela API e aplicados por `DocumentContextRetriever`, `DocumentQueryService` e `QueryAnswerProvider`. Eles delimitam três responsabilidades diferentes e não são intercambiáveis.
 
@@ -123,7 +123,7 @@ Define a quantidade máxima de interações transitórias `simetry` e `assimetry
 - **Função:** limitar a saída relacional produzida sobre as evidências recuperadas e citadas.
 - **Fallback do código:** `20` quando a variável não estiver definida.
 - **Intervalo efetivo:** de `0` a `100`; a configuração carregada é normalizada para esse intervalo.
-- **Ativação:** interações são analisadas sempre que há pelo menos duas evidências eleitas e o limite é maior que zero, independentemente do tipo inicial do input.
+- **Ativação:** interações são analisadas sempre que há pelo menos duas evidências recuperadas no contexto e o limite é maior que zero, independentemente do tipo inicial do input; somente pares citados podem ser aceitos.
 - **Desativação:** o valor `0` desativa a geração de interações; a resposta documental e suas citações continuam funcionando.
 - **Contrato com a IA:** o valor é enviado ao `QueryAnswerProvider` como `interaction_limit`. Uma resposta acima do limite é rejeitada.
 - **Validação:** cada interação aceita deve usar exatamente duas evidências pertencentes ao contexto, declaradas como utilizadas e citadas, além de conter fragmentos literais verificáveis de ambas.
@@ -163,7 +163,7 @@ O valor foi calibrado a partir da matriz relacional real. Reduzi-lo exige nova v
 
 Quando uma geração chega completa ao backend, mas viola o contrato local de citações, incorporação analítica ou interações, `DocumentQueryService` descarta integralmente essa saída e solicita nova geração com o mesmo contexto recuperado. A partir da segunda tentativa, o provedor recebe somente um código técnico conhecido da falha. Uma evidência recuperada que não aparece citada é apenas descartada; ela não provoca regeneração. São permitidas no máximo três tentativas totais de resposta validada dentro da mesma requisição da API.
 
-As tentativas rejeitadas não aparecem no transcript, não alteram a eleição do CIE e não reutilizam texto parcial. O feedback corretivo não contém input, conteúdo documental, resposta rejeitada, similaridade, peso ou valor subjetivo. Enquanto houver tentativa disponível, a interface permanece em **Consultando evidências…** e não exibe o identificador nem a regra técnica que causou a rejeição.
+As tentativas rejeitadas não aparecem no transcript, não alteram a seleção do CIE e não reutilizam texto parcial. O feedback corretivo não contém input, conteúdo documental, resposta rejeitada, similaridade, peso, valor subjetivo ou identificador de evidência. Enquanto houver tentativa disponível, a interface permanece em **Consultando evidências…** e não exibe a regra técnica que causou a rejeição.
 
 Uma tentativa posterior válida substitui completamente as anteriores. Somente depois de três falhas consecutivas de validação a API retorna erro ao navegador, usando mensagem genérica sem identificador de evidência. O esgotamento é registrado no log por categoria segura, quantidade de tentativas e `request_id`; o último motivo técnico permanece encadeado internamente sem ser exposto ao usuário.
 
@@ -181,7 +181,7 @@ Os argumentos da CLI não alteram o `.env`. Em processos PHP persistentes, alter
 
 ## Interações transitórias
 
-Sempre que houver ao menos duas evidências eleitas, `QueryAnswerProvider` deve avaliar interações entre seus pares:
+Sempre que houver ao menos duas evidências recuperadas, `QueryAnswerProvider` deve avaliar interações; somente pares efetivamente citados podem integrar o resultado:
 
 - `simetry`: dois papéis `participant`;
 - `assimetry`: um papel `origin` e um `destination`.
@@ -202,7 +202,6 @@ O adaptador descarta uma interação candidata e acrescenta limitação quando s
 
 `DocumentQueryService` rejeita a resposta quando:
 
-- uma evidência usada não pertence ao contexto;
 - uma citação visível aponta para evidência fora do contexto;
 - uma interação excede o limite da consulta;
 - um participante não foi recuperado e citado;
@@ -216,4 +215,4 @@ Os identificadores citados são validados contra o contexto, mas sua presença f
 
 ## Saída
 
-O resultado separa `answer`, `evidences_used`, `evidence_selection`, `simetry_interactions`, `assimetry_interactions`, `routing_points`, `context_intelligence` e `limitations`. Cada evidência utilizada também expõe `selection_region`; `evidence_selection` lista os IDs de núcleo e convergência. `context_intelligence` fica vazio em rotas não semânticas; quando presente, expõe a análise transitória por documento com `μ`, `σ`, `CV`, limites e regiões da distribuição. Nem essa análise nem as interações alteram a memória persistente.
+O resultado separa `answer`, `evidences_used`, `evidence_selection`, `simetry_interactions`, `assimetry_interactions`, `routing_points`, `context_intelligence` e `limitations`. Cada evidência utilizada também expõe `selection_region`; `evidence_selection` lista somente os IDs citados de núcleo e convergência. `context_intelligence` fica vazio em rotas não semânticas; quando presente, expõe a análise transitória por documento com `μ`, `σ`, `CV`, limites e regiões da distribuição. Nem essa análise nem as interações alteram a memória persistente.

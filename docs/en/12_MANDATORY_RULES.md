@@ -8,9 +8,9 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 4. Persist evidence with explicit `evidence_class` and `evidence_type` values.
 5. Build higher-level summaries only from identified lower-level evidence.
 6. Generate embeddings only from organized units, never from arbitrary size-based cuts.
-7. Keep evidence, derivations, and embeddings as the persistent core of the Evidence Algorithm.
-8. Do not persist Cnodes, candidate pairs, interaction analyses, or relational metrics.
-9. Evaluate interactions whenever at least two evidence records are elected, and emit them only within the requested limit.
+7. Treat EVA — Evidence Algorithm — as the principal system name and architecture, keeping evidence, derivations, and embeddings as its persistent core.
+8. Treat Cnode only as an internal transient conceptual derivation of EVA, never as a system, superior hierarchical layer, documentary node, or persistent entity; do not persist candidate pairs, interaction analyses, or relational metrics.
+9. Evaluate interactions when at least two evidence records are recovered, and emit only relationships between evidence records actually cited, within the requested limit.
 10. Use only `simetry` and `assimetry` to describe interactions.
 11. Do not classify relationships through judgmental taxonomies.
 12. Do not turn vector similarity into a conclusion.
@@ -40,7 +40,7 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 36. Answer each supported aspect with cited evidence.
 37. Name each aspect for which the recovered context contains insufficient evidence.
 38. Never erase a valid partial relationship only because another input aspect lacks evidence.
-39. Treat retrieved results as candidates until the application completes deterministic election.
+39. Treat retrieved results as candidates until the application completes deterministic composition of the available context.
 40. Deliver only the authorized final context to the provider, using primary sources and explicit `core` or `convergence` roles on semantic routes.
 41. Require every evidence record retained in the result to be cited in the analytical passage where it contributes.
 42. Discard recovered evidence omitted from the text, and reject isolated markers or citation inventories that do not demonstrate analytical incorporation.
@@ -60,7 +60,7 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 56. Limit the statistical set with `QUERY_CANDIDATE_LIMIT`, default `20`, effective range `1..200` candidates per document.
 57. Calculate population mean and population standard deviation over the Top-k, and calculate `CV = σ / μ`, using `null` when `μ = 0`.
 58. Classify `s < μ` as discard, `μ ≤ s < μ + σ` as convergence, and `s ≥ μ + σ` as core.
-59. Use core as the primary reference and convergence as mandatory complementary analysis; when core is empty, promote convergence to the primary role.
+59. Use core as the primary reference and convergence as available complementary context; when core is empty, promote convergence to the primary role.
 60. Preserve Retriever order within regions; do not create a subjective score, weight, heuristic, or AI reranking stage.
 61. Resolve derived candidates selected by CIE to primary sources before applying the global limit and calling the answer provider.
 62. Do not persist candidates, similarities, statistics, regions, or the CIE selection as documentary memory.
@@ -69,7 +69,7 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 65. Preserve `core` as argumentative precedence and use `convergence` only when it contributes literal support, context, limitation, or counterpoint.
 66. Do not invent relationships to accommodate recovered evidence; discard uncited candidates without invalidating the answer.
 67. Keep strict semantic calibration of `simetry` and `assimetry` separate from the documentary validity of the answer.
-68. Silently discard an answer rejected by local validation and permit at most three total attempts with the same elected context; from the second attempt onward, send only a safe corrective code and one elected evidence identifier when analytical incorporation is missing.
+68. Silently discard an answer rejected by local validation and permit at most three total attempts with the same available context; from the second attempt onward, send only a safe corrective code. Recovered but uncited evidence must be discarded from the final basis, never used alone to trigger another attempt or block the whole answer.
 69. Show an error to the user only after the third consecutive validation failure, using a generic message without an evidence identifier or internal technical rule.
 70. Keep modules independent from projects, users, and documents; observed associations belong to the module, not the Core persistence model.
 71. Allow zero, one, or many active modules and deliver each event only to declared subscribers.
@@ -82,4 +82,4 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 78. Require typed confirmation for permanent deletion and remove both the package and its corresponding private data directory.
 79. Do not assign scores, weights, confidence, or any subjective value to pedagogical observations produced by modules.
 
-Related explanations are available in [Architecture](02_ARCHITECTURE.md), [Query and conversational continuity](05_QUERY_AND_CHAT.md), [Cnode and cognitive interactions](10_CNODE.md), [Context Intelligence Engine](09_CONTEXT_INTELLIGENCE_ENGINE.md), and [Connector modules](17_MODULE_CONNECTORS.md).
+Related explanations are available in [Architecture](02_ARCHITECTURE.md), [Query and conversational continuity](05_QUERY_AND_CHAT.md), [Cnode as an EVA conceptual derivation](10_CNODE.md), [Context Intelligence Engine](09_CONTEXT_INTELLIGENCE_ENGINE.md), and [Connector modules](17_MODULE_CONNECTORS.md).

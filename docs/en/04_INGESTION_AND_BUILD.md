@@ -92,7 +92,7 @@ Model, dimension, and content hash identify the vector version. Similarity is us
 
 ## Persistent boundary
 
-The build ends with evidence, derivations, and embeddings. It never precomputes evidence pairs, interaction analyses, relationship embeddings, or persistent Cnodes.
+The build ends with evidence, derivations, and embeddings. It does not materialize Cnode, because that EVA conceptual derivation exists only during a query. It never precomputes evidence pairs, interaction analyses, relationship embeddings, or interaction caches.
 
 `HierarchicalSummaryService` reuses an identical version by model and input hash. `EvidenceEmbeddingService` persists complete units in technical batches. Its result reports `represented_by_derived`, making the number of oversized primary units represented through traceable summaries auditable.
 

@@ -4,11 +4,11 @@
 
 **Resultado inicial em 22/07/2026: NO-GO.**
 
-**Revalidação do CORE em 22/07/2026: APROVADA após as correções.**
+**Revalidação da consulta do EVA em 22/07/2026: APROVADA após as correções.**
 
 **Homologação pré-deploy em 22/07/2026: APROVADA PARA UPLOAD CONTROLADO.**
 
-O diagnóstico inicial confirmou dois defeitos no CORE da consulta: detecção incompleta de perguntas relacionais em português e respostas relacionais intermitentemente truncadas pelo limite de saída. Ambos foram corrigidos e a matriz relacional ao vivo foi aprovada sem falhas. Em seguida, foram concluídos o smoke visual local, a homologação pré-deploy da infraestrutura, o teste real de backup/restauração e a melhoria do diagnóstico seguro. O aceite do ambiente online depende somente da verificação posterior ao upload, conforme `docs/12_HOMOLOGACAO_PRE_DEPLOY.md`.
+O diagnóstico inicial confirmou dois defeitos no fluxo de consulta do EVA: detecção incompleta de perguntas relacionais em português e respostas relacionais intermitentemente truncadas pelo limite de saída. Ambos foram corrigidos e a matriz relacional ao vivo foi aprovada sem falhas. Em seguida, foram concluídos o smoke visual local, a homologação pré-deploy da infraestrutura, o teste real de backup/restauração e a melhoria do diagnóstico seguro. O aceite do ambiente online depende somente da verificação posterior ao upload, conforme `docs/12_HOMOLOGACAO_PRE_DEPLOY.md`.
 
 Este parecer cobre aplicação, banco, permissões, autenticação, consultas reais ao provedor configurado, navegador e infraestrutura local. Métricas de concorrência locais não substituem a observação de capacidade da hospedagem depois da publicação.
 
@@ -17,6 +17,8 @@ Este parecer cobre aplicação, banco, permissões, autenticação, consultas re
 > Validação dirigida em 2 de agosto de 2026: uma consulta conceitual real sobre *O Livro dos Espíritos*, com Top-30, três evidências finais de núcleo e sete de convergência, terminou sem truncamento em 24,32 segundos. As dez evidências foram incorporadas à prosa analítica e nenhuma apareceu apenas em inventário de citações. Esse resultado aprova o contrato determinístico e a validação fechada no caso de referência, mas não substitui a matriz comparativa ainda pendente sobre um corpus representativo.
 
 > Ajuste operacional em 3 de agosto de 2026: o padrão corrente foi reduzido para `QUERY_CANDIDATE_LIMIT=20` após uma consulta dirigida sobre *O Evangelho Segundo o Espiritismo* produzir contexto mais concentrado e resposta documental de melhor foco. Esse caso orienta o novo padrão, mas permanece uma observação operacional; a matriz comparativa representativa continua pendente.
+
+> Revalidação do contrato de citações em 4 de agosto de 2026: a antiga exigência de incorporar todas as fontes recuperadas foi substituída pelo contrato de citações visíveis. Na chamada real “O que é ectoplasma?” sobre um projeto autorizado com sete obras, foram recuperadas dez evidências. Antes da correção, a terceira geração terminou normalmente (`finish_reason=stop`) com 659 de 1800 tokens, citou nove evidências e omitiu uma; ainda assim, toda a resposta era rejeitada. Depois da correção, a consulta terminou com sucesso, citou quatro evidências e descartou as seis candidatas não citadas. A geração validada terminou com `finish_reason=stop` e 354 tokens. As 24 suítes sem chamada ao provedor também foram aprovadas. O caso confirma que a falha não era causada pelo teto de saída e valida o novo descarte, mas não substitui a matriz comparativa representativa.
 
 ## Ambiente e escopo
 
@@ -27,7 +29,7 @@ A validação utilizou o projeto ativo `Pentateuco Espírita` e suas duas obras 
 
 Foram usados um superadmin existente e um usuário temporário criado exclusivamente pelo teste. O usuário temporário e todas as suas atribuições foram removidos no encerramento, inclusive em caso de falha. As contagens originais de usuários e permissões foram restauradas.
 
-Configuração efetiva do CORE durante o teste:
+Configuração efetiva da consulta do EVA durante o teste:
 
 ```env
 QUERY_MAX_EVIDENCE=10

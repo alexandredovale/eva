@@ -22,9 +22,9 @@ An unsupported aspect never authorizes external knowledge and does not erase oth
 
 Direct, structural, and broad routes navigate identifiers and document hierarchy. Conceptual and relational routes create a transient input embedding and search primary and derived evidence.
 
-On conceptual or relational queries, an exact textual match does not terminate retrieval. The literal evidence enters first as `core`, preserving the direct answer as the anchor, and the same input continues through the vector Top-k and CIE. Semantically elected primary sources complete the context within `QUERY_MAX_EVIDENCE` without leaving the selected works. Exclusively direct, structural, or broad queries still consume no query embedding.
+On conceptual or relational queries, an exact textual match does not terminate retrieval. The literal evidence enters first as `core`, preserving the direct answer as the anchor, and the same input continues through the vector Top-k and CIE. Semantically selected primary sources compose the available context within `QUERY_MAX_EVIDENCE` without leaving the selected works. Exclusively direct, structural, or broad queries still consume no query embedding.
 
-Literal, lexical, and structural matches are candidates rather than conclusions. On non-vector routes, the application composes the final context within the configured limit and delivers it as a complete deterministic election. The provider must incorporate every received evidence record without extending its literal meaning.
+Literal, lexical, and structural matches are candidates rather than conclusions. On non-vector routes, the application composes the available context within the configured limit. The provider retains in the final basis only evidence incorporated into the answer with a visible citation, without extending its literal meaning; uncited candidates are discarded.
 
 `simetry` and `assimetry` are internal cognitive operators. They guide relational understanding but are not treated as expressions that a documentary source must contain.
 
@@ -62,11 +62,11 @@ The per-attempt output limit is a ceiling, not a generation target. The retry us
 
 ## Silent regeneration after validation failure
 
-When a generation reaches the backend intact but violates the local contract for evidence, citations, analytical incorporation, or interactions, `DocumentQueryService` discards that output completely and requests another generation with the same elected context. A single API request permits at most three total attempts to obtain a validated answer.
+When a generation reaches the backend intact but violates the local contract for citations, analytical incorporation, or interactions, `DocumentQueryService` discards that output completely and requests another generation with the same recovered context. A single API request permits at most three total attempts to obtain a validated answer.
 
 From the second attempt onward, the provider receives only a safe corrective code. A recovered evidence record omitted from the answer is discarded instead of triggering a retry. Raw validator messages, internal rules, and rejected text are never returned to the provider or browser.
 
-Rejected attempts never enter the transcript, alter the CIE election, or contribute partial text. While another attempt remains, the interface stays on **Consultando evidências…**, accompanied by three animated yellow dots. Reduced-motion browser preferences disable the animation. The waiting state exposes neither an evidence identifier nor a technical validation rule.
+Rejected attempts never enter the transcript, alter the CIE selection, or contribute partial text. While another attempt remains, the interface stays on **Consultando evidências…**, accompanied by three animated yellow dots. Reduced-motion browser preferences disable the animation. The waiting state exposes neither an evidence identifier nor a technical validation rule.
 
 A later valid attempt replaces every rejected attempt. Only after three consecutive validation failures does the API return a generic browser error without evidence identifiers. Exhaustion is logged with a safe category, attempt count, and `request_id`; the final technical reason remains chained internally and is not exposed to the user.
 
@@ -74,7 +74,7 @@ This mechanism is separate from provider truncation recovery. One answer attempt
 
 ## Interactions
 
-Whenever at least two elected evidences are available and the interaction limit is greater than zero, the answer call must analyze:
+Whenever at least two recovered evidence records are available and the interaction limit is greater than zero, the answer call must analyze potential interactions; only cited pairs may enter the result:
 
 ```text
 simetry:    participant ↔ participant
@@ -83,7 +83,7 @@ assimetry:  origin → destination
 
 Each accepted interaction requires two cited primary evidence records and one literal excerpt from each. It has no persistent identifier, confidence, weight, score, or embedding.
 
-The response and its interactions are generated in the same `QueryAnswerProvider` call configured by `AI_QUERY_MODEL`; there is no separate interaction provider. Evaluation is required when at least two elected evidence records exist and the configured interaction limit is greater than zero, but an interaction is emitted only when it can be demonstrated literally. Otherwise the documentary answer remains and the result contains a relational limitation.
+The response and its interactions are generated in the same `QueryAnswerProvider` call configured by `AI_QUERY_MODEL`; there is no separate interaction provider. Evaluation is required when at least two recovered evidence records exist and the configured interaction limit is greater than zero, but an interaction is emitted only when it can be demonstrated literally between cited evidence. Otherwise the documentary answer remains and the result contains a relational limitation.
 
 The local layer rejects or discards an interaction when its type, roles, orientation, participants, cited status, or excerpts are invalid. `simetry` accepts two `participant` roles and no direction. `assimetry` requires distinct `origin` and `destination` roles. An out-of-context visible citation or an excessive interaction count invalidates the response; a recovered but uncited evidence record is simply omitted.
 

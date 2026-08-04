@@ -27,7 +27,7 @@
 - direct, structural, conceptual, relational, and broad input detection — **completed**;
 - adaptive search over primary and derived evidence — **completed**;
 - resolution of summaries to primary sources — **completed**;
-- Cnode repositioned as a transient interaction — **completed**;
+- Cnode defined as an internal transient conceptual derivation of EVA, without hierarchy or persistence — **completed**;
 - `simetry`/`assimetry` generated in the answer call — **completed**;
 - validation of participants, orientation, citations, and literal excerpts — **completed**;
 - no relational persistence — **completed**.
@@ -58,7 +58,7 @@ The five phases and the first architectural upgrade are complete. Further work m
 - deterministic convergence fallback when no core exists — **completed**;
 - lineage resolution only after statistical selection — **completed**;
 - transient auditable `context_intelligence` output — **completed**;
-- core as primary reference and convergence as mandatory complementary analysis — **completed**;
+- core as primary reference and convergence as available complementary context — **completed**;
 - `used_evidence_ids` contract derived from visible citations, with omitted candidates discarded — **completed**;
 - closed validation of analytical incorporation, without automatic completion or citation inventories — **completed**;
 - directed live reference validation with 10/10 evidence records incorporated and no truncation — **completed**;

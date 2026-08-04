@@ -35,7 +35,7 @@ Modelo, dimensão e hash identificam a versão vetorial. Similaridades são usad
 
 ## Limite da construção persistente
 
-A construção termina em sínteses, derivações e embeddings. Não existe etapa de Cnode, análise antecipada de pares, cache de interação ou vetor relacional.
+A construção termina em sínteses, derivações e embeddings. Ela não materializa Cnode: essa derivação conceitual do EVA existe somente durante uma consulta. Também não existe análise antecipada de pares, cache de interação ou vetor relacional.
 
 Esse limite evita explosão combinatória, chamadas externas sem demanda e duplicação da informação já presente nas evidências.
 

@@ -1,13 +1,13 @@
-# Overview
+# EVA — Evidence Algorithm overview
 
 ## Purpose
 
-EVA builds, organizes, and queries verifiable documentary memory. It receives structured documents, preserves their hierarchy, creates traceable evidence, and answers only from primary evidence recovered for the current request.
+EVA, short for Evidence Algorithm, is the project's principal system and architecture. It builds, organizes, and queries verifiable documentary memory, preserving document hierarchy, traceable evidence, and answers limited to primary evidence recovered for the current request.
 
 The project distinguishes two concepts:
 
-- **Evidence Algorithm (EVA):** the persistent and operational architecture for documentary evidence.
-- **Cnode:** the transient understanding of an explicit interaction between evidence during one query.
+- **Evidence Algorithm (EVA):** the principal persistent and operational architecture for documentary evidence.
+- **Cnode:** an internal conceptual derivation of EVA: the transient understanding of an explicit interaction between evidence during one query. It is not a separate system, a superior hierarchical layer, a documentary-tree node, or a persistent entity.
 
 ## Persistent core
 

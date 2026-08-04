@@ -34,7 +34,7 @@ CV = σ / μ
 - **Convergence range:** `μ ≤ s < μ + σ`; complementary analysis context.
 - **Convergence core:** `s ≥ μ + σ`; primary answer context.
 
-When the core is non-empty, it leads the selected semantic context and the convergence range follows as mandatory complementary context. When no core exists, the convergence range becomes the primary context. Candidates below the mean remain discarded. If `μ = 0`, CV is undefined and the auditable output uses `null`. A homogeneous distribution has `σ = 0`, so all candidates equal to the mean belong to the core.
+When the core is non-empty, it leads the available semantic context and the convergence range follows as complementary context. When no core exists, the convergence range becomes the primary context. Candidates below the mean remain discarded. If `μ = 0`, CV is undefined and the auditable output uses `null`. A homogeneous distribution has `σ = 0`, so all candidates equal to the mean belong to the core.
 
 Boundary comparisons use a scale-aware `1e-12` numerical tolerance so that binary floating-point representation cannot misclassify a value mathematically equal to a threshold. The formulas and reported values are unchanged.
 

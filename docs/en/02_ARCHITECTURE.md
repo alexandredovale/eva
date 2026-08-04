@@ -26,17 +26,17 @@ The architecture separates responsibilities without duplicating concepts and wit
 File → parser → tree → primary evidence → summaries → derivations → embeddings
 
 Question → routing → primary/derived retrieval → Top-k → CIE (μ, σ, CV)
-         → core + convergence → lineage resolution → primary sources
+         → available core + convergence context → lineage resolution → available primary sources
          → deterministic contract → answer + transient interactions → validation
 ```
 
 ## Separation of responsibilities
 
-Embeddings locate semantically compatible evidence. Similarity orders the semantic Top-k and is then observed by CIE. Candidates below the mean are discarded; the convergence core (`s ≥ μ + σ`) leads the final context, while the convergence range (`μ ≤ s < μ + σ`) provides mandatory complementary analysis. When the core is empty, convergence assumes the primary role. The analysis remains transient.
+Embeddings locate semantically compatible evidence. Similarity orders the semantic Top-k and is then observed by CIE. Candidates below the mean are discarded; the convergence core (`s ≥ μ + σ`) leads the available context, while the convergence range (`μ ≤ s < μ + σ`) provides complementary context. When the core is empty, convergence assumes the primary role. The analysis remains transient.
 
-Derived evidence can guide retrieval, but the answer receives its resolved primary sources with explicit `core` or `convergence` roles. This is a completed deterministic election: the answer provider cannot reject or reduce it. Every source must be cited where its analytical contribution is explained; missing citations and citation-only inventories are rejected. The answer provider may declare `simetry` or `assimetry` in the same call that produces the answer. Local code accepts an interaction only when both participants belong to the recovered context, were cited, and contain the declared literal excerpts.
+Derived evidence can guide retrieval, but the answer receives its resolved primary sources as available context with explicit `core` or `convergence` roles. The answer provider cannot introduce external sources or IDs outside that set. The final evidence basis retains only sources incorporated into the prose with visible citations; a recovered but uncited source is discarded without invalidating the entire answer. Missing, out-of-context, or citation-only inventory references remain invalid. The answer provider may declare `simetry` or `assimetry` in the same call that produces the answer. Local code accepts an interaction only when both participants belong to the recovered context, were cited, and contain the declared literal excerpts.
 
-CIE and Cnode remain different transient responsibilities. CIE classifies the vector distribution without semantic interpretation. Cnode describes an explicit interaction only after evidence selection and does not create persistent pairs or relationship vectors.
+CIE and Cnode are different operations within EVA. CIE classifies the vector distribution without semantic interpretation. Cnode is an internal conceptual derivation that describes an explicit interaction only after evidence selection; it is not a separate system, a superior hierarchical layer, a documentary-tree node, or a persistent entity, and it does not create persistent pairs or relationship vectors.
 
 ## Provider boundaries
 

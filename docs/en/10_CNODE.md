@@ -1,12 +1,12 @@
-# Cnode and cognitive interactions
+# Cnode — an EVA conceptual derivation
 
 ## Definition
 
-A Cnode, or Cognitive Node, is the contextual understanding of an explicit semantic interaction between evidence recovered for one query. It is not an isolated or persistent entity: it exists only while the query organizes documentary interactions.
+A Cnode, or Cognitive Node, is an internal conceptual derivation of EVA — Evidence Algorithm: the contextual understanding of an explicit semantic interaction between evidence recovered for one query. EVA is the principal name and architecture. Cnode is not a system, subsystem, superior hierarchical layer, documentary-tree node, or persistent entity; it exists only while the query organizes documentary interactions.
 
-The Evidence Algorithm persists evidence and its lineage. A Cnode is produced transiently from that core and validated against primary sources.
+EVA persists evidence and its lineage. The Cnode conceptual derivation is produced transiently from that core and validated against primary sources.
 
-The [Context Intelligence Engine](09_CONTEXT_INTELLIGENCE_ENGINE.md) operates before this relational understanding. CIE reduces the vector Top-k to a leading statistical core and a complementary convergence range—promoting convergence when no core exists—without producing `simetry`, `assimetry`, or any semantic interpretation. CIE and Cnode are separate transient layers: the first selects context from a distribution; the second describes explicit interactions between sources already selected.
+The [Context Intelligence Engine](09_CONTEXT_INTELLIGENCE_ENGINE.md) operates before this relational understanding. CIE reduces the vector Top-k to a leading statistical core and a complementary convergence range—promoting convergence when no core exists—without producing `simetry`, `assimetry`, or any semantic interpretation. CIE and Cnode are different transient operations within EVA, not a hierarchy of systems: the first selects context from a distribution; the second conceptually derives explicit interactions between sources already selected.
 
 `simetry` and `assimetry` are terms in EVA's internal vocabulary. Source documents do not need to contain these words, and their textual absence does not prevent EVA from answering the substantive question from valid evidence.
 
@@ -19,7 +19,7 @@ assimetry
 
 The former taxonomy—`supports`, `complements`, `expands`, `contradicts`, `questions`, `defines`, `depends_on`, `causes`, `precedes`, `exemplifies`, `specializes`, `generalizes`, and `analogous_to`—is not part of the model.
 
-## Role in the system
+## Role in an EVA query
 
 The `simetry`/`assimetry` distinction preserves the form of a documentary interaction understood during a query. `simetry` records explicit reciprocity; `assimetry` preserves an explicit direction from origin to destination. When neither form can be demonstrated by the evidence, EVA keeps the valid documentary answer and reports the relational limitation.
 
@@ -31,7 +31,7 @@ This distinction allows the system to:
 - prevent thematic similarity from becoming a proven relationship;
 - state when evidence supports an answer but not an interaction classification.
 
-This layer is explanatory and transient. It assigns no score, confidence, weight, intensity, importance, or truth; creates no ranking; changes no embedding; and produces no persistent memory or database relationship.
+This derivation is explanatory and transient. It assigns no score, confidence, weight, intensity, importance, or truth; creates no ranking; changes no embedding; and produces no persistent memory or database relationship.
 
 ## Simetry
 
@@ -72,10 +72,10 @@ An interaction enters the result only when it can be reconstructed from cited ev
 
 The application deterministically validates participant identity, roles, declared orientation, and excerpt literalness. Strict proof that those excerpts express reciprocity or direction still depends on provider interpretation. A strong thematic convergence can therefore occasionally be classified as `simetry` without unequivocal documentary reciprocity.
 
-A future calibration should require a separate demonstration of both directions for `simetry` and a stricter origin/destination demonstration for `assimetry`. That refinement must not block a valid documentary answer, alter elected evidence, or authorize persistent relationships.
+A future calibration should require a separate demonstration of both directions for `simetry` and a stricter origin/destination demonstration for `assimetry`. That refinement must not block a valid documentary answer, alter cited evidence, or authorize persistent relationships.
 
 ## Quantity
 
-The number of interactions in a response describes only that query context. EVA has no persistent global Cnode count, and no count may be converted into rank or importance.
+The number of interactions in a response describes only that query context. EVA has no persistent global Cnode count because Cnode is not an entity, and no count may be converted into rank or importance.
 
 See also [Query and conversational continuity](05_QUERY_AND_CHAT.md) and [Mandatory rules](12_MANDATORY_RULES.md).

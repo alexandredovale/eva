@@ -27,7 +27,7 @@
 - detecção de input direto, estrutural, conceitual, relacional ou amplo — concluído;
 - busca adaptativa em evidências primárias e derivadas — concluído;
 - resolução de sínteses até fontes primárias — concluído;
-- Cnode reposicionado como interação transitória — concluído;
+- Cnode definido como derivação conceitual interna e transitória do EVA, sem hierarquia ou persistência — concluído;
 - `simetry`/`assimetry` na mesma chamada de resposta — concluído;
 - validação de participantes, orientação, citações e fragmentos literais — concluído;
 - ausência de persistência relacional — concluído.
@@ -58,7 +58,7 @@ As cinco fases e o primeiro upgrade arquitetural estão concluídos. Novas fases
 - fallback determinístico para convergência quando não houver núcleo — concluído;
 - resolução de linhagem somente após a seleção estatística — concluído;
 - saída transitória auditável em `context_intelligence` — concluído;
-- núcleo como referência principal e convergência como análise complementar obrigatória — concluído;
+- núcleo como referência principal e convergência como contexto complementar disponível — concluído;
 - contrato de `used_evidence_ids` derivado das citações visíveis, com descarte de candidatos omitidos — concluído;
 - validação fechada da incorporação analítica, sem preenchimento automático ou inventário de citações — concluído;
 - validação real de referência com 10/10 evidências incorporadas e sem truncamento — concluído;

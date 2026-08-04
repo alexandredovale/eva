@@ -15,7 +15,7 @@ English is the primary language of the public repository. The original Portugues
 7. [Security and deployment](en/07_SECURITY_AND_DEPLOYMENT.md)
 8. [Scientific scope and energy sustainability](en/08_SCIENTIFIC_AND_ENERGY.md)
 9. [Context Intelligence Engine](en/09_CONTEXT_INTELLIGENCE_ENGINE.md)
-10. [Cnode and cognitive interactions](en/10_CNODE.md)
+10. [Cnode as an EVA conceptual derivation](en/10_CNODE.md)
 11. [Database](en/11_DATABASE.md)
 12. [Mandatory rules](en/12_MANDATORY_RULES.md)
 13. [Roadmap](en/13_ROADMAP.md)
@@ -43,7 +43,7 @@ The English edition is organized by reader task rather than as filename-for-file
 | `03_INGESTAO.md` | [Ingestion and cognitive build](en/04_INGESTION_AND_BUILD.md) |
 | `04_CONSTRUCAO_COGNITIVA.md` | [Ingestion and cognitive build](en/04_INGESTION_AND_BUILD.md) |
 | `05_CONSULTA.md` | [Query and conversational continuity](en/05_QUERY_AND_CHAT.md) |
-| `06_CNODE.md` | [Cnode and cognitive interactions](en/10_CNODE.md) |
+| `06_CNODE.md` | [Cnode as an EVA conceptual derivation](en/10_CNODE.md) |
 | `07_BANCO_DE_DADOS.md` | [Database](en/11_DATABASE.md) |
 | `08_REGRAS.md` | [Mandatory rules](en/12_MANDATORY_RULES.md) |
 | `09_ROADMAP.md` | [Roadmap](en/13_ROADMAP.md) |
@@ -66,7 +66,7 @@ The English edition is organized by reader task rather than as filename-for-file
 | [`03_INGESTAO.md`](03_INGESTAO.md) | Parsing, normalization, upload, and persistence |
 | [`04_CONSTRUCAO_COGNITIVA.md`](04_CONSTRUCAO_COGNITIVA.md) | Summaries, embeddings, and lineage |
 | [`05_CONSULTA.md`](05_CONSULTA.md) | Query routes, chat context, limits, and validation |
-| [`06_CNODE.md`](06_CNODE.md) | Transient Cnode, `simetry`, and `assimetry` |
+| [`06_CNODE.md`](06_CNODE.md) | Cnode as a transient conceptual derivation of EVA, `simetry`, and `assimetry` |
 | [`07_BANCO_DE_DADOS.md`](07_BANCO_DE_DADOS.md) | Persistent data model |
 | [`08_REGRAS.md`](08_REGRAS.md) | System invariants and security rules |
 | [`09_ROADMAP.md`](09_ROADMAP.md) | Completed phases and experimental roadmap |

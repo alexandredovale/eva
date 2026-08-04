@@ -45,9 +45,10 @@ O fluxo implementado é:
 6. Na consulta, o input é encaminhado para rotas diretas, estruturais, amplas ou semânticas.
 7. Nas rotas semânticas, o Context Intelligence Engine (CIE) separa candidatos em núcleo, convergência e descarte.
 8. Evidências derivadas selecionadas são resolvidas novamente até suas fontes primárias.
-9. O modelo de linguagem recebe somente as fontes primárias eleitas.
-10. A resposta precisa devolver todos os identificadores eleitos na mesma ordem, citá-los analiticamente e usar fragmentos literais nas interações.
-11. A consulta e suas interações não alteram a memória documental persistente.
+9. O modelo de linguagem recebe somente o contexto primário disponível.
+10. A base final mantém apenas evidências incorporadas à prosa com citações visíveis; candidatas recuperadas mas não citadas são descartadas.
+11. Quando há interação demonstrável entre evidências citadas, Cnode existe apenas como derivação conceitual transitória do EVA, não como sistema, camada hierárquica ou entidade.
+12. A consulta e suas interações não alteram a memória documental persistente.
 
 Essa separação entre fonte original, conteúdo gerado e resultado transitório é o principal mérito do sistema.
 
@@ -101,9 +102,9 @@ O CIE usa limites relativos à distribuição: média e média mais desvio padr�
 
 Quando existem embeddings compatíveis, ao menos algum candidato tende a ficar igual ou acima da média e ser eleito, mesmo que todas as similaridades sejam baixas. Esse comportamento, implementado em [`ContextIntelligenceEngine.php`](../app/Application/Query/ContextIntelligenceEngine.php), pode enfraquecer a recusa negativa nas rotas semânticas.
 
-#### Obrigação de incorporar toda a eleição
+#### Filtragem por citações após a recuperação
 
-A LLM não pode reduzir o conjunto final. Essa regra impede uma reeleição opaca pelo modelo, mas torna cada erro do Retriever uma obrigação de redação. Uma evidência pouco pertinente pode precisar ser incorporada mesmo quando prejudica o foco da resposta.
+O Retriever e o CIE determinam localmente o contexto disponível, e as citações visíveis determinam a base documental final. A LLM não pode introduzir evidências externas ou IDs fora desse contexto, mas uma candidata recuperada que não contribua para a prosa pode ser descartada sem derrubar toda a resposta. Isso melhora o foco e a disponibilidade, embora ainda seja necessário medir se fontes pertinentes estão sendo omitidas.
 
 #### Tentativas adicionais
 
@@ -153,7 +154,7 @@ A barreira de evidência do EVA responde diretamente a esse problema. Ela não p
 
 Janelas maiores não eliminam falhas de recuperação. Modelos podem usar pior as informações posicionadas no meio de contextos extensos, conforme demonstrado por [Lost in the Middle](https://aclanthology.org/2024.tacl-1.9.pdf).
 
-O EVA reduz o contexto antes da geração e preserva a estrutura documental, o que é relevante. Entretanto, limitar evidências por quantidade e obrigar a incorporação integral não substitui um orçamento real de tokens nem uma avaliação de pertinência.
+O EVA reduz o contexto antes da geração, preserva a estrutura documental e descarta candidatas não citadas, o que é relevante. Entretanto, limitar evidências por quantidade não substitui um orçamento real de tokens nem uma avaliação de pertinência.
 
 ### Avaliação de RAG
 
@@ -186,7 +187,7 @@ Isso limita sua abrangência comercial, mas também reduz a superfície de ataqu
 
 Arquiteturas como o [Microsoft GraphRAG](https://www.microsoft.com/en-us/research/project/graphrag/) materializam entidades, relações e comunidades para responder perguntas globais sobre grandes corpora.
 
-O EVA escolhe o caminho oposto: não persiste Cnodes nem combinações relacionais antecipadas. Isso reduz custo, armazenamento e explosão combinatória, mas limita navegação global, análise de comunidades e raciocínio sobre relações persistentes entre muitos documentos.
+O EVA escolhe o caminho oposto: não materializa Cnode porque ele é apenas uma derivação conceitual transitória, nem persiste combinações relacionais antecipadas. Isso reduz custo, armazenamento e explosão combinatória, mas limita navegação global, análise de comunidades e raciocínio sobre relações persistentes entre muitos documentos.
 
 ### Neutralidade de fornecedor
 
@@ -263,7 +264,7 @@ A validação local confirma IDs, presença de citações, quantidade mínima de
 
 ### Recusa melhora segurança, mas reduz disponibilidade
 
-Bloquear uma resposta inválida evita exposição de conteúdo não verificável, porém também consome tokens e pode impedir que uma parte documental válida chegue ao usuário. Confiabilidade e disponibilidade precisam ser medidas em conjunto.
+Bloquear uma resposta sem citação documental válida ou com citação fora do contexto evita exposição de conteúdo não verificável. Uma candidata apenas recuperada, mas não citada, é descartada sem causar esse bloqueio. Confiabilidade e disponibilidade precisam ser medidas em conjunto.
 
 ## Prioridades para transformar potencial em impacto comprovado
 

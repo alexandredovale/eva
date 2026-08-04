@@ -45,9 +45,10 @@ The implemented flow is:
 6. At query time, the input is routed through direct, structural, broad, or semantic paths.
 7. In semantic routes, the Context Intelligence Engine (CIE) separates candidates into core, convergence, and discard regions.
 8. Selected derived evidence is resolved back to its primary sources.
-9. The language model receives only the elected primary sources.
-10. The response must return every elected identifier in the same order, cite it analytically, and use literal excerpts for interactions.
-11. Queries and their interactions do not change persistent documentary memory.
+9. The language model receives only the available primary context.
+10. The final basis retains only evidence incorporated into the prose with visible citations; recovered but uncited candidates are discarded.
+11. When an interaction can be demonstrated between cited evidence, Cnode exists only as a transient conceptual derivation of EVA, not as a system, hierarchical layer, or entity.
+12. Queries and their interactions do not change persistent documentary memory.
 
 This separation between original source, generated content, and transient result is the system's main strength.
 
@@ -101,9 +102,9 @@ CIE uses thresholds relative to the distribution: the mean and the mean plus the
 
 When compatible embeddings exist, at least one candidate will usually be at or above the mean and become elected even when all similarities are low. This behavior, implemented in [`ContextIntelligenceEngine.php`](../../app/Application/Query/ContextIntelligenceEngine.php), may weaken negative refusal on semantic routes.
 
-#### Mandatory incorporation of the full election
+#### Citation filtering after retrieval
 
-The LLM cannot reduce the final set. This rule prevents opaque re-election by the model, but it turns every Retriever error into a writing requirement. A weakly relevant evidence unit may have to be incorporated even when it harms the focus of the answer.
+The Retriever and CIE determine the available context locally, and visible citations determine the final documentary basis. The LLM cannot introduce external evidence or identifiers outside that context, but a recovered candidate that does not contribute to the prose may be discarded without failing the whole answer. This improves focus and availability, although omitted relevant sources still need to be measured.
 
 #### Additional attempts
 
@@ -153,7 +154,7 @@ EVA's evidence barrier directly addresses this problem. It does not prove that a
 
 Larger context windows do not eliminate retrieval failures. Models can make worse use of information placed in the middle of long contexts, as demonstrated by [Lost in the Middle](https://aclanthology.org/2024.tacl-1.9.pdf).
 
-EVA reduces context before generation and preserves documentary structure, both of which are relevant. However, limiting evidence by count and requiring full incorporation do not replace a real token budget or relevance evaluation.
+EVA reduces context before generation, preserves documentary structure, and discards uncited candidates, all of which are relevant. However, limiting evidence by count does not replace a real token budget or relevance evaluation.
 
 ### RAG evaluation
 
@@ -186,7 +187,7 @@ This limits its commercial reach, but also reduces attack surface, irreversible 
 
 Architectures such as [Microsoft GraphRAG](https://www.microsoft.com/en-us/research/project/graphrag/) materialize entities, relationships, and communities to answer global questions over large corpora.
 
-EVA deliberately takes the opposite path: it does not persist Cnodes or precomputed relational combinations. This reduces cost, storage, and combinatorial explosion, but limits global navigation, community analysis, and reasoning over persistent relationships across many documents.
+EVA deliberately takes the opposite path: it does not materialize Cnode because it is only a transient conceptual derivation, and it does not persist precomputed relational combinations. This reduces cost, storage, and combinatorial explosion, but limits global navigation, community analysis, and reasoning over persistent relationships across many documents.
 
 ### Provider neutrality
 
@@ -263,7 +264,7 @@ Local validation confirms IDs, citation presence, minimum word count, and litera
 
 ### Refusal improves safety but reduces availability
 
-Blocking an invalid response prevents unverifiable content from being exposed, but it also consumes tokens and may prevent a valid documentary portion from reaching the user. Reliability and availability must be measured together.
+Blocking an answer with no valid documentary citation or with an out-of-context citation prevents unverifiable content from being exposed. A merely recovered but uncited candidate is discarded without causing that block. Reliability and availability must be measured together.
 
 ## Priorities for Turning Potential Into Proven Impact
 

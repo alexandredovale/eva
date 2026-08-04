@@ -1,8 +1,8 @@
-# Visão geral do Cnode e do EVA
+# Visão geral do EVA — Evidence Algorithm
 
 ## Objetivo
 
-O Cnode é um sistema para construir, organizar e explorar memória cognitiva documental verificável. O EVA, sigla de Evidence Algorithm, é o algoritmo principal do projeto.
+O EVA, sigla de Evidence Algorithm, é o sistema e a arquitetura principal do projeto para construir, organizar e explorar memória cognitiva documental verificável.
 
 O EVA recebe documentos estruturados, preserva sua hierarquia e cria evidências rastreáveis. Durante uma consulta, o sistema pode compreender interações semânticas explícitas entre as evidências recuperadas. A resposta sempre deve poder voltar ao conteúdo original que a sustenta.
 
@@ -18,9 +18,9 @@ O núcleo persistente é composto por:
 
 `evidence_class` distingue a natureza da unidade persistida. `evidence_type` identifica sua função semântica e estrutural. Essa combinação permite recuperar a região adequada do documento sem duplicar a memória em tabelas relacionais.
 
-## Cnode reposicionado
+## Cnode como derivação conceitual
 
-Cnode é a compreensão contextual de uma interação explícita entre evidências. Ele existe no processamento da consulta, não como registro, identificador, vetor ou cache cognitivo próprio.
+Cnode é uma derivação conceitual interna do EVA: a compreensão contextual de uma interação explícita entre evidências. Ele existe somente no processamento transitório da consulta. Não é um sistema separado, uma camada hierárquica superior, um nó da árvore documental, um registro, identificador, vetor ou cache cognitivo próprio.
 
 `simetry` descreve uma interação recíproca. `assimetry` descreve uma interação orientada com origem e destino explícitos. Nenhuma delas representa peso, julgamento, superioridade, causalidade inferida ou importância.
 

@@ -6,9 +6,9 @@
 4. Persistir evidências com `evidence_class` e `evidence_type` explícitos.
 5. Construir sínteses superiores somente a partir de evidências inferiores identificadas.
 6. Gerar embeddings somente de unidades organizadas, nunca por cortes arbitrários de tamanho.
-7. Manter evidências, derivações e embeddings como núcleo persistente do Evidence Algorithm.
-8. Não persistir Cnodes, pares candidatos, análises de interação ou métricas relacionais.
-9. Avaliar interações sempre que houver ao menos duas evidências eleitas e produzi-las somente dentro do limite solicitado.
+7. Tratar EVA — Evidence Algorithm — como nome e arquitetura principal do sistema, mantendo evidências, derivações e embeddings como seu núcleo persistente.
+8. Tratar Cnode somente como derivação conceitual interna e transitória do EVA, nunca como sistema, camada hierárquica superior, nó documental ou entidade persistente; não persistir pares candidatos, análises de interação ou métricas relacionais.
+9. Avaliar interações quando houver ao menos duas evidências recuperadas e produzir somente relações entre evidências efetivamente citadas, dentro do limite solicitado.
 10. Usar exclusivamente `simetry` e `assimetry` para descrever interações.
 11. Não classificar relações por taxonomias julgamentais.
 12. Não transformar similaridade vetorial em conclusão.
@@ -38,7 +38,7 @@
 36. Responder cada aspecto sustentado com evidências citadas.
 37. Nomear separadamente cada aspecto sem evidência suficiente no contexto recuperado.
 38. Nunca apagar uma relação parcial válida apenas porque outro aspecto do input não possui evidência.
-39. Tratar resultados recuperados como candidatos até a eleição determinística concluída pela aplicação.
+39. Tratar resultados recuperados como candidatos até a composição determinística do contexto disponível concluída pela aplicação.
 40. Entregar ao provedor somente o contexto final autorizado, com fontes primárias e papéis explícitos de núcleo ou convergência nas rotas semânticas.
 41. Exigir que toda evidência mantida no resultado seja citada no trecho analítico em que contribui para a resposta.
 42. Descartar evidência recuperada omitida no texto e rejeitar marcador isolado ou inventário de citações que não demonstre incorporação analítica.
@@ -58,7 +58,7 @@
 56. Limitar o conjunto estatístico por `QUERY_CANDIDATE_LIMIT`, com padrão 20 e intervalo efetivo de 1 a 200 candidatos por documento.
 57. Calcular média e desvio padrão populacionais sobre o Top-k e calcular `CV = σ / μ`, usando `null` quando `μ = 0`.
 58. Classificar como descarte `s < μ`, convergência `μ ≤ s < μ + σ` e núcleo `s ≥ μ + σ`.
-59. Usar o núcleo como referência principal e a faixa de convergência como análise complementar obrigatória; quando o núcleo estiver vazio, promover a convergência ao papel principal.
+59. Usar o núcleo como referência principal e a faixa de convergência como contexto complementar disponível; quando o núcleo estiver vazio, promover a convergência ao papel principal.
 60. Preservar a ordem do Retriever dentro das regiões; não criar nota, peso, heurística subjetiva ou reranking por IA.
 61. Resolver candidatos derivados selecionados pelo CIE até suas fontes primárias antes de aplicar o limite global e chamar o provedor de resposta.
 62. Não persistir candidatos, similaridades, estatísticas, regiões ou seleção do CIE como memória documental.
@@ -67,7 +67,7 @@
 65. Preservar `core` como precedência argumentativa e usar `convergence` somente quando contribuir como reforço, contexto, limite ou contraponto sustentado literalmente.
 66. Não inventar relações para acomodar uma evidência recuperada; candidatos sem contribuição citada devem ser descartados sem invalidar a resposta.
 67. Manter a calibração semântica estrita de `simetry` e `assimetry` separada da validade documental da resposta.
-68. Descartar silenciosamente uma resposta rejeitada pela validação local e permitir no máximo três tentativas totais com o mesmo contexto eleito; da segunda tentativa em diante, transmitir somente o código seguro da falha e o identificador de uma evidência eleita quando ela não tiver sido incorporada analiticamente.
+68. Descartar silenciosamente uma resposta rejeitada pela validação local e permitir no máximo três tentativas totais com o mesmo contexto disponível; da segunda tentativa em diante, transmitir somente um código seguro de correção. Evidência recuperada mas não citada deve ser descartada da base final, nunca usada como motivo isolado para nova tentativa ou bloqueio integral.
 69. Exibir erro ao usuário somente depois da terceira falha consecutiva de validação, usando mensagem genérica sem identificador de evidência ou regra técnica interna.
 70. Manter módulos independentes de projetos, usuários e documentos; associações observadas pertencem ao módulo, não ao modelo persistente do Core.
 71. Permitir zero, um ou vários módulos ativos e entregar cada evento somente aos assinantes declarados.
