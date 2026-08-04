@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use Eva\Infrastructure\Database\Connection;
+use Eva\Application\Access\AccessManagementService;
+use Eva\Application\Access\AuthService;
 use Eva\Support\Env;
 
 $container = require __DIR__ . '/bootstrap.php';
@@ -14,6 +16,33 @@ if (in_array('--baseline', $arguments, true)) {
         'users' => (int) $database->query('SELECT COUNT(*) FROM users')->fetchColumn(),
         'sessions' => (int) $database->query('SELECT COUNT(*) FROM user_sessions')->fetchColumn(),
         'audit_max_id' => (int) $database->query('SELECT COALESCE(MAX(id), 0) FROM audit_events')->fetchColumn(),
+    ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES) . PHP_EOL;
+    exit(0);
+}
+
+$createArgument = array_values(array_filter(
+    $arguments,
+    static fn (string $argument): bool => str_starts_with($argument, '--create=')
+));
+
+if (isset($createArgument[0])) {
+    $username = substr($createArgument[0], strlen('--create='));
+
+    if (preg_match('/^smoke_[a-f0-9]{12}$/', $username) !== 1) {
+        fwrite(STDERR, "O username temporário é inválido.\n");
+        exit(1);
+    }
+
+    $password = 'Smoke-visual-2026!';
+    $service = new AccessManagementService(
+        $database,
+        new AuthService($database, $container['security'])
+    );
+    $result = $service->createUser($username, $password);
+    echo json_encode([
+        'username' => $username,
+        'password' => $password,
+        'user_id' => $result['user']['id'],
     ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES) . PHP_EOL;
     exit(0);
 }

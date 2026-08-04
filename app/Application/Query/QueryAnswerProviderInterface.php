@@ -8,5 +8,10 @@ interface QueryAnswerProviderInterface
 {
     public function model(): string;
 
-    public function answer(string $input, QueryContext $context): GeneratedAnswer;
+    /** @param array{code: string, evidence_id?: string} $validationFeedback */
+    public function answer(
+        string $input,
+        QueryContext $context,
+        array $validationFeedback
+    ): GeneratedAnswer;
 }

@@ -23,7 +23,9 @@ A base atual contém:
 - chat conversacional com transcript temporário completo e contexto limitado às três rodadas anteriores;
 - produto white label com interface administrativa, API autenticada, fila e retomada explícita;
 - métricas descritivas e auditoria sanitizada, sem exposição de segredos ou conteúdo consultado;
-- execução real de IA bloqueada por padrão e reaproveitamento por modelo/hash.
+- execução real de IA bloqueada por padrão e reaproveitamento por modelo/hash;
+- Runtime de módulos conectores independentes, com descoberta, ativação, desativação, exclusão confirmada e SQLite próprio por pacote;
+- módulo `com.eva.education` de referência, sem notas ou pesos e sem conhecimento educacional no Core.
 
 As Fases 1 a 5 estão funcionais e o roadmap original está concluído. O estado de cada entrega está em [docs/09_ROADMAP.md](docs/09_ROADMAP.md).
 
@@ -37,7 +39,7 @@ Um Cnode apenas descreve uma interação semântica explícita no contexto consu
 
 - PHP 8.2 ou superior;
 - MariaDB 10.4 ou MySQL compatível;
-- extensões PHP `pdo`, `pdo_mysql`, `json`, `dom`, `mbstring` e `curl`.
+- extensões PHP `pdo`, `pdo_mysql`, `pdo_sqlite`, `json`, `dom`, `mbstring` e `curl`.
 
 ## Configuração local
 
@@ -114,11 +116,11 @@ Além de `--live`, `AI_LIVE_ENABLED=true` deve estar configurado. Resumos criam 
 
 `InputTypeDetector` reconhece inputs diretos, estruturais, conceituais, relacionais e amplos sem consumir IA. `DocumentContextRetriever` escolhe a rota correspondente, usa embedding transitório e CIE apenas nas buscas conceituais/relacionais e retorna evidências primárias completas por acesso direto ou pela linhagem das sínteses derivadas.
 
-`DocumentQueryService` aceita somente identificadores pertencentes ao contexto recuperado. Citações desconhecidas, marcadores omitidos e inventários sem incorporação analítica são rejeitados; a aplicação não acrescenta citações ausentes para aparentar conformidade. Uma saída rejeitada pela validação local é regenerada silenciosamente até o limite de três tentativas totais com o mesmo contexto eleito. Somente a terceira falha consecutiva chega ao usuário como mensagem genérica, sem identificador de evidência. Evidências utilizadas, `simetry`, `assimetry` e limitações permanecem em campos separados.
+`DocumentQueryService` aceita somente identificadores pertencentes ao contexto recuperado. Citações desconhecidas, marcadores omitidos e inventários sem incorporação analítica são rejeitados; a aplicação não acrescenta citações ausentes para aparentar conformidade. Uma saída rejeitada pela validação local é regenerada silenciosamente até o limite de três tentativas totais com o mesmo contexto eleito. Da segunda tentativa em diante, o provedor recebe somente um código seguro da falha e, quando aplicável, o ID de uma evidência já eleita que deixou de ser incorporada. Somente a terceira falha consecutiva chega ao usuário como mensagem genérica, sem identificador de evidência. Evidências utilizadas, `simetry`, `assimetry` e limitações permanecem em campos separados.
 
 Na interface web, todas as rodadas concluídas permanecem visíveis no box do chat durante a sessão atual. A partir da segunda consulta, o navegador anexa ao input no máximo as três rodadas anteriores, em ordem cronológica, para que a IA avalie se o pedido atual é continuidade. Esse histórico auxilia referências conversacionais, mas não constitui evidência: perguntas e respostas anteriores nunca substituem nem ampliam as evidências primárias recuperadas para a consulta atual.
 
-O botão **Reiniciar chat** limpa o transcript, o contexto conversacional e o input, preservando o escopo de projetos e obras selecionado. O histórico não é enviado para tabelas, auditoria ou `sessionStorage`; logout, novo login ou recarregamento da aplicação iniciam uma conversa vazia.
+O botão **Reiniciar chat** limpa o transcript, o contexto conversacional e o input, preservando o escopo de projetos e obras selecionado. Durante a espera, o estado **Consultando evidências** apresenta três pontos amarelos animados e respeita a preferência de movimento reduzido. O histórico não é enviado para tabelas, auditoria ou `sessionStorage`; logout, novo login ou recarregamento da aplicação iniciam uma conversa vazia.
 
 A consulta real também exige dupla confirmação:
 
@@ -126,7 +128,21 @@ A consulta real também exige dupla confirmação:
 php bin/query-document.php <document-id> --live "pergunta"
 ```
 
-Os limites padrão são Top-k de 20 candidatos vetoriais por documento, 8 evidências primárias no contexto final e 20 interações transitórias. Na API e na interface web, configure-os por `QUERY_CANDIDATE_LIMIT`, `QUERY_MAX_EVIDENCE` e `QUERY_MAX_INTERACTIONS`. Na linha de comando, os dois limites finais também podem ser substituídos na execução por `--evidence-limit=N` e `--interaction-limit=N`.
+Os limites padrão são Top-k de 20 candidatos vetoriais por documento, 10 evidências primárias no contexto final e 20 interações transitórias. Na API e na interface web, configure-os por `QUERY_CANDIDATE_LIMIT`, `QUERY_MAX_EVIDENCE` e `QUERY_MAX_INTERACTIONS`. Na linha de comando, os dois limites finais também podem ser substituídos na execução por `--evidence-limit=N` e `--interaction-limit=N`.
+
+## Módulos conectores
+
+Um módulo funciona como um cartucho instalável: é um pacote independente em `modules/<module-id>/`, hierarquicamente acima de projetos, mas sem pertencer a projeto, documento ou usuário. Zero, um ou vários módulos podem permanecer ativos e observar o mesmo evento versionado de forma independente.
+
+Cada pacote declara `module.json`, implementa o EVA Module Contract v1 e grava seu histórico privado em `modules/.runtime/data/<module-id>/module.sqlite`. O Core persiste uma única caixa postal neutra em `module_events`; cada assinante mantém cursor próprio. O módulo recebe uma API de leitura limitada e uma capacidade de linguagem neutra, nunca chaves de IA ou credenciais do banco principal.
+
+O superadmin apenas ativa, desativa ou exclui definitivamente os pacotes encontrados em `modules/`. Desativar preserva o código e o SQLite. Excluir exige confirmação digitada e remove pacote e histórico. Para atualizar, substitui-se somente `modules/<module-id>/`; os dados permanecem fora do pacote.
+
+Interfaces modulares fornecem o próprio HTML e CSS. O Core conhece somente o contrato genérico de dashboard e o nome do manifesto. Assim, um conector futuro pode acrescentar sua própria interface sem inserir menu, renderer, estilo ou regra de domínio específica no Core.
+
+O pacote `com.eva.education` demonstra o contrato: observa interações concluídas, mapeia trajetos, produz observações descritivas ancoradas em evidências e extrai conceitos linguísticos do objeto completo pergunta+resposta. Não utiliza pontuações, pesos, percentuais, confiança ou rankings. Sua governança atual possui somente articulação conceitual, uso de evidências e conexão contextual.
+
+Consulte [Módulos do EVA](docs/16_MODULOS.md) para instalação, contratos, operação, backup, atualização e remoção.
 
 ## Produto administrativo
 
@@ -173,6 +189,7 @@ bootstrap/      Inicialização e autoload
 config/         Configurações
 database/       Esquema versionado do banco
 docs/           Especificação oficial
+modules/        Runtime e pacotes conectores independentes
 public/         Única pasta exposta pelo servidor web
 storage/        Documentos e logs locais não versionados
 tests/          Testes automatizados

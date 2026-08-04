@@ -300,7 +300,7 @@ $queryProvider = new QueryAnswerProvider(
     'language-model-test',
     'https://language-provider.test/v1/chat/completions'
 );
-$queryAnswer = $queryProvider->answer('Explique a unidade.', $queryContext);
+$queryAnswer = $queryProvider->answer('Explique a unidade.', $queryContext, []);
 $queryMessage = $queryHttp->requests[0]['payload']['messages'][1]['content'];
 $queryJsonStart = strpos($queryMessage, '{"input":');
 $queryJson = $queryJsonStart === false ? '' : substr($queryMessage, $queryJsonStart);
@@ -352,6 +352,55 @@ assertAiAdapter($queryAnswer->interactions[0]->interactionType === 'simetry', 'A
 assertAiAdapter(!array_key_exists('id', $queryAnswer->interactions[0]->toArray()), 'A interação transitória não deve possuir identidade persistente.');
 assertAiAdapter(str_contains($queryAnswer->answer, '[EVA-E000001]'), 'A resposta perdeu a citacao documental.');
 
+$correctiveQueryHttp = new CapturingJsonHttpClient([[
+    'choices' => [[
+        'message' => ['content' => json_encode([
+            'answer' => 'A evidência omitida agora contribui para a análise [EVA-E000001]. A segunda evidência também permanece incorporada [EVA-E000002].',
+            'used_evidence_ids' => ['EVA-E000001', 'EVA-E000002'],
+            'interactions' => [],
+            'limitations' => [],
+        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE)],
+    ]],
+]]);
+(new QueryAnswerProvider(
+    $correctiveQueryHttp,
+    'test-key',
+    'language-model-test',
+    'https://language-provider.test/v1/chat/completions'
+))->answer('Explique a unidade.', $queryContext, [
+    'code' => 'missing_analytical_evidence',
+    'evidence_id' => 'EVA-E000001',
+]);
+$correctiveMessage = $correctiveQueryHttp->requests[0]['payload']['messages'][1]['content'];
+
+assertAiAdapter(
+    str_contains($correctiveMessage, 'validation_failure_code: missing_analytical_evidence')
+        && str_contains($correctiveMessage, 'A evidência EVA-E000001 deve contribuir efetivamente'),
+    'A regeneração deve receber a regra segura e o identificador da evidência omitida.'
+);
+
+$invalidCorrectiveFeedbackRejected = false;
+$invalidCorrectiveHttp = new CapturingJsonHttpClient([]);
+
+try {
+    (new QueryAnswerProvider(
+        $invalidCorrectiveHttp,
+        'test-key',
+        'language-model-test',
+        'https://language-provider.test/v1/chat/completions'
+    ))->answer('Explique a unidade.', $queryContext, [
+        'code' => 'missing_analytical_evidence',
+        'evidence_id' => 'EVA-E999999',
+    ]);
+} catch (AiProviderException $exception) {
+    $invalidCorrectiveFeedbackRejected = str_contains($exception->getMessage(), 'feedback de evidência ausente');
+}
+
+assertAiAdapter(
+    $invalidCorrectiveFeedbackRejected && $invalidCorrectiveHttp->requests === [],
+    'O feedback corretivo não deve aceitar nem enviar uma evidência fora do contexto eleito.'
+);
+
 $profiledContext = new QueryContext(
     $queryContext->understanding,
     $queryContext->evidences,
@@ -380,7 +429,7 @@ $profiledQueryHttp = new CapturingJsonHttpClient([[
     'test-key',
     'language-model-test',
     'https://language-provider.test/v1/chat/completions'
-))->answer('Explique a unidade para um professor.', $profiledContext);
+))->answer('Explique a unidade para um professor.', $profiledContext, []);
 $baseQuerySystemPrompt = $queryHttp->requests[0]['payload']['messages'][0]['content'];
 $profiledSystemPrompt = $profiledQueryHttp->requests[0]['payload']['messages'][0]['content'];
 
@@ -429,7 +478,7 @@ $recoveredQueryAnswer = (new QueryAnswerProvider(
     'test-key',
     'language-model-test',
     'https://language-provider.test/v1/chat/completions'
-))->answer('Como as unidades se relacionam?', $queryContext);
+))->answer('Como as unidades se relacionam?', $queryContext, []);
 
 assertAiAdapter(
     count($truncatedQueryHttp->requests) === 2,
@@ -467,7 +516,7 @@ try {
         'test-key',
         'language-model-test',
         'https://language-provider.test/v1/chat/completions'
-    ))->answer('Como as unidades se relacionam?', $queryContext);
+    ))->answer('Como as unidades se relacionam?', $queryContext, []);
 } catch (AiProviderException $exception) {
     $repeatedTruncationRejected = str_contains($exception->getMessage(), 'após a regeneração compacta');
 }
@@ -501,7 +550,7 @@ $answerWithDiscardedInteraction = (new QueryAnswerProvider(
     'test-key',
     'language-model-test',
     'https://language-provider.test/v1/chat/completions'
-))->answer('Como as unidades se relacionam em simetry ou assimetry?', $queryContext);
+))->answer('Como as unidades se relacionam em simetry ou assimetry?', $queryContext, []);
 
 assertAiAdapter(
     $answerWithDiscardedInteraction->usedEvidenceIds === ['EVA-E000001', 'EVA-E000002'],
@@ -549,7 +598,7 @@ try {
         'test-key',
         'language-model-test',
         'https://language-provider.test/v1/chat/completions'
-    ))->answer('Como as unidades interagem?', $queryContext);
+    ))->answer('Como as unidades interagem?', $queryContext, []);
 } catch (AiProviderException $exception) {
     $forbiddenRejected = str_contains($exception->getMessage(), 'proibido');
 }

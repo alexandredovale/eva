@@ -1,0 +1,163 @@
+.education-dashboard .learning-toolbar {
+    display: flex;
+    align-items: end;
+    gap: 16px;
+}
+
+.education-dashboard .learning-toolbar .form-field {
+    min-width: min(360px, 100%);
+}
+
+.education-dashboard .learning-filter {
+    display: flex;
+    align-items: end;
+    gap: 18px;
+}
+
+.education-dashboard .learning-filter .form-field {
+    flex: 1;
+}
+
+.education-dashboard .learning-filter-count {
+    flex: 0 0 auto;
+    padding-bottom: 12px;
+    color: var(--muted);
+    font-family: "Cascadia Mono", monospace;
+    font-size: .72rem;
+}
+
+.education-dashboard .learning-timeline {
+    display: grid;
+    gap: 16px;
+}
+
+.education-dashboard .learning-entry {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.education-dashboard .learning-entry-header,
+.education-dashboard .learning-entry-heading {
+    margin: 0;
+}
+
+.education-dashboard .learning-entry-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: clamp(20px, 2.5vw, 34px);
+    border: 0;
+    color: inherit;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+}
+
+.education-dashboard .learning-entry-toggle:hover {
+    background: rgba(255, 255, 255, .025);
+}
+
+.education-dashboard .learning-entry-copy {
+    min-width: 0;
+    display: grid;
+    gap: 5px;
+}
+
+.education-dashboard .learning-entry-copy .eyebrow {
+    margin: 0;
+}
+
+.education-dashboard .learning-entry-question {
+    font-family: "Share Tech", ui-monospace, monospace;
+    font-size: 1.15rem;
+    font-weight: 600;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.education-dashboard .learning-entry-controls {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.education-dashboard .learning-entry-chevron {
+    width: 10px;
+    height: 10px;
+    border-right: 2px solid var(--muted-strong);
+    border-bottom: 2px solid var(--muted-strong);
+    transform: rotate(45deg);
+    transition: transform .18s ease;
+}
+
+.education-dashboard .learning-entry-toggle[aria-expanded="true"] .learning-entry-chevron {
+    transform: rotate(225deg);
+}
+
+.education-dashboard .learning-entry-body {
+    padding: 20px clamp(20px, 2.5vw, 34px) clamp(20px, 2.5vw, 34px);
+    border-top: 1px solid var(--line);
+}
+
+.education-dashboard .learning-entry-answer {
+    margin-top: 0;
+}
+
+.education-dashboard .learning-observations {
+    display: grid;
+    gap: 10px;
+    margin: 18px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.education-dashboard .learning-observations li {
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, .018);
+}
+
+.education-dashboard .learning-observations strong {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--accent);
+    font-family: "Cascadia Mono", monospace;
+    font-size: .72rem;
+}
+
+.education-dashboard .learning-observations small {
+    display: block;
+    margin-top: 6px;
+    color: var(--muted);
+}
+
+.education-dashboard .learning-context {
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: .8rem;
+}
+
+@media (max-width: 760px) {
+    .education-dashboard .learning-toolbar,
+    .education-dashboard .learning-filter {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .education-dashboard .learning-filter-count {
+        padding-bottom: 0;
+    }
+
+    .education-dashboard .learning-entry-toggle {
+        align-items: flex-start;
+    }
+
+    .education-dashboard .learning-entry-controls {
+        gap: 10px;
+    }
+}

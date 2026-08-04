@@ -14,8 +14,15 @@ Persistir a memória documental com integridade e rastreabilidade, sem duplicar 
 - **processing_jobs:** fila das etapas `summaries` e `embeddings`.
 - **audit_events:** eventos administrativos sanitizados.
 - **projects:** agrupamentos de obras, permissões e perfil complementar de respostas administrado pelo superadmin.
+- **module_events:** caixa postal neutra e append-only de eventos permitidos pelo contrato de módulos.
 
 Não existem tabelas `cnodes`, `cnode_evidences`, `cnode_embeddings` ou `interaction_analyses`.
+
+## Persistência dos módulos
+
+`module_events` é a única tabela adicional do banco principal necessária ao Runtime. Ela não contém regra, estado analítico ou esquema específico de qualquer módulo. O evento sanitizado é gravado na mesma transação que conclui a interação; em seguida, o Runtime entrega o evento aos módulos ativos assinantes.
+
+Cada módulo persiste seu próprio estado em `modules/.runtime/data/<module-id>/module.sqlite`. Esses bancos SQLite são privados, independentes do MySQL, versionados pelo próprio pacote e nunca enviados ao Git. Não existem chaves estrangeiras ou alterações nas tabelas preexistentes do Core para acomodar um módulo.
 
 ## Evidências
 
@@ -44,5 +51,6 @@ O esquema não armazena confiança, pontuação, similaridade cognitiva, intensi
 - Operações que alteram árvore e evidências usam transação.
 - Interações de consulta nunca alteram o núcleo persistente.
 - O perfil de respostas de um projeto orienta a geração somente quando esse projeto é selecionado explicitamente e não substitui as regras documentais do sistema.
+- Eventos de módulos são sanitizados, rejeitam campos sensíveis e não autorizam escrita de volta no núcleo documental.
 
 O esquema inicial está em `database/schema.sql` e evolui por migrações incrementais.

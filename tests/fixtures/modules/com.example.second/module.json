@@ -1,0 +1,11 @@
+{
+  "id": "com.example.second",
+  "name": "Second Fixture",
+  "vendor": "EVA Tests",
+  "version": "1.0.0",
+  "eva_contract": "1",
+  "entrypoint": "bootstrap.php",
+  "subscribed_events": ["interaction.completed"],
+  "capabilities": [],
+  "storage": {"driver": "sqlite", "schema_version": 1}
+}

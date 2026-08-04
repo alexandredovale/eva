@@ -161,9 +161,9 @@ O valor foi calibrado a partir da matriz relacional real. Reduzi-lo exige nova v
 
 ### Regeneração silenciosa por falha de validação
 
-Quando uma geração chega completa ao backend, mas viola o contrato local de evidências, citações, incorporação analítica ou interações, `DocumentQueryService` descarta integralmente essa saída e solicita nova geração com o mesmo contexto eleito. São permitidas no máximo três tentativas totais de resposta validada dentro da mesma requisição da API.
+Quando uma geração chega completa ao backend, mas viola o contrato local de evidências, citações, incorporação analítica ou interações, `DocumentQueryService` descarta integralmente essa saída e solicita nova geração com o mesmo contexto eleito. A partir da segunda tentativa, o provedor recebe somente um código técnico conhecido da falha e, quando uma evidência eleita não foi incorporada, o respectivo identificador público. São permitidas no máximo três tentativas totais de resposta validada dentro da mesma requisição da API.
 
-As tentativas rejeitadas não aparecem no transcript, não alteram a eleição do CIE e não reutilizam texto parcial. Enquanto houver tentativa disponível, a interface permanece em **Consultando evidências…** e não exibe o identificador nem a regra técnica que causou a rejeição.
+As tentativas rejeitadas não aparecem no transcript, não alteram a eleição do CIE e não reutilizam texto parcial. O feedback corretivo não contém input, conteúdo documental, resposta rejeitada, similaridade, peso ou valor subjetivo. Enquanto houver tentativa disponível, a interface permanece em **Consultando evidências…** e não exibe o identificador nem a regra técnica que causou a rejeição.
 
 Uma tentativa posterior válida substitui completamente as anteriores. Somente depois de três falhas consecutivas de validação a API retorna erro ao navegador, usando mensagem genérica sem identificador de evidência. O esgotamento é registrado no log por categoria segura, quantidade de tentativas e `request_id`; o último motivo técnico permanece encadeado internamente sem ser exposto ao usuário.
 

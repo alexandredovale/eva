@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://eva.local/contracts/module-dashboard-v1.schema.json",
+  "title": "EVA Module Dashboard v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract", "html", "css"],
+  "properties": {
+    "contract": {"const": "eva.module.dashboard/1"},
+    "html": {"type": "string"},
+    "css": {"type": "string"}
+  }
+}

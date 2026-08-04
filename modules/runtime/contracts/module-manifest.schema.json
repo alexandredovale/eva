@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://eva.local/contracts/module-manifest-v1.schema.json",
+  "title": "EVA Module Manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "vendor", "version", "eva_contract", "entrypoint", "subscribed_events", "capabilities", "storage"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)+$", "maxLength": 160},
+    "name": {"type": "string", "minLength": 1, "maxLength": 180},
+    "vendor": {"type": "string", "minLength": 1, "maxLength": 180},
+    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$", "maxLength": 64},
+    "eva_contract": {"const": "1"},
+    "entrypoint": {"type": "string", "pattern": "^[A-Za-z0-9_.\\\\/-]+\\.php$", "maxLength": 255},
+    "subscribed_events": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,79}$"}, "maxItems": 100},
+    "capabilities": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,119}$"}, "maxItems": 100},
+    "dashboard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled"],
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "entrypoint": {"type": "string", "maxLength": 255},
+        "order": {"type": "integer", "minimum": 1, "maximum": 9999}
+      }
+    },
+    "storage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["driver", "schema_version"],
+      "properties": {
+        "driver": {"const": "sqlite"},
+        "schema_version": {"type": "integer", "minimum": 1}
+      }
+    }
+  }
+}

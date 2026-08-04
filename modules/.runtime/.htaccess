@@ -1,0 +1,6 @@
+Options -Indexes
+Require all denied
+
+<FilesMatch "\.(?:php|phtml|phar|sqlite|sqlite-wal|sqlite-shm|json|log)$">
+    Require all denied
+</FilesMatch>

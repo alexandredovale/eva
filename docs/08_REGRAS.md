@@ -67,5 +67,15 @@
 65. Preservar `core` como precedência argumentativa e incorporar cada `convergence` como reforço, contexto, limite ou contraponto sustentado literalmente.
 66. Não inventar relações para acomodar uma evidência eleita; incorporação obrigatória continua limitada ao conteúdo documental.
 67. Manter a calibração semântica estrita de `simetry` e `assimetry` separada da validade documental da resposta.
-68. Descartar silenciosamente uma resposta rejeitada pela validação local e permitir no máximo três tentativas totais com o mesmo contexto eleito.
+68. Descartar silenciosamente uma resposta rejeitada pela validação local e permitir no máximo três tentativas totais com o mesmo contexto eleito; da segunda tentativa em diante, transmitir somente o código seguro da falha e o identificador de uma evidência eleita quando ela não tiver sido incorporada analiticamente.
 69. Exibir erro ao usuário somente depois da terceira falha consecutiva de validação, usando mensagem genérica sem identificador de evidência ou regra técnica interna.
+70. Manter módulos independentes de projetos, usuários e documentos; associações observadas pertencem ao módulo, não ao modelo persistente do Core.
+71. Permitir zero, um ou vários módulos ativos e entregar cada evento somente aos assinantes declarados.
+72. Conhecer no Core apenas contratos e capacidades genéricas, sem nome, menu, regra, HTML, CSS ou função específica de módulo.
+73. Usar `module_events` como única tabela adicional do banco principal para a caixa postal neutra, sem alterar tabelas preexistentes.
+74. Manter esquema, histórico e cursor de cada módulo em seu próprio SQLite privado e excluído do versionamento.
+75. Persistir o evento sanitizado transacionalmente e resolver seu processamento imediatamente depois da interação concluída.
+76. Isolar a falha de um módulo da resposta documental e dos demais módulos assinantes.
+77. Rejeitar eventos com campos sensíveis e não permitir que módulos escrevam na memória documental do Core.
+78. Exigir confirmação digitada para exclusão definitiva e remover o pacote e todo o diretório privado de dados correspondente.
+79. Não atribuir notas, pesos, confiança ou qualquer valor subjetivo às observações pedagógicas produzidas por módulos.

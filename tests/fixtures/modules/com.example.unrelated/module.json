@@ -1,0 +1,11 @@
+{
+  "id": "com.example.unrelated",
+  "name": "Unrelated Fixture",
+  "vendor": "EVA Tests",
+  "version": "1.0.0",
+  "eva_contract": "1",
+  "entrypoint": "bootstrap.php",
+  "subscribed_events": ["document.uploaded"],
+  "capabilities": [],
+  "storage": {"driver": "sqlite", "schema_version": 1}
+}

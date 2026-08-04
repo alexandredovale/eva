@@ -32,11 +32,19 @@ A raiz HTTP encaminha somente rotas virtuais e assets para `public`. Arquivos ou
 
 O box de consulta funciona como um transcript durante a permanência na página. Cada input aparece como mensagem do usuário e cada resultado como resposta documental independente. Rodadas concluídas permanecem visíveis, a interface rola para a mais recente e cada resposta mantém sua própria ação de cópia com pergunta, resposta e referências.
 
-Durante uma nova requisição, o transcript preserva as rodadas anteriores e acrescenta o estado `Consultando evidências…`. Se a requisição falhar, as rodadas já concluídas permanecem no box. Em caso de sucesso, o input é limpo e recebe foco para a próxima mensagem.
+Durante uma nova requisição, o transcript preserva as rodadas anteriores e acrescenta o estado `Consultando evidências…`, acompanhado por três pontos amarelos animados. A preferência de redução de movimento do navegador desativa a animação. Se a requisição falhar, as rodadas já concluídas permanecem no box. Em caso de sucesso, o input é limpo e recebe foco para a próxima mensagem.
 
 O estado visual pode conter todas as rodadas da conversa atual, mas somente as três rodadas concluídas mais recentes participam do próximo `POST /api/query`. Elas são anexadas ao próprio campo `input`; nenhuma nova rota, tabela ou entidade de conversa foi criada. Se o limite de 20.000 bytes exigir redução, a rodada mais antiga é removida por inteiro.
 
 **Reiniciar chat** limpa o transcript e o contexto curto sem desmarcar os projetos ou obras selecionados. O estado não sobrevive a logout, novo login ou recarregamento e não é persistido no banco, na auditoria ou no armazenamento do navegador.
+
+## Módulos conectores
+
+O EVA descobre zero, um ou vários módulos independentes em `modules/`. Cada pacote declara sua identidade, contrato, capacidades, eventos assinados e ponto de entrada em `module.json`. O Core conhece apenas o contrato genérico e nunca contém menu, função, regra pedagógica ou CSS específico de um módulo.
+
+Módulos ativos podem receber o evento neutro de interação concluída e processá-lo imediatamente após a persistência transacional. Cada módulo mantém cursor, esquema e histórico em seu próprio SQLite sob `modules/.runtime/data/<module-id>/module.sqlite`; falhas ficam isoladas e não invalidam a resposta documental já concluída.
+
+`GET /api/modules` produz os itens de interface dos módulos ativos, e `GET /api/modules/{id}/dashboard` entrega o painel genérico com HTML e CSS pertencentes ao pacote. O superadmin usa `GET /api/admin/modules` e `PATCH` ou `DELETE /api/admin/modules/{id}` para ativar, desativar ou excluir. A exclusão exige confirmação digitada e remove tanto o pacote quanto seus dados internos. O contrato completo está em [`16_MODULOS.md`](16_MODULOS.md).
 
 ## Projetos e perfis de respostas
 

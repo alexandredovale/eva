@@ -63,7 +63,7 @@ final class ContextIntegrationAnswerProvider implements QueryAnswerProviderInter
         return 'fake-cie-answer-v1';
     }
 
-    public function answer(string $input, QueryContext $context): GeneratedAnswer
+    public function answer(string $input, QueryContext $context, array $validationFeedback): GeneratedAnswer
     {
         $this->calls++;
         $ids = array_map(static fn ($evidence): string => $evidence->publicId, $context->evidences);

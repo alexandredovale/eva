@@ -21,8 +21,15 @@ The initial empty schema is in [`database/schema.sql`](../../database/schema.sql
 - **`project_documents`:** project-to-work membership.
 - **`user_projects`:** project-level access grants.
 - **`user_documents`:** individual-work access grants.
+- **`module_events`:** neutral append-only mailbox for events allowed by the module contract.
 
 There are no active `cnodes`, `cnode_evidences`, `cnode_embeddings`, or `interaction_analyses` tables. Historical migrations may mention removed architecture; the current schema and later migrations define the effective model.
+
+## Module persistence
+
+`module_events` is the only additional main-database table required by the Module Runtime. It contains no module-specific business rule, analytical state, or schema. A sanitized event is stored in the same transaction that completes the interaction, then delivered immediately to subscribed active modules.
+
+Each module owns `modules/.runtime/data/<module-id>/module.sqlite`. These SQLite databases are private, independent from MySQL, migrated by their package, and excluded from Git. Modules require no foreign keys to, or alterations of, pre-existing Core tables.
 
 ## Evidence records
 
@@ -56,6 +63,7 @@ The schema does not store cognitive confidence, relevance scores, intensity, pri
 - Tree and evidence mutations use transactions.
 - Query interactions never change the persistent core.
 - A project response profile governs generation only when that project is explicitly selected and never replaces the system's documentary rules.
+- Module events are sanitized, reject sensitive fields, and never authorize writes back to documentary memory.
 
 ## Deletion semantics
 

@@ -22,7 +22,12 @@ The table reflects the implemented dispatcher. Request and response bodies are J
 | Authenticated | `POST` | `/api/me/recovery-code` | Rotate and return a recovery code after password confirmation |
 | Authenticated | `GET` | `/api/scopes` | Projects and works available to the current actor |
 | Authenticated | `POST` | `/api/query` | Query authorized selected scopes |
+| Authenticated | `GET` | `/api/modules` | Discover interface entries exposed by active connector modules |
+| Authenticated | `GET` | `/api/modules/{id}/dashboard` | Load a connector-owned generic dashboard payload |
 | Superadmin | `POST` | `/api/admin/queue/run` | Run one explicitly confirmed worker pass |
+| Superadmin | `GET` | `/api/admin/modules` | List connector packages discovered under `modules/` |
+| Superadmin | `PATCH` | `/api/admin/modules/{id}` | Activate or deactivate one connector module |
+| Superadmin | `DELETE` | `/api/admin/modules/{id}` | Permanently remove a confirmed package and its private module data |
 | Superadmin | `GET`, `POST` | `/api/admin/users` | List users or create a normal user |
 | Superadmin | `PATCH` | `/api/admin/users/{id}` | Activate or deactivate a normal user |
 | Superadmin | `POST` | `/api/admin/users/{id}/reset-password` | Reset a password and return a new recovery code |
@@ -41,6 +46,12 @@ The table reflects the implemented dispatcher. Request and response bodies are J
 Unknown routes return 404. Known routes reject unsupported methods with 405 and an `Allow` header. Authentication, authorization, validation, queue conflicts, query-contract errors, provider unavailability, and unexpected failures remain distinct HTTP conditions with safe client messages.
 
 The administrative token must never appear in documentation, source, URLs, or logs. Normal-user session tokens are stored server-side only as hashes and expire according to security configuration.
+
+## Connector modules
+
+The Core exposes only a generic module contract. It can discover zero, one, or many independent packages without knowing their business purpose, interface labels, HTML, CSS, or private schema. Active module interface entries are returned dynamically, so disabling a module also removes its menu entry.
+
+After a completed interaction is persisted transactionally, subscribed active modules process the neutral event immediately. Each module owns its SQLite database and cursor under `modules/.runtime/data/<module-id>/`; one module failure is isolated from the documentary answer and from other subscribers. See [Connector modules](17_MODULE_CONNECTORS.md) for installation, lifecycle, storage, and extension rules.
 
 ## Access scopes
 

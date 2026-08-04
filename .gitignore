@@ -10,6 +10,10 @@
 !/storage/documents/.gitkeep
 !/storage/logs/.gitkeep
 
+/.00-analise/
+/database/backups/
+/updates/backups/
+
 /docs/test/
 /docs/doc_test.md
 
@@ -17,6 +21,13 @@
 /.vscode/
 /.phpunit.cache/
 /coverage/
+/modules/.runtime/state.json
+/modules/.runtime/data/**/*.sqlite
+/modules/.runtime/data/**/*.sqlite-wal
+/modules/.runtime/data/**/*.sqlite-shm
+/modules/.runtime/logs/*
+!/modules/.runtime/data/.gitkeep
+!/modules/.runtime/logs/.gitkeep
 *.log
 *.sql.gz
 *.zip

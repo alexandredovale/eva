@@ -82,14 +82,21 @@ PROMPT;
         return $this->model;
     }
 
-    public function answer(string $input, QueryContext $context): GeneratedAnswer
-    {
+    public function answer(
+        string $input,
+        QueryContext $context,
+        array $validationFeedback
+    ): GeneratedAnswer {
         $analyzeInteractions = count($context->evidences) > 1
             && $context->interactionLimit > 0;
         $systemPrompt = $this->systemPrompt($context->responseProfiles);
         $requiredEvidenceIds = array_map(
             static fn (RetrievedEvidence $evidence): string => $evidence->publicId,
             $context->evidences
+        );
+        $validationCorrection = $this->validationCorrection(
+            $validationFeedback,
+            $requiredEvidenceIds
         );
         $coreEvidenceIds = [];
         $convergenceEvidenceIds = [];
@@ -135,6 +142,10 @@ PROMPT;
 
             if ($attempt > 1) {
                 $command .= "\n" . self::COMPACT_RETRY_COMMAND;
+            }
+
+            if ($validationCorrection !== '') {
+                $command .= "\n" . $validationCorrection;
             }
 
             $response = $this->http->post(
@@ -343,6 +354,58 @@ PROMPT;
                 throw new AiProviderException('A resposta de consulta retornou um campo cognitivo proibido.');
             }
         }
+    }
+
+    /**
+     * @param array{code: string, evidence_id?: string} $feedback
+     * @param list<string> $requiredEvidenceIds
+     */
+    private function validationCorrection(array $feedback, array $requiredEvidenceIds): string
+    {
+        if ($feedback === []) {
+            return '';
+        }
+
+        if (array_diff(array_keys($feedback), ['code', 'evidence_id']) !== []
+            || !is_string($feedback['code'] ?? null)) {
+            throw new AiProviderException('O feedback de validação da consulta é inválido.');
+        }
+
+        $code = $feedback['code'];
+        $instructions = [
+            'evidence_outside_context' => 'Use somente os IDs presentes em required_evidence_ids.',
+            'required_evidence_set_mismatch' => 'Retorne used_evidence_ids exatamente igual a required_evidence_ids, na mesma ordem.',
+            'citation_outside_context' => 'Remova citações que não pertençam a required_evidence_ids.',
+            'citation_inventory_without_analysis' => 'Integre cada citação à frase que explica a contribuição documental; não devolva uma lista de IDs.',
+            'interaction_limit_exceeded' => 'Reduza interactions ao limite informado no contexto.',
+            'interaction_excerpt_invalid' => 'Use somente fragmentos literais contínuos das evidências indicadas.',
+            'interaction_uncited_evidence' => 'Associe interactions somente a evidências citadas analiticamente em answer.',
+            'answer_contract_invalid' => 'Regenere o objeto completo obedecendo integralmente ao contrato JSON e documental.',
+        ];
+
+        if ($code === 'missing_analytical_evidence') {
+            $evidenceId = $feedback['evidence_id'] ?? null;
+
+            if (!is_string($evidenceId) || !in_array($evidenceId, $requiredEvidenceIds, true)) {
+                throw new AiProviderException('O feedback de evidência ausente da consulta é inválido.');
+            }
+
+            $instruction = sprintf(
+                'A evidência %s deve contribuir efetivamente para a análise e possuir citação visível na frase que explica essa contribuição.',
+                $evidenceId
+            );
+        } else {
+            if (!isset($instructions[$code]) || array_key_exists('evidence_id', $feedback)) {
+                throw new AiProviderException('O código de feedback da consulta é inválido.');
+            }
+
+            $instruction = $instructions[$code];
+        }
+
+        return "Correção obrigatória da tentativa anterior:"
+            . "\nvalidation_failure_code: " . $code
+            . "\n" . $instruction
+            . "\nRegenere o JSON inteiro; não continue nem reutilize a saída rejeitada.";
     }
 
     /**

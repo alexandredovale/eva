@@ -31,6 +31,9 @@ use Eva\Infrastructure\Audit\AuditRecorder;
 use Eva\Infrastructure\Logging\FileLogger;
 use Eva\Infrastructure\Logging\SafeFailureDiagnostics;
 use Eva\Infrastructure\Storage\DocumentStorage;
+use Eva\ModuleRuntime\CoreEventSnapshotBuilder;
+use Eva\ModuleRuntime\ModuleException;
+use Eva\ModuleRuntime\RuntimeFactory;
 use PDO;
 use Throwable;
 
@@ -151,6 +154,8 @@ final readonly class ProductApi
                 'capability' => 'query',
             ]));
             return new HttpResponse(503, ['error' => 'O provedor cognitivo está indisponível.']);
+        } catch (ModuleException $exception) {
+            return new HttpResponse(422, ['error' => $exception->getMessage()]);
         } catch (Throwable $exception) {
             $this->logger->error('product_api_failed', SafeFailureDiagnostics::context($exception, [
                 'route' => $path,
@@ -238,6 +243,27 @@ final readonly class ProductApi
                 : $this->methodNotAllowed('GET');
         }
 
+        if ($path === '/api/modules') {
+            return $method === 'GET'
+                ? new HttpResponse(200, ['modules' => $this->moduleRuntime()->manager()->dashboards()])
+                : $this->methodNotAllowed('GET');
+        }
+
+        if (preg_match('~^/api/modules/([a-z0-9.-]+)/dashboard$~', $path, $matches) === 1) {
+            if ($method !== 'GET') {
+                return $this->methodNotAllowed('GET');
+            }
+
+            parse_str(is_string($server['QUERY_STRING'] ?? null) ? $server['QUERY_STRING'] : '', $filters);
+            $dashboard = $this->moduleRuntime()->manager()->dashboard(
+                $matches[1],
+                ['user_id' => $actor->userId, 'role' => $actor->role],
+                is_array($filters) ? $filters : []
+            );
+
+            return new HttpResponse(200, ['dashboard' => $dashboard]);
+        }
+
         if ($path === '/api/query') {
             if ($method !== 'POST') {
                 return $this->methodNotAllowed('POST');
@@ -245,8 +271,9 @@ final readonly class ProductApi
 
             $payload = (new JsonRequestParser())->parse($rawBody);
             $input = is_string($payload['input'] ?? null) ? trim($payload['input']) : '';
+            $currentInput = is_string($payload['current_input'] ?? null) ? trim($payload['current_input']) : $input;
 
-            if ($input === '' || strlen($input) > 20_000) {
+            if ($input === '' || strlen($input) > 20_000 || $currentInput === '' || strlen($currentInput) > 20_000) {
                 throw new ProductHttpException('Os dados da consulta são inválidos.', 422);
             }
 
@@ -296,6 +323,14 @@ final readonly class ProductApi
                 'simetry_count' => count($result->simetryInteractions),
                 'assimetry_count' => count($result->assimetryInteractions),
             ]);
+            $this->emitCompletedInteraction(
+                $actor,
+                $selectedScopes,
+                $documentIds,
+                $currentInput,
+                $input,
+                $result
+            );
 
             return new HttpResponse(200, ['query' => $result->toArray()]);
         }
@@ -305,6 +340,47 @@ final readonly class ProductApi
         }
 
         $management = new AccessManagementService($this->database, $auth);
+
+        if ($path === '/api/admin/modules') {
+            return $method === 'GET'
+                ? new HttpResponse(200, ['modules' => $this->moduleRuntime()->manager()->installed()])
+                : $this->methodNotAllowed('GET');
+        }
+
+        if (preg_match('~^/api/admin/modules/([a-z0-9.-]+)$~', $path, $matches) === 1) {
+            $payload = (new JsonRequestParser())->parse($rawBody);
+
+            if ($method === 'PATCH') {
+                if (array_keys($payload) !== ['active'] || !is_bool($payload['active'])) {
+                    throw new ProductHttpException('O estado do módulo é inválido.', 422);
+                }
+
+                $module = $this->moduleRuntime()->manager()->setActive($matches[1], $payload['active']);
+                $audit->record('module_state_changed', 'module', $matches[1], $actor->fingerprint, $networkAddress, [
+                    'active' => $module['active'],
+                ]);
+
+                return new HttpResponse(200, ['module' => $module]);
+            }
+
+            if ($method === 'DELETE') {
+                if (($payload['confirm_module_id'] ?? null) !== $matches[1]
+                    || ($payload['delete_data'] ?? null) !== true
+                    || array_diff(array_keys($payload), ['confirm_module_id', 'delete_data']) !== []) {
+                    throw new ProductHttpException('A confirmação de exclusão definitiva do módulo é inválida.', 422);
+                }
+
+                $deletion = $this->moduleRuntime()->manager()->delete($matches[1]);
+                $audit->record('module_deleted', 'module', $matches[1], $actor->fingerprint, $networkAddress, [
+                    'package_entries_deleted' => $deletion['package_entries_deleted'],
+                    'data_entries_deleted' => $deletion['data_entries_deleted'],
+                ]);
+
+                return new HttpResponse(200, ['deletion' => $deletion]);
+            }
+
+            return $this->methodNotAllowed('PATCH, DELETE');
+        }
 
         if ($path === '/api/admin/queue/run') {
             if ($method !== 'POST') {
@@ -389,20 +465,49 @@ final readonly class ProductApi
         }
 
         if (preg_match('~^/api/admin/users/(\d+)$~', $path, $matches) === 1) {
-            if ($method !== 'PATCH') {
-                return $this->methodNotAllowed('PATCH');
+            if (!in_array($method, ['PATCH', 'DELETE'], true)) {
+                return $this->methodNotAllowed('PATCH, DELETE');
             }
 
             $payload = (new JsonRequestParser())->parse($rawBody);
 
-            if (!is_bool($payload['active'] ?? null)) {
-                throw new ProductHttpException('O estado do usuário é inválido.', 422);
+            if ($method === 'PATCH' && array_keys($payload) === ['active'] && is_bool($payload['active'])) {
+                $management->setUserActive((int) $matches[1], $payload['active']);
+                $audit->record('user_status_changed', 'user', $matches[1], $actor->fingerprint, $networkAddress, ['active' => $payload['active']]);
+
+                return new HttpResponse(200, ['status' => 'ok']);
             }
 
-            $management->setUserActive((int) $matches[1], $payload['active']);
-            $audit->record('user_status_changed', 'user', $matches[1], $actor->fingerprint, $networkAddress, ['active' => $payload['active']]);
+            if ($method === 'PATCH' && array_keys($payload) === ['username'] && is_string($payload['username'])) {
+                $user = $management->renameUser((int) $matches[1], $payload['username']);
+                $audit->record('user_renamed', 'user', $matches[1], $actor->fingerprint, $networkAddress);
 
-            return new HttpResponse(200, ['status' => 'ok']);
+                return new HttpResponse(200, ['user' => [
+                    'id' => $user['id'],
+                    'username' => $user['username'],
+                ]]);
+            }
+
+            if ($method === 'PATCH') {
+                throw new ProductHttpException('Informe somente o novo username ou o estado do usuário.', 422);
+            }
+
+            if ($method === 'DELETE') {
+                if (array_keys($payload) !== ['confirm_username'] || !is_string($payload['confirm_username'])) {
+                    throw new ProductHttpException('A confirmação de exclusão do usuário é inválida.', 422);
+                }
+
+                $deletion = $management->deleteUser((int) $matches[1], $payload['confirm_username']);
+                $audit->record('user_deleted', 'user', $matches[1], $actor->fingerprint, $networkAddress, [
+                    'sessions_deleted' => $deletion['sessions_deleted'],
+                    'project_permissions_deleted' => $deletion['project_permissions_deleted'],
+                    'document_permissions_deleted' => $deletion['document_permissions_deleted'],
+                ]);
+
+                return new HttpResponse(200, ['deletion' => $deletion]);
+            }
+
+            return $this->methodNotAllowed('PATCH, DELETE');
         }
 
         if (preg_match('~^/api/admin/users/(\d+)/reset-password$~', $path, $matches) === 1) {
@@ -620,5 +725,76 @@ final readonly class ProductApi
     private function methodNotAllowed(string $allowed): HttpResponse
     {
         return new HttpResponse(405, ['error' => 'Método não permitido.'], ['Allow' => $allowed]);
+    }
+
+    private function moduleRuntime(): RuntimeFactory
+    {
+        return new RuntimeFactory($this->container['root'], $this->database, $this->container['ai']);
+    }
+
+    /**
+     * @param list<array<string, mixed>> $selectedScopes
+     * @param list<int> $documentIds
+     */
+    private function emitCompletedInteraction(
+        ActorContext $actor,
+        array $selectedScopes,
+        array $documentIds,
+        string $currentInput,
+        string $contextualInput,
+        \Eva\Application\Query\DocumentQueryResult $result
+    ): void {
+        try {
+            $runtime = $this->moduleRuntime();
+
+            if (!$runtime->registry()->hasActiveSubscriber('interaction.completed')) {
+                return;
+            }
+
+            $evidences = array_map(
+                static fn (\Eva\Application\Query\RetrievedEvidence $evidence): array => [
+                    'id' => $evidence->publicId,
+                    'document' => $evidence->documentTitle,
+                    'node' => $evidence->nodeTitle,
+                    'structural_path' => $evidence->structuralPath,
+                    'source_reference' => $evidence->sourceReference,
+                ],
+                $result->usedEvidences
+            );
+            $eventSeed = $this->requestId !== ''
+                ? $this->requestId
+                : bin2hex(random_bytes(16));
+            $eventId = 'EVA-EVT-' . strtoupper(substr(hash('sha256', $eventSeed), 0, 24));
+            $runtime->bridge()->emit(
+                'interaction.completed',
+                ['user_id' => $actor->userId, 'role' => $actor->role],
+                (new CoreEventSnapshotBuilder($this->database))->build($selectedScopes, $documentIds),
+                [
+                    'current_input' => $currentInput,
+                    'contextual_input' => $contextualInput,
+                    'answer' => $result->answer,
+                    'input_types' => $result->understanding->toArray()['types'],
+                    'direct_references' => $result->understanding->directReferences,
+                    'routing_points' => $result->routingPoints,
+                ],
+                $evidences,
+                $result->limitations,
+                $eventId
+            );
+            $dispatch = $runtime->dispatcher()->consumeOnce(500);
+
+            if ($dispatch['failed'] > 0) {
+                $this->logger->warning('module_event_dispatch_failed', [
+                    'event_type' => 'interaction.completed',
+                    'request_id' => $this->requestId,
+                    'failed_modules' => $dispatch['failed'],
+                ]);
+            }
+        } catch (Throwable $exception) {
+            $this->logger->warning('module_event_emission_failed', SafeFailureDiagnostics::context($exception, [
+                'event_type' => 'interaction.completed',
+                'request_id' => $this->requestId,
+            ]));
+        }
     }
 }

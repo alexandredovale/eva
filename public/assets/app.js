@@ -7,6 +7,10 @@ const state = {
     jobs: [],
     users: [],
     projects: [],
+    modules: [],
+    moduleInterfaces: [],
+    activeModuleId: '',
+    moduleLocalFilter: '',
     scopes: { projects: [], documents: [] },
     queryHistory: [],
     secretOwner: '',
@@ -42,13 +46,22 @@ const elements = {
     processingConfirmationCancel: document.querySelector('#processing-confirmation-cancel'),
     passwordResetDialog: document.querySelector('#password-reset-dialog'), passwordResetForm: document.querySelector('#admin-password-reset-form'),
     passwordResetUsername: document.querySelector('#password-reset-username'), adminResetPassword: document.querySelector('#admin-reset-password'),
+    usernameRenameDialog: document.querySelector('#username-rename-dialog'), usernameRenameForm: document.querySelector('#username-rename-form'),
+    usernameRenameCurrent: document.querySelector('#username-rename-current'), renamedUsername: document.querySelector('#renamed-username'),
+    modulesList: document.querySelector('#modules-list'), moduleNavigation: document.querySelector('#module-navigation'),
+    moduleView: document.querySelector('#view-module'), moduleDashboard: document.querySelector('#module-dashboard'),
 };
 
 const initialChatEmptyMarkup = elements.queryResult.innerHTML;
 const maxQueryPayloadLength = 20_000;
+const cspStyleNonce = document.querySelector('meta[name="csp-style-nonce"]')?.content || '';
 
 function escapeHtml(value) {
     return String(value ?? '').replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character]);
+}
+
+function normalizeSearchText(value) {
+    return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase().trim();
 }
 
 function total(group) { return Object.values(group || {}).reduce((sum, value) => sum + Number(value || 0), 0); }
@@ -106,21 +119,31 @@ function notify(message, error = false) {
 }
 
 function setConnected(connected) {
-    elements.accessPanel.hidden = connected;
-    elements.accessPanel.setAttribute('aria-hidden', String(connected));
-    elements.topbar.inert = !connected;
-    elements.workspace.inert = !connected;
+    if (connected) {
+        elements.topbar.inert = false;
+        elements.workspace.inert = false;
+        if (elements.accessPanel.contains(document.activeElement)) {
+            elements.workspace.focus({ preventScroll: true });
+        }
+        elements.accessPanel.inert = true;
+        elements.accessPanel.hidden = true;
+    } else {
+        elements.accessPanel.hidden = false;
+        elements.accessPanel.inert = false;
+        elements.accessUsername.focus({ preventScroll: true });
+        elements.topbar.inert = true;
+        elements.workspace.inert = true;
+    }
     document.body.classList.toggle('auth-locked', !connected);
     elements.connection.dataset.state = connected ? 'online' : 'offline';
     elements.connectionLabel.textContent = connected ? 'Sessão ativa' : 'Desconectado';
     elements.sessionUser.textContent = connected && state.user ? state.user.username : '';
-    if (!connected) setTimeout(() => elements.accessUsername.focus(), 0);
 }
 
 function applyRole() {
     const admin = state.user?.role === 'superadmin';
     document.querySelectorAll('[data-admin-only]').forEach(node => {
-        if (node.matches('a')) node.hidden = !admin;
+        if (!node.matches('[data-view-panel]')) node.hidden = !admin;
     });
     document.querySelectorAll('[data-user-only]').forEach(node => {
         if (node.matches('a')) node.hidden = admin;
@@ -149,6 +172,12 @@ function disconnect(showMessage = true) {
     state.jobs = [];
     state.users = [];
     state.projects = [];
+    state.modules = [];
+    state.moduleInterfaces = [];
+    state.activeModuleId = '';
+    state.moduleLocalFilter = '';
+    elements.moduleNavigation.innerHTML = '';
+    elements.moduleDashboard.innerHTML = '<div class="card empty">Selecione um módulo ativo.</div>';
     resetChat();
     sessionStorage.removeItem('eva_access_token');
     elements.accessPassword.value = '';
@@ -175,19 +204,34 @@ function restartChat() {
     document.querySelector('#query-input').focus();
 }
 
-function switchView(view) {
+function switchView(view, requestedModuleId = '') {
     const admin = state.user?.role === 'superadmin';
-    if (!admin && !['query', 'settings'].includes(view)) view = 'query';
+    const moduleInterface = view === 'module'
+        ? state.moduleInterfaces.find(module => module.id === requestedModuleId)
+        : null;
+    if (view === 'module' && !moduleInterface) view = admin ? 'overview' : 'query';
+    if (!admin && !['query', 'module', 'settings'].includes(view)) view = 'query';
+    state.activeModuleId = view === 'module' && moduleInterface ? moduleInterface.id : '';
     document.querySelectorAll('[data-view-panel]').forEach(panel => {
         const allowed = admin ? !panel.hasAttribute('data-user-only') : !panel.hasAttribute('data-admin-only');
         const active = allowed && panel.dataset.viewPanel === view;
         panel.hidden = !active;
         panel.classList.toggle('active', active);
     });
-    document.querySelectorAll('[data-view]').forEach(link => link.classList.toggle('active', link.dataset.view === view));
+    document.querySelectorAll('[data-view]').forEach(link => {
+        const active = link.dataset.view === view
+            && (view !== 'module' || link.dataset.moduleId === state.activeModuleId);
+        link.classList.toggle('active', active);
+    });
     document.body.classList.remove('menu-open');
     elements.menuToggle.setAttribute('aria-expanded', 'false');
-    location.hash = view;
+    location.hash = view === 'module' ? `module/${state.activeModuleId}` : view;
+    if (view === 'module') {
+        loadModuleDashboard(state.activeModuleId).catch(error => {
+            elements.moduleDashboard.innerHTML = `<div class="card empty">${escapeHtml(error.message)}</div>`;
+            notify(error.message, true);
+        });
+    }
 }
 
 function renderMetrics(metrics) {
@@ -363,7 +407,96 @@ function renderAudit(events) {
 function renderUsers(users) {
     state.users = users;
     elements.userCount.textContent = `${users.length} usuário${users.length === 1 ? '' : 's'}`;
-    elements.usersBody.innerHTML = users.length ? users.map(user => `<tr><td><strong>${escapeHtml(user.username)}</strong></td><td><span class="status ${user.active ? 'status-ready' : 'status-failed'}">${user.active ? 'ativo' : 'inativo'}</span></td><td>${escapeHtml(user.last_login_at || 'Nunca')}</td><td>${user.project_ids.length} projeto(s) · ${user.document_ids.length} obra(s)</td><td class="table-actions"><button class="button button-primary button-small" type="button" data-permissions="${user.id}">Permissões</button><button class="button button-quiet button-small" type="button" data-reset="${user.id}">Nova senha</button><button class="button button-quiet button-small" type="button" data-toggle-user="${user.id}" data-active="${user.active ? '0' : '1'}">${user.active ? 'Desativar' : 'Ativar'}</button></td></tr>`).join('') : '<tr><td colspan="5" class="empty">Nenhum usuário cadastrado.</td></tr>';
+    elements.usersBody.innerHTML = users.length ? users.map(user => `<tr><td><strong>${escapeHtml(user.username)}</strong></td><td><span class="status ${user.active ? 'status-ready' : 'status-failed'}">${user.active ? 'ativo' : 'inativo'}</span></td><td>${escapeHtml(user.last_login_at || 'Nunca')}</td><td>${user.project_ids.length} projeto(s) · ${user.document_ids.length} obra(s)</td><td class="table-actions"><button class="button button-primary button-small" type="button" data-permissions="${user.id}">Permissões</button><button class="button button-quiet button-small" type="button" data-rename-user="${user.id}">Renomear</button><button class="button button-quiet button-small" type="button" data-reset="${user.id}">Nova senha</button><button class="button button-quiet button-small" type="button" data-toggle-user="${user.id}" data-active="${user.active ? '0' : '1'}">${user.active ? 'Desativar' : 'Ativar'}</button><button class="button button-danger button-small" type="button" data-delete-user="${user.id}">Excluir</button></td></tr>`).join('') : '<tr><td colspan="5" class="empty">Nenhum usuário cadastrado.</td></tr>';
+}
+
+function renderModules(modules) {
+    state.modules = modules;
+    elements.modulesList.innerHTML = modules.length ? modules.map(module => {
+        if (!module.valid) return `<article class="card module-card"><div class="module-card-header"><div><p class="eyebrow">Pacote inválido</p><h2>${escapeHtml(module.directory)}</h2></div><span class="status status-failed">inválido</span></div><p>${escapeHtml(module.error || 'Manifesto incompatível.')}</p></article>`;
+        return `<article class="card module-card" data-module-card="${escapeHtml(module.id)}"><div class="module-card-header"><div><p class="eyebrow">${escapeHtml(module.vendor)}</p><h2>${escapeHtml(module.name)}</h2><p>${escapeHtml(module.id)}</p></div><span class="status ${module.active ? 'status-ready' : 'status-queued'}">${module.active ? 'ativo' : 'inativo'}</span></div><div class="module-meta"><span>v${escapeHtml(module.version)}</span><span>contract ${escapeHtml(module.eva_contract)}</span><span>${escapeHtml(module.storage?.driver || '')}</span></div><div class="module-actions"><button type="button" class="button ${module.active ? 'button-quiet' : 'button-primary'}" data-module-toggle="${escapeHtml(module.id)}" data-active="${module.active ? '0' : '1'}">${module.active ? 'Desativar' : 'Ativar'}</button><button type="button" class="button button-danger" data-module-delete="${escapeHtml(module.id)}" data-module-name="${escapeHtml(module.name)}">Excluir</button></div></article>`;
+    }).join('') : '<div class="card empty">Nenhum pacote de módulo instalado.</div>';
+}
+
+function renderModuleInterfaces(modules) {
+    state.moduleInterfaces = Array.isArray(modules) ? modules : [];
+    elements.moduleNavigation.innerHTML = state.moduleInterfaces.map(module =>
+        `<a href="#module/${encodeURIComponent(module.id)}" data-view="module" data-module-id="${escapeHtml(module.id)}"><span>${escapeHtml(module.name)}</span></a>`
+    ).join('');
+
+    if (state.activeModuleId && !state.moduleInterfaces.some(module => module.id === state.activeModuleId)) {
+        switchView(state.user?.role === 'superadmin' ? 'overview' : 'query');
+    }
+}
+
+function filterModuleEntries() {
+    const filter = elements.moduleDashboard.querySelector('[data-module-content-filter]');
+    const entries = Array.from(elements.moduleDashboard.querySelectorAll('[data-module-entry]'));
+    if (!filter) return;
+    const query = normalizeSearchText(filter.value);
+    state.moduleLocalFilter = filter.value;
+    let visible = 0;
+
+    entries.forEach(entry => {
+        const matches = !query || normalizeSearchText(entry.textContent).includes(query);
+        entry.hidden = !matches;
+        if (matches) {
+            visible += 1;
+            return;
+        }
+
+        const toggle = entry.querySelector('[data-module-accordion-toggle]');
+        const body = toggle ? document.getElementById(toggle.getAttribute('aria-controls')) : null;
+        if (toggle) toggle.setAttribute('aria-expanded', 'false');
+        if (body) body.hidden = true;
+    });
+
+    const total = entries.length;
+    const count = elements.moduleDashboard.querySelector('[data-module-filter-count]');
+    const singular = count?.dataset.moduleItemSingular || 'item';
+    const plural = count?.dataset.moduleItemPlural || 'itens';
+    const totalLabel = `${total} ${total === 1 ? singular : plural}`;
+    const empty = elements.moduleDashboard.querySelector('[data-module-filter-empty]');
+    if (count) count.textContent = query ? `${visible} de ${totalLabel}` : totalLabel;
+    if (empty) empty.hidden = !query || visible > 0 || total === 0;
+}
+
+function renderModuleDashboard(dashboard) {
+    if (dashboard?.contract !== 'eva.module.dashboard/1' || typeof dashboard.html !== 'string' || typeof dashboard.css !== 'string') {
+        throw new Error('O módulo retornou uma interface incompatível.');
+    }
+
+    elements.moduleDashboard.innerHTML = dashboard.html;
+    const style = document.createElement('style');
+    style.dataset.moduleStyle = state.activeModuleId;
+    if (cspStyleNonce) style.setAttribute('nonce', cspStyleNonce);
+    style.textContent = dashboard.css;
+    elements.moduleDashboard.prepend(style);
+
+    const filter = elements.moduleDashboard.querySelector('[data-module-content-filter]');
+    if (filter && state.moduleLocalFilter) {
+        filter.value = state.moduleLocalFilter;
+    }
+    filterModuleEntries();
+}
+
+async function loadModuleDashboard(moduleId) {
+    if (!moduleId || moduleId !== state.activeModuleId) return;
+    const parameters = new URLSearchParams();
+    elements.moduleDashboard.querySelectorAll('[data-module-filter]').forEach(control => {
+        if (control.name && control.value !== '') parameters.set(control.name, control.value);
+        else if (control.dataset.moduleFilter && control.value !== '') parameters.set(control.dataset.moduleFilter, control.value);
+    });
+    elements.moduleDashboard.setAttribute('aria-busy', 'true');
+
+    try {
+        const suffix = parameters.size ? `?${parameters.toString()}` : '';
+        const { dashboard } = await api(`modules/${encodeURIComponent(moduleId)}/dashboard${suffix}`);
+        if (moduleId !== state.activeModuleId) return;
+        renderModuleDashboard(dashboard);
+    } finally {
+        elements.moduleDashboard.removeAttribute('aria-busy');
+    }
 }
 
 function renderProjects(projects) {
@@ -494,6 +627,30 @@ function closePasswordReset() {
     openPasswordReset.user = null;
 }
 
+function openUsernameRename(user) {
+    openUsernameRename.user = user;
+    openUsernameRename.trigger = document.activeElement;
+    elements.usernameRenameCurrent.textContent = user.username;
+    elements.usernameRenameForm.reset();
+    elements.renamedUsername.value = user.username;
+    elements.usernameRenameDialog.hidden = false;
+    elements.topbar.inert = true;
+    elements.workspace.inert = true;
+    document.body.classList.add('auth-locked');
+    setTimeout(() => { elements.renamedUsername.focus(); elements.renamedUsername.select(); }, 0);
+}
+
+function closeUsernameRename() {
+    elements.usernameRenameDialog.hidden = true;
+    elements.usernameRenameForm.reset();
+    elements.topbar.inert = !state.user;
+    elements.workspace.inert = !state.user;
+    document.body.classList.toggle('auth-locked', !state.user || !elements.secretDialog.hidden);
+    if (openUsernameRename.trigger instanceof HTMLElement) openUsernameRename.trigger.focus();
+    openUsernameRename.trigger = null;
+    openUsernameRename.user = null;
+}
+
 function renderProjectDocumentChoices(selected = null) {
     if (!elements.projectDocuments) return;
     const checked = selected || new Set(Array.from(elements.projectDocuments.querySelectorAll('input:checked')).map(input => Number(input.value)));
@@ -538,7 +695,7 @@ function renderQuery(result, question, index) {
 function renderConversation(pendingQuestion = '') {
     const completed = state.queryHistory.map((turn, index) => renderQuery(turn.result, turn.user, index)).join('');
     const pending = pendingQuestion
-        ? `<section class="chat-turn"><article class="chat-message-user"><p class="eyebrow">Você</p><p>${escapeHtml(pendingQuestion)}</p></article><article class="card chat-message-assistant chat-message-pending"><p>Consultando evidências…</p></article></section>`
+        ? `<section class="chat-turn"><article class="chat-message-user"><p class="eyebrow">Você</p><p>${escapeHtml(pendingQuestion)}</p></article><article class="card chat-message-assistant chat-message-pending"><p class="query-loading"><span>Consultando evidências</span><span class="query-loading-dots" aria-hidden="true"><span class="query-loading-dot"></span><span class="query-loading-dot"></span><span class="query-loading-dot"></span></span><span class="sr-only">…</span></p></article></section>`
         : '';
 
     elements.queryResult.innerHTML = `<div class="chat-transcript">${completed}${pending}</div>`;
@@ -643,13 +800,29 @@ async function copyText(text) {
 
 async function refreshAll() {
     if (state.user?.role === 'superadmin') {
-        const [metrics, documents, jobs, audit, users, projects, scopes] = await Promise.all([api('metrics'), api('documents'), api('jobs'), api('audit'), api('admin/users'), api('admin/projects'), api('scopes')]);
+        const [metrics, documents, jobs, audit, users, projects, scopes, interfaces] = await Promise.all([api('metrics'), api('documents'), api('jobs'), api('audit'), api('admin/users'), api('admin/projects'), api('scopes'), api('modules')]);
         renderMetrics(metrics.metrics); renderDocuments(documents.documents); renderJobs(jobs.jobs); renderAudit(audit.events); renderUsers(users.users); renderProjects(projects.projects); renderScopes(scopes.scopes);
+        renderModuleInterfaces(interfaces.modules);
+        await refreshModules().catch(() => {});
         scheduleJobPolling();
     } else {
-        const { scopes } = await api('scopes');
+        const [{ scopes }, { modules }] = await Promise.all([api('scopes'), api('modules')]);
         renderScopes(scopes);
+        renderModuleInterfaces(modules);
     }
+
+    if (state.activeModuleId) await loadModuleDashboard(state.activeModuleId);
+}
+
+async function refreshModules() {
+    if (state.user?.role !== 'superadmin') return;
+    const { modules } = await api('admin/modules');
+    renderModules(modules);
+}
+
+async function refreshModuleInterfaces() {
+    const { modules } = await api('modules');
+    renderModuleInterfaces(modules);
 }
 
 function stopJobPolling() {
@@ -805,7 +978,83 @@ document.querySelector('#disconnect-button').addEventListener('click', async () 
 document.querySelector('#refresh-button').addEventListener('click', () => refreshAll().then(() => notify('Dados atualizados.')).catch(error => notify(error.message, true)));
 elements.workerRunButtons.forEach(button => button.addEventListener('click', drainQueueFromBrowser));
 elements.menuToggle.addEventListener('click', () => { const expanded = elements.menuToggle.getAttribute('aria-expanded') === 'true'; elements.menuToggle.setAttribute('aria-expanded', String(!expanded)); document.body.classList.toggle('menu-open', !expanded); });
-document.querySelectorAll('[data-view]').forEach(link => link.addEventListener('click', event => { event.preventDefault(); switchView(link.dataset.view); }));
+document.addEventListener('click', event => {
+    const link = event.target.closest('[data-view]');
+    if (!link) return;
+    event.preventDefault();
+    switchView(link.dataset.view, link.dataset.moduleId || '');
+});
+
+elements.moduleDashboard.addEventListener('input', event => {
+    if (event.target.matches('[data-module-content-filter]')) filterModuleEntries();
+});
+elements.moduleDashboard.addEventListener('change', event => {
+    if (!event.target.matches('[data-module-filter]')) return;
+    state.moduleLocalFilter = '';
+    loadModuleDashboard(state.activeModuleId).catch(error => notify(error.message, true));
+});
+elements.moduleDashboard.addEventListener('click', event => {
+    const refresh = event.target.closest('[data-module-refresh]');
+    if (refresh) {
+        loadModuleDashboard(state.activeModuleId).catch(error => notify(error.message, true));
+        return;
+    }
+
+    const toggle = event.target.closest('[data-module-accordion-toggle]');
+    if (!toggle) return;
+
+    const body = document.getElementById(toggle.getAttribute('aria-controls'));
+    if (!body) return;
+    const expand = toggle.getAttribute('aria-expanded') !== 'true';
+
+    elements.moduleDashboard.querySelectorAll('[data-module-accordion-toggle][aria-expanded="true"]').forEach(openToggle => {
+        openToggle.setAttribute('aria-expanded', 'false');
+        const openBody = document.getElementById(openToggle.getAttribute('aria-controls'));
+        if (openBody) openBody.hidden = true;
+    });
+
+    toggle.setAttribute('aria-expanded', String(expand));
+    body.hidden = !expand;
+});
+elements.modulesList.addEventListener('click', async event => {
+    const toggle = event.target.closest('[data-module-toggle]');
+    const deleteButton = event.target.closest('[data-module-delete]');
+    const button = toggle || deleteButton;
+    if (!button) return;
+
+    if (deleteButton && !await confirmTypedDeletion(
+        'Módulo',
+        deleteButton.dataset.moduleDelete,
+        `Esta ação excluirá definitivamente ${deleteButton.dataset.moduleName}, todo o pacote em modules/${deleteButton.dataset.moduleDelete}/ e todo o histórico em modules/.runtime/data/${deleteButton.dataset.moduleDelete}/.`
+    )) return;
+
+    button.disabled = true;
+    try {
+        if (toggle) {
+            await api(`admin/modules/${toggle.dataset.moduleToggle}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ active: toggle.dataset.active === '1' }),
+            });
+            notify(toggle.dataset.active === '1' ? 'Módulo ativado.' : 'Módulo desativado.');
+        } else if (deleteButton) {
+            await api(`admin/modules/${deleteButton.dataset.moduleDelete}`, {
+                method: 'DELETE',
+                body: JSON.stringify({
+                    confirm_module_id: deleteButton.dataset.moduleDelete,
+                    delete_data: true,
+                }),
+            });
+            notify('Módulo e todo o seu histórico foram excluídos definitivamente.');
+        }
+
+        await refreshModules();
+        await refreshModuleInterfaces();
+    } catch (error) {
+        notify(error.message, true);
+    } finally {
+        button.disabled = false;
+    }
+});
 
 document.querySelector('#upload-form').addEventListener('submit', async event => {
     event.preventDefault(); const form = event.currentTarget, button = form.querySelector('button[type="submit"]'), file = document.querySelector('#document-file').files[0];
@@ -897,7 +1146,7 @@ document.querySelector('#query-form').addEventListener('submit', async event => 
     event.preventDefault(); const scopes = selectedQueryScopes(), input = document.querySelector('#query-input').value.trim(), button = event.currentTarget.querySelector('button[type="submit"]');
     if (!scopes.length || !input) return notify('Selecione ao menos um projeto ou obra e informe a consulta.', true);
     button.disabled = true; elements.restartChat.disabled = true; renderConversation(input);
-    try { const payload = await api('query', { method: 'POST', body: JSON.stringify({ scopes, input: buildConversationalInput(input) }) }); setQueryScopePanel(false); rememberConversationTurn(input, payload.query); renderConversation(); document.querySelector('#query-input').value = ''; document.querySelector('#query-input').focus(); }
+    try { const payload = await api('query', { method: 'POST', body: JSON.stringify({ scopes, current_input: input, input: buildConversationalInput(input) }) }); setQueryScopePanel(false); rememberConversationTurn(input, payload.query); renderConversation(); document.querySelector('#query-input').value = ''; document.querySelector('#query-input').focus(); }
     catch (error) { if (state.queryHistory.length) renderConversation(); else elements.queryResult.innerHTML = initialChatEmptyMarkup; notify(error.message, true); }
     finally { button.disabled = false; elements.restartChat.disabled = false; }
 });
@@ -937,17 +1186,57 @@ document.querySelector('#user-form').addEventListener('submit', async event => {
 });
 
 elements.usersBody.addEventListener('click', async event => {
-    const permissionButton = event.target.closest('[data-permissions]'), toggleButton = event.target.closest('[data-toggle-user]'), resetButton = event.target.closest('[data-reset]');
+    const permissionButton = event.target.closest('[data-permissions]');
+    const toggleButton = event.target.closest('[data-toggle-user]');
+    const resetButton = event.target.closest('[data-reset]');
+    const renameButton = event.target.closest('[data-rename-user]');
+    const deleteButton = event.target.closest('[data-delete-user]');
     if (permissionButton) {
         const user = state.users.find(item => item.id === Number(permissionButton.dataset.permissions)); if (!user) return;
         document.querySelector('#permission-user-id').value = user.id; document.querySelector('#permission-title').textContent = user.username;
         renderPermissionTree(user);
         elements.permissionForm.hidden = false; elements.permissionForm.scrollIntoView({ behavior: 'smooth' });
+        return;
     }
-    if (toggleButton) { try { await api(`admin/users/${toggleButton.dataset.toggleUser}`, { method: 'PATCH', body: JSON.stringify({ active: toggleButton.dataset.active === '1' }) }); await refreshUsers(); notify('Estado do usuário atualizado.'); } catch (error) { notify(error.message, true); } }
+    if (toggleButton) { try { await api(`admin/users/${toggleButton.dataset.toggleUser}`, { method: 'PATCH', body: JSON.stringify({ active: toggleButton.dataset.active === '1' }) }); await refreshUsers(); notify('Estado do usuário atualizado.'); } catch (error) { notify(error.message, true); } return; }
     if (resetButton) {
         const user = state.users.find(item => item.id === Number(resetButton.dataset.reset));
         if (user) openPasswordReset(user);
+        return;
+    }
+    if (renameButton) {
+        const user = state.users.find(item => item.id === Number(renameButton.dataset.renameUser));
+        if (user) openUsernameRename(user);
+        return;
+    }
+    if (deleteButton) {
+        const userId = Number(deleteButton.dataset.deleteUser);
+        const user = state.users.find(item => item.id === userId);
+        if (!user || !await confirmTypedDeletion(
+            'Usuário',
+            user.username,
+            'Esta ação excluirá permanentemente o cadastro, as sessões e as permissões do usuário. Projetos e obras não serão excluídos.'
+        )) return;
+
+        deleteButton.disabled = true;
+
+        try {
+            await api(`admin/users/${userId}`, {
+                method: 'DELETE',
+                body: JSON.stringify({ confirm_username: user.username }),
+            });
+            if (Number(document.querySelector('#permission-user-id').value) === userId) elements.permissionForm.hidden = true;
+            state.users = state.users.filter(item => item.id !== userId);
+            renderUsers(state.users);
+            notify('Usuário excluído permanentemente.');
+
+            try { await refreshUsers(); }
+            catch (_) { notify('O usuário foi excluído, mas a listagem não pôde ser sincronizada.', true); }
+        } catch (error) {
+            notify(error.message, true);
+        } finally {
+            deleteButton.disabled = false;
+        }
     }
 });
 
@@ -1195,6 +1484,35 @@ elements.passwordResetForm.addEventListener('submit', async event => {
     }
 });
 document.querySelector('#password-reset-cancel').addEventListener('click', closePasswordReset);
+elements.usernameRenameForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    const user = openUsernameRename.user;
+    const button = event.currentTarget.querySelector('button[type="submit"]');
+    if (!user) return;
+    button.disabled = true;
+
+    try {
+        const result = await api(`admin/users/${user.id}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ username: elements.renamedUsername.value.trim() }),
+        });
+        user.username = result.user.username;
+        if (Number(document.querySelector('#permission-user-id').value) === user.id) {
+            document.querySelector('#permission-title').textContent = user.username;
+        }
+        renderUsers(state.users);
+        closeUsernameRename();
+        notify('Username alterado; ID e permissões foram preservados.');
+
+        try { await refreshUsers(); }
+        catch (_) { notify('O username foi alterado, mas a listagem não pôde ser sincronizada.', true); }
+    } catch (error) {
+        notify(error.message, true);
+    } finally {
+        button.disabled = false;
+    }
+});
+document.querySelector('#username-rename-cancel').addEventListener('click', closeUsernameRename);
 document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && !elements.queryScopePanel.hidden) {
         setQueryScopePanel(false);
@@ -1217,6 +1535,12 @@ document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && !elements.passwordResetDialog.hidden) {
         event.preventDefault();
         closePasswordReset();
+        return;
+    }
+
+    if (event.key === 'Escape' && !elements.usernameRenameDialog.hidden) {
+        event.preventDefault();
+        closeUsernameRename();
     }
 });
 

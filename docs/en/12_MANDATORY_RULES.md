@@ -69,7 +69,17 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 65. Preserve `core` as argumentative precedence and incorporate every `convergence` item as literal support, context, limitation, or counterpoint.
 66. Do not invent relationships to accommodate elected evidence; mandatory incorporation remains bounded by documentary content.
 67. Keep strict semantic calibration of `simetry` and `assimetry` separate from the documentary validity of the answer.
-68. Silently discard an answer rejected by local validation and permit at most three total attempts with the same elected context.
+68. Silently discard an answer rejected by local validation and permit at most three total attempts with the same elected context; from the second attempt onward, send only a safe corrective code and one elected evidence identifier when analytical incorporation is missing.
 69. Show an error to the user only after the third consecutive validation failure, using a generic message without an evidence identifier or internal technical rule.
+70. Keep modules independent from projects, users, and documents; observed associations belong to the module, not the Core persistence model.
+71. Allow zero, one, or many active modules and deliver each event only to declared subscribers.
+72. Let the Core know only generic contracts and capabilities, never a module-specific name, menu, rule, HTML, CSS, or function.
+73. Use `module_events` as the only additional main-database table for the neutral mailbox without altering pre-existing tables.
+74. Keep each module's schema, history, and cursor in its own private SQLite database excluded from version control.
+75. Persist the sanitized event transactionally and resolve its processing immediately after the completed interaction.
+76. Isolate a module failure from the documentary answer and from other subscribed modules.
+77. Reject events containing sensitive fields and never let modules write into Core documentary memory.
+78. Require typed confirmation for permanent deletion and remove both the package and its corresponding private data directory.
+79. Do not assign scores, weights, confidence, or any subjective value to pedagogical observations produced by modules.
 
-Related explanations are available in [Architecture](02_ARCHITECTURE.md), [Query and conversational continuity](05_QUERY_AND_CHAT.md), [Cnode and cognitive interactions](10_CNODE.md), and [Context Intelligence Engine](09_CONTEXT_INTELLIGENCE_ENGINE.md).
+Related explanations are available in [Architecture](02_ARCHITECTURE.md), [Query and conversational continuity](05_QUERY_AND_CHAT.md), [Cnode and cognitive interactions](10_CNODE.md), [Context Intelligence Engine](09_CONTEXT_INTELLIGENCE_ENGINE.md), and [Connector modules](17_MODULE_CONNECTORS.md).

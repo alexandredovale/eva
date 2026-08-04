@@ -89,9 +89,16 @@ if ($path === '/' || $path === '/app') {
         jsonResponse(405, ['error' => 'Método não permitido.'], ['Allow' => 'GET']);
     }
 
+    $styleNonce = base64_encode(random_bytes(18));
+    $applicationHtml = file_get_contents(__DIR__ . '/app.html');
+
+    if (!is_string($applicationHtml)) {
+        jsonResponse(503, ['error' => 'A interface da aplicação está indisponível.']);
+    }
+
     header('Content-Type: text/html; charset=utf-8');
-    header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'");
-    readfile(__DIR__ . '/app.html');
+    header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'nonce-{$styleNonce}' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'");
+    echo str_replace('{{CSP_STYLE_NONCE}}', htmlspecialchars($styleNonce, ENT_QUOTES, 'UTF-8'), $applicationHtml);
     exit;
 }
 
@@ -117,7 +124,7 @@ if ($path === '/api/health') {
         'application' => (new BrandingPresenter($container['branding']))->toArray()['name'],
         'status' => $httpStatus === 200 ? 'ready' : 'degraded',
         'database' => $databaseStatus,
-        'version' => '1.1.1',
+        'version' => '1.2.0',
     ]);
 }
 

@@ -7,10 +7,38 @@ and the project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-08-04
+
+### Added
+
+- EVA Module Contract v1 and a provider-neutral connector runtime under `modules/`.
+- Independent module discovery, activation, deactivation, definitive removal, event fan-out, retention, backup, and per-module SQLite storage.
+- Generic module-dashboard discovery in the white-label interface, including declarative filtering, accordion behavior, refresh, CSP-nonced module CSS, and manifest-defined ordering.
+- Neutral `module_events` mailbox as the only new Core table; no existing table was altered for modules.
+- Reference connector `com.eva.education`, with descriptive pedagogical observations, immediate transactional processing, localized labels, linguistic concept extraction from question and answer, and an independent learning-trajectory dashboard.
+- Animated yellow waiting indicator for documentary queries, with reduced-motion support.
+
+### Changed
+
+- Locally rejected answers now receive deterministic corrective feedback on the next bounded attempt: a safe failure code and, only when applicable, an already elected evidence ID.
+- Module interfaces, names, styles, persistence, and domain rules remain inside their packages; the Core exposes only generic contracts and hosts.
+- The Education connector now uses three non-valuative dimensions: conceptual articulation, evidence use, and contextual connection.
+- Authentication-dialog focus now moves before the access panel is hidden, using `inert` to preserve accessibility.
+
 ### Fixed
 
 - Exact textual matches now anchor conceptual and relational answers without suppressing semantic Top-k/CIE enrichment from the selected works.
 - Removed legacy separate credential-file loading and aligned all public guidance with `.env` as the only local configuration source.
+- Removed three unused credential variables and their obsolete documentation references from the local configuration inventory.
+- Corrective retries no longer repeat an identical rejected generation without validation guidance.
+- Education trajectory labels, dates, evidence layout, concepts, direct-reference text, and accordion filtering now remain readable and localized to the question language.
+- Removed the redundant Education observation “Question Refinement” from new and existing module histories through schema migration 2.
+
+### Security
+
+- Module packages and runtime data are denied direct HTTP access by `.htaccess`; SQLite, state, manifests, and internal PHP remain private.
+- Definitive module removal requires explicit typed confirmation and deletes both the package and its isolated runtime history.
+- Module events reject sensitive keys recursively, and modules receive AI capabilities without provider credentials.
 
 ## [1.1.1] - 2026-08-03
 

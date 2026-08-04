@@ -118,7 +118,7 @@ final class CitingFakeAnswerProvider implements QueryAnswerProviderInterface
         return 'fake-query-answer-v1';
     }
 
-    public function answer(string $input, QueryContext $context): GeneratedAnswer
+    public function answer(string $input, QueryContext $context, array $validationFeedback): GeneratedAnswer
     {
         $this->calls++;
         $used = array_map(static fn ($evidence): string => $evidence->publicId, $context->evidences);
@@ -159,7 +159,7 @@ final class InvalidCitationAnswerProvider implements QueryAnswerProviderInterfac
         return 'invalid-query-answer-v1';
     }
 
-    public function answer(string $input, QueryContext $context): GeneratedAnswer
+    public function answer(string $input, QueryContext $context, array $validationFeedback): GeneratedAnswer
     {
         $this->calls++;
 
@@ -176,7 +176,7 @@ final class MissingVisibleCitationAnswerProvider implements QueryAnswerProviderI
         return 'missing-visible-citation-v1';
     }
 
-    public function answer(string $input, QueryContext $context): GeneratedAnswer
+    public function answer(string $input, QueryContext $context, array $validationFeedback): GeneratedAnswer
     {
         $this->calls++;
 
@@ -196,7 +196,7 @@ final class CitationInventoryAnswerProvider implements QueryAnswerProviderInterf
         return 'citation-inventory-v1';
     }
 
-    public function answer(string $input, QueryContext $context): GeneratedAnswer
+    public function answer(string $input, QueryContext $context, array $validationFeedback): GeneratedAnswer
     {
         $this->calls++;
         $used = array_map(
@@ -221,7 +221,7 @@ final class CandidateLimitationAnswerProvider implements QueryAnswerProviderInte
         return 'candidate-limitation-v1';
     }
 
-    public function answer(string $input, QueryContext $context): GeneratedAnswer
+    public function answer(string $input, QueryContext $context, array $validationFeedback): GeneratedAnswer
     {
         $this->calls++;
 
@@ -243,7 +243,7 @@ final class EmptyCandidateAnswerProvider implements QueryAnswerProviderInterface
         return 'empty-candidate-answer-v1';
     }
 
-    public function answer(string $input, QueryContext $context): GeneratedAnswer
+    public function answer(string $input, QueryContext $context, array $validationFeedback): GeneratedAnswer
     {
         $this->calls++;
 
@@ -255,20 +255,25 @@ final class RecoveringAnswerProvider implements QueryAnswerProviderInterface
 {
     public int $calls = 0;
 
+    /** @var list<array{code: string, evidence_id?: string}> */
+    public array $feedback = [];
+
     public function model(): string
     {
         return 'recovering-query-answer-v1';
     }
 
-    public function answer(string $input, QueryContext $context): GeneratedAnswer
+    public function answer(string $input, QueryContext $context, array $validationFeedback): GeneratedAnswer
     {
         $this->calls++;
+        $this->feedback[] = $validationFeedback;
         $used = array_map(
             static fn ($evidence): string => $evidence->publicId,
             $context->evidences
         );
 
-        if ($this->calls < 3) {
+        if (($validationFeedback['code'] ?? null) !== 'missing_analytical_evidence'
+            || ($validationFeedback['evidence_id'] ?? null) !== $used[0]) {
             return new GeneratedAnswer(
                 'Resposta documental sem incorporação analítica visível.',
                 $used
@@ -281,7 +286,7 @@ final class RecoveringAnswerProvider implements QueryAnswerProviderInterface
         ));
 
         return new GeneratedAnswer(
-            'A terceira tentativa incorporou corretamente todo o contexto eleito ' . $citations . '.',
+            'A tentativa corretiva incorporou corretamente todo o contexto eleito ' . $citations . '.',
             $used
         );
     }
@@ -506,12 +511,19 @@ try {
     $recoveredResult = (new DocumentQueryService($retriever, $recoveringProvider))
         ->query($documentId, 'Explique ' . $intelligence['public_id']);
     assertQuery(
-        $recoveringProvider->calls === 3,
-        'Uma resposta inválida deve ser regenerada silenciosamente até a terceira tentativa.'
+        $recoveringProvider->calls === 2,
+        'Uma resposta inválida deve receber correção técnica na tentativa seguinte.'
     );
     assertQuery(
-        str_contains($recoveredResult->answer, 'terceira tentativa'),
+        str_contains($recoveredResult->answer, 'tentativa corretiva'),
         'Uma tentativa posterior válida deve substituir integralmente as gerações rejeitadas.'
+    );
+
+    assertQuery(
+        $recoveringProvider->feedback[0] === []
+            && ($recoveringProvider->feedback[1]['code'] ?? null) === 'missing_analytical_evidence'
+            && ($recoveringProvider->feedback[1]['evidence_id'] ?? null) === $intelligence['public_id'],
+        'O feedback corretivo deve conter somente a regra segura e a evidência omitida.'
     );
 
     $missingVisibleCitationProvider = new MissingVisibleCitationAnswerProvider();

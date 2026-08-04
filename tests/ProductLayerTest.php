@@ -70,6 +70,27 @@ try {
     assertProduct(($denied->headers['WWW-Authenticate'] ?? null) === 'Bearer', 'Desafio Bearer ausente.');
 
     $authorized = productServer($testToken);
+    $moduleInterfaces = $api->handle('GET', '/api/modules', $authorized, [], [], '');
+    assertProduct($moduleInterfaces->status === 200 && is_array($moduleInterfaces->payload['modules']), 'A descoberta genérica de interfaces modulares falhou.');
+    $modules = $api->handle('GET', '/api/admin/modules', $authorized, [], [], '');
+    assertProduct($modules->status === 200, 'A listagem administrativa de módulos falhou.');
+    assertProduct(
+        in_array('com.eva.education', array_column($modules->payload['modules'], 'id'), true),
+        'O pacote educacional instalado não foi descoberto pelo Runtime.'
+    );
+    $unconfirmedModuleDeletion = $api->handle(
+        'DELETE',
+        '/api/admin/modules/com.eva.education',
+        $authorized,
+        [],
+        [],
+        json_encode(['confirm_module_id' => 'incorreto', 'delete_data' => true], JSON_THROW_ON_ERROR)
+    );
+    assertProduct($unconfirmedModuleDeletion->status === 422, 'A exclusão modular aceitou confirmação incorreta.');
+    assertProduct(
+        is_dir(dirname(__DIR__) . '/modules/com.eva.education'),
+        'Uma confirmação incorreta excluiu o pacote educacional.'
+    );
     $documents = $api->handle('GET', '/api/documents', $authorized, [], [], '');
     assertProduct($documents->status === 200, 'A listagem autenticada falhou.');
     $documentRows = array_filter(

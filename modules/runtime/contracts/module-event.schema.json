@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://eva.local/contracts/module-event-v1.schema.json",
+  "title": "EVA Module Event v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "event_type", "contract_version", "occurred_at", "actor", "scope", "interaction", "evidences", "limitations"],
+  "properties": {
+    "event_id": {"type": "string", "pattern": "^EVA-EVT-[A-F0-9]{24}$"},
+    "event_type": {"type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,79}$"},
+    "contract_version": {"const": 1},
+    "occurred_at": {"type": "string", "format": "date-time"},
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["user_id", "role"],
+      "properties": {
+        "user_id": {"type": ["integer", "null"], "minimum": 1},
+        "role": {"type": "string", "enum": ["user", "superadmin"]}
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["projects", "documents"],
+      "properties": {
+        "projects": {"type": "array", "items": {"type": "object"}, "maxItems": 100},
+        "documents": {"type": "array", "items": {"type": "object"}, "maxItems": 200}
+      }
+    },
+    "interaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["current_input", "contextual_input", "answer"],
+      "properties": {
+        "current_input": {"type": "string", "maxLength": 20000},
+        "contextual_input": {"type": "string", "maxLength": 20000},
+        "answer": {"type": "string", "maxLength": 100000},
+        "input_types": {"type": "array", "uniqueItems": true, "items": {"type": "string", "maxLength": 80}, "maxItems": 20},
+        "direct_references": {"type": "array", "uniqueItems": true, "items": {"type": "string", "maxLength": 500}, "maxItems": 100},
+        "routing_points": {"type": "array", "uniqueItems": true, "items": {"type": "string", "maxLength": 500}, "maxItems": 100}
+      }
+    },
+    "evidences": {"type": "array", "items": {"type": "object"}, "maxItems": 100},
+    "limitations": {"type": "array", "items": {"type": "string", "maxLength": 2000}, "maxItems": 100}
+  }
+}

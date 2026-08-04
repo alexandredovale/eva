@@ -1,21 +1,17 @@
 # Publication checklist
 
-This directory is a sanitized public distribution. Upload its **contents** as the repository root so `README.md`, `LICENSE`, `.gitignore`, and `.github/` remain at the top level.
+Use this checklist for every public release. Always start from a fresh clone of the canonical GitHub repository in an exclusive local analysis directory, inspect the remote state, and copy only an explicit source allowlist.
 
-## Before the first public release
+## Release v1.2.0
 
-- [ ] Create an empty GitHub repository without an automatically generated README, license, or `.gitignore`.
-- [ ] Upload or push only the contents of this directory.
-- [ ] Confirm that GitHub detects **Apache License 2.0**.
-- [ ] Confirm that `.env`, `database/actual/eva.sql`, `docs/test/`, `docs/doc_test.md`, uploaded documents, and logs are absent.
-- [ ] Confirm that `database/` contains only `schema.sql` and versioned migrations.
-- [ ] Enable GitHub Actions and verify the **PHP quality** workflow.
-- [ ] Enable secret scanning, push protection, and private vulnerability reporting.
-- [ ] Protect `main` with pull requests and required status checks.
-- [ ] Review the project attribution in `NOTICE` and `CITATION.cff`.
-- [ ] Replace the example clone URL in `README.md` after choosing the final owner and repository name.
-- [ ] Create a clean clone, copy `.env.example` to `.env`, import the empty schema, and validate installation.
-- [ ] Publish release `v1.0.0` with release notes derived from `CHANGELOG.md`.
+- [x] Create a fresh clone from `alexandredovale/eva` under `.00-analise/` and verify `origin/main` before copying files.
+- [ ] Copy only source, public documentation, empty schema, versioned migrations, and tests.
+- [ ] Confirm that `.env`, operational databases, module SQLite files, Runtime state, uploaded documents, logs, dumps, backups, and private corpora are absent.
+- [ ] Review the complete diff and run the offline regression suite in the release clone.
+- [ ] Confirm that `database/` contains only `schema.sql`, versioned migrations, and tracked placeholders.
+- [ ] Confirm that `modules/.runtime/` contains only HTTP protections and empty tracked placeholders.
+- [ ] Review attribution, `CHANGELOG.md`, `CITATION.cff`, and the public version.
+- [ ] Commit, create annotated tag `v1.2.0`, push `main` and the tag, then verify the remote commit.
 
 ## Recommended repository metadata
 

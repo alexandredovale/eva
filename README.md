@@ -36,12 +36,13 @@ Core properties:
 - Real AI use is disabled by default and requires two explicit confirmations.
 - The chat displays the current transcript while sending at most the three previous completed turns as temporary conversational context.
 - Superadmin-managed project response profiles specialize answer behavior without weakening evidence, citation, or output rules.
+- Zero, one, or many independent connector modules can subscribe to completed interactions without adding domain knowledge to the Core.
 
 ## Requirements
 
 - PHP 8.2 or newer
 - MariaDB 10.4+ or compatible MySQL
-- PHP extensions: `curl`, `dom`, `json`, `mbstring`, `pdo`, and `pdo_mysql`
+- PHP extensions: `curl`, `dom`, `json`, `mbstring`, `pdo`, `pdo_mysql`, and `pdo_sqlite`
 - Apache with `mod_rewrite` and `mod_headers`, or another web server configured to expose only `public/`
 
 The project has no Composer or Node.js runtime dependency.
@@ -113,6 +114,20 @@ Profiles activate from the explicit chat scope:
 
 If two selected projects share the same work, EVA deduplicates the document ID before retrieval, so the work and its evidence are queried once. Both project profiles remain active. Compatible instructions may be combined; conflicting instructions over the same aspect fall back to the base rules and a neutral formulation.
 
+## Connector modules
+
+EVA modules behave like installable cartridges: a module is an independent package under `modules/<module-id>/`, hierarchically above projects but never owned by a project, document, or user. Several modules may be active at the same time and may observe the same versioned event independently.
+
+Each package declares `module.json`, implements the EVA Module Contract v1, and stores its private history in `modules/.runtime/data/<module-id>/module.sqlite`. The Core persists each neutral event once in `module_events`; active subscribers advance independent cursors. A module receives a constrained Core read API and provider-neutral language capability, never database credentials or AI keys.
+
+The superadmin interface discovers packages present in `modules/` and offers only three lifecycle operations: activate, deactivate, and definitively delete. Deactivation preserves the package and SQLite history. Definitive deletion requires typed confirmation and removes both. Updating a connector means replacing only `modules/<module-id>/`; runtime data remains outside the package.
+
+Dashboard modules supply their own HTML and CSS. The Core knows only the generic dashboard contract and manifest name, so installing an unknown future module requires no module-specific menu, renderer, or style in `public/`.
+
+The included `com.eva.education` connector is a reference implementation. It maps user trajectories from completed documentary interactions, produces descriptive evidence-grounded observations without scores or weights, extracts linguistic concepts from the complete question-and-answer object, localizes output to the question language, and persists everything in its own SQLite database.
+
+See [Connector modules](docs/en/17_MODULE_CONNECTORS.md) for contracts, installation, operation, backup, update, and removal.
+
 Real cognitive build commands require both `AI_LIVE_ENABLED=true` and `--live`:
 
 ```bash
@@ -148,6 +163,11 @@ Selected routes are shown below. The complete implemented route and access matri
 | `POST` | `/api/auth/recover` | Recover a normal-user password |
 | `GET` | `/api/scopes` | List projects and works available to the authenticated actor |
 | `POST` | `/api/query` | Run a validated query over authorized scopes |
+| `GET` | `/api/modules` | Discover active module dashboards for the authenticated actor |
+| `GET` | `/api/modules/{id}/dashboard` | Render one active module dashboard through the generic contract |
+| `GET` | `/api/admin/modules` | Inspect installed connector packages (superadmin) |
+| `PATCH` | `/api/admin/modules/{id}` | Activate or deactivate a connector (superadmin) |
+| `DELETE` | `/api/admin/modules/{id}` | Definitively remove a confirmed connector and its data (superadmin) |
 | `GET` | `/api/documents` | List works and counts (superadmin) |
 | `POST` | `/api/documents` | Ingest Markdown, JSON, or XML (superadmin) |
 | `POST` | `/api/documents/{id}/process` | Queue summaries and embeddings (superadmin) |
@@ -166,7 +186,7 @@ The repository includes offline tests with simulated AI providers. The public in
 Validate syntax:
 
 ```bash
-find app bin bootstrap config public tests -name '*.php' -print0 | xargs -0 -n1 php -l
+find app bin bootstrap config modules public tests -name '*.php' -print0 | xargs -0 -n1 php -l
 ```
 
 Run relevant tests individually after configuring an isolated test database, for example:
@@ -189,6 +209,7 @@ This public distribution intentionally excludes:
 - `.env` with local runtime configuration and credentials;
 - operational database dumps;
 - uploaded documents and runtime logs;
+- module activation state, module SQLite files, WAL files, and module runtime logs;
 - private user or access records;
 - third-party book corpora used in private regression environments.
 
@@ -211,6 +232,8 @@ The public schema and all versioned migrations remain included so a new installa
 - [Roadmap](docs/en/13_ROADMAP.md)
 - [Go-live readiness validation](docs/en/14_GO_LIVE_VALIDATION.md)
 - [Pre-deployment acceptance](docs/en/15_PRE_DEPLOYMENT_ACCEPTANCE.md)
+- [Project vision and impact assessment](docs/en/16_VISION.md)
+- [Connector modules](docs/en/17_MODULE_CONNECTORS.md)
 - [Scientific and philosophical material](philosophy/README.md)
 
 ## Contributing and security

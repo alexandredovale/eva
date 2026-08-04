@@ -25,6 +25,11 @@ English is the primary language of the public repository. The original Portugues
 14. [Go-live readiness validation](en/14_GO_LIVE_VALIDATION.md)
 15. [Pre-deployment acceptance](en/15_PRE_DEPLOYMENT_ACCEPTANCE.md)
 
+### Platform evolution
+
+16. [Project vision and impact assessment](en/16_VISION.md)
+17. [Connector modules](en/17_MODULE_CONNECTORS.md)
+
 The English collection covers the complete current technical scope. The two validation records preserve the date, environment, results, and limitations of the original executions; they are historical evidence, not a substitute for validating a new deployment.
 
 ### Source coverage
@@ -47,6 +52,8 @@ The English edition is organized by reader task rather than as filename-for-file
 | `12_HOMOLOGACAO_PRE_DEPLOY.md` | [Pre-deployment acceptance](en/15_PRE_DEPLOYMENT_ACCEPTANCE.md) |
 | `13_SUSTENTABILIDADE_ENERGETICA.md` | [Scientific scope and energy sustainability](en/08_SCIENTIFIC_AND_ENERGY.md) |
 | `14_CONTEXT_INTELLIGENCE_ENGINE.md` | [Context Intelligence Engine](en/09_CONTEXT_INTELLIGENCE_ENGINE.md) |
+| `15_VISAO.md` | [Project vision and impact assessment](en/16_VISION.md) |
+| `16_MODULOS.md` | [Connector modules](en/17_MODULE_CONNECTORS.md) |
 
 [Installation](en/03_INSTALLATION.md) is an additional English operational guide assembled from the current repository configuration and deployment requirements.
 
@@ -68,5 +75,7 @@ The English edition is organized by reader task rather than as filename-for-file
 | [`12_HOMOLOGACAO_PRE_DEPLOY.md`](12_HOMOLOGACAO_PRE_DEPLOY.md) | Pre-deployment acceptance record |
 | [`13_SUSTENTABILIDADE_ENERGETICA.md`](13_SUSTENTABILIDADE_ENERGETICA.md) | Energy-efficiency mechanisms and validation protocol |
 | [`14_CONTEXT_INTELLIGENCE_ENGINE.md`](14_CONTEXT_INTELLIGENCE_ENGINE.md) | Statistical stabilization between vector retrieval and cognitive layers |
+| [`15_VISAO.md`](15_VISAO.md) | Visão crítica, impacto potencial, limites atuais e prioridades de evolução |
+| [`16_MODULOS.md`](16_MODULOS.md) | Instalação, contratos, SDK, operação, backup e remoção de módulos |
 
 Private test books and operational corpora are intentionally not part of this repository.

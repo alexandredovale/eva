@@ -1,0 +1,19 @@
+{
+  "id": "com.eva.education",
+  "name": "Education",
+  "vendor": "EVA",
+  "version": "1.2.0",
+  "eva_contract": "1",
+  "entrypoint": "bootstrap.php",
+  "subscribed_events": ["interaction.completed"],
+  "capabilities": ["ai.language.generate", "core.read.users"],
+  "dashboard": {
+    "enabled": true,
+    "entrypoint": "dashboard.php",
+    "order": 80
+  },
+  "storage": {
+    "driver": "sqlite",
+    "schema_version": 2
+  }
+}

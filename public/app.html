@@ -3,13 +3,14 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csp-style-nonce" content="{{CSP_STYLE_NONCE}}">
     <meta name="color-scheme" content="dark">
     <meta name="theme-color" content="#0a0a0a">
     <title>EVA - Evidence Algorithm</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cascadia+Mono:wght@400;500;600;700&family=Share+Tech&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/app.css?v=20260731-2">
+    <link rel="stylesheet" href="assets/app.css?v=20260804-6">
     <link rel="icon" type="image/x-icon" href="public/logo/icone.png">
     <link rel="apple-touch-icon" href="public/logo/icone.png">
     <link rel="shortcut icon" href="public/logo/icone.png">
@@ -23,14 +24,16 @@
         </a>
         <button type="button" class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="top-navigation"><span></span><span></span><span></span><span class="sr-only">Abrir menu</span></button>
         <nav class="top-navigation" id="top-navigation" aria-label="Navegação principal">
-            <a href="#overview" data-view="overview" data-admin-only class="active"><span class="nav-index">01</span><span>Visão geral</span></a>
-            <a href="#documents" data-view="documents" data-admin-only><span class="nav-index">02</span><span>Documentos</span></a>
-            <a href="#query" data-view="query"><span class="nav-index">03</span><span>Chat</span></a>
-            <a href="#users" data-view="users" data-admin-only><span class="nav-index">04</span><span>Usuários</span></a>
-            <a href="#projects" data-view="projects" data-admin-only><span class="nav-index">05</span><span>Projetos</span></a>
-            <a href="#jobs" data-view="jobs" data-admin-only><span class="nav-index">06</span><span>Processamento</span></a>
-            <a href="#audit" data-view="audit" data-admin-only><span class="nav-index">07</span><span>Auditoria</span></a>
-            <a href="#settings" data-view="settings" data-user-only hidden><span class="nav-index">02</span><span>Alterar senha</span></a>
+            <a href="#overview" data-view="overview" data-admin-only class="active"><span>Visão geral</span></a>
+            <a href="#documents" data-view="documents" data-admin-only><span>Documentos</span></a>
+            <a href="#query" data-view="query"><span>Chat</span></a>
+            <a href="#users" data-view="users" data-admin-only><span>Usuários</span></a>
+            <a href="#projects" data-view="projects" data-admin-only><span>Projetos</span></a>
+            <a href="#jobs" data-view="jobs" data-admin-only><span>Processamento</span></a>
+            <a href="#audit" data-view="audit" data-admin-only><span>Auditoria</span></a>
+            <span id="module-navigation" class="module-navigation"></span>
+            <a href="#modules" data-view="modules" data-admin-only><span>Módulos</span></a>
+            <a href="#settings" data-view="settings" data-user-only hidden><span>Alterar senha</span></a>
         </nav>
         <div class="top-actions">
             <button type="button" class="icon-button" id="refresh-button" title="Atualizar dados" aria-label="Atualizar dados">↻</button>
@@ -90,6 +93,15 @@
             <div class="card table-card"><div class="table-wrap"><table><thead><tr><th>Evento</th><th>Entidade</th><th>Identificador</th><th>Momento</th><th>Metadados</th></tr></thead><tbody id="audit-body"></tbody></table></div></div>
         </section>
 
+        <section class="view" id="view-module" data-view-panel="module" hidden>
+            <div id="module-dashboard" class="module-dashboard-host" aria-live="polite"><div class="card empty">Selecione um módulo ativo.</div></div>
+        </section>
+
+        <section class="view" id="view-modules" data-view-panel="modules" data-admin-only hidden>
+            <div class="page-heading"><div><p class="eyebrow">EVA Module Runtime</p><h1>Módulos<span>.</span></h1><p>Ative, desative ou exclua os módulos encontrados em <code>modules/</code>.</p></div></div>
+            <div id="modules-list" class="module-grid" aria-live="polite"></div>
+        </section>
+
         <section class="view" id="view-settings" data-view-panel="settings" data-user-only hidden>
             <div class="page-heading"><div><p class="eyebrow">Segurança da conta</p><h1>Alterar senha<span>.</span></h1><p>Atualize sua senha ou gere um novo código de recuperação de 16 caracteres.</p></div></div>
             <div class="settings-grid">
@@ -145,7 +157,18 @@
             <div class="confirmation-actions"><button class="button button-quiet" id="password-reset-cancel" type="button">Cancelar</button><button class="button button-primary" type="submit">Salvar nova senha</button></div>
         </form>
     </div>
+    <div class="access-panel password-reset-dialog" id="username-rename-dialog" role="dialog" aria-modal="true" aria-labelledby="username-rename-title" hidden>
+        <form class="access-modal confirmation-modal" id="username-rename-form">
+            <div class="access-brand compact-brand" aria-hidden="true"><span>ID</span></div>
+            <p class="eyebrow">Cadastro do usuário</p>
+            <h2 id="username-rename-title">Renomear usuário</h2>
+            <p>O ID, a senha, o estado e todas as permissões atuais serão preservados.</p>
+            <p class="account-reference">Username atual: <strong id="username-rename-current"></strong></p>
+            <div class="form-field"><label for="renamed-username">Novo username</label><input id="renamed-username" minlength="3" maxlength="80" autocomplete="off" required></div>
+            <div class="confirmation-actions"><button class="button button-quiet" id="username-rename-cancel" type="button">Cancelar</button><button class="button button-primary" type="submit">Salvar username</button></div>
+        </form>
+    </div>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-    <script src="assets/app.js?v=20260802-1" defer></script>
+    <script src="assets/app.js?v=20260804-6" defer></script>
 </body>
 </html>

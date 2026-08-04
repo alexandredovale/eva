@@ -64,7 +64,9 @@ The per-attempt output limit is a ceiling, not a generation target. The retry us
 
 When a generation reaches the backend intact but violates the local contract for evidence, citations, analytical incorporation, or interactions, `DocumentQueryService` discards that output completely and requests another generation with the same elected context. A single API request permits at most three total attempts to obtain a validated answer.
 
-Rejected attempts never enter the transcript, alter the CIE election, or contribute partial text. While another attempt remains, the interface stays on **Consultando evidências…** and exposes neither the evidence identifier nor the technical validation rule.
+From the second attempt onward, the provider receives only a safe corrective code. When analytical incorporation is missing, EVA also identifies one already-elected evidence record that must be incorporated. Raw validator messages, internal rules, and rejected text are never returned to the provider or browser.
+
+Rejected attempts never enter the transcript, alter the CIE election, or contribute partial text. While another attempt remains, the interface stays on **Consultando evidências…**, accompanied by three animated yellow dots. Reduced-motion browser preferences disable the animation. The waiting state exposes neither an evidence identifier nor a technical validation rule.
 
 A later valid attempt replaces every rejected attempt. Only after three consecutive validation failures does the API return a generic browser error without evidence identifiers. Exhaustion is logged with a safe category, attempt count, and `request_id`; the final technical reason remains chained internally and is not exposed to the user.
 

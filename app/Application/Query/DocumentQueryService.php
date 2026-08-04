@@ -174,12 +174,19 @@ final readonly class DocumentQueryService
         }
 
         $lastValidationException = null;
+        $validationFeedback = [];
 
         for ($attempt = 1; $attempt <= self::MAX_ANSWER_VALIDATION_ATTEMPTS; $attempt++) {
             try {
-                return $this->generateValidatedResult($input, $context, $available);
+                return $this->generateValidatedResult(
+                    $input,
+                    $context,
+                    $available,
+                    $validationFeedback
+                );
             } catch (QueryException $exception) {
                 $lastValidationException = $exception;
+                $validationFeedback = $this->validationFeedback($exception);
             }
         }
 
@@ -190,13 +197,17 @@ final readonly class DocumentQueryService
         );
     }
 
-    /** @param array<string, RetrievedEvidence> $available */
+    /**
+     * @param array<string, RetrievedEvidence> $available
+     * @param array{code: string, evidence_id?: string} $validationFeedback
+     */
     private function generateValidatedResult(
         string $input,
         QueryContext $context,
-        array $available
+        array $available,
+        array $validationFeedback
     ): DocumentQueryResult {
-        $generated = $this->answerProvider->answer($input, $context);
+        $generated = $this->answerProvider->answer($input, $context, $validationFeedback);
 
         $usedIds = array_values(array_unique($generated->usedEvidenceIds));
         $electedIds = array_keys($available);
@@ -319,5 +330,29 @@ final readonly class DocumentQueryService
                 'A resposta apenas inventariou evidências sem incorporá-las à análise.'
             );
         }
+    }
+
+    /** @return array{code: string, evidence_id?: string} */
+    private function validationFeedback(QueryException $exception): array
+    {
+        $message = $exception->getMessage();
+        $feedback = ['code' => match (true) {
+            str_contains($message, 'fora do contexto recuperado') => 'evidence_outside_context',
+            str_contains($message, 'não aceitou integralmente') => 'required_evidence_set_mismatch',
+            str_contains($message, 'citação documental não recuperada') => 'citation_outside_context',
+            str_contains($message, 'não incorporou analiticamente') => 'missing_analytical_evidence',
+            str_contains($message, 'apenas inventariou evidências') => 'citation_inventory_without_analysis',
+            str_contains($message, 'limite de interações') => 'interaction_limit_exceeded',
+            str_contains($message, 'fragmento literal') => 'interaction_excerpt_invalid',
+            str_contains($message, 'evidências citadas na resposta') => 'interaction_uncited_evidence',
+            default => 'answer_contract_invalid',
+        }];
+
+        if ($feedback['code'] === 'missing_analytical_evidence'
+            && preg_match('/\bEVA-E\d{6,}\b/', $message, $matches) === 1) {
+            $feedback['evidence_id'] = $matches[0];
+        }
+
+        return $feedback;
     }
 }

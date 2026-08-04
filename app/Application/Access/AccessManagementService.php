@@ -50,12 +50,7 @@ final readonly class AccessManagementService
     /** @return array{user: array<string, mixed>, recovery_code: string} */
     public function createUser(string $username, string $password): array
     {
-        $username = trim($username);
-
-        if (preg_match('/^[\p{L}\p{N}._-]{3,80}$/u', $username) !== 1) {
-            throw new AccessException('O username deve ter de 3 a 80 caracteres e usar apenas letras, números, ponto, hífen ou sublinhado.', 422);
-        }
-
+        $username = $this->validatedUsername($username);
         $this->auth->assertPassword($password);
         $code = $this->auth->generateRecoveryCode();
 
@@ -81,6 +76,68 @@ final readonly class AccessManagementService
             'user' => ['id' => (int) $this->database->lastInsertId(), 'username' => $username, 'active' => true],
             'recovery_code' => $code,
         ];
+    }
+
+    /** @return array{id: int, username: string} */
+    public function renameUser(int $userId, string $username): array
+    {
+        $username = $this->validatedUsername($username);
+        $this->usernameFor($userId);
+
+        try {
+            $statement = $this->database->prepare('UPDATE users SET username = :username WHERE id = :id');
+            $statement->execute(['username' => $username, 'id' => $userId]);
+        } catch (PDOException $exception) {
+            if ((string) $exception->getCode() === '23000') {
+                throw new AccessException('Este username já está cadastrado.', 409);
+            }
+
+            throw $exception;
+        }
+
+        if ($statement->rowCount() === 0 && !$this->userExists($userId)) {
+            throw new AccessException('Usuário não localizado.', 404);
+        }
+
+        return [
+            'id' => $userId,
+            'username' => $username,
+        ];
+    }
+
+    /** @return array{username: string, sessions_deleted: int, project_permissions_deleted: int, document_permissions_deleted: int} */
+    public function deleteUser(int $userId, string $confirmedUsername): array
+    {
+        $this->database->beginTransaction();
+
+        try {
+            $statement = $this->database->prepare('SELECT username FROM users WHERE id = :id FOR UPDATE');
+            $statement->execute(['id' => $userId]);
+            $username = $statement->fetchColumn();
+
+            if (!is_string($username)) {
+                throw new AccessException('Usuário não localizado.', 404);
+            }
+
+            if (!hash_equals($username, $confirmedUsername)) {
+                throw new AccessException('A confirmação de exclusão do usuário é inválida.', 422);
+            }
+
+            $result = [
+                'username' => $username,
+                'sessions_deleted' => $this->relationCount('user_sessions', $userId),
+                'project_permissions_deleted' => $this->relationCount('user_projects', $userId),
+                'document_permissions_deleted' => $this->relationCount('user_documents', $userId),
+            ];
+            $delete = $this->database->prepare('DELETE FROM users WHERE id = :id');
+            $delete->execute(['id' => $userId]);
+            $this->database->commit();
+
+            return $result;
+        } catch (Throwable $exception) {
+            $this->database->rollBack();
+            throw $exception;
+        }
     }
 
     public function setUserActive(int $userId, bool $active): void
@@ -312,6 +369,38 @@ final readonly class AccessManagementService
         $statement->execute(['id' => $userId]);
 
         return $statement->fetchColumn() !== false;
+    }
+
+    private function validatedUsername(string $username): string
+    {
+        $username = trim($username);
+
+        if (preg_match('/^[\p{L}\p{N}._-]{3,80}$/u', $username) !== 1) {
+            throw new AccessException('O username deve ter de 3 a 80 caracteres e usar apenas letras, números, ponto, hífen ou sublinhado.', 422);
+        }
+
+        return $username;
+    }
+
+    private function usernameFor(int $userId): string
+    {
+        $statement = $this->database->prepare('SELECT username FROM users WHERE id = :id');
+        $statement->execute(['id' => $userId]);
+        $username = $statement->fetchColumn();
+
+        if (!is_string($username)) {
+            throw new AccessException('Usuário não localizado.', 404);
+        }
+
+        return $username;
+    }
+
+    private function relationCount(string $table, int $userId): int
+    {
+        $statement = $this->database->prepare("SELECT COUNT(*) FROM {$table} WHERE user_id = :user_id");
+        $statement->execute(['user_id' => $userId]);
+
+        return (int) $statement->fetchColumn();
     }
 
     private function projectExists(int $projectId): bool

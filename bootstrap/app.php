@@ -21,6 +21,12 @@ spl_autoload_register(static function (string $class) use ($root): void {
     }
 });
 
+$moduleRuntimeBootstrap = $root . '/modules/runtime/bootstrap.php';
+
+if (is_file($moduleRuntimeBootstrap)) {
+    require_once $moduleRuntimeBootstrap;
+}
+
 Env::load($root . '/.env');
 
 return [
