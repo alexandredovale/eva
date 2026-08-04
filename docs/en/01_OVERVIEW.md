@@ -34,7 +34,7 @@ Answer: cited evidence → answer and limitations
 
 The system describes evidence and explicit interactions without assigning truth, superiority, quality, priority, intensity, or importance. Provider brands, endpoints, models, and credential-variable names remain configurable and do not appear in domain contracts.
 
-For vector routes, the Context Intelligence Engine (CIE) uses the candidate distribution's mean, population standard deviation, and coefficient of variation to elect a leading convergence core plus mandatory complementary convergence context before cognitive processing. When no core exists, convergence assumes the primary role. The answer model must incorporate every resolved primary source. This local election is deterministic and model-independent.
+For vector routes, the Context Intelligence Engine (CIE) uses the candidate distribution's mean, population standard deviation, and coefficient of variation to elect a leading convergence core plus complementary convergence context before cognitive processing. When no core exists, convergence assumes the primary role. Every primary source retained in the result must be cited; recovered but uncited sources are discarded. This local recovery is deterministic and model-independent.
 
 ## Product scope
 

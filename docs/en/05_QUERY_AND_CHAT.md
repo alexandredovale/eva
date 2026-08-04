@@ -45,7 +45,7 @@ The backend merges authorized document IDs and deduplicates them before retrieva
 
 ## Evidence gate
 
-If retrieval finds no primary evidence, EVA returns an explicit documentary limitation without calling the answer provider. When context exists, the answer provider must accept the complete deterministic election in `used_evidence_ids`; it cannot re-elect or reject evidence. Formal acceptance is not sufficient: every elected evidence must be cited where its analytical contribution is explained. Core evidence leads the answer, convergence evidence provides mandatory complementary analysis, and citation-only inventories are rejected.
+If retrieval finds no primary evidence, EVA returns an explicit documentary limitation without calling the answer provider. When context exists, the answer provider may use the relevant subset of the deterministically recovered evidence. Every retained evidence must be visibly cited where its analytical contribution is explained; recovered candidates without a citation are discarded without invalidating the answer. Core evidence leads the answer, convergence evidence may provide complementary analysis, and citation-only inventories are rejected.
 
 ## Query limits
 
@@ -64,7 +64,7 @@ The per-attempt output limit is a ceiling, not a generation target. The retry us
 
 When a generation reaches the backend intact but violates the local contract for evidence, citations, analytical incorporation, or interactions, `DocumentQueryService` discards that output completely and requests another generation with the same elected context. A single API request permits at most three total attempts to obtain a validated answer.
 
-From the second attempt onward, the provider receives only a safe corrective code. When analytical incorporation is missing, EVA also identifies one already-elected evidence record that must be incorporated. Raw validator messages, internal rules, and rejected text are never returned to the provider or browser.
+From the second attempt onward, the provider receives only a safe corrective code. A recovered evidence record omitted from the answer is discarded instead of triggering a retry. Raw validator messages, internal rules, and rejected text are never returned to the provider or browser.
 
 Rejected attempts never enter the transcript, alter the CIE election, or contribute partial text. While another attempt remains, the interface stays on **Consultando evidências…**, accompanied by three animated yellow dots. Reduced-motion browser preferences disable the animation. The waiting state exposes neither an evidence identifier nor a technical validation rule.
 
@@ -85,9 +85,9 @@ Each accepted interaction requires two cited primary evidence records and one li
 
 The response and its interactions are generated in the same `QueryAnswerProvider` call configured by `AI_QUERY_MODEL`; there is no separate interaction provider. Evaluation is required when at least two elected evidence records exist and the configured interaction limit is greater than zero, but an interaction is emitted only when it can be demonstrated literally. Otherwise the documentary answer remains and the result contains a relational limitation.
 
-The local layer rejects or discards an interaction when its type, roles, orientation, participants, cited status, or excerpts are invalid. `simetry` accepts two `participant` roles and no direction. `assimetry` requires distinct `origin` and `destination` roles. A provider output with an unknown used evidence ID, an out-of-context visible citation, an excessive interaction count, or an incomplete final election invalidates the response.
+The local layer rejects or discards an interaction when its type, roles, orientation, participants, cited status, or excerpts are invalid. `simetry` accepts two `participant` roles and no direction. `assimetry` requires distinct `origin` and `destination` roles. An out-of-context visible citation or an excessive interaction count invalidates the response; a recovered but uncited evidence record is simply omitted.
 
-The public result exposes `selection_region` on each used evidence and an `evidence_selection` object with the elected core and convergence IDs, so the provider contract remains auditable after generation.
+The public result exposes `selection_region` on each used evidence and an `evidence_selection` object containing only the cited core and convergence IDs, so the accepted documentary basis remains auditable after generation.
 
 ## Conversational continuity
 
@@ -110,7 +110,7 @@ The public query result separates:
 - `context_intelligence`;
 - `limitations`.
 
-Each used evidence item exposes `selection_region`. `evidence_selection` lists elected core and convergence IDs. `context_intelligence` is empty on exclusively non-semantic routes and otherwise exposes the transient per-document calculation. Neither CIE analysis nor interactions modify persistent memory.
+Each used evidence item exposes `selection_region`. `evidence_selection` lists the cited core and convergence IDs. `context_intelligence` is empty on exclusively non-semantic routes and otherwise exposes the transient per-document calculation. Neither CIE analysis nor interactions modify persistent memory.
 
 ## CLI
 

@@ -324,17 +324,17 @@ assertAiAdapter(
 );
 assertAiAdapter($queryPayload['analyze_interactions'] === true, 'Duas evidências eleitas devem ativar a análise transitória de interações.');
 assertAiAdapter(
-    $queryPayload['evidence_selection_contract']['required_evidence_ids'] === ['EVA-E000001', 'EVA-E000002']
+    $queryPayload['evidence_selection_contract']['available_evidence_ids'] === ['EVA-E000001', 'EVA-E000002']
         && $queryPayload['primary_evidences'][0]['selection_region'] === 'core',
-    'O payload deve preservar a eleição determinística e o papel das evidências.'
+    'O payload deve preservar o conjunto determinístico disponível e o papel das evidências.'
 );
 assertAiAdapter(
     str_contains($queryHttp->requests[0]['payload']['messages'][0]['content'], 'operadores cognitivos internos e essenciais'),
     'O prompt deve preservar simetry e assimetry na compreensão cognitiva.'
 );
 assertAiAdapter(
-    str_contains($queryHttp->requests[0]['payload']['messages'][0]['content'], 'já foram eleitas deterministicamente'),
-    'O prompt deve impedir que a IA refaça a eleição local das evidências.'
+    str_contains($queryHttp->requests[0]['payload']['messages'][0]['content'], 'foram recuperadas deterministicamente'),
+    'O prompt deve preservar a recuperação local sem obrigar o uso artificial de todas as evidências.'
 );
 assertAiAdapter(
     str_contains($queryHttp->requests[0]['payload']['messages'][0]['content'], 'A aceitação formal de um identificador não equivale ao uso da evidência')
@@ -351,6 +351,28 @@ assertAiAdapter(count($queryAnswer->interactions) === 1, 'A interação transit�
 assertAiAdapter($queryAnswer->interactions[0]->interactionType === 'simetry', 'A classificação simetry foi perdida.');
 assertAiAdapter(!array_key_exists('id', $queryAnswer->interactions[0]->toArray()), 'A interação transitória não deve possuir identidade persistente.');
 assertAiAdapter(str_contains($queryAnswer->answer, '[EVA-E000001]'), 'A resposta perdeu a citacao documental.');
+
+$selectiveQueryHttp = new CapturingJsonHttpClient([[
+    'choices' => [[
+        'message' => ['content' => json_encode([
+            'answer' => 'Somente a primeira evidência contribui para esta resposta [EVA-E000001].',
+            'used_evidence_ids' => ['EVA-E000001', 'EVA-E000002'],
+            'interactions' => [],
+            'limitations' => [],
+        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE)],
+    ]],
+]]);
+$selectiveQueryAnswer = (new QueryAnswerProvider(
+    $selectiveQueryHttp,
+    'test-key',
+    'language-model-test',
+    'https://language-provider.test/v1/chat/completions'
+))->answer('Explique a primeira unidade.', $queryContext, []);
+
+assertAiAdapter(
+    $selectiveQueryAnswer->usedEvidenceIds === ['EVA-E000001'],
+    'Uma evidência declarada pelo provedor, mas ausente das citações visíveis, deve ser descartada.'
+);
 
 $correctiveQueryHttp = new CapturingJsonHttpClient([[
     'choices' => [[

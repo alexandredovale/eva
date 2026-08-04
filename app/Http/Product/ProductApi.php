@@ -142,6 +142,7 @@ final readonly class ProductApi
                         'route' => $path,
                         'request_id' => $this->requestId,
                         'attempt_count' => 3,
+                        'validation_failure_code' => $exception->validationCode,
                     ])
                 );
             }

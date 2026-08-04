@@ -59,7 +59,7 @@ The five phases and the first architectural upgrade are complete. Further work m
 - lineage resolution only after statistical selection — **completed**;
 - transient auditable `context_intelligence` output — **completed**;
 - core as primary reference and convergence as mandatory complementary analysis — **completed**;
-- complete `used_evidence_ids` contract without LLM re-election — **completed**;
+- `used_evidence_ids` contract derived from visible citations, with omitted candidates discarded — **completed**;
 - closed validation of analytical incorporation, without automatic completion or citation inventories — **completed**;
 - directed live reference validation with 10/10 evidence records incorporated and no truncation — **completed**;
 - isolated tests without a database or external calls — **completed**;

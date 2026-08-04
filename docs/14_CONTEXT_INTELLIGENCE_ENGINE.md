@@ -53,13 +53,13 @@ Dado o mesmo conjunto ordenado de candidatos e similaridades, o CIE sempre produ
 - persiste análise, contexto ou similaridades;
 - substitui a validação de citações e fragmentos.
 
-O provedor de resposta recebe somente as evidências primárias resolvidas após a seleção, identificadas como `core` ou `convergence`. Não recebe as similaridades nem as usa como autoridade documental. A eleição é integral: o provedor não pode rejeitar ou reduzir as fontes recebidas.
+O provedor de resposta recebe somente as evidências primárias resolvidas após a seleção, identificadas como `core` ou `convergence`. Não recebe as similaridades nem as usa como autoridade documental. As fontes formam o conjunto disponível; somente as efetivamente citadas integram o resultado.
 
 ## Evidências derivadas e múltiplos documentos
 
 O CIE classifica os candidatos vetoriais antes da resolução de linhagem. Um candidato `derived` selecionado continua sendo resolvido por `evidence_derivations` até suas fontes `primary`, e somente o conteúdo primário literal pode chegar ao provedor de resposta.
 
-Cada fonte primária final deve ser incorporada à resposta no trecho analítico em que contribui. A reprodução de IDs em `used_evidence_ids` sem uso textual não é suficiente, e listas isoladas de citações são rejeitadas. O núcleo preserva precedência; a convergência reforça, contextualiza, delimita ou contrapõe o núcleo sem autorizar relações inventadas.
+Cada fonte primária mantida deve ser incorporada à resposta no trecho analítico em que contribui. A reprodução de IDs em `used_evidence_ids` sem uso textual não é suficiente, e listas isoladas de citações são rejeitadas. Fontes recuperadas sem citação são descartadas sem derrubar a resposta. O núcleo preserva precedência; a convergência pode reforçar, contextualizar, delimitar ou contrapor o núcleo sem autorizar relações inventadas.
 
 Em consultas com múltiplas obras, cada documento produz sua própria distribuição e sua própria análise do CIE. `DocumentQueryService` intercala depois as fontes primárias selecionadas, remove duplicatas e respeita `QUERY_MAX_EVIDENCE` como limite global. Isso evita misturar escalas de similaridade de índices documentais distintos antes da estabilização local.
 

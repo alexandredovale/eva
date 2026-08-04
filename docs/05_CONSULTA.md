@@ -105,7 +105,7 @@ Define a quantidade máxima de evidências primárias candidatas que compõem o 
 - **Escopo:** é um limite global por consulta, não um limite por projeto ou por obra na chamada final à IA.
 - **Seleção:** nas rotas semânticas, o limite é aplicado às fontes primárias resolvidas depois do CIE; nas demais rotas, é aplicado diretamente aos candidatos hierárquicos ou literais.
 - **Múltiplas obras:** cada obra pode produzir seu contexto de recuperação, mas `DocumentQueryService` intercala os resultados entre as obras e encerra a composição quando atinge o limite global.
-- **Rastreabilidade:** as evidências finais já foram eleitas deterministicamente. A IA deve reproduzir o conjunto integral em `used_evidence_ids`, usar o núcleo como referência principal e incorporar cada convergência à análise complementar; qualquer redução, omissão textual ou inventário isolado de citações é rejeitado.
+- **Rastreabilidade:** as evidências finais são recuperadas deterministicamente e entregues como conjunto disponível. A IA usa o núcleo como referência principal, cita cada fonte efetivamente incorporada e pode omitir candidatos que não contribuam sem invalidar a resposta; inventários isolados de citações continuam rejeitados.
 - **Impacto operacional:** valores maiores ampliam cobertura e consumo de tokens. Valores menores reduzem contexto e custo, mas podem retirar evidências necessárias para cobrir todos os aspectos do input.
 
 Exemplo:
@@ -161,7 +161,7 @@ O valor foi calibrado a partir da matriz relacional real. Reduzi-lo exige nova v
 
 ### Regeneração silenciosa por falha de validação
 
-Quando uma geração chega completa ao backend, mas viola o contrato local de evidências, citações, incorporação analítica ou interações, `DocumentQueryService` descarta integralmente essa saída e solicita nova geração com o mesmo contexto eleito. A partir da segunda tentativa, o provedor recebe somente um código técnico conhecido da falha e, quando uma evidência eleita não foi incorporada, o respectivo identificador público. São permitidas no máximo três tentativas totais de resposta validada dentro da mesma requisição da API.
+Quando uma geração chega completa ao backend, mas viola o contrato local de citações, incorporação analítica ou interações, `DocumentQueryService` descarta integralmente essa saída e solicita nova geração com o mesmo contexto recuperado. A partir da segunda tentativa, o provedor recebe somente um código técnico conhecido da falha. Uma evidência recuperada que não aparece citada é apenas descartada; ela não provoca regeneração. São permitidas no máximo três tentativas totais de resposta validada dentro da mesma requisição da API.
 
 As tentativas rejeitadas não aparecem no transcript, não alteram a eleição do CIE e não reutilizam texto parcial. O feedback corretivo não contém input, conteúdo documental, resposta rejeitada, similaridade, peso ou valor subjetivo. Enquanto houver tentativa disponível, a interface permanece em **Consultando evidências…** e não exibe o identificador nem a regra técnica que causou a rejeição.
 
@@ -210,9 +210,9 @@ O adaptador descarta uma interação candidata e acrescenta limitação quando s
 - `simetry` recebe orientação;
 - `assimetry` não possui origem e destino distintos.
 
-Quando a recuperação não encontra evidência alguma, o sistema informa a limitação sem chamar o provedor de resposta. Quando há contexto eleito, `used_evidence_ids` deve reproduzi-lo integralmente e na mesma ordem; a IA não possui autoridade para refazer a eleição.
+Quando a recuperação não encontra evidência alguma, o sistema informa a limitação sem chamar o provedor de resposta. Quando há contexto, `used_evidence_ids` contém somente as evidências efetivamente citadas. Candidatos recuperados sem citação são descartados sem invalidar a resposta.
 
-Os identificadores de `used_evidence_ids` são validados contra o contexto, mas sua presença formal não basta. Cada evidência eleita deve aparecer citada em uma frase ou parágrafo analítico que exponha sua contribuição. A aplicação não acrescenta citações ausentes e rejeita listas isoladas como `Evidências: [EVA-E000000]`, pois elas não demonstram incorporação analítica.
+Os identificadores citados são validados contra o contexto, mas sua presença formal não basta. Cada evidência mantida deve aparecer citada em uma frase ou parágrafo analítico que exponha sua contribuição. A aplicação não acrescenta citações ausentes e rejeita listas isoladas como `Evidências: [EVA-E000000]`, pois elas não demonstram incorporação analítica. Uma resposta com contexto recuperado e nenhuma citação documental também é rejeitada.
 
 ## Saída
 

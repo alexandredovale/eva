@@ -193,7 +193,8 @@ final readonly class DocumentQueryService
         throw new QueryException(
             self::PUBLIC_VALIDATION_FAILURE_MESSAGE,
             0,
-            $lastValidationException
+            $lastValidationException,
+            is_string($validationFeedback['code'] ?? null) ? $validationFeedback['code'] : null
         );
     }
 
@@ -209,25 +210,24 @@ final readonly class DocumentQueryService
     ): DocumentQueryResult {
         $generated = $this->answerProvider->answer($input, $context, $validationFeedback);
 
-        $usedIds = array_values(array_unique($generated->usedEvidenceIds));
         $electedIds = array_keys($available);
 
-        foreach ($usedIds as $evidenceId) {
-            if (!isset($available[$evidenceId])) {
-                throw new QueryException('A resposta citou uma evidência fora do contexto recuperado.');
-            }
-        }
-
-        if ($usedIds !== $electedIds) {
-            throw new QueryException('A resposta não aceitou integralmente as evidências eleitas pelo contexto.');
-        }
-
         preg_match_all('/\[(EVA-E\d{6,})\]/', $generated->answer, $citationMatches);
+        $citedIds = array_values(array_unique($citationMatches[1] ?? []));
 
-        foreach (array_unique($citationMatches[1] ?? []) as $citation) {
+        foreach ($citedIds as $citation) {
             if (!isset($available[$citation])) {
                 throw new QueryException('A resposta contém uma citação documental não recuperada.');
             }
+        }
+
+        $usedIds = array_values(array_filter(
+            $electedIds,
+            static fn (string $evidenceId): bool => in_array($evidenceId, $citedIds, true)
+        ));
+
+        if ($usedIds === []) {
+            throw new QueryException('A resposta não citou nenhuma evidência documental recuperada.');
         }
 
         $this->assertAnalyticalEvidenceCoverage($generated->answer, $usedIds);
@@ -241,6 +241,8 @@ final readonly class DocumentQueryService
         $assimetry = [];
 
         foreach ($generated->interactions as $interaction) {
+            $usesOnlyCitedEvidence = true;
+
             foreach ($interaction->evidences as $association) {
                 $evidenceId = $association['evidence_id'];
                 $excerpt = $association['excerpt'];
@@ -255,8 +257,12 @@ final readonly class DocumentQueryService
                 }
 
                 if (!in_array($evidenceId, $usedIds, true)) {
-                    throw new QueryException('Uma interação transitória deve usar evidências citadas na resposta.');
+                    $usesOnlyCitedEvidence = false;
                 }
+            }
+
+            if (!$usesOnlyCitedEvidence) {
+                continue;
             }
 
             if ($interaction->interactionType === 'simetry') {
@@ -265,6 +271,11 @@ final readonly class DocumentQueryService
                 $assimetry[] = $interaction;
             }
         }
+
+        $usedEvidenceSelection = array_intersect_key(
+            $context->evidenceSelection,
+            array_fill_keys($usedIds, true)
+        );
 
         return new DocumentQueryResult(
             $context->understanding,
@@ -275,7 +286,7 @@ final readonly class DocumentQueryService
             $context->routingPoints,
             array_values(array_unique([...$context->limitations, ...$generated->limitations])),
             $context->contextIntelligenceAnalyses,
-            $context->evidenceSelection
+            $usedEvidenceSelection
         );
     }
 
@@ -338,8 +349,8 @@ final readonly class DocumentQueryService
         $message = $exception->getMessage();
         $feedback = ['code' => match (true) {
             str_contains($message, 'fora do contexto recuperado') => 'evidence_outside_context',
-            str_contains($message, 'não aceitou integralmente') => 'required_evidence_set_mismatch',
             str_contains($message, 'citação documental não recuperada') => 'citation_outside_context',
+            str_contains($message, 'não citou nenhuma evidência documental') => 'missing_documentary_citation',
             str_contains($message, 'não incorporou analiticamente') => 'missing_analytical_evidence',
             str_contains($message, 'apenas inventariou evidências') => 'citation_inventory_without_analysis',
             str_contains($message, 'limite de interações') => 'interaction_limit_exceeded',

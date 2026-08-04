@@ -42,11 +42,11 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 38. Never erase a valid partial relationship only because another input aspect lacks evidence.
 39. Treat retrieved results as candidates until the application completes deterministic election.
 40. Deliver only the authorized final context to the provider, using primary sources and explicit `core` or `convergence` roles on semantic routes.
-41. Require every elected evidence record to be cited in the analytical passage where it contributes.
-42. Reject textual omission, isolated markers, or citation inventories that do not demonstrate analytical incorporation.
+41. Require every evidence record retained in the result to be cited in the analytical passage where it contributes.
+42. Discard recovered evidence omitted from the text, and reject isolated markers or citation inventories that do not demonstrate analytical incorporation.
 43. Never add a citation omitted by the provider merely to make the response appear compliant.
 44. Treat `QUERY_MAX_EVIDENCE` as the global primary-evidence limit delivered to the provider for each query, applied after CIE on semantic routes.
-45. Do not confuse a retrieved candidate with elected evidence. The application selects final context, and the AI cannot re-elect, reject, or reduce it.
+45. Do not confuse recovered context with used evidence. The application authorizes the available set and retains only effectively cited sources in the result.
 46. Treat `QUERY_MAX_INTERACTIONS` as a transient relational-output limit, never as an evidence count, persisted-pair count, or instruction to precompute combinations.
 47. A zero `QUERY_MAX_INTERACTIONS` disables interactions without disabling the evidence-based documentary answer.
 48. Detect relational intent locally through normalized deterministic rules without an AI call before retrieval.
@@ -65,9 +65,9 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 61. Resolve derived candidates selected by CIE to primary sources before applying the global limit and calling the answer provider.
 62. Do not persist candidates, similarities, statistics, regions, or the CIE selection as documentary memory.
 63. Stop vectorization and report the evidence identifier when an oversized primary unit has no compatible derived summary; require a real structural subdivision.
-64. Require `used_evidence_ids` to reproduce the application's final election completely and in the same order.
-65. Preserve `core` as argumentative precedence and incorporate every `convergence` item as literal support, context, limitation, or counterpoint.
-66. Do not invent relationships to accommodate elected evidence; mandatory incorporation remains bounded by documentary content.
+64. Require `used_evidence_ids` to contain only evidence records that are effectively cited in the answer.
+65. Preserve `core` as argumentative precedence and use `convergence` only when it contributes literal support, context, limitation, or counterpoint.
+66. Do not invent relationships to accommodate recovered evidence; discard uncited candidates without invalidating the answer.
 67. Keep strict semantic calibration of `simetry` and `assimetry` separate from the documentary validity of the answer.
 68. Silently discard an answer rejected by local validation and permit at most three total attempts with the same elected context; from the second attempt onward, send only a safe corrective code and one elected evidence identifier when analytical incorporation is missing.
 69. Show an error to the user only after the third consecutive validation failure, using a generic message without an evidence identifier or internal technical rule.

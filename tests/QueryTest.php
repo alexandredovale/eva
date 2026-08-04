@@ -272,8 +272,7 @@ final class RecoveringAnswerProvider implements QueryAnswerProviderInterface
             $context->evidences
         );
 
-        if (($validationFeedback['code'] ?? null) !== 'missing_analytical_evidence'
-            || ($validationFeedback['evidence_id'] ?? null) !== $used[0]) {
+        if (($validationFeedback['code'] ?? null) !== 'missing_documentary_citation') {
             return new GeneratedAnswer(
                 'Resposta documental sem incorporação analítica visível.',
                 $used
@@ -288,6 +287,27 @@ final class RecoveringAnswerProvider implements QueryAnswerProviderInterface
         return new GeneratedAnswer(
             'A tentativa corretiva incorporou corretamente todo o contexto eleito ' . $citations . '.',
             $used
+        );
+    }
+}
+
+final class SelectiveCitationAnswerProvider implements QueryAnswerProviderInterface
+{
+    public int $calls = 0;
+
+    public function model(): string
+    {
+        return 'selective-citation-v1';
+    }
+
+    public function answer(string $input, QueryContext $context, array $validationFeedback): GeneratedAnswer
+    {
+        $this->calls++;
+        $allIds = array_map(static fn ($evidence): string => $evidence->publicId, $context->evidences);
+
+        return new GeneratedAnswer(
+            'A primeira evidência recuperada sustenta diretamente a resposta documental [' . $allIds[0] . '].',
+            $allIds
         );
     }
 }
@@ -521,9 +541,21 @@ try {
 
     assertQuery(
         $recoveringProvider->feedback[0] === []
-            && ($recoveringProvider->feedback[1]['code'] ?? null) === 'missing_analytical_evidence'
-            && ($recoveringProvider->feedback[1]['evidence_id'] ?? null) === $intelligence['public_id'],
-        'O feedback corretivo deve conter somente a regra segura e a evidência omitida.'
+            && ($recoveringProvider->feedback[1]['code'] ?? null) === 'missing_documentary_citation'
+            && !array_key_exists('evidence_id', $recoveringProvider->feedback[1]),
+        'O feedback corretivo deve solicitar ao menos uma citação documental sem expor conteúdo.'
+    );
+
+    $selectiveProvider = new SelectiveCitationAnswerProvider();
+    $selectiveResult = (new DocumentQueryService($retriever, $selectiveProvider))
+        ->query($documentId, 'intelligence and instinct', 5, 20);
+    assertQuery(
+        $selectiveProvider->calls === 1 && count($selectiveResult->usedEvidences) === 1,
+        'Uma evidência recuperada sem citação deve ser descartada sem regenerar a resposta válida.'
+    );
+    assertQuery(
+        array_keys($selectiveResult->evidenceSelection) === [$selectiveResult->usedEvidences[0]->publicId],
+        'A seleção exposta no resultado deve conter somente evidências efetivamente citadas.'
     );
 
     $missingVisibleCitationProvider = new MissingVisibleCitationAnswerProvider();
@@ -539,7 +571,7 @@ try {
             'após três tentativas'
         );
         $missingAnalyticalReasonPreserved = $exception->getPrevious() instanceof QueryException
-            && str_contains($exception->getPrevious()->getMessage(), 'não incorporou analiticamente')
+            && str_contains($exception->getPrevious()->getMessage(), 'não citou nenhuma evidência documental')
             && !str_contains($exception->getMessage(), 'EVA-E');
     }
 
@@ -608,7 +640,7 @@ try {
     } catch (QueryException $exception) {
         $invalidRejected = str_contains($exception->getMessage(), 'após três tentativas');
         $invalidReasonPreserved = $exception->getPrevious() instanceof QueryException
-            && str_contains($exception->getPrevious()->getMessage(), 'fora do contexto');
+            && str_contains($exception->getPrevious()->getMessage(), 'não recuperada');
     }
 
     assertQuery(

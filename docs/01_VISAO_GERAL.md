@@ -37,7 +37,7 @@ Resposta: evidências citadas → resposta e limitações
 
 A IA apenas compreende e descreve relações semânticas explícitas. Ela não julga conteúdos, não atribui pesos, não classifica importância e não transforma proximidade semântica em conclusão documental.
 
-O Context Intelligence Engine (CIE) reforça essa neutralidade entre o Retriever e as camadas cognitivas. Média, desvio padrão e coeficiente de variação identificam o núcleo principal e a faixa de convergência complementar da distribuição vetorial; quando não há núcleo, a convergência assume o papel principal. A eleição é local, determinística, transitória e independente de julgamento por modelo. Depois da resolução até fontes primárias, todas as evidências eleitas devem ser incorporadas à resposta.
+O Context Intelligence Engine (CIE) reforça essa neutralidade entre o Retriever e as camadas cognitivas. Média, desvio padrão e coeficiente de variação identificam o núcleo principal e a faixa de convergência complementar da distribuição vetorial; quando não há núcleo, a convergência assume o papel principal. A recuperação é local, determinística, transitória e independente de julgamento por modelo. Depois da resolução até fontes primárias, somente evidências efetivamente citadas são mantidas na resposta.
 
 ## White label
 

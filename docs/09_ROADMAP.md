@@ -59,7 +59,7 @@ As cinco fases e o primeiro upgrade arquitetural estão concluídos. Novas fases
 - resolução de linhagem somente após a seleção estatística — concluído;
 - saída transitória auditável em `context_intelligence` — concluído;
 - núcleo como referência principal e convergência como análise complementar obrigatória — concluído;
-- contrato integral de `used_evidence_ids` sem reeleição pela LLM — concluído;
+- contrato de `used_evidence_ids` derivado das citações visíveis, com descarte de candidatos omitidos — concluído;
 - validação fechada da incorporação analítica, sem preenchimento automático ou inventário de citações — concluído;
 - validação real de referência com 10/10 evidências incorporadas e sem truncamento — concluído;
 - testes isolados sem banco ou chamadas externas — concluído;

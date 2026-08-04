@@ -40,11 +40,11 @@
 38. Nunca apagar uma relação parcial válida apenas porque outro aspecto do input não possui evidência.
 39. Tratar resultados recuperados como candidatos até a eleição determinística concluída pela aplicação.
 40. Entregar ao provedor somente o contexto final autorizado, com fontes primárias e papéis explícitos de núcleo ou convergência nas rotas semânticas.
-41. Exigir que toda evidência eleita seja citada no trecho analítico em que contribui para a resposta.
-42. Rejeitar omissão textual, marcador isolado ou inventário de citações que não demonstre incorporação analítica.
+41. Exigir que toda evidência mantida no resultado seja citada no trecho analítico em que contribui para a resposta.
+42. Descartar evidência recuperada omitida no texto e rejeitar marcador isolado ou inventário de citações que não demonstre incorporação analítica.
 43. Nunca acrescentar automaticamente uma citação omitida pelo provedor para fazer a resposta aparentar conformidade.
 44. Tratar `QUERY_MAX_EVIDENCE` como limite global de evidências primárias entregues ao provedor em cada consulta, aplicado depois do CIE nas rotas semânticas.
-45. Não confundir candidato recuperado com evidência eleita; a aplicação seleciona o contexto final e a IA não pode reelegê-lo, rejeitá-lo ou reduzi-lo.
+45. Não confundir contexto recuperado com evidência utilizada; a aplicação autoriza o conjunto disponível e conserva no resultado somente as fontes efetivamente citadas.
 46. Tratar `QUERY_MAX_INTERACTIONS` como limite de saída relacional transitória, nunca como quantidade de evidências, pares persistidos ou combinações antecipadas.
 47. Desativar interações quando `QUERY_MAX_INTERACTIONS` for zero sem desativar a resposta documental baseada em evidências.
 48. Detectar a intenção relacional localmente, por regras determinísticas normalizadas, sem criar uma chamada de IA anterior à recuperação.
@@ -63,9 +63,9 @@
 61. Resolver candidatos derivados selecionados pelo CIE até suas fontes primárias antes de aplicar o limite global e chamar o provedor de resposta.
 62. Não persistir candidatos, similaridades, estatísticas, regiões ou seleção do CIE como memória documental.
 63. Interromper a vetorização com o identificador da evidência quando uma primária excedente não possuir síntese derivada compatível, exigindo subdivisão estrutural real.
-64. Exigir que `used_evidence_ids` reproduza integralmente e na mesma ordem a eleição final da aplicação.
-65. Preservar `core` como precedência argumentativa e incorporar cada `convergence` como reforço, contexto, limite ou contraponto sustentado literalmente.
-66. Não inventar relações para acomodar uma evidência eleita; incorporação obrigatória continua limitada ao conteúdo documental.
+64. Exigir que `used_evidence_ids` contenha somente evidências efetivamente citadas na resposta.
+65. Preservar `core` como precedência argumentativa e usar `convergence` somente quando contribuir como reforço, contexto, limite ou contraponto sustentado literalmente.
+66. Não inventar relações para acomodar uma evidência recuperada; candidatos sem contribuição citada devem ser descartados sem invalidar a resposta.
 67. Manter a calibração semântica estrita de `simetry` e `assimetry` separada da validade documental da resposta.
 68. Descartar silenciosamente uma resposta rejeitada pela validação local e permitir no máximo três tentativas totais com o mesmo contexto eleito; da segunda tentativa em diante, transmitir somente o código seguro da falha e o identificador de uma evidência eleita quando ela não tiver sido incorporada analiticamente.
 69. Exibir erro ao usuário somente depois da terceira falha consecutiva de validação, usando mensagem genérica sem identificador de evidência ou regra técnica interna.
