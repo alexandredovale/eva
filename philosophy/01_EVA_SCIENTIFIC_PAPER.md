@@ -8,7 +8,7 @@
 
 Este artigo apresenta o EVA (Evidence Algorithm), uma arquitetura para consulta documental assistida por modelos de linguagem cuja memória persistente é organizada em evidências rastreáveis, e não em respostas, relações cognitivas ou grafos inferidos. O sistema transforma documentos estruturados em uma árvore normalizada, preserva seus conteúdos literais como evidências primárias e produz sínteses hierárquicas como evidências derivadas com linhagem explícita. Embeddings são gerados para essas unidades semânticas completas, respeitando a organização do documento em vez de fragmentá-lo por limites arbitrários de caracteres ou tokens.
 
-Na consulta, o EVA seleciona uma rota de recuperação compatível com o tipo de input. Perguntas diretas, estruturais e amplas podem navegar pela hierarquia; perguntas conceituais e relacionais usam uma representação vetorial transitória para localizar evidências primárias e derivadas. Nessas rotas semânticas, o Context Intelligence Engine (CIE) analisa a distribuição do Top-k por média, desvio padrão e coeficiente de variação, elegendo o núcleo de convergência como referência principal e a faixa de convergência como contexto complementar obrigatório. Quando não há núcleo, a convergência assume o papel principal. Evidências derivadas selecionadas são resolvidas até suas fontes primárias antes da geração da resposta. Se nenhuma evidência primária suficiente for encontrada, o fluxo é interrompido sem chamada ao provedor de resposta.
+Na consulta, o EVA seleciona uma rota de recuperação compatível com o tipo de input. Perguntas diretas, estruturais e amplas podem navegar pela hierarquia; perguntas conceituais e relacionais usam uma representação vetorial transitória para localizar evidências primárias e derivadas. Nessas rotas semânticas, o Context Intelligence Engine (CIE) analisa a distribuição do Top-k por média, desvio padrão e coeficiente de variação, identificando o núcleo de convergência como referência principal e a faixa de convergência como contexto complementar disponível. Quando não há núcleo, a convergência assume o papel principal. Evidências derivadas selecionadas são resolvidas até suas fontes primárias antes da geração da resposta; somente fontes incorporadas à prosa com citações visíveis integram a base final. Se nenhuma evidência primária suficiente for encontrada, o fluxo é interrompido sem chamada ao provedor de resposta.
 
 Relações cognitivas são tratadas como interações transitórias de **simetry** ou **assimetry**, produzidas somente no contexto da consulta, sem pesos, taxonomias julgamentais ou persistência. Em projetos multidisciplinares, evidências de documentos especializados distintos podem integrar uma seleção transitória e sustentar sínteses conceituais emergentes sem que a interpretação resultante seja promovida a evidência ou memória. Citações e participantes dessas interações são validados localmente contra o contexto recuperado. A proposta separa memória documental, recuperação, interpretação e apresentação, mantendo fornecedores e modelos como componentes substituíveis configurados externamente. O artigo descreve a arquitetura vigente, suas hipóteses verificáveis, limitações e um protocolo experimental para avaliação futura.
 
@@ -213,7 +213,7 @@ Inputs diretos, estruturais e amplos podem ser resolvidos por navegação textua
 
 A hierarquia permite recuperar uma unidade e seu contexto, respeitando ordem e parentesco. Assim, uma seção não é apresentada como uma sequência desordenada de fragmentos semelhantes.
 
-As unidades recuperadas nessa rota permanecem candidatas até a aplicação formar o contexto final dentro do limite operacional. A partir dessa eleição, o provedor não possui autoridade para rejeitar, reduzir ou reordenar o fundamento: deve incorporar todas as evidências primárias recebidas segundo o conteúdo literal de cada uma. Se a aplicação não recuperar evidência alguma, retorna ausência justificada sem chamar o provedor de resposta.
+As unidades recuperadas nessa rota permanecem candidatas até a aplicação formar o contexto disponível dentro do limite operacional. O provedor não pode introduzir fontes ou identificadores fora desse conjunto, mas pode omitir candidatas que não contribuam para a resposta. Somente evidências incorporadas à prosa com citação visível integram a base final; candidatas não citadas são descartadas sem invalidar toda a geração. Se a aplicação não recuperar evidência alguma, retorna ausência justificada sem chamar o provedor de resposta.
 
 ### 7.3 Recuperação semântica
 
@@ -239,7 +239,7 @@ Para `N` candidatos com similaridades `sᵢ`, o CIE calcula as estatísticas pop
 CV = \frac{\sigma}{\mu}
 \]
 
-Quando `μ = 0`, o CV é indefinido e representado como `null`. Candidatos com `s < μ` são descartados; `μ ≤ s < μ + σ` define a faixa de convergência; e `s ≥ μ + σ` define o núcleo. Se houver núcleo, ele segue como referência principal e a faixa de convergência segue como contexto complementar obrigatório. Se o núcleo estiver vazio, a convergência assume o papel principal. Uma tolerância numérica mínima protege as comparações de fronteira sem alterar os valores calculados.
+Quando `μ = 0`, o CV é indefinido e representado como `null`. Candidatos com `s < μ` são descartados; `μ ≤ s < μ + σ` define a faixa de convergência; e `s ≥ μ + σ` define o núcleo. Se houver núcleo, ele segue como referência principal e a faixa de convergência compõe o contexto complementar disponível. Se o núcleo estiver vazio, a convergência assume o papel principal. Uma tolerância numérica mínima protege as comparações de fronteira sem alterar os valores calculados.
 
 Essa transformação é determinística e preserva a ordem original do Retriever dentro de cada região. Ela não cria peso, nota ou ranking adicional. A saída da consulta pode expor as regiões e estatísticas para auditoria, mas o provedor de resposta recebe apenas o contexto primário resolvido.
 
@@ -273,16 +273,16 @@ onde (E_P^*) é o contexto primário validado e (g) é o provedor de resposta co
 
 Essa barreira reduz evasão, mas não prova que toda resposta gerada seja correta. A validade semântica da interpretação continua sendo objeto de avaliação.
 
-### 7.6 Geração única de resposta e interação
+### 7.6 Geração conjunta de resposta e interação
 
-Quando há evidências, uma única chamada ao provedor de resposta recebe o input atual, até três rodadas conversacionais anteriores anexadas pela interface e o contexto primário. Ela produz:
+Quando há evidências, a tentativa nominal do provedor de resposta recebe o input atual, até três rodadas conversacionais anteriores anexadas pela interface e o contexto primário disponível. A mesma geração produz:
 
 - resposta textual;
 - identificadores das evidências utilizadas;
-- interações de `simetry` e `assimetry`, quando a natureza do input as exige;
+- interações de `simetry` e `assimetry` quando há ao menos duas evidências disponíveis e o limite configurado é positivo, independentemente do tipo inicial do input;
 - pontos de roteamento ou limitações pertinentes.
 
-Não existe um provedor separado dedicado a construir relações, nem uma segunda análise destinada a persistir um grafo.
+Não existe um provedor separado dedicado a construir relações, nem uma segunda análise destinada a persistir um grafo. Uma saída truncada admite no máximo uma regeneração compacta dentro da tentativa. Separadamente, a validação local admite no máximo três tentativas totais com o mesmo contexto; cada saída rejeitada é descartada integralmente.
 
 ### 7.7 Validação local
 
@@ -295,15 +295,15 @@ A saída do provedor é tratada como proposta, não como autoridade. O backend v
 - `simetry` possui dois participantes recíprocos;
 - `assimetry` explicita origem e destino.
 
-Quando uma evidência válida consta na saída estruturada, mas sua marca não aparece no texto visível, a aplicação pode acrescentar deterministicamente seu identificador. Esse mecanismo só apresenta IDs previamente validados; ele não inventa fontes.
+`used_evidence_ids` é derivado das citações visíveis encontradas em `answer`. Quando uma candidata recuperada não aparece citada, ela é descartada da base final sem provocar nova tentativa. A aplicação não acrescenta identificadores omitidos e rejeita inventários isolados de citações.
 
 ### 7.8 Transitoriedade e privacidade
 
-O embedding do input, os escores de similaridade, as estatísticas e regiões do CIE, o contexto montado, a resposta e as interações são descartados ao final do request. Eles não são reinseridos na memória documental.
+O embedding do input, os escores de similaridade, as estatísticas e regiões do CIE, o contexto montado, a resposta e as interações não são reinseridos na memória documental. Pares, papéis, descrições e fragmentos de `simetry`/`assimetry` são descartados ao final do request.
 
 O comportamento vigente admite continuidade conversacional curta e transitória. A interface mantém o transcript completo apenas em memória local da página e anexa ao input no máximo as três rodadas concluídas mais recentes. O modelo avalia se a solicitação atual realmente depende desse histórico; mensagens sem relação devem ser ignoradas.
 
-Essa continuidade não altera a fronteira epistemológica. Inputs e respostas anteriores podem esclarecer referências anafóricas, mas não são fontes documentais e nunca autorizam afirmações. A nova resposta permanece limitada às evidências primárias recuperadas para o request atual. O transcript não é persistido no banco, em eventos de auditoria ou no armazenamento do navegador e desaparece em reinício do chat, logout, novo login ou recarregamento.
+Essa continuidade não altera a fronteira epistemológica. Inputs e respostas anteriores podem esclarecer referências anafóricas, mas não são fontes documentais e nunca autorizam afirmações. A nova resposta permanece limitada às evidências primárias recuperadas para o request atual. O transcript visual completo não é persistido e desaparece em reinício do chat, logout, novo login ou recarregamento. Para observabilidade, `audit_events` registra metadados sanitizados da consulta concluída, inclusive contagens de interações; quando existe módulo assinante, `module_events` pode registrar o envelope permitido de `interaction.completed`, que inclui o input contextual usado pelo Core e a resposta validada sem alterar a memória documental.
 
 ### 7.9 Custo externo por rota
 
@@ -331,7 +331,7 @@ O EVA usa dois apontamentos mínimos:
 
 O esquema registra estrutura, participantes e base textual. Não registra peso, intensidade, aprovação ou precedência ontológica.
 
-`simetry` e `assimetry` são operadores essenciais da compreensão cognitiva do sistema, não termos que precisem ocorrer na fonte. Eles permanecem no contexto relacional da IA e são aplicados às evidências recuperadas. Quando a interação não pode ser validada, a arquitetura preserva a resposta documental sustentada e explicita a limitação relacional.
+`simetry` e `assimetry` são operadores essenciais da compreensão cognitiva do sistema, não termos que precisem ocorrer na fonte. Eles são avaliados entre evidências efetivamente citadas sempre que o contexto e o limite habilitam a análise. Quando a interação não pode ser validada, a arquitetura preserva a resposta documental sustentada e explicita a limitação relacional.
 
 ### 8.2 Neutralidade
 
@@ -357,7 +357,7 @@ Uma síntese emergente entre disciplinas é, portanto, confiável no sentido de 
 
 A superfície pública é separada dos arquivos privados da aplicação. Operações administrativas exigem autenticação por token bearer configurado fora do código. Credenciais e associações de fornecedores não são documentadas nem expostas por endpoints públicos.
 
-Eventos operacionais são registrados de forma sanitizada, sem transformar texto bruto de consultas em memória. A consulta permanece somente leitura em relação ao acervo documental.
+Eventos operacionais são registrados de forma sanitizada, sem transformar a consulta em memória documental. O Core persiste contagens de `simetry` e `assimetry` na auditoria da consulta concluída. O Runtime modular, quando possui assinante ativo, pode persistir o envelope contratual de `interaction.completed` na caixa postal neutra e no armazenamento privado do módulo. A consulta permanece somente leitura em relação ao acervo documental.
 
 O modelo de segurança vigente deve ser descrito sem extrapolações: o superadmin pode usar a credencial administrativa da instalação, usuários autenticados possuem sessões revogáveis e permissões explícitas por projeto ou documento, e projetos agrupam obras para consulta multidocumental. Esse controle não constitui identidade global, colaboração entre organizações nem isolamento multitenant. Tais capacidades exigiriam fronteiras adicionais de autorização e testes próprios.
 
@@ -605,13 +605,14 @@ O custo dessa prudência é real. O sistema pode recusar perguntas que um modelo
 
 ### 15.1 Fluxo compacto e separação de responsabilidades
 
-Embora o EVA contenha ingestão, síntese, embeddings, recuperação e geração, sua cadeia epistemológica pode ser reduzida a cinco operações:
+Embora o EVA contenha ingestão, síntese, embeddings, recuperação e geração, sua cadeia epistemológica pode ser reduzida a sete operações:
 
 ```text
-DOCUMENTO → EVIDÊNCIAS → LOCALIZAÇÃO → VALIDAÇÃO → RESPOSTA
+DOCUMENTO → EVIDÊNCIAS → LOCALIZAÇÃO → CONTEXTO DISPONÍVEL
+          → GERAÇÃO + INTERAÇÕES → VALIDAÇÃO LOCAL → RESPOSTA
 ```
 
-Essa compactação não elimina as etapas técnicas; explicita a responsabilidade dominante de cada uma. O documento estabelece a origem, as evidências preservam conteúdo e linhagem, a recuperação localiza candidatos, a aplicação valida o conjunto utilizável e o modelo formula a resposta. Em termos funcionais:
+Essa compactação não elimina as etapas técnicas; explicita a responsabilidade dominante de cada uma. O documento estabelece a origem, as evidências preservam conteúdo e linhagem, a recuperação localiza candidatos, a aplicação compõe o contexto autorizado, o modelo formula a resposta e propõe interações, e a validação local mantém somente citações e relações reconstruíveis. Em termos funcionais:
 
 ```text
 síntese localiza

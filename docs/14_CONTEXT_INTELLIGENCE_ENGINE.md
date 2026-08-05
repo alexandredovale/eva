@@ -15,7 +15,7 @@ input conceitual ou relacional
         → Top-k vetorial (20 por padrão)
         → Context Intelligence Engine
         → resolução de evidências derivadas até fontes primárias
-        → limite global do contexto final
+        → limite global do contexto disponível
         → camadas cognitivas
         → LLM
 ```
@@ -73,7 +73,7 @@ QUERY_MAX_EVIDENCE=8
 - `QUERY_CANDIDATE_LIMIT`: tamanho do Top-k semântico analisado por documento; padrão `20`, intervalo efetivo `1..200`.
 - `QUERY_MAX_EVIDENCE`: máximo de evidências primárias no contexto entregue ao provedor; padrão `8`, intervalo efetivo `1..50`.
 
-Os limites não são equivalentes. O primeiro define a população estatística do CIE. O segundo contém o contexto final e o consumo de tokens depois da seleção e da resolução de linhagem.
+Os limites não são equivalentes. O primeiro define a população estatística do CIE. O segundo contém o contexto primário disponível e o consumo de tokens depois da seleção e da resolução de linhagem; a base final será o subconjunto efetivamente citado.
 
 ## Saída auditável
 
@@ -82,7 +82,7 @@ Respostas de consulta incluem `context_intelligence`, uma lista com uma análise
 - quantidade de candidatos;
 - média, desvio padrão e CV;
 - limites da faixa de convergência;
-- região usada no contexto final;
+- região usada no contexto disponível;
 - papéis finais de núcleo e convergência;
 - candidatos do núcleo, convergência e descarte com a similaridade original.
 

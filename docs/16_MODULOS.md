@@ -4,7 +4,7 @@
 
 Um módulo é um pacote independente colocado diretamente em `modules/<module-id>/`. Ele não pertence a usuário, projeto ou documento. Quando conectado, recebe os eventos que declarou no manifesto; vários módulos podem receber o mesmo evento.
 
-O Core mantém somente a caixa postal neutra `module_events`. Cada módulo mantém cursor, histórico e resultados no arquivo privado `modules/.runtime/data/<module-id>/module.sqlite`.
+O Core mantém somente a caixa postal neutra `module_events`, incluída diretamente em `database/schema.sql`. A migration `database/migrations/20260803_010_module_events.sql` permanece para atualizar bancos criados antes dessa consolidação. Cada módulo mantém cursor, histórico e resultados no arquivo privado `modules/.runtime/data/<module-id>/module.sqlite`. Se um deploy legado não tiver recebido a migration, a emissão falha de forma isolada e a resposta documental continua, mas nenhum evento modular novo é armazenado.
 
 ## Instalação manual
 
@@ -44,6 +44,7 @@ Os schemas canônicos estão em:
 - `modules/runtime/contracts/module-manifest.schema.json`;
 - `modules/runtime/contracts/module-event.schema.json`.
 - `modules/runtime/contracts/module-dashboard.schema.json`.
+- `modules/runtime/contracts/module-action.schema.json`.
 
 ## EVA Module SDK
 
@@ -64,10 +65,13 @@ interface ModuleInterface
 - `storage`: PDO SQLite exclusivo do módulo;
 - `core`: API de leitura do Core limitada às capacidades declaradas;
 - `language`: geração JSON por IA sem exposição da chave ao módulo.
+- `query`: consulta documental escopada ao ator autenticado, disponível somente com `core.query.scoped` em contextos interativos.
 
 Interfaces opcionais:
 
 - `DashboardModuleInterface`: devolve `contract`, `html` e `css` pelo endpoint genérico de dashboard.
+- `ModuleAccessInterface`: decide se o ator pode descobrir, abrir e executar o módulo; o superadmin mantém acesso administrativo.
+- `ModuleActionInterface`: recebe ações autenticadas e devolve `eva.module.action/1` com um dashboard atualizado.
 
 O Core não contém menus, textos, estilos, IDs ou renderizadores de um módulo específico. Quando um módulo ativo declara `dashboard.enabled`, a rota autenticada `GET /api/modules` publica somente seu descritor genérico (`id`, `name`, `order`). O frontend monta a navegação a partir desses descritores e entrega a resposta de `DashboardModuleInterface` a um único host visual.
 
@@ -81,8 +85,25 @@ O HTML e o CSS pertencem ao pacote. O módulo pode manter sua folha em `assets/`
 - `data-module-refresh`: atualização da interface;
 - `data-module-content-filter` e `data-module-entry`: filtragem local;
 - `data-module-accordion-toggle`: abertura exclusiva de um item.
+- `data-module-action-form` e `data-module-action`: envio autenticado de formulários para uma ação do próprio módulo.
 
 O dashboard deve retornar o contrato `eva.module.dashboard/1`. Um pacote removido leva consigo toda a apresentação que produzia; o host genérico permanece vazio e não conserva conhecimento do domínio removido.
+
+## Ações interativas e autorização
+
+Um módulo interativo implementa `ModuleActionInterface`. Formulários declarativos são enviados por:
+
+```text
+POST /api/modules/<module-id>/actions/<action-id>
+```
+
+O envelope contém somente `request_id` e `input`. O identificador permite que o próprio módulo implemente idempotência no SQLite. A resposta usa `eva.module.action/1`, inclui obrigatoriamente um novo `eva.module.dashboard/1` e pode incluir uma notificação neutra. O host não executa JavaScript fornecido pelo pacote.
+
+Antes de listar o menu, abrir o dashboard ou executar uma ação, o Runtime consulta `ModuleAccessInterface` quando implementada. Módulos antigos permanecem acessíveis como antes; o superadmin sempre conserva o acesso necessário para configuração e recuperação.
+
+Com a capacidade `core.query.scoped`, uma ação pode chamar `ModuleContext::scopedQuery()` para reutilizar o RAG do Core. O ator fica vinculado pelo Runtime e não pode ser substituído pelo módulo. Projetos e documentos são novamente autorizados pelo `ScopeAccessService`, e instruções complementares permanecem subordinadas às regras-base, evidências, citações e contrato de resposta do EVA.
+
+Campos sensíveis são recusados recursivamente. O payload de entrada possui limite de 128 KiB; HTML e CSS retornados também possuem limites próprios. Perfis, preferências, histórico e demais relações de domínio continuam pertencendo ao SQLite privado do módulo, sem novas tabelas no MySQL.
 
 Um módulo não pode chamar outro módulo. O processamento deve ser idempotente por `event_id`.
 
@@ -125,7 +146,7 @@ Consumo até esvaziar a caixa postal:
 C:\xampp\php\php.exe modules\runtime\bin\consume.php --limit=50 --drain
 ```
 
-Esse comando pode ser agendado pelo Agendador de Tarefas ou cron. Cada módulo avança seu cursor na mesma transação da persistência do evento.
+Esse comando pode ser agendado pelo Agendador de Tarefas ou cron. Para cada item já existente na caixa postal do Core, o módulo confirma no mesmo SQLite privado o processamento, o registro idempotente do evento e o avanço do cursor em uma única transação.
 
 O agendamento é opcional para módulos que possuem dashboard: ao abrir ou atualizar o dashboard, o Runtime executa uma passagem de recuperação antes da leitura. O comando periódico continua disponível para processar eventos antecipadamente e para módulos sem interface de dashboard.
 

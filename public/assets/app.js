@@ -499,6 +499,86 @@ async function loadModuleDashboard(moduleId) {
     }
 }
 
+function moduleActionRequestId() {
+    if (typeof crypto?.randomUUID === 'function') return crypto.randomUUID();
+    const random = crypto.getRandomValues(new Uint32Array(4));
+    return `module-${Array.from(random, value => value.toString(16).padStart(8, '0')).join('')}`;
+}
+
+function serializeModuleActionInput(form, submitter = null) {
+    const input = {};
+    const data = form instanceof HTMLFormElement ? new FormData(form) : new FormData();
+
+    if (submitter?.name && !data.has(submitter.name)) {
+        data.append(submitter.name, submitter.value || '1');
+    }
+
+    data.forEach((value, rawName) => {
+        if (value instanceof File) throw new Error('Ações modulares não aceitam arquivos neste contrato.');
+        const forceArray = rawName.endsWith('[]');
+        const name = forceArray ? rawName.slice(0, -2) : rawName;
+        if (!name) return;
+
+        if (Object.prototype.hasOwnProperty.call(input, name)) {
+            input[name] = Array.isArray(input[name])
+                ? [...input[name], value]
+                : [input[name], value];
+        } else {
+            input[name] = forceArray ? [value] : value;
+        }
+    });
+
+    return input;
+}
+
+async function executeModuleAction(actionId, form = null, submitter = null) {
+    const moduleId = state.activeModuleId;
+    if (!moduleId || !/^[a-z][a-z0-9_.-]{2,79}$/.test(actionId || '')) {
+        throw new Error('A ação modular solicitada é inválida.');
+    }
+
+    const controls = form instanceof HTMLFormElement
+        ? Array.from(form.querySelectorAll('button, input, select, textarea'))
+        : submitter ? [submitter] : [];
+    const previousDisabled = controls.map(control => control.disabled);
+    controls.forEach(control => { control.disabled = true; });
+    elements.moduleDashboard.setAttribute('aria-busy', 'true');
+
+    try {
+        const { action } = await api(
+            `modules/${encodeURIComponent(moduleId)}/actions/${encodeURIComponent(actionId)}`,
+            {
+                method: 'POST',
+                body: JSON.stringify({
+                    request_id: moduleActionRequestId(),
+                    input: serializeModuleActionInput(form, submitter),
+                }),
+            }
+        );
+
+        if (moduleId !== state.activeModuleId) return;
+
+        if (action?.contract !== 'eva.module.action/1'
+            || !action.dashboard
+            || (action.notice !== undefined && (
+                !['success', 'info', 'warning'].includes(action.notice?.type)
+                || typeof action.notice?.message !== 'string'
+            ))) {
+            throw new Error('O módulo retornou uma ação incompatível.');
+        }
+
+        renderModuleDashboard(action.dashboard);
+        if (action.notice?.message) notify(action.notice.message);
+    } finally {
+        if (moduleId === state.activeModuleId) {
+            elements.moduleDashboard.removeAttribute('aria-busy');
+        }
+        controls.forEach((control, index) => {
+            if (control.isConnected) control.disabled = previousDisabled[index];
+        });
+    }
+}
+
 function renderProjects(projects) {
     state.projects = projects;
     elements.projectsList.innerHTML = projects.length ? projects.map(project => {
@@ -988,12 +1068,31 @@ document.addEventListener('click', event => {
 elements.moduleDashboard.addEventListener('input', event => {
     if (event.target.matches('[data-module-content-filter]')) filterModuleEntries();
 });
+elements.moduleDashboard.addEventListener('submit', event => {
+    const form = event.target.closest('[data-module-action-form]');
+    if (!form) return;
+    event.preventDefault();
+    const actionId = event.submitter?.dataset.moduleAction || form.dataset.moduleActionForm || '';
+    executeModuleAction(actionId, form, event.submitter).catch(error => notify(error.message, true));
+});
 elements.moduleDashboard.addEventListener('change', event => {
     if (!event.target.matches('[data-module-filter]')) return;
     state.moduleLocalFilter = '';
     loadModuleDashboard(state.activeModuleId).catch(error => notify(error.message, true));
 });
 elements.moduleDashboard.addEventListener('click', event => {
+    const actionControl = event.target.closest('[data-module-action]');
+    if (actionControl) {
+        const form = actionControl.closest('[data-module-action-form]');
+
+        if (!(form && actionControl.matches('button[type="submit"], input[type="submit"]'))) {
+            event.preventDefault();
+            executeModuleAction(actionControl.dataset.moduleAction || '', form, actionControl)
+                .catch(error => notify(error.message, true));
+        }
+        return;
+    }
+
     const refresh = event.target.closest('[data-module-refresh]');
     if (refresh) {
         loadModuleDashboard(state.activeModuleId).catch(error => notify(error.message, true));

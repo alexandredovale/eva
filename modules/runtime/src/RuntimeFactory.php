@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Eva\ModuleRuntime;
 
+use Eva\Http\Security\ActorContext;
 use PDO;
 
 final readonly class RuntimeFactory
@@ -70,13 +71,21 @@ final readonly class RuntimeFactory
         );
     }
 
-    public function context(ModuleManifest $manifest): ModuleContext
+    public function context(ModuleManifest $manifest, ?ActorContext $actor = null): ModuleContext
     {
         return new ModuleContext(
             $manifest,
             $this->storage->open($manifest),
             new CoreReadApi($this->database, $manifest->capabilities),
-            new LanguageModelApi($manifest->capabilities, $this->aiConfiguration)
+            new LanguageModelApi($manifest->capabilities, $this->aiConfiguration),
+            $actor instanceof ActorContext
+                ? new CoreQueryApi(
+                    $this->database,
+                    $manifest->capabilities,
+                    $this->aiConfiguration,
+                    $actor
+                )
+                : null
         );
     }
 }

@@ -12,7 +12,17 @@ final readonly class ModuleContext
         public ModuleManifest $manifest,
         public PDO $storage,
         public CoreReadApi $core,
-        public LanguageModelInterface $language
+        public LanguageModelInterface $language,
+        public ?CoreQueryApi $query = null
     ) {
+    }
+
+    public function scopedQuery(): CoreQueryApi
+    {
+        if (!$this->query instanceof CoreQueryApi) {
+            throw new ModuleException('A consulta documental escopada nÃ£o estÃ¡ disponÃ­vel neste contexto modular.');
+        }
+
+        return $this->query;
     }
 }

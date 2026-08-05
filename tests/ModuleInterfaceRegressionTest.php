@@ -11,10 +11,15 @@ $presenter = file_get_contents($root . '/modules/com.eva.education/src/Dashboard
 $moduleStyle = file_get_contents($root . '/modules/com.eva.education/assets/dashboard.css');
 $index = file_get_contents($root . '/public/index.php');
 $manifestSchema = file_get_contents($root . '/modules/runtime/contracts/module-manifest.schema.json');
+$actionSchema = file_get_contents($root . '/modules/runtime/contracts/module-action.schema.json');
+$productApi = file_get_contents($root . '/app/Http/Product/ProductApi.php');
+$moduleManager = file_get_contents($root . '/modules/runtime/src/ModuleManager.php');
+$coreQueryApi = file_get_contents($root . '/modules/runtime/src/CoreQueryApi.php');
 
 if (!is_string($html) || !is_string($script) || !is_string($style)
     || !is_string($manifest) || !is_string($presenter) || !is_string($moduleStyle)
-    || !is_string($index) || !is_string($manifestSchema)) {
+    || !is_string($index) || !is_string($manifestSchema) || !is_string($actionSchema)
+    || !is_string($productApi) || !is_string($moduleManager) || !is_string($coreQueryApi)) {
     throw new RuntimeException('Não foi possível ler a interface modular.');
 }
 
@@ -33,6 +38,12 @@ $assertions = [
     [$manifest, '"id": "com.eva.education"', 'O módulo ainda utiliza um identificador proprietário.'],
     [$manifest, '"name": "Education"', 'O nome canônico do módulo não foi aplicado.'],
     [$manifestSchema, '"order": {"type": "integer"', 'O contrato perdeu a ordenação genérica das interfaces.'],
+    [$actionSchema, '"const": "eva.module.action/1"', 'O contrato genérico de ações modulares está ausente.'],
+    [$script, '[data-module-action-form]', 'O host não reconhece formulários declarativos de módulos.'],
+    [$script, 'executeModuleAction(', 'O host não executa ações modulares genéricas.'],
+    [$productApi, "/actions/([a-z][a-z0-9_.-]", 'A API não expõe o conector genérico de ações.'],
+    [$moduleManager, 'instanceof ModuleAccessInterface', 'O Runtime não aplica autorização modular opcional.'],
+    [$moduleManager, 'instanceof ModuleActionInterface', 'O Runtime não valida módulos interativos.'],
     [$presenter, 'class="card learning-entry" data-module-entry', 'O módulo não produz seus próprios cards.'],
     [$presenter, 'data-module-content-filter', 'O filtro não pertence à apresentação do módulo.'],
     [$presenter, "return \$parts[3] . '-' . \$parts[2]", 'A data institucional não é formatada pelo módulo.'],
@@ -53,6 +64,20 @@ foreach ($forbiddenCoreTerms as $term) {
     }
 }
 
+$connectorCore = strtolower($script . $productApi . $moduleManager . $coreQueryApi);
+$forbiddenConnectorTerms = [
+    strtolower('Ena' . 'de'),
+    strtolower('Profes' . 'sor'),
+    'create_' . 'item',
+    'review_' . 'item',
+];
+
+foreach ($forbiddenConnectorTerms as $term) {
+    if (str_contains($connectorCore, $term)) {
+        throw new RuntimeException('O conector contém conhecimento específico de um módulo: ' . $term);
+    }
+}
+
 if (str_contains($script, 'module.label') || str_contains($manifestSchema, '"label"')) {
     throw new RuntimeException('O contrato ainda permite alias de navegação diferente de module.name.');
 }
@@ -61,9 +86,9 @@ if (str_contains($html, 'nav-index') || str_contains($script, 'nav-index') || st
     throw new RuntimeException('A navegação ainda contém numeração visual de itens.');
 }
 
-if (!preg_match('~assets/app\.css\?v=20260804-6~', $html)
-    || !preg_match('~assets/app\.js\?v=20260804-6~', $html)) {
+if (!preg_match('~assets/app\.css\?v=20260804-7~', $html)
+    || !preg_match('~assets/app\.js\?v=20260804-7~', $html)) {
     throw new RuntimeException('Os assets públicos modulares não receberam a mesma versão.');
 }
 
-echo 'ModuleInterfaceRegressionTest: ' . (count($assertions) + count($forbiddenCoreTerms) + 3) . " verificações concluídas.\n";
+echo 'ModuleInterfaceRegressionTest: ' . (count($assertions) + count($forbiddenCoreTerms) + count($forbiddenConnectorTerms) + 3) . " verificações concluídas.\n";

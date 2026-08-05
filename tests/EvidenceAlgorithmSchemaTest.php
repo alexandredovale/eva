@@ -34,6 +34,11 @@ foreach (['cnodes', 'cnode_evidences', 'cnode_embeddings', 'interaction_analyses
     );
 }
 
+assertEvidenceSchema(
+    in_array('module_events', $tables, true),
+    'O schema consolidado deve incluir a caixa postal neutra module_events.'
+);
+
 $columnQuery = $database->prepare(
     'SELECT COLUMN_NAME, COLUMN_TYPE
        FROM INFORMATION_SCHEMA.COLUMNS

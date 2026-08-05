@@ -1,148 +1,273 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="820" viewBox="0 0 1600 820" role="img" aria-labelledby="title desc">
-  <title id="title">Fluxo arquitetural do EVA com Context Intelligence Engine</title>
-  <desc id="desc">Construção da memória documental e consulta, com o CIE elegendo núcleo principal e convergência complementar antes da incorporação analítica.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1320" viewBox="0 0 1600 1320" role="img" aria-labelledby="title desc">
+  <title id="title">Fluxo completo real do EVA com Context Intelligence Engine e CNode transitório</title>
+  <desc id="desc">Fluxo executável desde o upload e construção cognitiva até recuperação, CIE, resposta, interações transitórias, validação, auditoria, módulos e interface.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#041326"/>
-      <stop offset="1" stop-color="#071d32"/>
+      <stop offset="0" stop-color="#031223"/>
+      <stop offset="1" stop-color="#082239"/>
     </linearGradient>
     <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#09233c"/>
+      <stop offset="0" stop-color="#09243e"/>
       <stop offset="1" stop-color="#061a2d"/>
     </linearGradient>
     <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000" flood-opacity=".32"/>
+      <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#000" flood-opacity=".3"/>
     </filter>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8edcff"/>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#8edcff"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#9ee66a"/>
     </marker>
     <style>
-      .panel { fill:url(#panel); stroke:#168fca; stroke-width:2; }
+      .panel { fill:url(#panel); stroke:#167fb4; stroke-width:2; }
       .node { fill:#0a2946; stroke:#25b9f3; stroke-width:2; filter:url(#shadow); }
-      .node-ai { fill:#282416; stroke:#ffbd3f; }
-      .node-cie { fill:#173314; stroke:#a9ed4b; stroke-width:3; }
-      .node-db { fill:#12351f; stroke:#68d579; }
+      .node-ai { fill:#302719; stroke:#ffbd3f; stroke-width:2; filter:url(#shadow); }
+      .node-cie { fill:#193619; stroke:#a9ed4b; stroke-width:3; filter:url(#shadow); }
+      .node-db { fill:#12351f; stroke:#68d579; stroke-width:2; filter:url(#shadow); }
+      .node-warn { fill:#34202a; stroke:#ff7e9d; stroke-width:2; filter:url(#shadow); }
+      .node-cnode { fill:#2b203d; stroke:#c79cff; stroke-width:3; filter:url(#shadow); }
       .arrow { fill:none; stroke:#8edcff; stroke-width:3; marker-end:url(#arrow); }
-      .skip { fill:none; stroke:#8edcff; stroke-width:2; stroke-dasharray:8 8; marker-end:url(#arrow); opacity:.82; }
-      .title { fill:#35c8ff; font:700 34px Arial, sans-serif; letter-spacing:1px; }
-      .subtitle { fill:#9edcf5; font:400 18px Arial, sans-serif; }
-      .label { fill:#f5fbff; font:700 18px Arial, sans-serif; text-anchor:middle; }
-      .small { fill:#b8d8e8; font:400 14px Arial, sans-serif; text-anchor:middle; }
-      .accent { fill:#c9ff77; font:700 14px Arial, sans-serif; text-anchor:middle; }
-      .note { fill:#b8d8e8; font:400 16px Arial, sans-serif; }
+      .arrow-green { fill:none; stroke:#9ee66a; stroke-width:3; marker-end:url(#arrow-green); }
+      .branch { fill:none; stroke:#8edcff; stroke-width:2.5; marker-end:url(#arrow); }
+      .dash { fill:none; stroke:#8edcff; stroke-width:2.5; stroke-dasharray:8 7; marker-end:url(#arrow); }
+      .title { fill:#37c9ff; font:700 31px Arial, sans-serif; letter-spacing:.8px; }
+      .section { fill:#37c9ff; font:700 23px Arial, sans-serif; letter-spacing:.5px; }
+      .subtitle { fill:#a8dff5; font:400 17px Arial, sans-serif; }
+      .label { fill:#f7fbff; font:700 16px Arial, sans-serif; text-anchor:middle; }
+      .small { fill:#bedbea; font:400 13px Arial, sans-serif; text-anchor:middle; }
+      .tiny { fill:#a9c8d8; font:400 12px Arial, sans-serif; text-anchor:middle; }
+      .accent { fill:#d2ff8a; font:700 13px Arial, sans-serif; text-anchor:middle; }
+      .purple { fill:#e1cfff; font:700 13px Arial, sans-serif; text-anchor:middle; }
+      .note { fill:#bedbea; font:400 14px Arial, sans-serif; }
+      .legend { fill:#d6eaf3; font:400 13px Arial, sans-serif; }
     </style>
   </defs>
 
-  <rect width="1600" height="820" fill="url(#bg)"/>
-  <text id="header" x="800" y="54" class="title" text-anchor="middle">EVA — FLUXO COM CONTEXT INTELLIGENCE ENGINE</text>
-  <text x="800" y="84" class="subtitle" text-anchor="middle">Memória documental verificável · seleção matemática transitória · resposta validada</text>
+  <rect width="1600" height="1320" fill="url(#bg)"/>
+  <text x="800" y="48" class="title" text-anchor="middle">EVA — FLUXO COMPLETO REAL</text>
+  <text x="800" y="76" class="subtitle" text-anchor="middle">Ingestão · construção cognitiva · Retriever · CIE · resposta · CNode transitório · validação · saída</text>
 
-  <rect x="28" y="112" width="1544" height="268" rx="24" class="panel"/>
-  <text x="62" y="154" class="title" font-size="25">CONSTRUÇÃO DA MEMÓRIA</text>
+  <!-- 1. Ingestão e construção -->
+  <rect x="28" y="100" width="1544" height="300" rx="22" class="panel"/>
+  <text x="58" y="137" class="section">1 · INGESTÃO E CONSTRUÇÃO DA MEMÓRIA DOCUMENTAL</text>
 
-  <g transform="translate(58 188)">
-    <rect width="170" height="116" rx="16" class="node"/>
-    <text x="85" y="45" class="label">Documento</text>
-    <text x="85" y="73" class="small">Markdown · JSON · XML</text>
+  <g transform="translate(55 166)">
+    <rect width="190" height="88" rx="14" class="node"/>
+    <text x="95" y="28" class="label">Anexo no navegador</text>
+    <text x="95" y="51" class="small">POST /api/documents</text>
+    <text x="95" y="70" class="tiny">multipart · superadmin</text>
   </g>
-  <path d="M228 246 H266" class="arrow"/>
-  <g transform="translate(266 188)">
-    <rect width="170" height="116" rx="16" class="node"/>
-    <text x="85" y="45" class="label">Parser local</text>
-    <text x="85" y="73" class="small">sem inferência</text>
+  <path d="M245 210 H278" class="arrow"/>
+  <g transform="translate(278 166)">
+    <rect width="200" height="88" rx="14" class="node"/>
+    <text x="100" y="28" class="label">Validação + parser</text>
+    <text x="100" y="51" class="small">Markdown · JSON · XML</text>
+    <text x="100" y="70" class="tiny">sem inferência</text>
   </g>
-  <path d="M436 246 H474" class="arrow"/>
-  <g transform="translate(474 188)">
-    <rect width="170" height="116" rx="16" class="node"/>
-    <text x="85" y="45" class="label">Árvore</text>
-    <text x="85" y="73" class="small">estrutura preservada</text>
+  <path d="M478 210 H511" class="arrow"/>
+  <g transform="translate(511 158)">
+    <rect width="260" height="104" rx="14" class="node-db"/>
+    <text x="130" y="27" class="label">Persistência inicial</text>
+    <text x="130" y="50" class="small">fonte privada + documento + árvore</text>
+    <text x="130" y="70" class="small">evidências primary/node_content</text>
+    <text x="130" y="89" class="tiny">status ready · zero chamadas de IA</text>
   </g>
-  <path d="M644 246 H682" class="arrow"/>
-  <g transform="translate(682 188)">
-    <rect width="170" height="116" rx="16" class="node-db"/>
-    <text x="85" y="45" class="label">Evidências</text>
-    <text x="85" y="73" class="small">primárias + linhagem</text>
+  <path d="M771 210 H804" class="arrow-green"/>
+  <g transform="translate(804 166)">
+    <rect width="190" height="88" rx="14" class="node"/>
+    <text x="95" y="28" class="label">Processar</text>
+    <text x="95" y="51" class="tiny">POST /api/documents/{id}/process</text>
+    <text x="95" y="70" class="tiny">enfileira 2 estágios</text>
   </g>
-  <path d="M852 246 H890" class="arrow"/>
-  <g transform="translate(890 188)">
-    <rect width="170" height="116" rx="16" class="node node-ai"/>
-    <text x="85" y="45" class="label">Sínteses</text>
-    <text x="85" y="73" class="small">derivadas e rastreáveis</text>
+  <path d="M994 210 H1027" class="arrow"/>
+  <g transform="translate(1027 166)">
+    <rect width="205" height="88" rx="14" class="node-ai"/>
+    <text x="102.5" y="28" class="label">summaries</text>
+    <text x="102.5" y="51" class="small">sínteses bottom-up</text>
+    <text x="102.5" y="70" class="tiny">N chamadas externas</text>
   </g>
-  <path d="M1060 246 H1098" class="arrow"/>
-  <g transform="translate(1098 188)">
-    <rect width="170" height="116" rx="16" class="node node-ai"/>
-    <text x="85" y="45" class="label">Embeddings</text>
-    <text x="85" y="73" class="small">unidades completas</text>
-  </g>
-  <path d="M1268 246 H1306" class="arrow"/>
-  <g transform="translate(1306 188)">
-    <rect width="210" height="116" rx="16" class="node-db"/>
-    <text x="105" y="45" class="label">Memória pronta</text>
-    <text x="105" y="73" class="small">documentos · evidências</text>
-    <text x="105" y="94" class="small">derivações · vetores</text>
-  </g>
-
-  <rect x="28" y="404" width="1544" height="334" rx="24" class="panel"/>
-  <text x="62" y="448" class="title" font-size="25">CONSULTA</text>
-
-  <g transform="translate(58 500)">
-    <rect width="150" height="118" rx="16" class="node"/>
-    <text x="75" y="43" class="label">Input</text>
-    <text x="75" y="72" class="small">consulta atual</text>
-  </g>
-  <path d="M208 559 H242" class="arrow"/>
-  <g transform="translate(242 500)">
-    <rect width="160" height="118" rx="16" class="node"/>
-    <text x="80" y="43" class="label">Roteamento</text>
-    <text x="80" y="70" class="small">direto · estrutural</text>
-    <text x="80" y="91" class="small">amplo · semântico</text>
-  </g>
-  <path d="M402 559 H436" class="arrow"/>
-  <g transform="translate(436 500)">
-    <rect width="160" height="118" rx="16" class="node"/>
-    <text x="80" y="43" class="label">Retriever</text>
-    <text x="80" y="70" class="small">cosseno nas rotas</text>
-    <text x="80" y="91" class="small">conceitual/relacional</text>
-  </g>
-  <path d="M596 559 H630" class="arrow"/>
-  <g transform="translate(630 500)">
-    <rect width="150" height="118" rx="16" class="node"/>
-    <text x="75" y="43" class="label">Top-k</text>
-    <text x="75" y="72" class="small">30 por padrão</text>
-  </g>
-  <path d="M780 559 H814" class="arrow"/>
-  <g transform="translate(814 484)">
-    <rect width="210" height="150" rx="18" class="node-cie" filter="url(#shadow)"/>
-    <text x="105" y="38" class="label">CIE</text>
-    <text x="105" y="66" class="accent">μ · σ · CV</text>
-    <text x="105" y="94" class="small">núcleo principal</text>
-    <text x="105" y="116" class="small">+ convergência</text>
-    <text x="105" y="136" class="small">complementar</text>
-  </g>
-  <path d="M1024 559 H1058" class="arrow"/>
-  <g transform="translate(1058 500)">
-    <rect width="176" height="118" rx="16" class="node-db"/>
-    <text x="88" y="43" class="label">Fontes primárias</text>
-    <text x="88" y="72" class="small">eleição integral</text>
-  </g>
-  <path d="M1234 559 H1268" class="arrow"/>
-  <g transform="translate(1268 500)">
-    <rect width="128" height="118" rx="16" class="node node-ai"/>
-    <text x="64" y="43" class="label">LLM</text>
-    <text x="64" y="72" class="small">incorpora todas</text>
-  </g>
-  <path d="M1396 559 H1430" class="arrow"/>
-  <g transform="translate(1430 500)">
-    <rect width="104" height="118" rx="16" class="node"/>
-    <text x="52" y="39" class="label" font-size="15">Validação</text>
-    <text x="52" y="67" class="small">cobertura</text>
-    <text x="52" y="88" class="small">analítica</text>
+  <path d="M1232 210 H1265" class="arrow"/>
+  <g transform="translate(1265 158)">
+    <rect width="260" height="104" rx="14" class="node-ai"/>
+    <text x="130" y="27" class="label">embeddings</text>
+    <text x="130" y="50" class="small">aguarda summaries concluído</text>
+    <text x="130" y="70" class="small">primary + derived em lotes</text>
+    <text x="130" y="89" class="tiny">M chamadas externas</text>
   </g>
 
-  <path d="M322 618 V681 H1146 V620" class="skip"/>
-  <text x="700" y="706" class="small">Rotas direta, estrutural e ampla não usam embedding nem CIE</text>
+  <path d="M1129 254 V306 H684" class="arrow-green"/>
+  <g transform="translate(455 302)">
+    <rect width="458" height="70" rx="14" class="node-db"/>
+    <text x="229" y="27" class="label">Sínteses derivadas + evidence_derivations</text>
+    <text x="229" y="50" class="small">linhagem persistida até as fontes primárias</text>
+  </g>
+  <path d="M1395 262 V337 H946" class="arrow-green"/>
+  <g transform="translate(946 302)">
+    <rect width="400" height="70" rx="14" class="node-db"/>
+    <text x="200" y="27" class="label">Memória semanticamente consultável</text>
+    <text x="200" y="50" class="small">documentos · nós · evidências · derivações · vetores</text>
+  </g>
 
-  <rect x="28" y="762" width="1544" height="42" rx="14" fill="#061829" stroke="#3e7898" stroke-dasharray="7 6"/>
-  <text x="800" y="789" class="note" text-anchor="middle">Transitórios: embedding do input, similaridades, análise do CIE, contexto, resposta e interações · Persistentes: documentos, evidências, derivações e embeddings do acervo</text>
+  <!-- 2. Consulta -->
+  <rect x="28" y="420" width="1544" height="610" rx="22" class="panel"/>
+  <text x="58" y="458" class="section">2 · CONSULTA, CIE, RESPOSTA E CNODE TRANSITÓRIO</text>
+
+  <g transform="translate(55 485)">
+    <rect width="220" height="92" rx="14" class="node"/>
+    <text x="110" y="27" class="label">Input no navegador</text>
+    <text x="110" y="50" class="small">input atual + até 3 rodadas</text>
+    <text x="110" y="70" class="tiny">teto total de 20.000 bytes</text>
+  </g>
+  <path d="M275 531 H310" class="arrow"/>
+  <g transform="translate(310 485)">
+    <rect width="190" height="92" rx="14" class="node"/>
+    <text x="95" y="27" class="label">POST /api/query</text>
+    <text x="95" y="50" class="small">current_input + input</text>
+    <text x="95" y="70" class="tiny">escopos selecionados</text>
+  </g>
+  <path d="M500 531 H535" class="arrow"/>
+  <g transform="translate(535 485)">
+    <rect width="225" height="92" rx="14" class="node"/>
+    <text x="112.5" y="27" class="label">Autorização e escopo</text>
+    <text x="112.5" y="50" class="small">projetos/obras deduplicados</text>
+    <text x="112.5" y="70" class="tiny">perfis só quando explícitos</text>
+  </g>
+  <path d="M760 531 H795" class="arrow"/>
+  <g transform="translate(795 485)">
+    <rect width="270" height="92" rx="14" class="node"/>
+    <text x="135" y="27" class="label">Detecção local do input</text>
+    <text x="135" y="50" class="small">direto · estrutural · conceitual</text>
+    <text x="135" y="70" class="tiny">relacional · amplo · tipos combináveis</text>
+  </g>
+
+  <path d="M930 577 V610 H388" class="branch"/>
+  <g transform="translate(130 610)">
+    <rect width="360" height="100" rx="15" class="node"/>
+    <text x="180" y="27" class="label">Direto / estrutural / amplo</text>
+    <text x="180" y="51" class="small">IDs · citações · títulos · caminhos</text>
+    <text x="180" y="73" class="small">SQL/hierarquia local</text>
+    <text x="180" y="91" class="tiny">sem embedding do input e sem CIE</text>
+  </g>
+
+  <path d="M930 577 V610 H775" class="branch"/>
+  <g transform="translate(585 610)">
+    <rect width="380" height="100" rx="15" class="node-ai"/>
+    <text x="190" y="27" class="label">Conceitual / relacional</text>
+    <text x="190" y="51" class="small">âncora literal + embedding transitório</text>
+    <text x="190" y="73" class="small">cosseno local · Top-k 20 por documento</text>
+    <text x="190" y="91" class="tiny">1 chamada externa de embedding</text>
+  </g>
+  <path d="M965 660 H1000" class="arrow"/>
+  <g transform="translate(1000 600)">
+    <rect width="240" height="120" rx="16" class="node-cie"/>
+    <text x="120" y="28" class="label">CIE por documento</text>
+    <text x="120" y="52" class="accent">μ · σ · CV</text>
+    <text x="120" y="75" class="small">descarte · convergence · core</text>
+    <text x="120" y="97" class="tiny">core precede; convergence complementa</text>
+    <text x="120" y="114" class="tiny">zero chamadas externas</text>
+  </g>
+  <path d="M1240 660 H1275" class="arrow"/>
+  <g transform="translate(1275 610)">
+    <rect width="270" height="100" rx="15" class="node-db"/>
+    <text x="135" y="27" class="label">Resolver para primárias</text>
+    <text x="135" y="51" class="small">evidence_derivations até primary</text>
+    <text x="135" y="73" class="small">conteúdo literal completo</text>
+    <text x="135" y="91" class="tiny">papel core ou convergence</text>
+  </g>
+
+  <path d="M310 710 V758 H570" class="arrow-green"/>
+  <path d="M1410 710 V758 H970" class="arrow-green"/>
+  <g transform="translate(570 735)">
+    <rect width="400" height="92" rx="15" class="node-db"/>
+    <text x="200" y="27" class="label">Composição do contexto disponível</text>
+    <text x="200" y="50" class="small">intercala documentos · remove duplicatas</text>
+    <text x="200" y="71" class="small">limite global QUERY_MAX_EVIDENCE</text>
+  </g>
+  <path d="M970 781 H1010" class="arrow-green"/>
+  <g transform="translate(1010 735)">
+    <rect width="250" height="92" rx="15" class="node"/>
+    <text x="125" y="29" class="label">Há evidência primária?</text>
+    <text x="125" y="55" class="small">barreira determinística</text>
+    <text x="125" y="74" class="tiny">nenhuma fonte externa é permitida</text>
+  </g>
+
+  <path d="M1065 827 V865 H340" class="branch"/>
+  <text x="945" y="854" class="tiny">NÃO</text>
+  <g transform="translate(115 865)">
+    <rect width="450" height="108" rx="15" class="node-warn"/>
+    <text x="225" y="28" class="label">Limitação determinística</text>
+    <text x="225" y="52" class="small">“Não há evidência documental suficiente...”</text>
+    <text x="225" y="75" class="small">zero chamadas ao provedor de resposta</text>
+    <text x="225" y="95" class="tiny">CIE ainda pode ser exposto se a rota semântica ocorreu</text>
+  </g>
+
+  <path d="M1205 827 V865 H810" class="branch"/>
+  <text x="1115" y="854" class="tiny">SIM</text>
+  <g transform="translate(610 852)">
+    <rect width="400" height="134" rx="16" class="node-cnode"/>
+    <text x="200" y="27" class="label">QueryAnswerProvider — mesma geração</text>
+    <text x="200" y="51" class="small">answer + citações + limitations</text>
+    <text x="200" y="74" class="purple">CNode transitório: simetry / assimetry</text>
+    <text x="200" y="96" class="tiny">analisar se ≥2 evidências e limite &gt; 0</text>
+    <text x="200" y="114" class="tiny">independe do tipo inicial do input</text>
+    <text x="200" y="130" class="tiny">tentativa nominal + 1 retry compacto se truncar</text>
+  </g>
+  <path d="M1010 919 H1045" class="arrow"/>
+  <g transform="translate(1045 852)">
+    <rect width="490" height="134" rx="16" class="node"/>
+    <text x="245" y="26" class="label">Validação local — até 3 tentativas totais</text>
+    <text x="245" y="49" class="small">IDs citados pertencem ao contexto · uso analítico visível</text>
+    <text x="245" y="70" class="small">candidatas não citadas são descartadas</text>
+    <text x="245" y="91" class="small">interações: 2 citadas · papéis válidos · excerpts literais</text>
+    <text x="245" y="112" class="tiny">rejeita fonte externa, inventário, limite excedido e campos proibidos</text>
+    <text x="245" y="129" class="tiny">uma tentativa válida substitui integralmente as rejeitadas</text>
+  </g>
+
+  <!-- 3. Observabilidade e saída -->
+  <rect x="28" y="1050" width="1544" height="210" rx="22" class="panel"/>
+  <text x="58" y="1086" class="section">3 · OBSERVABILIDADE, EVENTO MODULAR E ENTREGA</text>
+
+  <path d="M340 973 V1115 H150" class="arrow"/>
+  <path d="M1290 986 V1115 H150" class="arrow"/>
+  <g transform="translate(55 1115)">
+    <rect width="270" height="105" rx="15" class="node-db"/>
+    <text x="135" y="27" class="label">audit_events</text>
+    <text x="135" y="50" class="small">document_queried sanitizado</text>
+    <text x="135" y="72" class="small">evidence/simetry/assimetry counts</text>
+    <text x="135" y="92" class="tiny">sem pares, descrições ou fragmentos</text>
+  </g>
+  <path d="M325 1168 H360" class="arrow"/>
+  <g transform="translate(360 1105)">
+    <rect width="355" height="125" rx="15" class="node-db"/>
+    <text x="177.5" y="25" class="label">Evento modular opcional</text>
+    <text x="177.5" y="48" class="small">se houver assinante ativo</text>
+    <text x="177.5" y="69" class="small">append idempotente interaction.completed</text>
+    <text x="177.5" y="90" class="tiny">incluída no schema · input · resposta · refs públicas</text>
+    <text x="177.5" y="108" class="tiny">migration 010 só legado; ausência/falha isolada</text>
+  </g>
+  <path d="M715 1168 H750" class="arrow"/>
+  <g transform="translate(750 1105)">
+    <rect width="365" height="125" rx="15" class="node"/>
+    <text x="182.5" y="25" class="label">Resposta JSON /api/query</text>
+    <text x="182.5" y="48" class="small">answer · evidences_used · selection</text>
+    <text x="182.5" y="69" class="small">simetry · assimetry · CIE · limitations</text>
+    <text x="182.5" y="91" class="tiny">API entrega o contrato completo ao autorizado</text>
+    <text x="182.5" y="109" class="tiny">transcript atualizado somente após sucesso</text>
+  </g>
+  <path d="M1115 1168 H1150" class="arrow"/>
+  <g transform="translate(1150 1105)">
+    <rect width="395" height="125" rx="15" class="node"/>
+    <text x="197.5" y="25" class="label">Interface</text>
+    <text x="197.5" y="48" class="small">todos: resposta + evidências utilizadas</text>
+    <text x="197.5" y="70" class="small">superadmin: CIE + simetry + assimetry + limitações</text>
+    <text x="197.5" y="92" class="tiny">chat visual em memória JavaScript</text>
+    <text x="197.5" y="110" class="tiny">reload/logout/reiniciar descartam o transcript</text>
+  </g>
+
+  <!-- Legenda de persistência -->
+  <rect x="28" y="1280" width="1544" height="28" rx="10" fill="#061829" stroke="#3e7898" stroke-dasharray="7 6"/>
+  <text x="50" y="1299" class="legend">MEMÓRIA: documentos, nós, evidências, derivações e embeddings</text>
+  <text x="580" y="1299" class="legend">OPERACIONAL: auditoria sanitizada e evento modular opcional</text>
+  <text x="1110" y="1299" class="legend">TRANSITÓRIO: vetores de input, CIE, contexto e CNodes</text>
 </svg>

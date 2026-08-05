@@ -7,7 +7,7 @@
 5. Construir sínteses superiores somente a partir de evidências inferiores identificadas.
 6. Gerar embeddings somente de unidades organizadas, nunca por cortes arbitrários de tamanho.
 7. Tratar EVA — Evidence Algorithm — como nome e arquitetura principal do sistema, mantendo evidências, derivações e embeddings como seu núcleo persistente.
-8. Tratar Cnode somente como derivação conceitual interna e transitória do EVA, nunca como sistema, camada hierárquica superior, nó documental ou entidade persistente; não persistir pares candidatos, análises de interação ou métricas relacionais.
+8. Tratar Cnode somente como derivação conceitual interna e transitória do EVA, nunca como sistema, camada hierárquica superior, nó documental ou entidade persistente; não persistir pares candidatos, análises de interação ou métricas relacionais como memória/ranking. `audit_events` pode manter apenas contagens sanitizadas por consulta, sem participantes, fragmentos ou reconstrução do par.
 9. Avaliar interações quando houver ao menos duas evidências recuperadas e produzir somente relações entre evidências efetivamente citadas, dentro do limite solicitado.
 10. Usar exclusivamente `simetry` e `assimetry` para descrever interações.
 11. Não classificar relações por taxonomias julgamentais.
@@ -74,7 +74,7 @@
 72. Conhecer no Core apenas contratos e capacidades genéricas, sem nome, menu, regra, HTML, CSS ou função específica de módulo.
 73. Usar `module_events` como única tabela adicional do banco principal para a caixa postal neutra, sem alterar tabelas preexistentes.
 74. Manter esquema, histórico e cursor de cada módulo em seu próprio SQLite privado e excluído do versionamento.
-75. Persistir o evento sanitizado transacionalmente e resolver seu processamento imediatamente depois da interação concluída.
+75. Persistir idempotentemente o evento sanitizado depois da validação e antes da resposta HTTP, então tentar seu processamento imediato; manter processamento, registro idempotente e avanço de cursor de cada módulo na mesma transação SQLite privada.
 76. Isolar a falha de um módulo da resposta documental e dos demais módulos assinantes.
 77. Rejeitar eventos com campos sensíveis e não permitir que módulos escrevam na memória documental do Core.
 78. Exigir confirmação digitada para exclusão definitiva e remover o pacote e todo o diretório privado de dados correspondente.

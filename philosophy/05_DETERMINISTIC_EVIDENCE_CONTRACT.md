@@ -1,61 +1,72 @@
-# Eleição determinística e incorporação analítica das evidências
+# Composição determinística do contexto e contrato de citação visível
 
-**Estado:** implementado e validado em chamada real
-**Data:** 2 de agosto de 2026
+**Estado:** implementado e validado
+**Atualização:** 5 de agosto de 2026
 
 ## Princípio
 
-No EVA, selecionar o fundamento de uma resposta não é uma prerrogativa do modelo de linguagem. O Retriever localiza candidatos; o Context Intelligence Engine separa descarte, convergência e núcleo; a linhagem transforma rotas derivadas em fontes primárias; e a aplicação entrega ao modelo uma eleição documental concluída.
+No EVA, o modelo de resposta não define o universo documental autorizado. O Retriever localiza candidatos; o Context Intelligence Engine separa descarte, convergência e núcleo; a linhagem transforma rotas derivadas em fontes primárias; e a aplicação compõe um contexto disponível dentro do limite global.
 
 ```text
 Retriever
-   → Top-k
+   → Top-k por documento
    → CIE
-   → núcleo principal + convergência complementar
+   → núcleo + convergência
    → resolução para fontes primárias
-   → eleição determinística
-   → incorporação analítica pela LLM
-   → validação local fechada
+   → contexto disponível limitado
+   → resposta e interações propostas pela LLM
+   → validação local
+   → base final formada somente por evidências citadas
 ```
 
-A LLM não escolhe, reordena, rejeita ou reduz esse conjunto. Seu papel é formular uma resposta fiel usando o núcleo como referência principal e todas as convergências como elementos complementares da análise.
+A composição do contexto é determinística para o mesmo banco, input, configuração e vetores. O modelo não pode introduzir fonte externa, identificador desconhecido ou evidência fora desse conjunto. Ele pode, porém, deixar de usar uma candidata que não contribua para a resposta. Essa candidata é descartada da base final sem invalidar toda a geração.
 
-## Aceitação não é utilização
+## Contexto disponível não é base final
 
-O campo `used_evidence_ids` constitui um contrato de identidade, mas sua reprodução isolada não demonstra que uma evidência participou do raciocínio. Por isso, o EVA diferencia:
+O EVA distingue duas etapas:
 
 ```text
-aceitação formal → o ID foi devolvido
-utilização real  → a evidência sustenta uma proposição analítica citada
+contexto disponível → evidências primárias que a aplicação permite analisar
+base final          → subconjunto efetivamente citado na resposta validada
 ```
 
-Cada evidência eleita deve aparecer na frase ou no parágrafo que explica sua contribuição. Um apêndice como `Evidências: [EVA-E000000]` não satisfaz o contrato. A aplicação não acrescenta citações omitidas e rejeita a resposta quando identifica ausência ou inventário isolado.
+O núcleo (`core`) possui precedência no contexto disponível. A convergência (`convergence`) pode reforçar, contextualizar, delimitar ou contrapor o núcleo quando sua literalidade contribuir. Esses papéis não obrigam a inventar relações nem convertem uma candidata irrelevante em fundamento.
 
-Essa decisão impede uma forma sutil de evasão: declarar conformidade estrutural sem permitir que a convergência participe efetivamente da explicação.
+## Citação não é inventário
 
-## Papéis complementares
+O campo `used_evidence_ids` é derivado das citações visíveis encontradas em `answer`; a lista declarada pelo provedor não prevalece sobre o texto. Cada evidência mantida deve aparecer na frase ou no parágrafo que explica sua contribuição.
 
-O núcleo e a convergência não competem por autoridade:
+```text
+ID conhecido + citação visível + uso analítico → evidência mantida
+candidata recuperada sem citação              → evidência descartada
+ID fora do contexto                           → resposta inválida
+lista isolada de IDs                          → resposta inválida
+```
 
-- `core` sustenta as conclusões principais e aparece com precedência;
-- `convergence` reforça, contextualiza, delimita ou contrapõe o núcleo conforme seu conteúdo literal;
-- quando não há núcleo, a convergência assume o papel principal;
-- nenhuma região recebe peso, confiança ou valor de verdade.
+A aplicação não acrescenta marcadores omitidos e não aceita um apêndice como `Evidências: [EVA-E000000]` no lugar da incorporação analítica.
 
-A convergência não deve ser decorativa nem forçada. Sua contribuição precisa permanecer dentro do que a fonte permite afirmar. A obrigação de uso não autoriza inventar relações.
+## Resposta e CNode transitório
 
-## Validação real de referência
+Quando o contexto contém ao menos duas evidências e `QUERY_MAX_INTERACTIONS` é maior que zero, a mesma chamada que formula a resposta também avalia `simetry` e `assimetry`, independentemente do tipo inicial do input. No código, cada resultado aceito é um `RetrievedInteraction`.
 
-A consulta abaixo foi executada com provedores reais e exclusivamente sobre *O Livro dos Espíritos*:
+Uma interação somente permanece quando conecta duas evidências citadas, usa papéis coerentes e contém um fragmento literal verificável de cada participante. Pares inválidos ou associados a evidências não citadas são descartados; a resposta documental válida pode permanecer acompanhada de uma limitação relacional. Nenhum CNode recebe ID, embedding ou registro persistente.
 
-> a que podemos atribuir a vontade de uma pessoa em construir lápide luxuosa em seu próprio túmulo quando morrer?
+## Falhas e tentativas limitadas
 
-O CIE analisou 30 candidatos, com `μ = 0,4256067108`, `σ = 0,0428704555` e `CV = 0,1007278655`. A resolução final produziu três evidências de núcleo e sete de convergência. A resposta incorporou analiticamente as dez fontes, preservou a precedência do núcleo, não criou inventário artificial de citações, retornou JSON válido e terminou sem truncamento em 24,32 segundos.
+Se uma geração completa viola o contrato local, `DocumentQueryService` descarta toda a saída e pode solicitar nova geração com o mesmo contexto disponível. A requisição admite no máximo três tentativas totais de resposta validada. Dentro de cada tentativa, `QueryAnswerProvider` admite no máximo uma regeneração compacta quando a primeira saída termina por limite de tokens. Texto parcial nunca integra o resultado.
 
-O teste anterior à validação fechada havia devolvido os mesmos dez IDs, mas sete apareciam apenas em uma lista acrescentada ao final. Esse contraste demonstrou que identidade, citação e utilização são propriedades diferentes e justificou a nova barreira local.
+Uma candidata simplesmente não citada não provoca nova tentativa. Ela é removida da base final.
+
+## Observabilidade sem memória cognitiva
+
+O Core não persiste contexto, resposta ou objetos `simetry`/`assimetry` como memória documental. Depois de uma consulta concluída, `audit_events` registra metadados sanitizados, inclusive `simetry_count` e `assimetry_count`. Se houver módulo ativo assinante, o Runtime pode persistir o envelope permitido de `interaction.completed` em `module_events`, agora incluída no schema consolidado, e entregá-lo ao armazenamento privado do módulo. A migration `20260803_010_module_events.sql` atende somente bancos legados. Ausência da tabela em instalação incompleta ou falha modular é isolada da resposta. Esses registros operacionais não alteram documentos, evidências, derivações ou embeddings.
+
+## Registro histórico da mudança
+
+Em 2 de agosto de 2026, uma chamada real incorporou dez de dez fontes recebidas e demonstrou a diferença entre devolver IDs e usá-los analiticamente. Esse caso permanece válido como observação histórica do antigo contrato de incorporação integral.
+
+Em 4 de agosto de 2026, o contrato foi corrigido para refletir a fronteira vigente: dez candidatas foram recuperadas, quatro contribuíram com citações visíveis e seis foram descartadas sem derrubar a resposta. A autoridade local continua definindo o universo permitido; a pertinência do subconjunto final é observada pelas citações validadas.
 
 ## Fronteira atual
 
-A cobertura analítica das evidências é verificável por regras locais. A adequação semântica estrita de uma classificação `simetry` ou `assimetry` possui uma dificuldade distinta: literalidade e participantes podem ser confirmados deterministicamente, mas reciprocidade ou direção ainda dependem de interpretação semântica.
-
-Essa calibração permanece como evolução futura. Ela não reduz a validade alcançada pela resposta documental e não modifica o princípio central deste marco: todas as evidências eleitas participam da análise, enquanto a escolha do fundamento permanece fora da autoridade da LLM.
+A aplicação comprova identidade, pertencimento ao contexto, citação visível, uso analítico observável, papéis e literalidade dos fragmentos. Ela ainda não comprova deterministicamente que os fragmentos expressam reciprocidade ou direção em sentido semântico estrito. Essa calibração permanece como evolução futura e não autoriza persistência de relações, pesos ou rankings.

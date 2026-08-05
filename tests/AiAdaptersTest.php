@@ -472,6 +472,46 @@ assertAiAdapter(
     'A governança por projeto deve permanecer subordinada às regras documentais do EVA.'
 );
 
+$supplementaryContext = new QueryContext(
+    $queryContext->understanding,
+    $queryContext->evidences,
+    $queryContext->interactionLimit,
+    $queryContext->routingPoints,
+    $queryContext->limitations,
+    [],
+    $queryContext->contextIntelligenceAnalyses,
+    $queryContext->evidenceSelection,
+    ['Apresente a resposta em uma estrutura operacional definida pelo módulo.']
+);
+$supplementaryHttp = new CapturingJsonHttpClient([[
+    'choices' => [[
+        'message' => ['content' => json_encode([
+            'answer' => 'Resposta modular [EVA-E000001] [EVA-E000002].',
+            'used_evidence_ids' => ['EVA-E000001', 'EVA-E000002'],
+            'interactions' => [],
+            'limitations' => [],
+        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE)],
+    ]],
+]]);
+(new QueryAnswerProvider(
+    $supplementaryHttp,
+    'test-key',
+    'language-model-test',
+    'https://language-provider.test/v1/chat/completions'
+))->answer('Execute a tarefa autorizada.', $supplementaryContext, []);
+$supplementarySystemPrompt = $supplementaryHttp->requests[0]['payload']['messages'][0]['content'];
+
+assertAiAdapter(
+    str_contains($supplementarySystemPrompt, 'active_module_instructions')
+    && str_contains($supplementarySystemPrompt, 'estrutura operacional definida pelo módulo'),
+    'A instrução modular autorizada não foi transportada integralmente para a consulta.'
+);
+assertAiAdapter(
+    str_contains($supplementarySystemPrompt, 'nunca substituem nem flexibilizam as regras-base')
+    && str_starts_with($supplementarySystemPrompt, $baseQuerySystemPrompt),
+    'A governança modular deve permanecer subordinada ao prompt documental do Core.'
+);
+
 $recoveredQueryPayload = [
     'answer' => 'Resposta regenerada e sustentada [EVA-E000001] [EVA-E000002].',
     'used_evidence_ids' => ['EVA-E000001', 'EVA-E000002'],

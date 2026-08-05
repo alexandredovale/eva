@@ -51,6 +51,6 @@ Fornecedor, endpoint, modelo e nome da variável de credencial ficam exclusivame
 - A IA não atribui confiança, intensidade, qualidade, prioridade ou relevância.
 - A IA não classifica relações por taxonomias julgamentais.
 - Assimetria não significa hierarquia ou superioridade.
-- Interações transitórias não são persistidas nem usadas como ranking.
+- Objetos de interação transitória — pares, papéis, descrições e fragmentos — não são persistidos nem usados como ranking; somente contagens sanitizadas por consulta podem permanecer na auditoria operacional.
 - A interface não acessa o banco diretamente.
 - A pasta pública não contém documentos, configurações ou segredos.

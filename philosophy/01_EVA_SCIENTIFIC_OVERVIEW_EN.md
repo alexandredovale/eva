@@ -2,7 +2,7 @@
 
 ## Abstract
 
-The Evidence Algorithm (EVA) is a provider-neutral architecture for verifiable documentary memory. It parses structured sources into a normalized hierarchy, persists literal primary evidence, produces traceable hierarchical derived evidence, and embeds complete semantic units. During a semantic query, it retrieves a vector Top-k, uses the deterministic Context Intelligence Engine (CIE) to identify a leading convergence core plus mandatory complementary convergence context, resolves selected derived candidates back to primary sources, and binds generated answers to the complete election. When no core exists, convergence assumes the primary role.
+The Evidence Algorithm (EVA) is a provider-neutral architecture for verifiable documentary memory. It parses structured sources into a normalized hierarchy, persists literal primary evidence, produces traceable hierarchical derived evidence, and embeds complete semantic units. During a semantic query, it retrieves a vector Top-k, uses the deterministic Context Intelligence Engine (CIE) to identify a leading convergence core plus complementary convergence context, resolves selected derived candidates back to primary sources, and composes a bounded available context. When no core exists, convergence assumes the primary role. The final documentary basis retains only sources incorporated into the answer with visible citations; recovered but uncited candidates are discarded.
 
 EVA treats a Cnode as the transient understanding of an explicit interaction between cited evidence. The interaction is never stored as a graph edge, score, vector, or permanent cognitive entity. Its two internal forms are `simetry`, for an explicit reciprocal interaction, and `assimetry`, for an explicit directed interaction. Neither form implies truth, importance, superiority, confidence, intensity, or inferred causality.
 
@@ -45,7 +45,7 @@ The architecture motivates, but does not by itself prove, the following hypothes
 
 ## Existing observations
 
-The current implementation and offline tests verify structural preservation, literal persistence, lineage resolution, deterministic CIE regions, complete core/convergence election, version reuse, bounded provider calls, analytical citation coverage, rejection of citation-only inventories, transient interaction validation, partial coverage reporting, and no-generation behavior when evidence is absent. A directed real-provider case also incorporated all ten elected primary sources without truncation.
+The current implementation and offline tests verify structural preservation, literal persistence, lineage resolution, deterministic CIE regions, bounded available-context composition, version reuse, bounded provider calls, analytical citation coverage, rejection of citation-only inventories, transient interaction validation, partial coverage reporting, and no-generation behavior when evidence is absent. A historical directed real-provider case incorporated all ten available primary sources; a later revalidation confirmed the current behavior by retaining four cited sources and discarding six recovered but uncited candidates without failing the whole answer.
 
 The recorded operational baseline is intentionally small. It demonstrates observable behavior and exposes failure modes, but it does not establish statistical superiority. Rejected generated outputs can still consume tokens before local validation; complete semantic units can produce large prompts; and provider compliance remains an empirical factor.
 
@@ -68,7 +68,7 @@ Minimum measures include:
 
 ## Epistemic boundary
 
-EVA verifies that a response is traceable to supplied documentary evidence. It does not establish that the source itself is universally true. Validation is therefore process validation: known sources, literal content, explicit lineage, complete elected identifiers, analytical incorporation, and locally reconstructible interactions. Strict semantic discrimination between thematic convergence and reciprocal `simetry` remains a future calibration boundary.
+EVA verifies that a response is traceable to supplied documentary evidence. It does not establish that the source itself is universally true. Validation is therefore process validation: known sources, literal content, explicit lineage, visible citations, analytical incorporation of every retained source, and locally reconstructible interactions. Strict semantic discrimination between thematic convergence and reciprocal `simetry` remains a future calibration boundary.
 
 ## Source record
 

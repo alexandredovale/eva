@@ -17,6 +17,7 @@ $server = new PDO(
     [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]
 );
 $migration = (string) file_get_contents(dirname(__DIR__) . '/database/migrations/20260803_010_module_events.sql');
+$schema = (string) file_get_contents(dirname(__DIR__) . '/database/schema.sql');
 $assertions = 0;
 
 function assertModuleMigration(bool $condition, string $message): void
@@ -47,9 +48,24 @@ try {
     assertModuleMigration(count($columns) === 6, 'A tabela module_events não possui exatamente seis colunas.');
     $temporary->exec('DROP TABLE module_events');
     assertModuleMigration($temporary->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN) === [], 'O rollback isolado não removeu a tabela modular.');
+
+    $temporary->exec($schema);
+    $tables = $temporary->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
+    assertModuleMigration(count($tables) === 14, 'O schema consolidado deve criar exatamente 14 tabelas.');
+    assertModuleMigration(in_array('module_events', $tables, true), 'O schema consolidado não criou module_events.');
+    assertModuleMigration(
+        count($temporary->query('SHOW COLUMNS FROM module_events')->fetchAll()) === 6,
+        'A definição de module_events no schema diverge do contrato de seis colunas.'
+    );
+
+    $temporary->exec($migration);
+    assertModuleMigration(
+        count($temporary->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN)) === 14,
+        'Aplicar a migration 010 sobre o schema consolidado não pode criar estrutura adicional.'
+    );
     unset($temporary);
 
-    echo sprintf("Migration modular validada com %d asserções e rollback isolado.\n", $assertions);
+    echo sprintf("Schema consolidado e migration modular validados com %d asserções.\n", $assertions);
 } finally {
     $server->exec(sprintf('DROP DATABASE IF EXISTS `%s`', $databaseName));
 }

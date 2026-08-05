@@ -243,9 +243,9 @@ O resultado preservou uma interação `simetry` validada entre evidências de X 
 
 Essa execução confirma funcionalmente o padrão esperado: relação solicitada entre X, Y e Z; resposta sustentada entre X e Y; limitação explícita para Z; compreensão cognitiva `simetry`/`assimetry` preservada. Uma única execução não demonstra taxa estatística de sucesso.
 
-## 10. Verificação da recuperação lexical e estrutural sem descarte
+## 10. Verificação histórica da recuperação lexical e estrutural
 
-Este caso permanece como registro histórico da recuperação estrutural anterior ao contrato de eleição integral. O CIE não altera a localização direta, lexical, estrutural ou ampla, mas a versão vigente já não delega ao provedor a escolha final entre candidatos: a aplicação forma o contexto autorizado e exige incorporação analítica integral. Portanto, as métricas de seleção pela IA abaixo não devem ser usadas como descrição do comportamento atual.
+Este caso permanece como registro histórico da recuperação estrutural e antecipa o contrato vigente de citação visível. O CIE não altera a localização direta, lexical, estrutural ou ampla. A aplicação forma o contexto autorizado; o provedor pode usar somente o subconjunto que efetivamente contribuir, e a base final conserva apenas evidências citadas analiticamente. Portanto, as métricas abaixo descrevem essa execução histórica, não uma etapa adicional de triagem por IA no fluxo atual.
 
 O caso estrutural que havia sido bloqueado na linha de base foi repetido após a introdução da triagem de candidatos pela IA.
 
@@ -274,7 +274,7 @@ O recuperador entregou oito evidências candidatas ao provedor. O conjunto ainda
 | Tokens totais | 10.667 | 11.236 |
 | Tamanho do request | 39.805 bytes | 41.734 bytes |
 
-Na arquitetura então avaliada, o teste confirmou que a recuperação produzia candidatos e a IA selecionava os textos sustentadores. Esse resultado é preservado como baseline histórico. Na arquitetura vigente, a eleição final pertence à aplicação, todas as fontes entregues devem participar da análise e listas artificiais de citações são rejeitadas.
+Na arquitetura então avaliada, o teste confirmou que a recuperação produzia candidatos e a IA selecionava os textos sustentadores. Esse resultado é preservado como baseline histórico. Na arquitetura vigente, a aplicação determina o contexto disponível e a LLM determina somente o subconjunto utilizado por meio de citações visíveis; candidatas não citadas são descartadas, fontes externas são proibidas e listas artificiais de citações são rejeitadas.
 
 ## 11. Protocolo multidisciplinar a executar
 

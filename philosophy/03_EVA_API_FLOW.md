@@ -174,14 +174,14 @@ POST /api/query                              <- API interna do EVA
            +--------------------------+------------------------+
                                       |
                                       v
-                     [ROTAS ELEITAS PELO CIE]
-                     - core: referência principal
-                     - convergence: análise complementar obrigatória
+                     [CANDIDATOS SELECIONADOS PELO CIE]
+                     - core: precedência no contexto disponível
+                     - convergence: contexto complementar disponível
                                       |
                                       v
                      [RESOLUÇÃO PARA FONTES PRIMÁRIAS]
-                     - eleição final determinística
-                     - nenhuma reeleição pela LLM
+                     - composição determinística até QUERY_MAX_EVIDENCE
+                     - a LLM não pode introduzir fontes externas
                                       |
                                       v
                             < HÁ EVIDÊNCIA? >
@@ -193,20 +193,26 @@ POST /api/query                              <- API interna do EVA
                              |              ║ API EXTERNA 4                 ║
                              |              ║ GERAÇÃO DA RESPOSTA          ║
                              |              ║                               ║
-                             |              ║ Uma chamada com input,       ║
-                             |              ║ evidências e limitações.      ║
+                             |              ║ Chamada nominal com input,    ║
+                             |              ║ contexto disponível e limites.║
                              |              ╚═══════════════════════════════╝
                              |                              |
                              |                              v
                               |                 [VALIDAÇÃO LOCAL DA SAÍDA]
-                              |                 - IDs eleitos aceitos integralmente
-                              |                 - cada fonte incorporada à análise
+                              |                 - citações pertencem ao contexto
+                              |                 - cada fonte mantida contribui na análise
+                              |                 - candidatas não citadas são descartadas
                               |                 - sem inventário isolado de citações
                              |                 - fragmentos literais
                              |                 - simetry/assimetry
                              |                 - campos proibidos
                              |                              |
                              +------------------------------+
+                                            |
+                                            v
+                                    [AUDITORIA E EVENTO OPCIONAL]
+                                    - document_queried registra somente contagens
+                                    - interaction.completed é emitido se houver assinante
                                             |
                                             v
                                     [RESPOSTA AO USUÁRIO]
@@ -254,16 +260,17 @@ POST /api/query                              <- API interna do EVA
 ╔═════════════════════════════════════════════════════════════╗
 ║ API EXTERNA — GERAÇÃO DA RESPOSTA                          ║
 ║                                                             ║
-║ Articula todas as evidências eleitas, preserva core e       ║
-║ convergence, identifica                                     ║
-║ simetry/assimetry quando pertinente e declara lacunas.       ║
+║ Usa o subconjunto documental que efetivamente contribuir,   ║
+║ preserva a precedência de core, pode usar convergence,       ║
+║ avalia simetry/assimetry e declara lacunas.                  ║
 ╚═════════════════════════════════════════════════════════════╝
            |
            v
 [VALIDAÇÃO LOCAL MULTIDOCUMENTAL]
 - cada ID pertence ao contexto autorizado
-- todos os IDs eleitos foram aceitos na mesma ordem
-- cada evidência possui contribuição analítica citada
+- cada ID citado pertence ao contexto disponível
+- cada evidência mantida possui contribuição analítica citada
+- candidatas recuperadas mas não citadas são descartadas
 - listas isoladas de citações são rejeitadas
 - cada evidência mantém seu documento de origem
 - participantes são citados
@@ -306,6 +313,8 @@ CONSULTA SEM EVIDÊNCIA
   └── 0 chamadas para geração de resposta
 ```
 
+As quantidades acima descrevem o caminho nominal. Uma tentativa do `QueryAnswerProvider` admite no máximo uma regeneração compacta quando o provedor termina com `finish_reason=length`. Separadamente, `DocumentQueryService` admite no máximo três tentativas totais de resposta validada com o mesmo contexto disponível; saídas rejeitadas são descartadas integralmente e não chegam ao transcript.
+
 ## 7. Fluxo resumido
 
 ```text
@@ -323,7 +332,7 @@ EVIDÊNCIAS PRIMÁRIAS
                                   |
 INPUT DO USUÁRIO                  |
    |                              |
-   +--> se conceitual: API DE EMBEDDING
+   +--> se conceitual/relacional: API DE EMBEDDING
    |                              |
    +----------> RECUPERAÇÃO <-----+
                      |
@@ -331,7 +340,7 @@ INPUT DO USUÁRIO                  |
                      |
          NÚCLEO + CONVERGÊNCIA
                      |
-          FONTES PRIMÁRIAS ELEITAS
+        CONTEXTO PRIMÁRIO DISPONÍVEL
                      |
               há evidência?
                 /       \
@@ -339,7 +348,11 @@ INPUT DO USUÁRIO                  |
                |         |
             RECUSA    API DE RESPOSTA
                          |
+              RESPOSTA + INTERAÇÕES
+                         |
                    VALIDAÇÃO LOCAL
+                         |
+             AUDITORIA / EVENTO OPCIONAL
                          |
                       RESPOSTA
 ```
@@ -358,4 +371,8 @@ NÃO SÃO PERSISTIDOS COMO MEMÓRIA DOCUMENTAL:
 - histórico conversacional.
 ```
 
-O transcript completo existe apenas na memória JavaScript da página aberta. Para continuidade, somente as três rodadas concluídas mais recentes são anexadas ao próximo input; elas ajudam o modelo a interpretar referências conversacionais, mas não adquirem autoridade de evidência. **Reiniciar chat**, logout, novo login ou recarregamento descartam esse estado sem alterar projetos e documentos persistidos.
+Essa regra não significa ausência absoluta de observabilidade. `audit_events` mantém metadados sanitizados da consulta concluída, inclusive `simetry_count` e `assimetry_count`, sem pares ou fragmentos. Quando existe módulo ativo assinante, `module_events`, incluída no schema consolidado, pode receber o envelope permitido de `interaction.completed`, com input atual, input contextual, resposta validada, referências públicas de evidência e limitações; cada módulo governa seu próprio estado privado. Bancos legados usam a migration `20260803_010_module_events.sql`. Ausência da tabela em uma instalação incompleta ou falha modular gera diagnóstico seguro, mas não derruba a resposta já validada. Nenhum desses registros altera documentos, evidências, derivações ou embeddings.
+
+As relações físicas e lógicas que sustentam essa fronteira estão mapeadas em [`docs/17_RELACIONAMENTO_BANCO_DADOS.md`](../docs/17_RELACIONAMENTO_BANCO_DADOS.md).
+
+O transcript completo existe apenas na memória JavaScript da página aberta. Para continuidade, somente as três rodadas concluídas mais recentes são anexadas ao próximo input; elas ajudam o modelo a interpretar referências conversacionais, mas não adquirem autoridade de evidência. **Reiniciar chat**, logout, novo login ou recarregamento descartam esse estado visual sem alterar projetos e documentos persistidos. A API sempre devolve as interações transitórias validadas; na interface vigente, CIE, `simetry`, `assimetry` e limitações técnicas são exibidos somente ao superadmin, enquanto o usuário comum vê a resposta e as evidências utilizadas.

@@ -4,7 +4,7 @@
 
 An EVA module is an independent connector package installed at `modules/<module-id>/`. It is hierarchically above projects, but it is never owned by a project, document, or user. Zero, one, or many modules may be active, and several modules may observe the same event independently.
 
-The Core knows only generic contracts. It stores each neutral event once in `module_events`, discovers valid manifests, and fans events out to active subscribers. Each module owns its cursor, history, schema, migrations, and results in `modules/.runtime/data/<module-id>/module.sqlite`.
+The Core knows only generic contracts. It stores each neutral event once in `module_events`, included directly in consolidated `database/schema.sql`, discovers valid manifests, and fans events out to active subscribers. Migration `database/migrations/20260803_010_module_events.sql` remains available for databases created before this consolidation. Each module owns its cursor, history, schema, migrations, and results in `modules/.runtime/data/<module-id>/module.sqlite`. If a legacy deployment has not applied that migration, event emission fails in isolation and the documentary answer continues, but no new module event is stored.
 
 No specialized module table is added to the Core database. The modular release adds only the neutral `module_events` mailbox and does not alter an existing MySQL table.
 
@@ -63,7 +63,8 @@ interface ModuleInterface
 - the validated immutable manifest;
 - a private PDO SQLite connection;
 - a capability-limited Core read API;
-- a provider-neutral JSON language interface.
+- a provider-neutral JSON language interface;
+- an actor-bound scoped documentary query interface when the package declares `core.query.scoped`.
 
 AI keys, database credentials, bearer tokens, and raw Core PDO access are not provided to modules. Packages must be idempotent by `event_id` and cannot call one another.
 
@@ -89,6 +90,22 @@ Dashboard modules implement `DashboardModuleInterface` and return the contract `
 The package owns its styles and markup. CSP authorizes returned CSS with a request nonce; `unsafe-inline` remains disabled. Generic declarative attributes provide refresh, remote filters, local content filters, entries, and accordion toggles without module-specific JavaScript in the Core.
 
 Removing or deactivating a package removes its descriptor and menu entry automatically. The Core contains no module ID, domain label, renderer, or stylesheet.
+
+## Interactive actions and module access
+
+Interactive packages may additionally implement `ModuleAccessInterface` and `ModuleActionInterface`. Access is evaluated before discovery, dashboard rendering, and action execution. Legacy modules remain available by default, while the superadmin retains administrative access.
+
+Declarative forms use `data-module-action-form` and `data-module-action`. The neutral host serializes their fields and sends an authenticated request to:
+
+```text
+POST /api/modules/<module-id>/actions/<action-id>
+```
+
+The request contains a bounded `input` object and a `request_id` that packages can use for SQLite idempotency. A valid `eva.module.action/1` response returns a fresh `eva.module.dashboard/1` payload and may include a neutral notice. Packages still cannot provide executable JavaScript or expose direct HTTP files.
+
+The optional `core.query.scoped` capability lets an authorized action reuse Core retrieval and answer validation. The Runtime binds the authenticated actor, Core scope authorization runs again, and supplementary module instructions remain subordinate to documentary evidence, citations, limitations, and the base answer contract.
+
+Module-specific profiles, preferences, authorization records, and action history remain in the package SQLite database. The connector adds no MySQL table and contains no domain-specific identifier, label, renderer, or action name.
 
 ## Backup and retention
 

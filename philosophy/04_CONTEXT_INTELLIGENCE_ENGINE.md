@@ -10,7 +10,7 @@ O Context Intelligence Engine (CIE) transforma a seleção de contexto semântic
 Sua posição arquitetural é deliberadamente intermediária:
 
 ```text
-Retriever → Top-k → CIE → contexto eleito (núcleo + convergência) → fontes primárias → LLM
+Retriever → Top-k → CIE → candidatos selecionados (núcleo + convergência) → fontes primárias disponíveis → LLM
 ```
 
 O Retriever localiza candidatos. O CIE identifica regiões matemáticas. As camadas cognitivas compreendem as fontes selecionadas. O provedor comunica uma resposta limitada a essas fontes. Cada componente preserva uma responsabilidade reconstruível.
@@ -31,7 +31,7 @@ Da própria distribuição emergem três regiões:
 - de `μ` até antes de `μ + σ`: convergência;
 - a partir de `μ + σ`: núcleo.
 
-O núcleo lidera o contexto final quando existe, e a faixa de convergência o acompanha como análise complementar obrigatória. Quando a distribuição não produz núcleo, a faixa de convergência assume o papel principal sem introduzir uma heurística externa. Se a média for zero, o CV é indefinido e registrado como `null`; isso não impede a classificação por `μ` e `σ`.
+O núcleo lidera o contexto disponível quando existe, e a faixa de convergência o acompanha como contexto complementar. Quando a distribuição não produz núcleo, a faixa de convergência assume o papel principal sem introduzir uma heurística externa. Se a média for zero, o CV é indefinido e representado como `null`; isso não impede a classificação por `μ` e `σ`.
 
 ## Neutralidade
 
@@ -50,13 +50,13 @@ A similaridade original continua sendo uma medida geométrica do espaço vetoria
 
 ## Separação entre seleção e fundamentação
 
-Um candidato selecionado não chega automaticamente à resposta como texto documental. Se ele for derivado, sua linhagem precisa ser resolvida até fontes primárias. Depois dessa resolução, núcleo e convergência constituem uma eleição determinística e integral: o provedor não pode escolher novamente quais fontes aceitar. A aplicação valida IDs, papéis, cobertura analítica, citações, participantes e fragmentos literais.
+Um candidato selecionado não chega automaticamente à resposta como texto documental. Se ele for derivado, sua linhagem precisa ser resolvida até fontes primárias. Depois dessa resolução, a aplicação compõe deterministicamente o contexto primário disponível, preservando os papéis `core` e `convergence` e o limite global. O provedor não pode introduzir fontes externas, mas pode omitir candidatas que não contribuam para a resposta; somente fontes citadas analiticamente permanecem na base final. A aplicação valida IDs, papéis, citações, participantes e fragmentos literais.
 
 Assim, existem três filtros com naturezas distintas:
 
 1. o Retriever localiza por compatibilidade vetorial;
-2. o CIE e a resolução de linhagem elegem o contexto final pela distribuição;
-3. a validação documental confirma que a resposta incorporou integralmente essa eleição.
+2. o CIE e a resolução de linhagem compõem o contexto primário disponível pela distribuição;
+3. a resposta cita o subconjunto que efetivamente contribui e a validação documental descarta candidatas não citadas, rejeitando referências externas ou decorativas.
 
 Nenhum deles substitui os demais.
 
@@ -73,11 +73,11 @@ Dado o mesmo Top-k, o resultado do CIE é invariável. A saída transitória per
 
 Essa explicabilidade não exige uma segunda inferência nem uma justificativa gerada por modelo. Ela decorre das operações matemáticas executadas localmente.
 
-## Contrato de incorporação analítica
+## Contrato de contexto disponível e citação visível
 
-A eleição do CIE não é uma sugestão ao modelo. As fontes primárias resolvidas são enviadas com papéis explícitos de `core` e `convergence`, e `used_evidence_ids` deve reproduzir integralmente o conjunto na mesma ordem. O núcleo sustenta as conclusões principais; cada convergência deve reforçar, contextualizar, delimitar ou contrapor essas conclusões sem extrapolar sua literalidade.
+O resultado do CIE não autoriza o modelo a buscar fora do contexto. As fontes primárias resolvidas são enviadas com papéis explícitos de `core` e `convergence`; o núcleo possui precedência e a convergência pode reforçar, contextualizar, delimitar ou contrapor as conclusões quando seu conteúdo literal contribuir. `used_evidence_ids` é derivado das citações visíveis e contém somente as fontes efetivamente incorporadas.
 
-Aceitação formal não basta. Cada evidência deve estar citada na frase ou no parágrafo que explica sua contribuição. A aplicação não repara citações ausentes e rejeita listas isoladas de IDs. Essa regra mantém a eleição sob autoridade local e reserva ao modelo a formulação, não a seleção do fundamento.
+Aceitação formal não basta. Cada evidência mantida deve estar citada na frase ou no parágrafo que explica sua contribuição. A aplicação não repara citações ausentes, rejeita listas isoladas de IDs e descarta candidatas recuperadas sem citação. Essa regra mantém o universo autorizado sob controle local e permite ao modelo selecionar apenas o subconjunto documental pertinente, sem inventar relações para acomodar o restante.
 
 ## Hipótese e limite científico
 
@@ -97,4 +97,4 @@ Devem ser medidos precision/recall, estabilidade entre paráfrases, validade de 
 
 O CIE estabelece um ponto de expansão sem alterar o contrato das demais camadas. Analisadores futuros — robustos, temporais, topológicos, de entropia ou de grafo transitório — somente devem ser incorporados quando mantiverem neutralidade, determinismo observável, ausência de persistência indevida e avaliação experimental comparável.
 
-A implementação vigente contém apenas o analisador de distribuição estatística descrito neste documento. A calibração semântica estrita dos operadores `simetry` e `assimetry` permanece como evolução futura separada: ela não altera a eleição do CIE nem autoriza o modelo a reduzir evidências.
+A implementação vigente contém apenas o analisador de distribuição estatística descrito neste documento. A calibração semântica estrita dos operadores `simetry` e `assimetry` permanece como evolução futura separada: ela não altera a seleção do CIE, a composição do contexto disponível nem a regra de que somente evidências citadas integram a base final.

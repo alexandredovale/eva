@@ -18,14 +18,14 @@ Never copy production secrets into examples, issue reports, test output, or docu
 
 ## 3. Database
 
-Create an empty UTF-8 database and import `database/schema.sql`. The repository does not require seed data and does not include an operational dump, user records, uploaded sources, or generated evidence.
+Create an empty UTF-8 database and import `database/schema.sql`. The consolidated schema creates all 14 current main-database tables, including the Module Runtime mailbox. The repository does not require seed data and does not include an operational dump, user records, uploaded sources, or generated evidence.
 
 ```bash
 mysql -u root -p -e "CREATE DATABASE eva CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 mysql -u root -p eva < database/schema.sql
 ```
 
-For an existing installation, apply migrations in filename order and back up the private database before any migration.
+For an existing installation, apply outstanding migrations in filename order and back up the private database before any migration. Migration `20260803_010_module_events.sql` remains the upgrade path for databases created before `module_events` entered the consolidated schema.
 
 ## 4. Storage permissions
 

@@ -49,6 +49,8 @@ Um Cnode apenas descreve uma interação semântica explícita no contexto consu
 4. Configure o Apache para servir a pasta `public` como raiz pública.
 5. Acesse `/` para abrir o produto. O diagnóstico público está em `GET /api/health`.
 
+Em uma instalação vazia, importe somente `database/schema.sql`, que já contém as 14 tabelas atuais, inclusive `module_events`. Bancos existentes devem receber, em ordem, apenas as migrations ainda ausentes; a migration `20260803_010_module_events.sql` permanece necessária para instalações criadas antes dessa consolidação.
+
 Nenhuma chave de API deve ser gravada no código, na documentação, nos logs ou no repositório. O `.env` é a única fonte local de configuração e contém os placeholders comentados das credenciais neutras; cada instalação deve preencher esses valores somente em seu arquivo privado.
 
 As classes da aplicação são white label e conhecem apenas capacidades. Todos os vínculos com fornecedores, endpoints, modelos e variáveis de credencial ficam exclusivamente no `.env`; `config/ai.php` apenas lê essas variáveis genéricas. Os testes usam provedores simulados e não consomem créditos.
@@ -86,7 +88,7 @@ A ingestão não produz resumos ou embeddings. A construção cognitiva é uma e
 
 `EvidenceEmbeddingService` vetoriza evidências primárias e resumos derivados com título do documento, caminho, nó e conteúdo organizado. Antes de chamar o provedor, todas as unidades pendentes são validadas contra `AI_EMBEDDING_MAX_INPUT_TOKENS`, com margem preventiva de 10%. Lotes técnicos agrupam unidades completas e nunca fragmentam nenhuma delas. Se uma primária exceder o limite, uma síntese derivada válida e rastreável assume sua rota semântica; sem essa síntese, a etapa para com o identificador da evidência e exige subdivisão estrutural real. Uma versão já existente para o mesmo modelo e hash é reutilizada antes de chamar o provedor.
 
-Na consulta conceitual ou relacional, `DocumentContextRetriever` compara o embedding transitório do input com evidências primárias e derivadas. O Retriever produz um Top-k de 20 candidatos por padrão; o CIE calcula média, desvio padrão populacional e CV, elege o núcleo principal e a convergência complementar e só então resolve sínteses por `evidence_derivations` até suas fontes primárias. Quando não há núcleo, a convergência assume o papel principal. A LLM deve incorporar integralmente as fontes eleitas; similaridades e estatísticas permanecem transitórias.
+Na consulta conceitual ou relacional, `DocumentContextRetriever` compara o embedding transitório do input com evidências primárias e derivadas. O Retriever produz um Top-k de 20 candidatos por padrão; o CIE calcula média, desvio padrão populacional e CV, identifica o núcleo principal e a convergência complementar e só então resolve sínteses por `evidence_derivations` até suas fontes primárias. Quando não há núcleo, a convergência assume o papel principal. As fontes primárias resolvidas formam o contexto disponível: a LLM pode usar somente o subconjunto que efetivamente contribuir para a resposta, com citação visível; candidatas não citadas são descartadas da base final. Similaridades e estatísticas permanecem transitórias.
 
 `QueryAnswerProvider` pode declarar interações `simetry` ou `assimetry` na mesma chamada que produz a resposta. `DocumentQueryService` aceita cada interação somente quando os participantes pertencem ao contexto, foram citados e seus fragmentos existem literalmente nas evidências. Nada disso é persistido como Cnode.
 
@@ -153,6 +155,8 @@ O token identifica o superadmin. Pela área **Usuários**, ele cadastra username
 Usuários cadastrados acessam apenas o chat e a alteração de senha. Cada senha é persistida exclusivamente por `password_hash()`. Na criação, redefinição ou rotação é exibido uma única vez um código de recuperação de 16 caracteres, cujo valor também é armazenado somente como hash. Sem SMTP, a recuperação exige username, código vigente e nova senha; ao concluir, todas as sessões anteriores são revogadas e um novo código de recuperação é emitido.
 
 As tabelas dessa camada estão na migração `database/migrations/20260721_008_user_access.sql`; o perfil de respostas foi acrescentado por `database/migrations/20260731_009_project_response_profile.sql`. A permissão de projeto inclui todas as obras associadas a ele; a permissão de obra não libera as demais obras do mesmo projeto.
+
+O mapa completo de cardinalidades, chaves estrangeiras, tabelas de junção, relações lógicas e cascatas está em [Relacionamento do banco de dados](docs/17_RELACIONAMENTO_BANCO_DADOS.md).
 
 O superadmin também pode excluir uma obra ou um projeto mediante confirmação digitada. Excluir uma obra remove em cascata seus nós, evidências, derivações, embeddings, trabalhos de processamento, permissões e vínculos com projetos. Excluir um projeto remove igualmente todas as obras nele contidas, mesmo que alguma também esteja associada a outro projeto, e depois remove suas fontes do armazenamento privado.
 

@@ -9,7 +9,7 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 5. Build higher-level summaries only from identified lower-level evidence.
 6. Generate embeddings only from organized units, never from arbitrary size-based cuts.
 7. Treat EVA — Evidence Algorithm — as the principal system name and architecture, keeping evidence, derivations, and embeddings as its persistent core.
-8. Treat Cnode only as an internal transient conceptual derivation of EVA, never as a system, superior hierarchical layer, documentary node, or persistent entity; do not persist candidate pairs, interaction analyses, or relational metrics.
+8. Treat Cnode only as an internal transient conceptual derivation of EVA, never as a system, superior hierarchical layer, documentary node, or persistent entity; do not persist candidate pairs, interaction analyses, or relational metrics as memory/ranking. `audit_events` may retain only sanitized per-query counts without participants, excerpts, or pair reconstruction.
 9. Evaluate interactions when at least two evidence records are recovered, and emit only relationships between evidence records actually cited, within the requested limit.
 10. Use only `simetry` and `assimetry` to describe interactions.
 11. Do not classify relationships through judgmental taxonomies.
@@ -76,7 +76,7 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 72. Let the Core know only generic contracts and capabilities, never a module-specific name, menu, rule, HTML, CSS, or function.
 73. Use `module_events` as the only additional main-database table for the neutral mailbox without altering pre-existing tables.
 74. Keep each module's schema, history, and cursor in its own private SQLite database excluded from version control.
-75. Persist the sanitized event transactionally and resolve its processing immediately after the completed interaction.
+75. Append the sanitized event idempotently after validation and before the HTTP response, then attempt immediate processing; keep each module's processing, idempotent record, and cursor advance in the same private SQLite transaction.
 76. Isolate a module failure from the documentary answer and from other subscribed modules.
 77. Reject events containing sensitive fields and never let modules write into Core documentary memory.
 78. Require typed confirmation for permanent deletion and remove both the package and its corresponding private data directory.

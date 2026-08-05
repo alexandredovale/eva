@@ -19,6 +19,7 @@ English is the primary language of the public repository. The original Portugues
 11. [Database](en/11_DATABASE.md)
 12. [Mandatory rules](en/12_MANDATORY_RULES.md)
 13. [Roadmap](en/13_ROADMAP.md)
+18. [Database relationships](en/18_DATABASE_RELATIONSHIPS.md)
 
 ### Validation records
 
@@ -54,6 +55,7 @@ The English edition is organized by reader task rather than as filename-for-file
 | `14_CONTEXT_INTELLIGENCE_ENGINE.md` | [Context Intelligence Engine](en/09_CONTEXT_INTELLIGENCE_ENGINE.md) |
 | `15_VISAO.md` | [Project vision and impact assessment](en/16_VISION.md) |
 | `16_MODULOS.md` | [Connector modules](en/17_MODULE_CONNECTORS.md) |
+| `17_RELACIONAMENTO_BANCO_DADOS.md` | [Database relationships](en/18_DATABASE_RELATIONSHIPS.md) |
 
 [Installation](en/03_INSTALLATION.md) is an additional English operational guide assembled from the current repository configuration and deployment requirements.
 
@@ -77,5 +79,6 @@ The English edition is organized by reader task rather than as filename-for-file
 | [`14_CONTEXT_INTELLIGENCE_ENGINE.md`](14_CONTEXT_INTELLIGENCE_ENGINE.md) | Statistical stabilization between vector retrieval and cognitive layers |
 | [`15_VISAO.md`](15_VISAO.md) | Visão crítica, impacto potencial, limites atuais e prioridades de evolução |
 | [`16_MODULOS.md`](16_MODULOS.md) | Instalação, contratos, SDK, operação, backup e remoção de módulos |
+| [`17_RELACIONAMENTO_BANCO_DADOS.md`](17_RELACIONAMENTO_BANCO_DADOS.md) | Cardinalidades, chaves estrangeiras, relações lógicas, fluxos e efeitos de exclusão |
 
 Private test books and operational corpora are intentionally not part of this repository.

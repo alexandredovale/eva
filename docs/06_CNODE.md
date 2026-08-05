@@ -76,4 +76,4 @@ Uma calibração futura deverá exigir demonstração separada das duas direçõ
 
 ## Quantidade
 
-A quantidade de interações em uma resposta descreve apenas aquele contexto consultado. Não existe contagem global persistida de Cnodes porque Cnode não é uma entidade; nenhuma contagem pode ser convertida em ranking ou importância.
+A quantidade de interações em uma resposta descreve apenas aquele contexto consultado. Não existe tabela, identidade ou contador cognitivo global de Cnodes. Entretanto, `ProductApi` registra em `audit_events`, para cada consulta concluída, as contagens sanitizadas `simetry_count` e `assimetry_count`; essas métricas operacionais podem ser agregadas sem reconstruir pares, participantes, descrições ou fragmentos. Elas não transformam Cnode em entidade e não podem ser usadas como ranking, peso ou importância.

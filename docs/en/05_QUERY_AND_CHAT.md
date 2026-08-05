@@ -28,7 +28,7 @@ Literal, lexical, and structural matches are candidates rather than conclusions.
 
 `simetry` and `assimetry` are internal cognitive operators. They guide relational understanding but are not treated as expressions that a documentary source must contain.
 
-For semantic routes, Retriever orders up to `QUERY_CANDIDATE_LIMIT` candidates and CIE calculates the mean, population standard deviation, and coefficient of variation. Candidates below the mean are discarded. The convergence core leads the final semantic selection; the convergence range follows as complementary analysis context. If no core exists, convergence becomes the primary context. Selected derived candidates are then resolved through `evidence_derivations` until primary sources are available. The answer provider receives the deterministic `core`/`convergence` role, but not similarity values as documentary authority.
+For semantic routes, Retriever orders up to `QUERY_CANDIDATE_LIMIT` candidates and CIE calculates the mean, population standard deviation, and coefficient of variation. Candidates below the mean are discarded. The convergence core leads the available semantic context; the convergence range follows as complementary context. If no core exists, convergence becomes the primary context. Selected derived candidates are then resolved through `evidence_derivations` until primary sources are available. The answer provider receives the deterministic `core`/`convergence` role, but not similarity values as documentary authority.
 
 ## Project response governance
 
@@ -95,7 +95,7 @@ The interface keeps the visible transcript while the current page remains open. 
 
 The answer provider decides whether the current request continues an earlier turn. Previous questions and answers can clarify conversational references, but they never become documentary evidence. Every new response remains restricted to primary evidence recovered for that query.
 
-**Reset chat** clears the transcript and temporary context while preserving selected projects and works. Conversation state is not persisted in the database, audit log, or browser storage.
+**Reset chat** clears the transcript and temporary browser context while preserving selected projects and works. The complete visual transcript is not persisted as chat state. Sanitized query metadata may still be recorded in `audit_events`, and an active subscribed module may receive the allowed `interaction.completed` envelope, including the contextual input used by the Core; neither mechanism turns prior turns into documentary evidence.
 
 ## Result contract
 
@@ -110,7 +110,9 @@ The public query result separates:
 - `context_intelligence`;
 - `limitations`.
 
-Each used evidence item exposes `selection_region`. `evidence_selection` lists the cited core and convergence IDs. `context_intelligence` is empty on exclusively non-semantic routes and otherwise exposes the transient per-document calculation. Neither CIE analysis nor interactions modify persistent memory.
+Each used evidence item exposes `selection_region`. `evidence_selection` lists the cited core and convergence IDs. `context_intelligence` is empty on exclusively non-semantic routes and otherwise exposes the transient per-document calculation. The API returns all result fields to every authorized user; the current interface shows the answer and evidence to everyone but restricts CIE, `simetry`, `assimetry`, and technical limitations to the superadmin.
+
+Neither CIE analysis nor interaction objects modify documentary memory. After a completed query, `audit_events` receives sanitized metadata including interaction counts. If an active module subscribes, the Runtime emits `interaction.completed` before the HTTP response and may persist its allowed envelope in `module_events`; module failures are isolated from the documentary answer.
 
 ## CLI
 

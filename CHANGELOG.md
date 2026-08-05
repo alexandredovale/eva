@@ -7,6 +7,10 @@ and the project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Consolidated the neutral `module_events` mailbox into `database/schema.sql` so fresh installations require one schema import; migration `010` remains the idempotent upgrade path for existing databases.
+
 ## [1.2.0] - 2026-08-04
 
 ### Added

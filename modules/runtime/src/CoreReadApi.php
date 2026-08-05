@@ -34,6 +34,17 @@ final readonly class CoreReadApi
         return is_array($rows) ? $rows : [];
     }
 
+    /** @return list<array<string, mixed>> */
+    public function projects(): array
+    {
+        $this->requireCapability('core.read.projects');
+        $rows = $this->database->query(
+            'SELECT id, name, active, created_at FROM projects ORDER BY name ASC'
+        )->fetchAll();
+
+        return is_array($rows) ? $rows : [];
+    }
+
     /** @return array<string, mixed>|null */
     public function project(int $id): ?array
     {
@@ -48,6 +59,38 @@ final readonly class CoreReadApi
         $this->requireCapability('core.read.documents');
 
         return $this->one('SELECT id, public_id, title, format, status, created_at FROM documents WHERE id = :id', $id);
+    }
+
+    /** @return list<array<string, mixed>> */
+    public function documents(): array
+    {
+        $this->requireCapability('core.read.documents');
+        $rows = $this->database->query(
+            "SELECT id, public_id, title, format, source_hash, status, created_at
+               FROM documents
+              WHERE status = 'ready'
+              ORDER BY title ASC"
+        )->fetchAll();
+
+        return is_array($rows) ? $rows : [];
+    }
+
+    /** @return list<array<string, mixed>> */
+    public function projectDocuments(int $projectId): array
+    {
+        $this->requireCapability('core.read.projects');
+        $this->requireCapability('core.read.documents');
+        $statement = $this->database->prepare(
+            "SELECT d.id, d.public_id, d.title, d.format, d.source_hash, d.status
+               FROM project_documents pd
+               JOIN documents d ON d.id = pd.document_id
+              WHERE pd.project_id = :project_id
+              ORDER BY d.title ASC"
+        );
+        $statement->execute(['project_id' => $projectId]);
+        $rows = $statement->fetchAll();
+
+        return is_array($rows) ? $rows : [];
     }
 
     /** @return array<string, mixed>|null */

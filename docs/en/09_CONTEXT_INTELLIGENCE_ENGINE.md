@@ -56,7 +56,7 @@ QUERY_MAX_EVIDENCE=8
 - `QUERY_CANDIDATE_LIMIT`: semantic Top-k analyzed per document; default `20`, effective range `1..200`.
 - `QUERY_MAX_EVIDENCE`: primary-evidence cap delivered to the answer provider; default `8`, effective range `1..50`.
 
-The first limit defines the statistical population. The second bounds the final context after CIE selection and lineage resolution.
+The first limit defines the statistical population. The second bounds the available primary context after CIE selection and lineage resolution; the final basis is the subset effectively cited.
 
 ## Auditable output and tests
 

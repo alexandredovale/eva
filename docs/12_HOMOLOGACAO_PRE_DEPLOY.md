@@ -99,7 +99,7 @@ Esse total registra a homologação anterior ao CIE. Para o update de 2 de agost
 ## Procedimento obrigatório depois do upload
 
 1. Publicar o projeto preservando os arquivos `.htaccess` e sem expor `.env`, chaves, logs, dumps ou `.git`.
-2. Configurar o `.env` de produção, permissões graváveis de `storage/documents` e `storage/logs` e o worker/cron da fila.
+2. Configurar o `.env` de produção, permissões graváveis de `storage/documents` e `storage/logs`; em banco novo, importar o `database/schema.sql` consolidado; em banco existente, aplicar todas as migrations pendentes — inclusive `20260803_010_module_events.sql` quando a instalação for anterior à consolidação — e configurar o worker/cron da fila.
 3. Configurar backup recorrente do banco e dos documentos, com retenção e cópia externa.
 4. Executar, a partir de uma máquina que acesse o domínio:
 
@@ -108,6 +108,6 @@ php bin\verify-deployment.php https://eva.oceanno.com.br
 ```
 
 5. Exigir zero falhas no verificador e realizar um último login de superadmin e de usuário comum no domínio publicado.
-6. Confirmar que uma consulta conceitual ou relacional retorna `context_intelligence`, preserva núcleo principal e convergência complementar, resolve somente fontes primárias e exige incorporação analítica integral do contexto final.
+6. Confirmar que uma consulta conceitual ou relacional retorna `context_intelligence`, preserva os papéis de núcleo e convergência no contexto disponível, resolve somente fontes primárias, mantém na base final apenas evidências citadas analiticamente e descarta candidatas não citadas sem invalidar a resposta.
 
 Se o verificador tiver qualquer falha, a publicação deve permanecer em homologação até a correção. Não é necessário repetir toda a matriz paga de IA se código, banco e configuração forem exatamente os homologados; basta o smoke online final e uma consulta controlada por perfil.

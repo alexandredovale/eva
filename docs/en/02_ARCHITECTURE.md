@@ -59,6 +59,6 @@ The factory resolves implementations from environment configuration. Changing pr
 - CIE does not judge documents or create AI scores, subjective weights, or a learned reranking stage.
 - Asymmetry does not imply superiority or inferred causality.
 - Relationship taxonomies, cognitive confidence, intensity, quality, priority, and importance are outside the model.
-- Interactions are transient and never become ranking signals.
+- Interaction objects—pairs, roles, descriptions, and excerpts—are transient and never become ranking signals; only sanitized per-query counts may remain in operational audit metadata.
 - The web interface never accesses the database directly.
 - Only `public/` is exposed by the web server.

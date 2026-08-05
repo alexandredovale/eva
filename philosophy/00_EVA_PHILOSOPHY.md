@@ -1,6 +1,6 @@
 # Filosofia do EVA — Evidence Algorithm
 
-Versão: 3.2
+Versão: 3.3
 Estado conceitual: arquitetura vigente
 
 ## 1. Proposição central
@@ -36,22 +36,22 @@ Toda consulta é primeiro compreendida quanto à sua forma operacional. Ela pode
 
 O EVA não reduz toda pergunta a uma única estratégia. Consultas diretas, estruturais e amplas podem ser resolvidas pela hierarquia documental. Consultas conceituais e relacionais podem usar uma representação vetorial transitória do input atual para localizar evidências primárias e derivadas semanticamente próximas.
 
-Similaridade é um mecanismo de ordenação, não um juízo de verdade, importância ou força cognitiva. Nas rotas vetoriais, o Context Intelligence Engine observa a distribuição do Top-k por média, desvio padrão e coeficiente de variação. Essa camada não escolhe por preferência: evidencia o núcleo estatístico e a faixa de convergência. O núcleo lidera a resposta; a convergência participa obrigatoriamente como contexto complementar. Quando não há núcleo, a convergência assume o papel principal. Valores e análise são descartados após a consulta e nunca são convertidos em memória, peso ou relação permanente.
+Similaridade é um mecanismo de ordenação, não um juízo de verdade, importância ou força cognitiva. Nas rotas vetoriais, o Context Intelligence Engine observa a distribuição do Top-k por média, desvio padrão e coeficiente de variação. Essa camada não escolhe por preferência: identifica o núcleo estatístico e a faixa de convergência. O núcleo recebe precedência e a convergência compõe o contexto complementar disponível; quando não há núcleo, a convergência assume o papel principal. Na base final permanecem somente as fontes que o modelo incorporou à resposta com citação visível. Valores e análise estatística são descartados após a consulta e nunca são convertidos em memória, peso ou relação permanente.
 
 ## 5. Interações cognitivas transitórias
 
-No EVA, relações cognitivas não são entidades persistentes. Elas existem somente durante a compreensão de uma interação concreta, no contexto formado pelo input atual e entre as evidências efetivamente recuperadas.
+No EVA, relações cognitivas não são entidades persistentes. Elas existem somente durante a compreensão de uma interação concreta, no contexto formado pelo input atual e entre evidências efetivamente citadas na resposta.
 
 Há duas formas fundamentais de interação:
 
 - **simetry**: interação recíproca entre dois participantes, sem origem ou destino privilegiados;
 - **assimetry**: interação direcional, com origem e destino explicitamente identificados.
 
-Esses apontamentos descrevem a forma da interação sem atribuir pesos, intensidades, valores morais ou rótulos julgamentais. O EVA não presume que uma evidência “vence”, “vale mais” ou deve ser favorecida. A força cognitiva observável decorre da quantidade e da clareza das interações recuperáveis em um contexto, não de pesos inferidos pelo sistema.
+Esses apontamentos descrevem a forma da interação sem atribuir pesos, intensidades, valores morais ou rótulos julgamentais. O EVA não presume que uma evidência “vence”, “vale mais” ou deve ser favorecida. Uma interação somente é admitida quando seus dois participantes citados, papéis e fragmentos literais passam pela validação local; sua quantidade não constitui força, importância ou ranking.
 
 Os nomes `simetry` e `assimetry` pertencem ao vocabulário interno do EVA e não precisam existir na fonte. Eles são operadores essenciais da compreensão cognitiva relacional: orientam como a IA compreende as interações entre evidências, sem serem confundidos com conceitos documentais cuja presença literal deva ser procurada.
 
-O conceito historicamente chamado de **Cnode** permanece apenas como uma maneira de compreender essa interação cognitiva em tempo de consulta. Ele não designa tabela, objeto persistente, identidade global, cache, embedding próprio ou grafo de memória. Encerrada a consulta, a interação é descartada.
+O conceito historicamente chamado de **Cnode** permanece apenas como uma maneira de compreender essa interação cognitiva em tempo de consulta. No código, a forma concreta é `RetrievedInteraction`, gerada na mesma chamada que formula a resposta e separada em `simetry_interactions` e `assimetry_interactions` no resultado. Ela não designa tabela, objeto persistente, identidade global, cache, embedding próprio ou grafo de memória. Encerrada a consulta, seus pares, descrições e fragmentos são descartados; somente contagens sanitizadas podem permanecer na auditoria operacional.
 
 ## 6. Aplicação multidisciplinar e confiabilidade por restrição
 
@@ -78,7 +78,7 @@ O EVA não deve preencher lacunas com plausibilidade. Se não houver evidência 
 
 Suficiência documental pode ser parcial. Se uma pergunta combina X, Y e Z, mas apenas X e Y encontram fundamento, o EVA descreve a relação sustentada entre X e Y, cita suas fontes e identifica Z como aspecto sem evidência suficiente. A lacuna de uma parte restringe essa parte; não apaga aquilo que o documento permite responder sobre as demais.
 
-Recuperar um candidato não equivale a elegê-lo como fundamento. Essa fronteira, porém, pertence à aplicação, não ao modelo de resposta. O Retriever localiza; o CIE e as regras locais elegem; a resolução de linhagem retorna às fontes primárias. Quando o contexto final é formado, a IA não pode reeleger, rejeitar ou reduzir suas evidências. O núcleo constitui a referência principal e cada convergência deve participar da análise complementar segundo o conteúdo que efetivamente preserva.
+Recuperar um candidato não equivale a mantê-lo como fundamento final. O Retriever localiza; o CIE classifica a distribuição; a resolução de linhagem retorna às fontes primárias; e a aplicação compõe deterministicamente o contexto disponível dentro do limite. A IA não pode introduzir fontes ou identificadores externos, mas pode omitir candidatas que não contribuam para a prosa. O núcleo possui precedência, a convergência pode complementar a análise e somente as evidências efetivamente citadas permanecem na base final.
 
 Quando o input contradiz, desloca ou questiona o conteúdo recuperado, o sistema descreve a divergência por meio das evidências disponíveis. Ele não julga o usuário, não adere automaticamente à premissa da pergunta e não transforma o documento em autoridade universal. Sua função é apresentar o que a fonte permite sustentar e o que ela não permite concluir.
 
@@ -92,7 +92,7 @@ Essa disciplina constitui o princípio de **antievasão**:
 
 ## 8. Validação e rastreabilidade
 
-Uma resposta verificável exige mais do que uma citação decorativa. O EVA valida localmente se cada identificador citado pertence ao contexto recuperado, se todas as evidências eleitas foram aceitas na mesma ordem e se cada uma aparece no trecho analítico em que contribui. Cada interação declarada também deve envolver evidências citadas e trechos reconhecidos naquele contexto.
+Uma resposta verificável exige mais do que uma citação decorativa. O EVA valida localmente se cada identificador citado pertence ao contexto disponível e se cada evidência mantida aparece no trecho analítico em que contribui. Candidatas recuperadas mas não citadas são descartadas sem invalidar toda a resposta. Cada interação declarada também deve envolver evidências citadas e trechos reconhecidos naquele contexto.
 
 A presença formal em `used_evidence_ids` não comprova uso. A aplicação não acrescenta marcadores omitidos e rejeita inventários isolados de citações, porque uma lista de IDs não substitui a incorporação analítica. O sistema nunca cria um identificador ausente nem aceita referências desconhecidas.
 
@@ -109,13 +109,13 @@ O EVA persiste somente o que é necessário para reconstruir e auditar o conheci
 - embeddings das unidades semânticas persistentes;
 - estados de processamento e eventos de auditoria sanitizados.
 
-O EVA não persiste consultas brutas, contexto recuperado, similaridades, estatísticas ou regiões do CIE, respostas, interações cognitivas ou históricos conversacionais como memória documental. Consultar é um ato de leitura; não é uma autorização implícita para reescrever o conhecimento.
+O EVA não persiste consultas brutas, contexto recuperado, similaridades, estatísticas ou regiões do CIE, respostas, interações cognitivas ou históricos conversacionais como memória documental. Para observabilidade, `audit_events` pode manter metadados sanitizados, inclusive as contagens de `simetry` e `assimetry`; se houver módulo assinante, a caixa postal `module_events` pode registrar o envelope permitido de `interaction.completed`, e cada módulo governa seu estado privado. Esses registros operacionais não reescrevem documentos, evidências, derivações ou embeddings. Consultar é um ato de leitura em relação ao acervo; não é autorização implícita para reescrever o conhecimento.
 
 ## 10. Papel dos modelos
 
 Modelos são componentes substituíveis. Na construção da memória, podem produzir sínteses derivadas. Na consulta, podem gerar a representação vetorial transitória necessária à recuperação semântica e formular uma resposta com base nas evidências fornecidas.
 
-As decisões críticas permanecem sob controle da aplicação: quais registros podem ser persistidos, quais evidências entram no contexto, como derivações são resolvidas, quais papéis de núcleo e convergência são preservados, quais citações são válidas e quando a ausência de evidência deve encerrar o fluxo.
+As decisões críticas permanecem sob controle da aplicação: quais registros podem ser persistidos, quais evidências entram no contexto disponível, como derivações são resolvidas, quais papéis de núcleo e convergência são preservados, quais citações são válidas e quando a ausência de evidência deve encerrar o fluxo. O modelo determina somente o subconjunto utilizado por meio das citações visíveis, sem poder sair do contexto autorizado.
 
 Fornecedores, modelos, endpoints e credenciais são definidos por configuração externa e neutra. Esse compromisso white label impede que um componente conceitual do EVA dependa do nome de uma empresa ou de um modelo específico.
 
@@ -140,12 +140,14 @@ LOCALIZAÇÃO / RETRIEVER
    ↓
 CIE (EM ROTAS VETORIAIS)
    ↓
-VALIDAÇÃO
+PROVEDOR DE RESPOSTA
+   ↓
+VALIDAÇÃO LOCAL
    ↓
 RESPOSTA
 ```
 
-Cada etapa possui uma responsabilidade verificável. O documento fornece a origem; as evidências preservam conteúdo e linhagem; a recuperação localiza candidatos; o CIE estabiliza matematicamente o conjunto vetorial; a aplicação valida o que pode ser utilizado; e o modelo comunica a resposta dentro do contexto autorizado.
+Cada etapa possui uma responsabilidade verificável. O documento fornece a origem; as evidências preservam conteúdo e linhagem; a recuperação localiza candidatos; o CIE estabiliza matematicamente o conjunto vetorial; a aplicação compõe o contexto disponível; o modelo comunica a resposta e propõe interações dentro desse contexto; e a validação local mantém apenas citações e interações reconstruíveis.
 
 Essa divisão limita a autoridade dos modelos sem dispensar sua capacidade:
 

@@ -27,6 +27,7 @@ $dumpPath = $temporaryRoot . DIRECTORY_SEPARATOR . 'database.sql';
 $archivePath = $temporaryRoot . DIRECTORY_SEPARATOR . 'documents.zip';
 $restorePath = $temporaryRoot . DIRECTORY_SEPARATOR . 'restore';
 $createdDatabase = false;
+$syntheticDocumentPath = null;
 
 if (!mkdir($temporaryRoot, 0700, true) && !is_dir($temporaryRoot)) {
     throw new RuntimeException('Não foi possível criar a área temporária do teste.');
@@ -187,6 +188,22 @@ try {
 
     $storagePath = (string) $container['ingestion']['document_storage'];
     $sourceHashes = fileHashes($storagePath);
+
+    if ($sourceHashes === []) {
+        if (!is_dir($storagePath) && !mkdir($storagePath, 0700, true) && !is_dir($storagePath)) {
+            throw new RuntimeException('Não foi possível preparar o armazenamento vazio para o teste.');
+        }
+
+        $syntheticDocumentPath = $storagePath . DIRECTORY_SEPARATOR
+            . 'backup-smoke-' . bin2hex(random_bytes(6)) . '.md';
+
+        if (file_put_contents($syntheticDocumentPath, "# Backup smoke fixture\n\nPublic synthetic content.\n") === false) {
+            throw new RuntimeException('Não foi possível criar o documento sintético de backup.');
+        }
+
+        $sourceHashes = fileHashes($storagePath);
+    }
+
     $archive = new ZipArchive();
 
     if ($archive->open($archivePath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
@@ -227,6 +244,10 @@ try {
 } finally {
     if ($createdDatabase) {
         $adminDatabase->exec('DROP DATABASE IF EXISTS `' . $temporaryDatabase . '`');
+    }
+
+    if (is_string($syntheticDocumentPath) && is_file($syntheticDocumentPath)) {
+        unlink($syntheticDocumentPath);
     }
 
     removeInfrastructureTemporaryDirectory($temporaryRoot);

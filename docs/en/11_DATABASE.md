@@ -4,7 +4,9 @@
 
 The database persists documentary memory with integrity and traceability without duplicating transient relationships or storing judgments and weights.
 
-The initial empty schema is in [`database/schema.sql`](../../database/schema.sql). Existing installations evolve through the ordered migrations in [`database/migrations/`](../../database/migrations/).
+The consolidated empty schema is in [`database/schema.sql`](../../database/schema.sql) and creates all 14 current main-database tables, including `module_events`. Fresh installations import only that file. Existing installations evolve through every outstanding ordered migration in [`database/migrations/`](../../database/migrations/); migration `010` remains the upgrade path for pre-consolidation databases.
+
+For the complete foreign-key map, logical relationships, access paths, and deletion behavior, see [Database relationships](18_DATABASE_RELATIONSHIPS.md).
 
 ## Persistent entities
 
@@ -21,13 +23,13 @@ The initial empty schema is in [`database/schema.sql`](../../database/schema.sql
 - **`project_documents`:** project-to-work membership.
 - **`user_projects`:** project-level access grants.
 - **`user_documents`:** individual-work access grants.
-- **`module_events`:** neutral append-only mailbox for events allowed by the module contract.
+- **`module_events`:** neutral append-oriented mailbox for events allowed by the module contract, with explicit administrative retention.
 
 There are no active `cnodes`, `cnode_evidences`, `cnode_embeddings`, or `interaction_analyses` tables. Historical migrations may mention removed architecture; the current schema and later migrations define the effective model.
 
 ## Module persistence
 
-`module_events` is the only additional main-database table required by the Module Runtime. It contains no module-specific business rule, analytical state, or schema. A sanitized event is stored in the same transaction that completes the interaction, then delivered immediately to subscribed active modules.
+`module_events` is the only additional main-database table required by the Module Runtime. It is part of the consolidated schema and contains no module-specific business rule, analytical state, or schema. `database/migrations/20260803_010_module_events.sql` is retained for legacy upgrades. After answer validation and audit recording, the sanitized event is appended idempotently to the mailbox before the HTTP response; the Runtime then attempts immediate delivery to active subscribed modules. This append is not part of a documentary-mutation transaction because the query is read-only with respect to the corpus. If an incomplete deployment lacks the table or dispatch fails, `ProductApi` records a safe warning and preserves the already validated documentary answer.
 
 Each module owns `modules/.runtime/data/<module-id>/module.sqlite`. These SQLite databases are private, independent from MySQL, migrated by their package, and excluded from Git. Modules require no foreign keys to, or alterations of, pre-existing Core tables.
 
@@ -47,7 +49,9 @@ Query similarities, mean, population standard deviation, coefficient of variatio
 
 ## Cognitive interactions
 
-`simetry` and `assimetry` are not database records. They are assembled during a query and validated against primary evidence. The database therefore stores no interaction pairs, roles, descriptions, excerpts, confidence values, or negative interaction results.
+`simetry` and `assimetry` are not documentary-memory records. They are produced in the same call that formulates the answer whenever the available context contains at least two evidence records and the interaction limit is positive, regardless of the input's initial type. They are then validated against cited primary evidence. The database stores no interaction pairs, roles, descriptions, excerpts, confidence values, or negative interaction results.
+
+For operational observability, the sanitized `document_queried` event records only the completed query's `simetry_count` and `assimetry_count` values in `audit_events`. These counts cannot reconstruct an interaction and are not cognitive memory. When an active module subscribes, the Runtime may also persist the allowed `interaction.completed` envelope in the `module_events` mailbox; that event contains the input, answer, public evidence references, and limitations, but does not persist the Core's `simetry`/`assimetry` objects.
 
 ## No cognitive weights
 
@@ -61,7 +65,7 @@ The schema does not store cognitive confidence, relevance scores, intensity, pri
 - Foreign keys cascade dependent records where the schema defines that lifecycle.
 - Deleting a work also requires explicit cleanup of its private source file; the product deletion service performs both operations and reports storage cleanup failures.
 - Tree and evidence mutations use transactions.
-- Query interactions never change the persistent core.
+- Query interactions never change the persistent documentary core; only sanitized audit counts and permitted module events may record the operational occurrence.
 - A project response profile governs generation only when that project is explicitly selected and never replaces the system's documentary rules.
 - Module events are sanitized, reject sensitive fields, and never authorize writes back to documentary memory.
 

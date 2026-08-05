@@ -22,7 +22,8 @@ final readonly class DocumentQueryService
         string $input,
         int $maxEvidence = 8,
         int $maxInteractions = 20,
-        array $responseProfiles = []
+        array $responseProfiles = [],
+        array $supplementaryInstructions = []
     ): DocumentQueryResult
     {
         $context = $this->retriever->retrieve(
@@ -32,7 +33,7 @@ final readonly class DocumentQueryService
             $maxInteractions
         );
 
-        if ($responseProfiles !== []) {
+        if ($responseProfiles !== [] || $supplementaryInstructions !== []) {
             $context = new QueryContext(
                 $context->understanding,
                 $context->evidences,
@@ -41,7 +42,8 @@ final readonly class DocumentQueryService
                 $context->limitations,
                 $responseProfiles,
                 $context->contextIntelligenceAnalyses,
-                $context->evidenceSelection
+                $context->evidenceSelection,
+                $supplementaryInstructions
             );
         }
 
@@ -51,13 +53,15 @@ final readonly class DocumentQueryService
     /**
      * @param list<int> $documentIds
      * @param list<array{project_id: int, project_name: string, response_profile: string, documents: list<string>}> $responseProfiles
+     * @param list<string> $supplementaryInstructions
      */
     public function queryDocuments(
         array $documentIds,
         string $input,
         int $maxEvidence = 8,
         int $maxInteractions = 20,
-        array $responseProfiles = []
+        array $responseProfiles = [],
+        array $supplementaryInstructions = []
     ): DocumentQueryResult {
         $documentIds = array_values(array_unique(array_filter(
             array_map('intval', $documentIds),
@@ -69,7 +73,14 @@ final readonly class DocumentQueryService
         }
 
         if (count($documentIds) === 1) {
-            return $this->query($documentIds[0], $input, $maxEvidence, $maxInteractions, $responseProfiles);
+            return $this->query(
+                $documentIds[0],
+                $input,
+                $maxEvidence,
+                $maxInteractions,
+                $responseProfiles,
+                $supplementaryInstructions
+            );
         }
 
         $contexts = array_map(
@@ -145,7 +156,8 @@ final readonly class DocumentQueryService
             array_values(array_unique($limitations)),
             $responseProfiles,
             $contextIntelligenceAnalyses,
-            $evidenceSelection
+            $evidenceSelection,
+            $supplementaryInstructions
         );
 
         return $this->answerFromContext($input, $context);

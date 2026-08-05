@@ -32,6 +32,7 @@ use Eva\Infrastructure\Logging\FileLogger;
 use Eva\Infrastructure\Logging\SafeFailureDiagnostics;
 use Eva\Infrastructure\Storage\DocumentStorage;
 use Eva\ModuleRuntime\CoreEventSnapshotBuilder;
+use Eva\ModuleRuntime\ModuleAccessDeniedException;
 use Eva\ModuleRuntime\ModuleException;
 use Eva\ModuleRuntime\RuntimeFactory;
 use PDO;
@@ -155,6 +156,8 @@ final readonly class ProductApi
                 'capability' => 'query',
             ]));
             return new HttpResponse(503, ['error' => 'O provedor cognitivo está indisponível.']);
+        } catch (ModuleAccessDeniedException $exception) {
+            return new HttpResponse(403, ['error' => $exception->getMessage()]);
         } catch (ModuleException $exception) {
             return new HttpResponse(422, ['error' => $exception->getMessage()]);
         } catch (Throwable $exception) {
@@ -246,7 +249,7 @@ final readonly class ProductApi
 
         if ($path === '/api/modules') {
             return $method === 'GET'
-                ? new HttpResponse(200, ['modules' => $this->moduleRuntime()->manager()->dashboards()])
+                ? new HttpResponse(200, ['modules' => $this->moduleRuntime()->manager()->dashboards($actor)])
                 : $this->methodNotAllowed('GET');
         }
 
@@ -258,11 +261,43 @@ final readonly class ProductApi
             parse_str(is_string($server['QUERY_STRING'] ?? null) ? $server['QUERY_STRING'] : '', $filters);
             $dashboard = $this->moduleRuntime()->manager()->dashboard(
                 $matches[1],
-                ['user_id' => $actor->userId, 'role' => $actor->role],
+                $actor,
                 is_array($filters) ? $filters : []
             );
 
             return new HttpResponse(200, ['dashboard' => $dashboard]);
+        }
+
+        if (preg_match('~^/api/modules/([a-z0-9.-]+)/actions/([a-z][a-z0-9_.-]{2,79})$~', $path, $matches) === 1) {
+            if ($method !== 'POST') {
+                return $this->methodNotAllowed('POST');
+            }
+
+            $payload = (new JsonRequestParser())->parse($rawBody);
+
+            if (array_diff(array_keys($payload), ['request_id', 'input']) !== []
+                || !is_string($payload['request_id'] ?? null)
+                || !is_array($payload['input'] ?? null)) {
+                throw new ProductHttpException('O envelope da ação modular é inválido.', 422);
+            }
+
+            $result = $this->moduleRuntime()->manager()->action(
+                $matches[1],
+                $actor,
+                $matches[2],
+                $payload['input'],
+                $payload['request_id']
+            );
+            $audit->record(
+                'module_action_executed',
+                'module',
+                $matches[1],
+                $actor->fingerprint,
+                $networkAddress,
+                ['action_id' => $matches[2]]
+            );
+
+            return new HttpResponse(200, ['action' => $result]);
         }
 
         if ($path === '/api/query') {

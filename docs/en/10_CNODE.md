@@ -76,6 +76,6 @@ A future calibration should require a separate demonstration of both directions 
 
 ## Quantity
 
-The number of interactions in a response describes only that query context. EVA has no persistent global Cnode count because Cnode is not an entity, and no count may be converted into rank or importance.
+The number of interactions in a response describes only that query context. EVA has no Cnode table, identity, or global cognitive counter. `ProductApi` does, however, record sanitized per-query `simetry_count` and `assimetry_count` values in `audit_events`; these operational metrics can be aggregated without reconstructing pairs, participants, descriptions, or excerpts. They do not turn a Cnode into an entity and must not be used as rank, weight, or importance.
 
 See also [Query and conversational continuity](05_QUERY_AND_CHAT.md) and [Mandatory rules](12_MANDATORY_RULES.md).

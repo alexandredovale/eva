@@ -1,0 +1,16 @@
+{
+  "id": "com.example.interactive",
+  "name": "Interactive Fixture",
+  "vendor": "EVA Tests",
+  "version": "1.0.0",
+  "eva_contract": "1",
+  "entrypoint": "bootstrap.php",
+  "subscribed_events": [],
+  "capabilities": [],
+  "dashboard": {
+    "enabled": true,
+    "entrypoint": "dashboard.php",
+    "order": 90
+  },
+  "storage": {"driver": "sqlite", "schema_version": 1}
+}

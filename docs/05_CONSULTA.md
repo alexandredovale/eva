@@ -38,7 +38,7 @@ O `SYSTEM_PROMPT` do `QueryAnswerProvider` orienta a IA a decidir se o input atu
 
 Perguntas e respostas anteriores nunca são evidências documentais, mesmo quando contêm citações. Toda afirmação da nova resposta continua limitada às `primary_evidences` recuperadas para a consulta atual e submetida às mesmas validações locais de IDs, citações e fragmentos.
 
-O botão **Reiniciar chat** limpa o transcript, as rodadas disponíveis para contexto e o input atual, mas preserva a seleção de projetos e obras. O estado conversacional reside apenas na memória JavaScript da página: não é persistido no banco, em auditoria ou em `sessionStorage`, e é reiniciado em logout, novo login ou recarregamento da aplicação.
+O botão **Reiniciar chat** limpa o transcript, as rodadas disponíveis para contexto e o input atual, mas preserva a seleção de projetos e obras. O estado visual da conversa reside apenas na memória JavaScript da página, não é restaurado do banco, da auditoria ou de `sessionStorage`, e é reiniciado em logout, novo login ou recarregamento da aplicação. Isso não impede os registros operacionais sanitizados nem o evento modular opcional descritos na seção de saída; esses registros não reconstituem o chat na interface e não transformam rodadas anteriores em evidência.
 
 ## Cobertura parcial do input
 
@@ -215,4 +215,6 @@ Os identificadores citados são validados contra o contexto, mas sua presença f
 
 ## Saída
 
-O resultado separa `answer`, `evidences_used`, `evidence_selection`, `simetry_interactions`, `assimetry_interactions`, `routing_points`, `context_intelligence` e `limitations`. Cada evidência utilizada também expõe `selection_region`; `evidence_selection` lista somente os IDs citados de núcleo e convergência. `context_intelligence` fica vazio em rotas não semânticas; quando presente, expõe a análise transitória por documento com `μ`, `σ`, `CV`, limites e regiões da distribuição. Nem essa análise nem as interações alteram a memória persistente.
+O resultado separa `answer`, `evidences_used`, `evidence_selection`, `simetry_interactions`, `assimetry_interactions`, `routing_points`, `context_intelligence` e `limitations`. Cada evidência utilizada também expõe `selection_region`; `evidence_selection` lista somente os IDs citados de núcleo e convergência. `context_intelligence` fica vazio em rotas não semânticas; quando presente, expõe a análise transitória por documento com `μ`, `σ`, `CV`, limites e regiões da distribuição. A API entrega todos esses campos a qualquer usuário autorizado; a interface mostra resposta e evidências a todos, mas restringe CIE, `simetry`, `assimetry` e limitações técnicas ao superadmin.
+
+Nem a análise do CIE nem os objetos de interação alteram a memória documental. Após uma consulta concluída, `audit_events` recebe metadados sanitizados, inclusive as contagens de cada tipo de interação. Se houver módulo ativo assinante, o Runtime emite `interaction.completed` antes da resposta HTTP e pode persistir seu envelope permitido em `module_events`; falhas modulares são isoladas e não derrubam a resposta documental.

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://eva.local/contracts/module-action-v1.schema.json",
+  "title": "EVA Module Action v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract", "dashboard"],
+  "properties": {
+    "contract": {"const": "eva.module.action/1"},
+    "dashboard": {"$ref": "module-dashboard.schema.json"},
+    "notice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "message"],
+      "properties": {
+        "type": {"type": "string", "enum": ["success", "info", "warning"]},
+        "message": {"type": "string", "minLength": 1, "maxLength": 500}
+      }
+    }
+  }
+}

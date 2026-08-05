@@ -622,6 +622,8 @@ legend {
 .module-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .module-navigation { display: contents; }
 .module-dashboard-host { min-width: 0; }
+.module-dashboard-host[aria-busy="true"] { cursor: progress; }
+.module-dashboard-host[aria-busy="true"] > :not(style) { opacity: .68; }
 
 .text-button {
     width: 100%;

@@ -79,7 +79,7 @@ try {
     }
 
     $manifests = $registry->manifests();
-    assertModuleRuntime(count($manifests) === 4, 'O Runtime não descobriu os quatro fixtures.');
+    assertModuleRuntime(count($manifests) === 5, 'O Runtime não descobriu os cinco fixtures.');
     assertModuleRuntime($registry->activeManifests() === [], 'Módulos devem iniciar inativos.');
 
     $invalidEventRejected = false;

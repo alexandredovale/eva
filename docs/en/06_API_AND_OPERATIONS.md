@@ -51,7 +51,7 @@ The administrative token must never appear in documentation, source, URLs, or lo
 
 The Core exposes only a generic module contract. It can discover zero, one, or many independent packages without knowing their business purpose, interface labels, HTML, CSS, or private schema. Active module interface entries are returned dynamically, so disabling a module also removes its menu entry.
 
-After a completed interaction is persisted transactionally, subscribed active modules process the neutral event immediately. Each module owns its SQLite database and cursor under `modules/.runtime/data/<module-id>/`; one module failure is isolated from the documentary answer and from other subscribers. See [Connector modules](17_MODULE_CONNECTORS.md) for installation, lifecycle, storage, and extension rules.
+After answer validation, the Core appends the neutral event idempotently to `module_events`, which is part of the consolidated schema, and attempts immediate processing before returning the HTTP response. Legacy databases use `20260803_010_module_events.sql` as their upgrade path. Each module owns its SQLite database and cursor under `modules/.runtime/data/<module-id>/`; its processing, idempotent event record, and cursor advance commit together in that private transaction. A mailbox missing from an incomplete deployment or one module failure is isolated from the documentary answer and from other subscribers. See [Connector modules](17_MODULE_CONNECTORS.md) for installation, lifecycle, storage, and extension rules.
 
 ## Access scopes
 

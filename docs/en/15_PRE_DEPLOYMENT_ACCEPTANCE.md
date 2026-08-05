@@ -97,7 +97,7 @@ For the August 2, 2026 CIE update, `tests/ContextIntelligenceEngineTest.php` pas
 ## Mandatory post-upload procedure
 
 1. Publish the project with all `.htaccess` files intact and without exposing `.env`, credentials, logs, dumps, or `.git`.
-2. Configure the production `.env`, writable permissions for `storage/documents` and `storage/logs`, and the queue worker or cron schedule.
+2. Configure the production `.env` and writable permissions for `storage/documents` and `storage/logs`; import consolidated `database/schema.sql` for a new database; for an existing database, apply every outstanding migration—including `20260803_010_module_events.sql` when upgrading a pre-consolidation installation—and configure the queue worker or cron schedule.
 3. Configure recurring database and document backups with retention and an off-server copy.
 4. From a machine that can reach the public domain, run:
 
@@ -106,7 +106,7 @@ For the August 2, 2026 CIE update, `tests/ContextIntelligenceEngineTest.php` pas
    ```
 
 5. Require zero verifier failures, then perform a final superadmin login and normal-user login on the published domain.
-6. Confirm that a conceptual or relational query returns `context_intelligence`, preserves leading core and complementary convergence, resolves only primary sources, and requires complete analytical incorporation of final context.
+6. Confirm that a conceptual or relational query returns `context_intelligence`, preserves core and convergence roles in the available context, resolves only primary sources, retains only analytically cited evidence in the final basis, and discards uncited candidates without invalidating the answer.
 
 If any verifier check fails, keep the release in acceptance until corrected. The entire paid AI matrix need not be repeated only when code, database, and configuration are exactly those accepted; otherwise revalidate the affected behavior. In all cases, complete the final online smoke test and one controlled profile-aware query.
 

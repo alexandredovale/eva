@@ -27,8 +27,8 @@ Core properties:
 - Embeddings represent complete, previously organized semantic units rather than arbitrary cuts.
 - Direct, structural, and broad queries can avoid a transient query embedding.
 - Conceptual and relational queries use semantic retrieval and resolve summaries back to primary evidence.
-- CIE deterministically elects a leading vector core plus mandatory complementary convergence context from mean and population standard deviation before lineage resolution.
-- The answer model must accept every elected primary source and cite it where its analytical contribution is explained; citation-only inventories are rejected.
+- CIE deterministically identifies a leading vector core plus complementary available convergence context from mean and population standard deviation before lineage resolution.
+- The answer model may use only the relevant subset of the available primary context. Every retained source must be cited where its analytical contribution is explained; uncited candidates are discarded, and citation-only inventories are rejected.
 - Locally rejected answer generations are retried silently up to three total attempts; only the third consecutive validation failure reaches the user as a generic error.
 - Answer generation is skipped when no primary evidence is recovered.
 - `simetry` and `assimetry` interactions exist only for the current query and require two cited primary sources with literal excerpts.
@@ -68,12 +68,14 @@ The project has no Composer or Node.js runtime dependency.
    Copy-Item .env.example .env
    ```
 
-3. Create an empty database and import the public schema:
+3. Create an empty database and import the consolidated public schema:
 
    ```bash
    mysql -u root -p -e "CREATE DATABASE eva CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
    mysql -u root -p eva < database/schema.sql
    ```
+
+   Existing installations must apply every outstanding migration in filename order. Migration `010` remains available for databases created before `module_events` became part of the consolidated schema.
 
 4. Edit `.env` with local database credentials. Generate a unique superadmin token of at least 24 characters, for example:
 
@@ -228,6 +230,7 @@ The public schema and all versioned migrations remain included so a new installa
 - [Scientific scope and energy sustainability](docs/en/08_SCIENTIFIC_AND_ENERGY.md)
 - [Cnode and cognitive interactions](docs/en/10_CNODE.md)
 - [Database](docs/en/11_DATABASE.md)
+- [Database relationships](docs/en/18_DATABASE_RELATIONSHIPS.md)
 - [Mandatory rules](docs/en/12_MANDATORY_RULES.md)
 - [Roadmap](docs/en/13_ROADMAP.md)
 - [Go-live readiness validation](docs/en/14_GO_LIVE_VALIDATION.md)
