@@ -7,9 +7,36 @@ and the project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-08-05
+
+### Added
+
+- Generic module action, access-control, dashboard-refresh, and actor-bound scoped-query contracts without introducing module-specific knowledge into the Core.
+- Complete Portuguese and English database-relationship documentation covering all 14 tables, 15 foreign keys, logical links, access paths, cascades, and real data lifecycles.
+- A complete current API-flow diagram covering ingestion, cognitive build, retrieval, CIE, answer generation, transient CNodes, validation, audit, module events, and delivery.
+- Public regression coverage for interactive module connectors and clean-clone backup/restore behavior.
+
 ### Changed
 
+- The recovered primary set is now an available context from which the answer may retain only the analytically used and visibly cited subset; uncited candidates are discarded from the final evidence basis.
+- CNode `simetry` and `assimetry` interactions are documented and validated as transient products of the same generation that formulates the answer, never as persistent graph entities.
+- Answer validation uses bounded corrective attempts with safe failure guidance while preserving the elected documentary context and rejecting invented citations or citation-only inventories.
 - Consolidated the neutral `module_events` mailbox into `database/schema.sql` so fresh installations require one schema import; migration `010` remains the idempotent upgrade path for existing databases.
+- Consolidated the GitHub repository on one canonical `main` branch and aligned Portuguese, English, scientific, operational, and philosophical documentation with the implemented flow.
+
+### Removed
+
+- Legacy pre-CIE `philosophy/EVA_API_FLOW.png`; `EVA_API_FLOW_CIE.svg` is the single canonical flow diagram.
+
+### Fixed
+
+- Recovered evidence that does not contribute to the answer no longer forces artificial citation or invalidates an otherwise grounded response.
+- The infrastructure backup/restore test now creates and removes a public synthetic fixture when a clean clone has no operational documents.
+
+### Security
+
+- Interactive module queries remain bound to the authenticated actor and are re-authorized through Core scope resolution.
+- The release snapshot excludes credentials, runtime state, operational databases, uploaded documents, logs, private corpora, and module SQLite data.
 
 ## [1.2.0] - 2026-08-04
 

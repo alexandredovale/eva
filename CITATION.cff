@@ -5,15 +5,16 @@ type: software
 authors:
   - given-names: "Alexandre"
     family-names: "do Vale Brostel"
-version: 1.2.0
-doi: "10.5281/zenodo.21500612"
-date-released: 2026-08-04
+version: 2.0.0
+doi: "10.5281/zenodo.21500611"
+date-released: 2026-08-05
 license: Apache-2.0
 abstract: >-
   EVA is a provider-neutral architecture for verifiable documentary memory.
   It preserves document hierarchy, distinguishes literal primary evidence
   from traceable derived evidence, and evaluates evidence interactions only
-  within the query that requires them.
+  within the query that requires them. Optional connector modules can observe
+  validated interactions without altering the documentary Core.
 keywords:
   - retrieval-augmented generation
   - document intelligence

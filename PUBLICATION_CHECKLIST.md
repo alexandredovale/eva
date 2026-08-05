@@ -2,16 +2,16 @@
 
 Use this checklist for every public release. Always start from a fresh clone of the canonical GitHub repository in an exclusive local analysis directory, inspect the remote state, and copy only an explicit source allowlist.
 
-## Canonical `main` publication
+## Release v2.0.0
 
-- [ ] Create a fresh clone from `alexandredovale/eva` under `.00-analise/` and verify `origin/main` before copying files.
-- [ ] Copy only source, public documentation, empty schema, versioned migrations, and tests.
-- [ ] Confirm that `.env`, operational databases, module SQLite files, Runtime state, uploaded documents, logs, dumps, backups, and private corpora are absent.
-- [ ] Review the complete diff and run the offline regression suite in the release clone.
-- [ ] Confirm that `database/` contains only `schema.sql`, versioned migrations, and tracked placeholders.
-- [ ] Confirm that `modules/.runtime/` contains only HTTP protections and empty tracked placeholders.
-- [ ] Review attribution, `CHANGELOG.md`, `CITATION.cff`, and the public version.
-- [ ] Commit and push `main`, verify that `origin/HEAD` resolves to it, and remove obsolete remote branches.
+- [x] Create a fresh clone from `alexandredovale/eva` under `.00-analise/` and verify `origin/main` before copying files.
+- [x] Copy only source, public documentation, empty schema, versioned migrations, and tests.
+- [x] Confirm that `.env`, operational databases, module SQLite files, Runtime state, uploaded documents, logs, dumps, backups, and private corpora are absent.
+- [x] Review the complete diff and run the offline regression suite in the release clone.
+- [x] Confirm that `database/` contains only `schema.sql`, versioned migrations, and tracked placeholders.
+- [x] Confirm that `modules/.runtime/` contains only HTTP protections and empty tracked placeholders.
+- [x] Review attribution, `CHANGELOG.md`, `CITATION.cff`, and the public version.
+- [x] Commit and push canonical `main`, verify `origin/HEAD`, remove obsolete remote branches, create annotated tag `v2.0.0`, and publish the GitHub Release.
 
 Release tags preserve published history and are not competing development branches. Create or remove a tag only as an explicit release-management decision.
 
