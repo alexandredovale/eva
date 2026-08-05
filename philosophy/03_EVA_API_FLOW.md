@@ -2,7 +2,7 @@
 
 Este documento apresenta, em diagramas de texto, o fluxo vigente do EVA desde o anexo de um documento até a resposta ao input do usuário.
 
-O diagrama visual atualizado está em [`EVA_API_FLOW_CIE.svg`](EVA_API_FLOW_CIE.svg). O arquivo `EVA_API_FLOW.png` permanece somente como registro visual anterior ao CIE.
+O diagrama visual canônico está em [`EVA_API_FLOW_CIE.svg`](EVA_API_FLOW_CIE.svg).
 
 ## 1. Anexo e construção da memória documental
 

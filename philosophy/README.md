@@ -7,7 +7,6 @@ This directory contains the conceptual and empirical record of the Evidence Algo
 - [Scientific overview](01_EVA_SCIENTIFIC_OVERVIEW_EN.md)
 - [Architecture and API flow](03_EVA_API_FLOW.md) — original detailed document in Portuguese
 - [Current API flow diagram with CIE](EVA_API_FLOW_CIE.svg)
-- [Legacy pre-CIE API flow diagram](EVA_API_FLOW.png) — retained as a historical baseline
 - [Scientific and energy scope](../docs/en/08_SCIENTIFIC_AND_ENERGY.md)
 - [Context Intelligence Engine](04_CONTEXT_INTELLIGENCE_ENGINE.md) — mathematical layer and scientific boundary
 - [Deterministic context and visible-citation contract](05_DETERMINISTIC_EVIDENCE_CONTRACT.md) — available-context composition, cited final basis, and transient interaction validation
