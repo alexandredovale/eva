@@ -17,7 +17,7 @@ O fluxo de consulta não aciona indiscriminadamente todas as capacidades externa
 - quando nenhuma evidência primária é recuperada, o EVA encerra a consulta com uma limitação explícita e não chama o provedor de resposta;
 - consultas diretas, estruturais e amplas percorrem a estrutura documental sem gerar embedding transitório do input;
 - somente consultas conceituais e relacionais utilizam embedding transitório para recuperação semântica;
-- o CIE reduz localmente o Top-k vetorial ao núcleo principal e à faixa de convergência complementar antes que o contexto seja enviado ao provedor de resposta;
+- κq reduz localmente a população hierárquica completa antes que o CIE forme núcleo e convergência;
 - a resposta documental e as interações `simetry`/`assimetry` são produzidas na mesma chamada generativa;
 - evidências recuperadas mas não citadas são descartadas da base final sem exigir uma nova geração;
 - uma saída truncada admite no máximo uma regeneração integral e compacta, sem ciclos ilimitados.
@@ -26,7 +26,7 @@ Esse desenho reduz o número de operações externas em relação a fluxos que s
 
 ### Contexto e saída delimitados
 
-`QUERY_CANDIDATE_LIMIT` limita a população vetorial analisada localmente pelo CIE. `QUERY_MAX_EVIDENCE` limita quantas evidências primárias completas chegam ao provedor depois da seleção estatística e da resolução de linhagem. `AI_QUERY_MAX_OUTPUT_TOKENS` limita cada tentativa de resposta, e o histórico conversacional enviado contém no máximo as três rodadas anteriores que caibam integralmente no teto de 20.000 bytes do input.
+κq e o CIE hierárquico estabilizam cada obra; κe e CIE primário elegem núcleos locais, e o CIE global consolida o contexto final sem limite semântico configurado. `QUERY_NON_SEMANTIC_MAX_EVIDENCE` atua apenas nas rotas sem CIE. `AI_QUERY_MAX_OUTPUT_TOKENS` limita cada tentativa de resposta, e o histórico contém no máximo as três rodadas anteriores que caibam integralmente no teto de 20.000 bytes.
 
 Esses limites não garantem, isoladamente, menor consumo energético, mas impedem crescimento irrestrito do contexto e da saída. Estudos experimentais de inferência indicam correlação entre energia consumida, tempo de resposta e quantidade de tokens gerados, tornando a contenção de tokens um mecanismo operacional relevante.
 
@@ -109,7 +109,7 @@ As métricas mínimas são:
 - joules por consulta e kWh por mil consultas;
 - energia de construção amortizada;
 - chamadas externas e embeddings por consulta;
-- tamanho do Top-k, proporção de descarte, composição de núcleo/convergência e tokens de contexto antes e depois do CIE;
+- tamanhos de κq e κe, descartes nos estágios hierárquico/primário/global, união dos núcleos locais, núcleo global final e tokens em cada estágio;
 - tokens de entrada e saída;
 - tempo de GPU e latências p50, p95 e p99;
 - taxa de reutilização de sínteses e embeddings;

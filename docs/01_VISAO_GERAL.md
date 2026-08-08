@@ -28,7 +28,8 @@ Cnode é uma derivação conceitual interna do EVA: a compreensão contextual de
 
 ```text
 Construção: fonte → árvore → evidência primária → síntese derivada → embedding
-Consulta semântica: pergunta → Retriever → Top-k → CIE → fontes primárias
+Consulta semântica: pergunta → hierarquia completa → κq → CIE hierárquico
+                    → linhagem → κe/CIE primário → CIE global → fontes primárias
 Interação: fontes recuperadas → simetry/assimetry transitória → validação literal
 Resposta: evidências citadas → resposta e limitações
 ```
@@ -37,7 +38,7 @@ Resposta: evidências citadas → resposta e limitações
 
 A IA apenas compreende e descreve relações semânticas explícitas. Ela não julga conteúdos, não atribui pesos, não classifica importância e não transforma proximidade semântica em conclusão documental.
 
-O Context Intelligence Engine (CIE) reforça essa neutralidade entre o Retriever e as camadas cognitivas. Média, desvio padrão e coeficiente de variação identificam o núcleo principal e a faixa de convergência complementar da distribuição vetorial; quando não há núcleo, a convergência assume o papel principal. A recuperação é local, determinística, transitória e independente de julgamento por modelo. Depois da resolução até fontes primárias, somente evidências efetivamente citadas são mantidas na resposta.
+O Context Intelligence Engine (CIE) reforça essa neutralidade entre o Retriever e as camadas cognitivas. Média, desvio padrão e coeficiente de variação identificam descarte, convergência e núcleo em três estágios: hierárquico, primário estratificado e global. κq e κe fazem as fronteiras query-local sem quantidades configuradas; o núcleo global, ou sua convergência quando o núcleo estiver vazio, determina o contexto semântico enviado ao modelo. Âncoras literais exatas permanecem protegidas. Somente evidências efetivamente citadas são mantidas na resposta.
 
 ## White label
 

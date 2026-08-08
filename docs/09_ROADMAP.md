@@ -52,13 +52,16 @@ As cinco fases e o primeiro upgrade arquitetural estão concluídos. Novas fases
 
 ## Upgrade arquitetural — Context Intelligence Engine
 
-- separação entre Top-k do Retriever e contexto final — concluído;
+- substituição do Top-k por κq query-local sobre a hierarquia completa — concluído;
 - média, desvio padrão populacional e coeficiente de variação — concluído;
 - regiões de descarte, convergência e núcleo — concluído;
 - fallback determinístico para convergência quando não houver núcleo — concluído;
-- resolução de linhagem somente após a seleção estatística — concluído;
+- resolução integral de linhagem somente após a seleção estatística, preservando a região herdada — concluído;
+- κe e CIE primário separados para fontes herdadas de núcleo e convergência — concluído;
+- união deduplicada dos núcleos primários locais e CIE global de consolidação — concluído;
+- remoção de `QUERY_MAX_EVIDENCE` das rotas semânticas e isolamento de `QUERY_NON_SEMANTIC_MAX_EVIDENCE` — concluído;
 - saída transitória auditável em `context_intelligence` — concluído;
-- núcleo como referência principal e convergência como contexto complementar disponível — concluído;
+- núcleo como população eleita em cada estágio, com fallback para convergência somente quando vazio — concluído;
 - contrato de `used_evidence_ids` derivado das citações visíveis, com descarte de candidatos omitidos — concluído;
 - validação fechada da incorporação analítica, sem preenchimento automático ou inventário de citações — concluído;
 - validação real de referência com 10/10 evidências incorporadas e sem truncamento — concluído;

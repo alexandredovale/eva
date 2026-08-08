@@ -9,6 +9,7 @@ use Eva\Application\Query\DocumentContextRetriever;
 use Eva\Application\Query\DocumentQueryService;
 use Eva\Application\Query\InputType;
 use Eva\Application\Query\InputTypeDetector;
+use Eva\Application\Query\QueryContext;
 use Eva\Http\Security\ActorContext;
 use Eva\Infrastructure\Ai\CognitiveProviderFactory;
 use PDO;
@@ -16,8 +17,6 @@ use PDO;
 final readonly class CoreQueryApi
 {
     private const MAX_INPUT_BYTES = 20_000;
-    private const MAX_INSTRUCTION_LENGTH = 6_000;
-
     /** @param list<string> $capabilities @param array<string, mixed> $aiConfiguration */
     public function __construct(
         private PDO $database,
@@ -41,7 +40,7 @@ final readonly class CoreQueryApi
             throw new ModuleException('O input da consulta modular Ã© invÃ¡lido.');
         }
 
-        if (mb_strlen($supplementaryInstruction, 'UTF-8') > self::MAX_INSTRUCTION_LENGTH) {
+        if (mb_strlen($supplementaryInstruction, 'UTF-8') > QueryContext::MAX_SUPPLEMENTARY_INSTRUCTION_LENGTH) {
             throw new ModuleException('A instruÃ§Ã£o complementar do mÃ³dulo excede o limite permitido.');
         }
 
@@ -56,14 +55,13 @@ final readonly class CoreQueryApi
         $retriever = new DocumentContextRetriever(
             $this->database,
             $needsEmbedding ? $factory->embeddings() : null,
-            $detector,
-            (int) ($this->aiConfiguration['query']['candidate_limit'] ?? 50)
+            $detector
         );
         $instructions = $supplementaryInstruction === '' ? [] : [$supplementaryInstruction];
         $result = (new DocumentQueryService($retriever, $factory->queryAnswers()))->queryDocuments(
             $documentIds,
             $input,
-            (int) ($this->aiConfiguration['query']['max_evidence'] ?? 8),
+            (int) ($this->aiConfiguration['query']['non_semantic_max_evidence'] ?? 8),
             (int) ($this->aiConfiguration['query']['max_interactions'] ?? 20),
             $responseProfiles,
             $instructions

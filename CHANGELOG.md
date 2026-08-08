@@ -5,7 +5,29 @@ All notable changes to this project will be documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project uses [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [3.0.0] - 2026-08-08
+
+### Added
+
+- Query-local κq diagnostics over the complete eligible hierarchical population, including normalized geometry, gaps, degenerate states, and the effective statistical population delivered to CIE.
+- Complete Portuguese and English operational philosophy for κq, κe, hierarchical/primary/global CIE, Cantelli's upper bound, protected literal anchors, and the deterministic evidence contract.
+- A complete `philosophy/en/` mirror containing English versions of every canonical Markdown file and the full API-flow SVG, including the complete scientific paper, benchmark record, and text diagrams rather than summaries.
+
+### Changed
+
+- Semantic retrieval now scores every latest `derived:node_summary`, globally orders the distribution, derives κq, and only then runs the unchanged CIE and lineage-resolution stages.
+- Semantic lineage now resolves complete primary populations by inherited region, applies κe and primary CIE locally, then applies a global consolidation CIE to the union of local primary nuclei.
+- The module scoped-query connector now reads the isolated `non_semantic_max_evidence` configuration used by the Core.
+
+### Removed
+
+- Arbitrary `QUERY_CANDIDATE_LIMIT` / Top-k configuration from the semantic retrieval core.
+- Arbitrary `QUERY_MAX_EVIDENCE` from semantic routes; `QUERY_NON_SEMANTIC_MAX_EVIDENCE` remains isolated to routes without CIE.
+- Dead `ApiTokenGuard`, superseded by the active database-aware `AuthGuard`.
+
+### Fixed
+
+- Operational, scientific, philosophical, API, validation, deployment, sustainability, and vision documents now describe the implemented κq → hierarchical CIE → complete lineage → κe/primary CIE → global CIE flow instead of the former Top-k/global-count flow.
 
 ## [2.0.0] - 2026-08-05
 

@@ -30,7 +30,16 @@ $assertions = [
     [$script, 'data-module-id', 'A navegação não utiliza o identificador dinâmico do manifesto.'],
     [$script, 'escapeHtml(module.name)', 'A navegação não respeita o nome canônico do módulo.'],
     [$script, '[data-module-content-filter]', 'O host não oferece filtragem declarativa.'],
+    [$script, '[data-module-id-filter]', 'O host não oferece filtragem declarativa específica por ID.'],
+    [$script, 'dataset.moduleEntryId', 'O host não compara o filtro de ID com o identificador isolado do card.'],
+    [$script, '[data-module-filter-source]', 'O host não permite que módulos delimitem o conteúdo pesquisável.'],
+    [$script, 'input[type="checkbox"], input[type="radio"]', 'O host não respeita a seleção de filtros modulares por rádio.'],
     [$script, '[data-module-accordion-toggle]', 'O host não oferece acordeão declarativo.'],
+    [$script, '[data-module-copy-target]', 'O host não oferece cópia declarativa de conteúdo modular.'],
+    [$script, '[data-module-download-target]', 'O host não oferece download declarativo de conteúdo modular.'],
+    [$script, '[data-module-mode-panel]', 'O host não alterna painéis declarativos de um formulário modular.'],
+    [$script, '[data-module-action-progress]', 'O host não exibe progresso declarativo durante ações modulares.'],
+    [$script, 'syncModuleCharacterCounters()', 'O host não atualiza contadores declarativos de caracteres.'],
     [$script, "dashboard?.contract !== 'eva.module.dashboard/1'", 'O frontend não valida o contrato visual modular.'],
     [$script, "style.setAttribute('nonce', cspStyleNonce)", 'O CSS modular não recebe autorização da CSP.'],
     [$html, 'name="csp-style-nonce"', 'A página não transporta o nonce de estilo.'],
@@ -40,10 +49,15 @@ $assertions = [
     [$manifestSchema, '"order": {"type": "integer"', 'O contrato perdeu a ordenação genérica das interfaces.'],
     [$actionSchema, '"const": "eva.module.action/1"', 'O contrato genérico de ações modulares está ausente.'],
     [$script, '[data-module-action-form]', 'O host não reconhece formulários declarativos de módulos.'],
+    [$script, '[data-module-confirm-action]', 'O host não reconhece confirmações declarativas de módulos.'],
     [$script, 'executeModuleAction(', 'O host não executa ações modulares genéricas.'],
+    [$script, 'const actionInput = serializeModuleActionInput(form, submitter);', 'O host não captura o formulário antes de bloquear os controles.'],
+    [$script, 'input: actionInput,', 'O payload modular não utiliza o formulário capturado antes do bloqueio.'],
     [$productApi, "/actions/([a-z][a-z0-9_.-]", 'A API não expõe o conector genérico de ações.'],
     [$moduleManager, 'instanceof ModuleAccessInterface', 'O Runtime não aplica autorização modular opcional.'],
     [$moduleManager, 'instanceof ModuleActionInterface', 'O Runtime não valida módulos interativos.'],
+    [$coreQueryApi, 'QueryContext::MAX_SUPPLEMENTARY_INSTRUCTION_LENGTH', 'O Runtime não compartilha o limite de instruções com o contexto de consulta.'],
+    [$coreQueryApi, "['query']['non_semantic_max_evidence']", 'O Runtime modular ainda lê a antiga configuração geral de evidências.'],
     [$presenter, 'class="card learning-entry" data-module-entry', 'O módulo não produz seus próprios cards.'],
     [$presenter, 'data-module-content-filter', 'O filtro não pertence à apresentação do módulo.'],
     [$presenter, "return \$parts[3] . '-' . \$parts[2]", 'A data institucional não é formatada pelo módulo.'],
@@ -82,12 +96,16 @@ if (str_contains($script, 'module.label') || str_contains($manifestSchema, '"lab
     throw new RuntimeException('O contrato ainda permite alias de navegação diferente de module.name.');
 }
 
+if (str_contains($coreQueryApi, "['query']['max_evidence']")) {
+    throw new RuntimeException('O Runtime modular ainda contém a chave removida query.max_evidence.');
+}
+
 if (str_contains($html, 'nav-index') || str_contains($script, 'nav-index') || str_contains($style, '.nav-index')) {
     throw new RuntimeException('A navegação ainda contém numeração visual de itens.');
 }
 
-if (!preg_match('~assets/app\.css\?v=20260804-7~', $html)
-    || !preg_match('~assets/app\.js\?v=20260804-7~', $html)) {
+if (!preg_match('~assets/app\.css\?v=20260808-2~', $html)
+    || !preg_match('~assets/app\.js\?v=20260808-2~', $html)) {
     throw new RuntimeException('Os assets públicos modulares não receberam a mesma versão.');
 }
 

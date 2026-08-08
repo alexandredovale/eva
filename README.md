@@ -2,7 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Current release:** [v2.0.0](https://github.com/alexandredovale/eva/releases/tag/v2.0.0)
+**Current release:** [v3.0.0](https://github.com/alexandredovale/eva/releases/tag/v3.0.0)
+
+**Release highlight:** semantic retrieval now derives the query-local population through κq over the complete eligible hierarchy, then applies hierarchical CIE, complete lineage resolution, κe/primary CIE, and global CIE. This calculation replaces configured semantic Top-k and evidence-count limits with deterministic boundaries derived from the current score distributions.
 
 EVA is a provider-neutral PHP system for building and querying **verifiable documentary memory**. It preserves document hierarchy, keeps literal source evidence separate from generated summaries, and validates every answer against the primary evidence recovered for the current query.
 
@@ -18,7 +20,7 @@ Many retrieval systems begin with arbitrary token chunks and later try to recons
 Source → normalized tree → literal primary evidence
        → traceable hierarchical summaries → contextual embeddings
 
-Semantic query → local routing → vector Top-k → CIE → primary sources
+Semantic query → local routing → complete hierarchy → κq → CIE → primary sources
       → one bounded answer → local citation and interaction validation
 ```
 
@@ -29,6 +31,7 @@ Core properties:
 - Embeddings represent complete, previously organized semantic units rather than arbitrary cuts.
 - Direct, structural, and broad queries can avoid a transient query embedding.
 - Conceptual and relational queries use semantic retrieval and resolve summaries back to primary evidence.
+- The query-local κq boundary emerges from the complete eligible hierarchical score distribution; complete lineage then passes through κe and primary CIE, and global CIE consolidates local primary nuclei. There is no configured semantic Top-k or evidence count.
 - CIE deterministically identifies a leading vector core plus complementary available convergence context from mean and population standard deviation before lineage resolution.
 - The answer model may use only the relevant subset of the available primary context. Every retained source must be cited where its analytical contribution is explained; uncited candidates are discarded, and citation-only inventories are rejected.
 - Locally rejected answer generations are retried silently up to three total attempts; only the third consecutive validation failure reaches the user as a generic error.

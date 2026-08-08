@@ -108,6 +108,18 @@ try {
          VALUES
             (:public_id, :document_id, :node_id, 'primary', 'node_content', :content, :source_hash, 'validated')"
     );
+    $summaryStatement = $database->prepare(
+        "INSERT INTO evidences
+            (public_id, document_id, node_id, evidence_class, evidence_type, content, summary,
+             source_hash, generation_model, generation_input_hash, status)
+         VALUES
+            (:public_id, :document_id, :node_id, 'derived', 'node_summary', :content, :summary,
+             :source_hash, 'fake-summary-v1', :generation_input_hash, 'generated')"
+    );
+    $derivationStatement = $database->prepare(
+        'INSERT INTO evidence_derivations (evidence_id, source_evidence_id)
+         VALUES (:evidence_id, :source_evidence_id)'
+    );
     $embeddingStatement = $database->prepare(
         'INSERT INTO evidence_embeddings
             (evidence_id, model, dimensions, vector_data, content_hash)
@@ -115,7 +127,9 @@ try {
             (:evidence_id, :model, 2, :vector_data, :content_hash)'
     );
     $similarities = [1.0, 0.6, 0.6, 0.6, 0.2];
+    $primarySimilarities = [0.4, 0.9, 0.6, 0.3, 0.1];
     $evidenceIds = [];
+    $summaryIds = [];
 
     foreach ($similarities as $index => $similarity) {
         $content = sprintf('Unidade simples %d para validar a distribuição do contexto.', $index + 1);
@@ -142,33 +156,72 @@ try {
         $evidencePublicId = sprintf('EVA-E%06d', $evidenceId);
         $database->prepare('UPDATE evidences SET public_id = :public_id WHERE id = :id')
             ->execute(['public_id' => $evidencePublicId, 'id' => $evidenceId]);
-        $vector = [$similarity, sqrt(1 - ($similarity * $similarity))];
+        $primarySimilarity = $primarySimilarities[$index];
         $embeddingStatement->execute([
             'evidence_id' => $evidenceId,
+            'model' => 'fake-cie-integration-v1',
+            'vector_data' => json_encode([
+                $primarySimilarity,
+                sqrt(1 - ($primarySimilarity * $primarySimilarity)),
+            ], JSON_THROW_ON_ERROR),
+            'content_hash' => $nodeHash,
+        ]);
+        $summaryStatement->execute([
+            'public_id' => 'pending-' . bin2hex(random_bytes(6)),
+            'document_id' => $documentId,
+            'node_id' => $nodeId,
+            'content' => 'Resumo hierárquico de ' . $content,
+            'summary' => 'Resumo hierárquico de ' . $content,
+            'source_hash' => hash('sha256', 'summary-' . $content),
+            'generation_input_hash' => hash('sha256', 'input-' . $content),
+        ]);
+        $summaryId = (int) $database->lastInsertId();
+        $summaryPublicId = sprintf('EVA-E%06d', $summaryId);
+        $database->prepare('UPDATE evidences SET public_id = :public_id WHERE id = :id')
+            ->execute(['public_id' => $summaryPublicId, 'id' => $summaryId]);
+        $derivationStatement->execute([
+            'evidence_id' => $summaryId,
+            'source_evidence_id' => $evidenceId,
+        ]);
+        $vector = [$similarity, sqrt(1 - ($similarity * $similarity))];
+        $embeddingStatement->execute([
+            'evidence_id' => $summaryId,
             'model' => 'fake-cie-integration-v1',
             'vector_data' => json_encode($vector, JSON_THROW_ON_ERROR),
             'content_hash' => $nodeHash,
         ]);
         $evidenceIds[] = $evidenceId;
+        $summaryIds[] = $summaryId;
     }
 
     $embeddingProvider = new ContextIntegrationEmbeddingProvider();
     $retriever = new DocumentContextRetriever($database, $embeddingProvider);
     $context = $retriever->retrieve($documentId, 'Explique a distribuição estatística.', 8, 0);
     $analysis = $context->contextIntelligenceAnalyses[0] ?? null;
+    $primaryCoreAnalysis = $context->contextIntelligenceAnalyses[1] ?? null;
+    $primaryConvergenceAnalysis = $context->contextIntelligenceAnalyses[2] ?? null;
 
     assertContextIntegration($analysis !== null, 'A recuperação semântica não produziu análise do CIE.');
     assertContextIntegration(abs($analysis->mean - 0.6) < 1e-12, 'A integração alterou a média esperada.');
     assertContextIntegration($analysis->selectedRegion === 'core', 'A integração não selecionou o núcleo.');
     assertContextIntegration(
-        array_column($analysis->selectedCandidates, 'evidenceId') === array_slice($evidenceIds, 0, 4),
+        array_column($analysis->selectedCandidates, 'evidenceId') === array_slice($summaryIds, 0, 4),
         'A integração não preservou núcleo e convergência complementar.'
     );
     assertContextIntegration(
-        array_column($context->evidences, 'id') === array_slice($evidenceIds, 0, 4)
+        array_column($context->evidences, 'id') === array_slice($evidenceIds, 0, 2)
             && ($context->evidenceSelection[$context->evidences[0]->publicId] ?? null) === 'core'
             && ($context->evidenceSelection[$context->evidences[1]->publicId] ?? null) === 'convergence',
-        'O contexto primário final não preservou os papéis do CIE.'
+        'Os CIEs primários não preservaram os núcleos de cada região herdada.'
+    );
+    assertContextIntegration(
+        $primaryCoreAnalysis?->stage === 'primary'
+            && $primaryCoreAnalysis->sourceRegion === 'core'
+            && count($primaryCoreAnalysis->coreCandidates) === 1
+            && $primaryConvergenceAnalysis?->stage === 'primary'
+            && $primaryConvergenceAnalysis->sourceRegion === 'convergence'
+            && array_column($primaryConvergenceAnalysis->coreCandidates, 'evidenceId') === [$evidenceIds[1]],
+        'A análise primária estratificada não permaneceu auditável.'
     );
     assertContextIntegration(
         $analysis->documentId === $documentPublicId && $analysis->documentTitle === 'Documento simples do CIE',
@@ -181,12 +234,17 @@ try {
     $payload = $result->toArray();
 
     assertContextIntegration($answerProvider->calls === 1, 'A resposta integrada deveria executar uma vez.');
-    assertContextIntegration(count($result->usedEvidences) === 4, 'A resposta não aceitou todo o contexto eleito.');
+    assertContextIntegration(count($result->usedEvidences) === 1, 'A resposta não respeitou o núcleo global consolidado.');
     assertContextIntegration(
         ($payload['context_intelligence'][0]['selected_region'] ?? null) === 'core'
             && ($payload['context_intelligence'][0]['candidate_count'] ?? null) === 5
-            && ($payload['evidence_selection']['core_evidence_ids'] ?? []) === [$context->evidences[0]->publicId]
-            && ($payload['evidences_used'][1]['selection_region'] ?? null) === 'convergence',
+            && ($payload['context_intelligence'][0]['retrieval_boundary']['hierarchical_candidate_count'] ?? null) === 5
+            && ($payload['context_intelligence'][1]['stage'] ?? null) === 'primary'
+            && ($payload['context_intelligence'][2]['source_region'] ?? null) === 'convergence'
+            && ($payload['context_intelligence'][3]['stage'] ?? null) === 'global'
+            && ($payload['context_intelligence'][3]['candidate_count'] ?? null) === 2
+            && ($payload['evidence_selection']['core_evidence_ids'] ?? []) === []
+            && ($payload['evidences_used'][0]['selection_region'] ?? null) === 'convergence',
         'A API não expôs a análise transitória e os papéis eleitos esperados.'
     );
     assertContextIntegration($embeddingProvider->calls === 1, 'Consultas idênticas devem reutilizar o embedding transitório.');

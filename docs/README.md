@@ -81,4 +81,6 @@ The English edition is organized by reader task rather than as filename-for-file
 | [`16_MODULOS.md`](16_MODULOS.md) | Instalação, contratos, SDK, operação, backup e remoção de módulos |
 | [`17_RELACIONAMENTO_BANCO_DADOS.md`](17_RELACIONAMENTO_BANCO_DADOS.md) | Cardinalidades, chaves estrangeiras, relações lógicas, fluxos e efeitos de exclusão |
 
+The complete English philosophical and scientific collection is available in [`philosophy/en/`](../philosophy/en/README.md), including the [full scientific paper](../philosophy/en/01_EVA_SCIENTIFIC_PAPER.md), [API flow](../philosophy/en/03_EVA_API_FLOW.md), [Context Intelligence Engine](../philosophy/en/04_CONTEXT_INTELLIGENCE_ENGINE.md), and [deterministic evidence contract](../philosophy/en/05_DETERMINISTIC_EVIDENCE_CONTRACT.md).
+
 Private test books and operational corpora are intentionally not part of this repository.

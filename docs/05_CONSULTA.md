@@ -48,17 +48,17 @@ A ausência de um aspecto nunca autoriza conhecimento externo e não apaga os de
 
 ## Recuperação
 
-Consultas diretas, estruturais e amplas percorrem a árvore e suas evidências primárias. Consultas conceituais e relacionais geram um embedding transitório do input e pesquisam evidências `primary` e `derived`.
+Consultas diretas, estruturais e amplas percorrem a árvore e suas evidências primárias. Consultas conceituais e relacionais geram um embedding transitório do input e pesquisam a população completa de resumos hierárquicos `derived:node_summary` elegíveis.
 
-Em consultas conceituais ou relacionais, uma correspondência textual exata não encerra a recuperação. A evidência literal entra primeiro como `core`, preservando a resposta direta como âncora, e o mesmo input segue para o Top-k vetorial e para o CIE. As fontes primárias semanticamente selecionadas compõem o contexto disponível dentro de `QUERY_MAX_EVIDENCE`, sem sair das obras selecionadas. Consultas exclusivamente diretas, estruturais ou amplas continuam sem consumir embedding de consulta.
+Em consultas conceituais ou relacionais, uma correspondência textual exata não encerra a recuperação. A evidência literal permanece como âncora `core`; o mesmo input segue por κq e CIE hierárquico, resolução integral de linhagem, κe e CIE primário por região. A união dos núcleos primários locais recebe um CIE global, cujo núcleo forma o contexto sem limite numérico configurado. Consultas exclusivamente diretas, estruturais ou amplas continuam sem consumir embedding de consulta.
 
 Resultados literais, lexicais e estruturais são candidatos, não conclusões. Nessas rotas não vetoriais, a aplicação forma o contexto disponível dentro do limite. O provedor mantém na base final somente as evidências incorporadas à resposta com citação visível, sem transformá-las em conclusões além de seu conteúdo literal; candidatas não citadas são descartadas.
 
 `simetry` e `assimetry` são operadores cognitivos internos e permanecem no contexto integral da consulta relacional. Eles orientam a compreensão da IA, mas não são tratados como expressões que a fonte documental precise conter.
 
-Na recuperação semântica, o Retriever ordena até `QUERY_CANDIDATE_LIMIT` candidatos e o Context Intelligence Engine calcula média, desvio padrão populacional e coeficiente de variação. Candidatos abaixo da média são descartados. O núcleo acima ou igual a `μ + σ` lidera o contexto disponível; a faixa entre `μ` e `μ + σ` fornece contexto complementar. Se o núcleo estiver vazio, a convergência assume o papel principal. O processo é determinístico e não executa reranking por IA.
+Na recuperação semântica, o Retriever calcula cosine para toda a população hierárquica elegível, ordena globalmente e determina κq pela geometria normalizada e pelos gaps query-locais. Quando não existe ruptura identificável, a população completa segue ao CIE. Só então o Context Intelligence Engine calcula média, desvio padrão populacional e coeficiente de variação. Candidatos abaixo da média são descartados. O núcleo acima ou igual a `μ + σ` lidera o contexto disponível; a faixa entre `μ` e `μ + σ` fornece contexto complementar. Se o núcleo estiver vazio, a convergência assume o papel principal.
 
-Quando uma evidência derivada é selecionada pelo CIE, `evidence_derivations` é percorrida até suas fontes primárias. A resolução distribui o limite entre os candidatos eleitos e ordena as fontes de cada linhagem pela similaridade da consulta, evitando esgotar o contexto na primeira linhagem ampla. A resposta recebe conteúdo literal completo e o papel `core` ou `convergence`; similaridades e estatísticas não são enviadas como autoridade documental nem persistidas.
+Quando uma evidência derivada é selecionada, `evidence_derivations` é percorrida sem truncagem até suas fontes primárias. O embedding transitório é reutilizado para κe e CIE primário, sem chamada externa adicional. O CIE global compara os núcleos locais pelo cosine primário e preserva em cada fonte final o papel hierárquico herdado `core` ou `convergence`.
 
 ## Governança de respostas por projeto
 
@@ -79,42 +79,28 @@ Uma obra selecionada individualmente pode aparecer em diferentes projetos conced
 
 ## Parâmetros da consulta do EVA
 
-Os limites da consulta são carregados por `config/ai.php`, consumidos pela API e aplicados por `DocumentContextRetriever`, `DocumentQueryService` e `QueryAnswerProvider`. Eles delimitam três responsabilidades diferentes e não são intercambiáveis.
+Os limites da consulta são carregados por `config/ai.php`, consumidos pela API e aplicados por `DocumentContextRetriever`, `DocumentQueryService` e `QueryAnswerProvider`. A população estatística do CIE não é configurável: κq emerge da distribuição completa de cada consulta.
 
-### `QUERY_CANDIDATE_LIMIT`
+### `QUERY_NON_SEMANTIC_MAX_EVIDENCE`
 
-Define o Top-k vetorial analisado pelo CIE em cada documento para consultas conceituais ou relacionais.
-
-- **Fallback do código:** `20`.
-- **Intervalo efetivo:** de `1` a `200`.
-- **Escopo:** por documento e somente em recuperação semântica.
-- **Função:** definir a população usada nos cálculos de `μ`, `σ` e `CV`; não define quantos textos chegam ao provedor.
-- **Persistência:** candidatos, similaridades e análise permanecem transitórios.
-
-```env
-QUERY_CANDIDATE_LIMIT=20
-```
-
-### `QUERY_MAX_EVIDENCE`
-
-Define a quantidade máxima de evidências primárias candidatas que compõem o contexto documental entregue ao provedor de resposta.
+Define somente a quantidade máxima de evidências nas rotas diretas, estruturais ou amplas, que não executam CIE.
 
 - **Função:** limitar quantos textos documentais completos a IA poderá analisar para responder ao input.
 - **Fallback do código:** `8` quando a variável não estiver definida.
 - **Intervalo efetivo:** de `1` a `50`; a configuração carregada é normalizada para esse intervalo.
-- **Escopo:** é um limite global por consulta, não um limite por projeto ou por obra na chamada final à IA.
-- **Seleção:** nas rotas semânticas, o limite é aplicado às fontes primárias resolvidas depois do CIE; nas demais rotas, é aplicado diretamente aos candidatos hierárquicos ou literais.
-- **Múltiplas obras:** cada obra pode produzir seu contexto de recuperação, mas `DocumentQueryService` intercala os resultados entre as obras e encerra a composição quando atinge o limite global.
+- **Escopo:** não participa de consultas conceituais ou relacionais e nunca define uma população estatística.
+- **Seleção semântica:** κq, CIE hierárquico, κe, CIE primário e CIE global substituem integralmente o antigo limite.
+- **Múltiplas obras:** `DocumentQueryService` consolida globalmente e deduplica os núcleos locais antes da resposta.
 - **Rastreabilidade:** as evidências finais são recuperadas deterministicamente e entregues como conjunto disponível. A IA usa o núcleo como referência principal, cita cada fonte efetivamente incorporada e pode omitir candidatos que não contribuam sem invalidar a resposta; inventários isolados de citações continuam rejeitados.
 - **Impacto operacional:** valores maiores ampliam cobertura e consumo de tokens. Valores menores reduzem contexto e custo, mas podem retirar evidências necessárias para cobrir todos os aspectos do input.
 
 Exemplo:
 
 ```env
-QUERY_MAX_EVIDENCE=10
+QUERY_NON_SEMANTIC_MAX_EVIDENCE=10
 ```
 
-Nesse caso, no máximo dez evidências candidatas distintas são entregues ao `QueryAnswerProvider`, mesmo quando o usuário seleciona várias obras.
+Esse valor não altera a quantidade de evidências de uma consulta semântica.
 
 ### `QUERY_MAX_INTERACTIONS`
 
@@ -128,7 +114,7 @@ Define a quantidade máxima de interações transitórias `simetry` e `assimetry
 - **Contrato com a IA:** o valor é enviado ao `QueryAnswerProvider` como `interaction_limit`. Uma resposta acima do limite é rejeitada.
 - **Validação:** cada interação aceita deve usar exatamente duas evidências pertencentes ao contexto, declaradas como utilizadas e citadas, além de conter fragmentos literais verificáveis de ambas.
 - **Persistência:** o limite não cria pares antecipadamente, não executa combinação massiva e não altera o banco. As interações existem somente durante aquela consulta.
-- **Independência:** aumentar esse valor não aumenta o Top-k analisado pelo CIE nem o contexto documental; essas responsabilidades pertencem a `QUERY_CANDIDATE_LIMIT` e `QUERY_MAX_EVIDENCE`.
+- **Independência:** aumentar esse valor não altera κq, κe ou qualquer análise do CIE.
 
 Exemplo:
 
@@ -215,6 +201,6 @@ Os identificadores citados são validados contra o contexto, mas sua presença f
 
 ## Saída
 
-O resultado separa `answer`, `evidences_used`, `evidence_selection`, `simetry_interactions`, `assimetry_interactions`, `routing_points`, `context_intelligence` e `limitations`. Cada evidência utilizada também expõe `selection_region`; `evidence_selection` lista somente os IDs citados de núcleo e convergência. `context_intelligence` fica vazio em rotas não semânticas; quando presente, expõe a análise transitória por documento com `μ`, `σ`, `CV`, limites e regiões da distribuição. A API entrega todos esses campos a qualquer usuário autorizado; a interface mostra resposta e evidências a todos, mas restringe CIE, `simetry`, `assimetry` e limitações técnicas ao superadmin.
+O resultado separa `answer`, `evidences_used`, `evidence_selection`, `simetry_interactions`, `assimetry_interactions`, `routing_points`, `context_intelligence` e `limitations`. Cada evidência utilizada também expõe `selection_region`; `evidence_selection` lista somente os IDs citados com o papel hierárquico herdado. `context_intelligence` fica vazio em rotas não semânticas; quando presente, expõe análises `hierarchical`, `primary` e `global` com `μ`, `σ`, `CV`, limites, regiões e diagnósticos κ. A API entrega todos esses campos a qualquer usuário autorizado; a interface mostra resposta e evidências a todos, mas restringe CIE, `simetry`, `assimetry` e limitações técnicas ao superadmin.
 
 Nem a análise do CIE nem os objetos de interação alteram a memória documental. Após uma consulta concluída, `audit_events` recebe metadados sanitizados, inclusive as contagens de cada tipo de interação. Se houver módulo ativo assinante, o Runtime emite `interaction.completed` antes da resposta HTTP e pode persistir seu envelope permitido em `module_events`; falhas modulares são isoladas e não derrubam a resposta documental.

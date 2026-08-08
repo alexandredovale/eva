@@ -69,8 +69,7 @@ try {
     $retriever = new DocumentContextRetriever(
         $database,
         $needsSemanticRetrieval ? $factory->embeddings() : null,
-        $detector,
-        (int) $container['ai']['query']['candidate_limit']
+        $detector
     );
     $service = new DocumentQueryService($retriever, $factory->queryAnswers());
     $result = $service->query($documentId, $input, $maxEvidence, $maxInteractions);

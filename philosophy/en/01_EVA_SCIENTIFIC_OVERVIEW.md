@@ -2,7 +2,7 @@
 
 ## Abstract
 
-The Evidence Algorithm (EVA) is a provider-neutral architecture for verifiable documentary memory. It parses structured sources into a normalized hierarchy, persists literal primary evidence, produces traceable hierarchical derived evidence, and embeds complete semantic units. During a semantic query, it retrieves a vector Top-k, uses the deterministic Context Intelligence Engine (CIE) to identify a leading convergence core plus complementary convergence context, resolves selected derived candidates back to primary sources, and composes a bounded available context. When no core exists, convergence assumes the primary role. The final documentary basis retains only sources incorporated into the answer with visible citations; recovered but uncited candidates are discarded.
+The Evidence Algorithm (EVA) is a provider-neutral architecture for verifiable documentary memory. It parses structured sources into a normalized hierarchy, persists literal primary evidence, produces traceable hierarchical derived evidence, and embeds complete semantic units. During a semantic query, it scores the complete eligible hierarchical population, derives the query-local κq boundary, and applies hierarchical CIE. Complete lineage resolution produces primary populations inherited from core and convergence; each passes separately through κe and primary CIE. A global CIE consolidates the deduplicated union of local primary nuclei. Its global nucleus—or global convergence when that nucleus is empty—forms the semantic context without a configured Top-k or evidence count. Exact literal anchors remain protected. The final documentary basis retains only sources incorporated into the answer with visible citations.
 
 EVA treats a Cnode as the transient understanding of an explicit interaction between cited evidence. The interaction is never stored as a graph edge, score, vector, or permanent cognitive entity. Its two internal forms are `simetry`, for an explicit reciprocal interaction, and `assimetry`, for an explicit directed interaction. Neither form implies truth, importance, superiority, confidence, intensity, or inferred causality.
 
@@ -23,8 +23,9 @@ Structured source
 User query
   → deterministic route detection
   → structural or semantic candidate retrieval
-  → semantic Top-k distribution analysis by CIE
-  → lineage resolution to primary evidence
+  → complete hierarchical scoring → κq → hierarchical CIE
+  → complete lineage resolution → κe → primary CIE
+  → union of local nuclei → global CIE
   → one bounded structured answer
   → local validation of citations and interactions
 ```
@@ -45,7 +46,7 @@ The architecture motivates, but does not by itself prove, the following hypothes
 
 ## Existing observations
 
-The current implementation and offline tests verify structural preservation, literal persistence, lineage resolution, deterministic CIE regions, bounded available-context composition, version reuse, bounded provider calls, analytical citation coverage, rejection of citation-only inventories, transient interaction validation, partial coverage reporting, and no-generation behavior when evidence is absent. A historical directed real-provider case incorporated all ten available primary sources; a later revalidation confirmed the current behavior by retaining four cited sources and discarding six recovered but uncited candidates without failing the whole answer.
+The current implementation and offline tests verify structural preservation, literal persistence, complete lineage resolution, deterministic κq/κe boundaries, hierarchical/primary/global CIE regions, query-local context composition, version reuse, bounded provider calls, analytical citation coverage, rejection of citation-only inventories, transient interaction validation, partial coverage reporting, and no-generation behavior when evidence is absent. On August 8, 2026, a directed seven-work query produced 350 local primary-nucleus candidates, a 63-source global nucleus, and a validated answer citing four sources. This is a functional observation, not proof of retrieval superiority.
 
 The recorded operational baseline is intentionally small. It demonstrates observable behavior and exposes failure modes, but it does not establish statistical superiority. Rejected generated outputs can still consume tokens before local validation; complete semantic units can produce large prompts; and provider compliance remains an empirical factor.
 
@@ -70,12 +71,13 @@ Minimum measures include:
 
 EVA verifies that a response is traceable to supplied documentary evidence. It does not establish that the source itself is universally true. Validation is therefore process validation: known sources, literal content, explicit lineage, visible citations, analytical incorporation of every retained source, and locally reconstructible interactions. Strict semantic discrimination between thematic convergence and reciprocal `simetry` remains a future calibration boundary.
 
-## Source record
+## Complete English record
 
-The complete paper, detailed citations, benchmark record, and API analysis are preserved in the original Portuguese documents:
+The full research and operational collection is available in this directory:
 
 - [Full scientific paper](01_EVA_SCIENTIFIC_PAPER.md)
 - [Benchmark baseline](02_EVA_BENCHMARK_BASELINE.md)
 - [API flow](03_EVA_API_FLOW.md)
 - [Philosophical foundation](00_EVA_PHILOSOPHY.md)
 - [Context Intelligence Engine](04_CONTEXT_INTELLIGENCE_ENGINE.md)
+- [Deterministic evidence contract](05_DETERMINISTIC_EVIDENCE_CONTRACT.md)

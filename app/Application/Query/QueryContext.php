@@ -6,6 +6,8 @@ namespace Eva\Application\Query;
 
 final readonly class QueryContext
 {
+    public const MAX_SUPPLEMENTARY_INSTRUCTION_LENGTH = 10_000;
+
     /**
      * @param list<RetrievedEvidence> $evidences
      * @param list<string> $routingPoints
@@ -48,7 +50,7 @@ final readonly class QueryContext
 
         foreach ($this->supplementaryInstructions as $instruction) {
             if (!is_string($instruction) || trim($instruction) === ''
-                || mb_strlen($instruction, 'UTF-8') > 6_000) {
+                || mb_strlen($instruction, 'UTF-8') > self::MAX_SUPPLEMENTARY_INSTRUCTION_LENGTH) {
                 throw new QueryException('O contexto contém uma instrução complementar inválida.');
             }
         }

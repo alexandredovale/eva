@@ -155,13 +155,13 @@
     <rect width="380" height="100" rx="15" class="node-ai"/>
     <text x="190" y="27" class="label">Conceitual / relacional</text>
     <text x="190" y="51" class="small">âncora literal + embedding transitório</text>
-    <text x="190" y="73" class="small">cosseno local · Top-k 20 por documento</text>
+    <text x="190" y="73" class="small">população completa · cosine · κq</text>
     <text x="190" y="91" class="tiny">1 chamada externa de embedding</text>
   </g>
   <path d="M965 660 H1000" class="arrow"/>
   <g transform="translate(1000 600)">
     <rect width="240" height="120" rx="16" class="node-cie"/>
-    <text x="120" y="28" class="label">CIE por documento</text>
+    <text x="120" y="28" class="label">CIE hierárquico</text>
     <text x="120" y="52" class="accent">μ · σ · CV</text>
     <text x="120" y="75" class="small">descarte · convergence · core</text>
     <text x="120" y="97" class="tiny">core precede; convergence complementa</text>
@@ -181,8 +181,8 @@
   <g transform="translate(570 735)">
     <rect width="400" height="92" rx="15" class="node-db"/>
     <text x="200" y="27" class="label">Composição do contexto disponível</text>
-    <text x="200" y="50" class="small">intercala documentos · remove duplicatas</text>
-    <text x="200" y="71" class="small">limite global QUERY_MAX_EVIDENCE</text>
+    <text x="200" y="50" class="small">κe + CIE primário · deduplicação</text>
+    <text x="200" y="71" class="small">CIE global · núcleo final query-local</text>
   </g>
   <path d="M970 781 H1010" class="arrow-green"/>
   <g transform="translate(1010 735)">

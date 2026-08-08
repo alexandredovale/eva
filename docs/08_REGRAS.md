@@ -39,11 +39,11 @@
 37. Nomear separadamente cada aspecto sem evidência suficiente no contexto recuperado.
 38. Nunca apagar uma relação parcial válida apenas porque outro aspecto do input não possui evidência.
 39. Tratar resultados recuperados como candidatos até a composição determinística do contexto disponível concluída pela aplicação.
-40. Entregar ao provedor somente o contexto final autorizado, com fontes primárias e papéis explícitos de núcleo ou convergência nas rotas semânticas.
+40. Entregar ao provedor somente o contexto final autorizado: núcleo do CIE global — ou sua convergência quando o núcleo estiver vazio —, âncoras literais protegidas e os papéis hierárquicos herdados `core` ou `convergence`.
 41. Exigir que toda evidência mantida no resultado seja citada no trecho analítico em que contribui para a resposta.
 42. Descartar evidência recuperada omitida no texto e rejeitar marcador isolado ou inventário de citações que não demonstre incorporação analítica.
 43. Nunca acrescentar automaticamente uma citação omitida pelo provedor para fazer a resposta aparentar conformidade.
-44. Tratar `QUERY_MAX_EVIDENCE` como limite global de evidências primárias entregues ao provedor em cada consulta, aplicado depois do CIE nas rotas semânticas.
+44. Nas rotas semânticas, formar o contexto final pelo núcleo do CIE global sobre os núcleos primários locais; `QUERY_NON_SEMANTIC_MAX_EVIDENCE` não pode participar dessas populações.
 45. Não confundir contexto recuperado com evidência utilizada; a aplicação autoriza o conjunto disponível e conserva no resultado somente as fontes efetivamente citadas.
 46. Tratar `QUERY_MAX_INTERACTIONS` como limite de saída relacional transitória, nunca como quantidade de evidências, pares persistidos ou combinações antecipadas.
 47. Desativar interações quando `QUERY_MAX_INTERACTIONS` for zero sem desativar a resposta documental baseada em evidências.
@@ -55,18 +55,19 @@
 53. Nunca truncar, cortar ou fragmentar arbitrariamente uma evidência para produzir seu embedding.
 54. Representar uma primária excedente pelo embedding de uma síntese derivada válida somente quando a linhagem até a evidência primária integral estiver persistida.
 55. Aplicar o CIE somente às distribuições vetoriais das rotas conceitual e relacional.
-56. Limitar o conjunto estatístico por `QUERY_CANDIDATE_LIMIT`, com padrão 20 e intervalo efetivo de 1 a 200 candidatos por documento.
-57. Calcular média e desvio padrão populacionais sobre o Top-k e calcular `CV = σ / μ`, usando `null` quando `μ = 0`.
+56. Calcular cosine contra toda a população `derived:node_summary` elegível, ordenar globalmente e determinar κq sem Top-k, pesos ou thresholds semânticos humanos.
+57. Calcular média e desvio padrão populacionais sobre a população legitimada por κq — ou sobre a população completa quando não houver ruptura — e calcular `CV = σ / μ`, usando `null` quando `μ = 0`.
 58. Classificar como descarte `s < μ`, convergência `μ ≤ s < μ + σ` e núcleo `s ≥ μ + σ`.
-59. Usar o núcleo como referência principal e a faixa de convergência como contexto complementar disponível; quando o núcleo estiver vazio, promover a convergência ao papel principal.
+59. Em cada CIE, usar o núcleo como população eleita e promover a convergência somente quando o núcleo estiver vazio; no estágio hierárquico, preservar ambas as regiões para resolução e análise primária separadas.
 60. Preservar a ordem do Retriever dentro das regiões; não criar nota, peso, heurística subjetiva ou reranking por IA.
-61. Resolver candidatos derivados selecionados pelo CIE até suas fontes primárias antes de aplicar o limite global e chamar o provedor de resposta.
+61. Resolver sem truncagem candidatos derivados de núcleo e convergência até suas fontes primárias, aplicar κe e CIE primário separadamente por região herdada e por obra, e submeter a união deduplicada dos núcleos locais ao CIE global antes de chamar o provedor.
 62. Não persistir candidatos, similaridades, estatísticas, regiões ou seleção do CIE como memória documental.
 63. Interromper a vetorização com o identificador da evidência quando uma primária excedente não possuir síntese derivada compatível, exigindo subdivisão estrutural real.
 64. Exigir que `used_evidence_ids` contenha somente evidências efetivamente citadas na resposta.
 65. Preservar `core` como precedência argumentativa e usar `convergence` somente quando contribuir como reforço, contexto, limite ou contraponto sustentado literalmente.
 66. Não inventar relações para acomodar uma evidência recuperada; candidatos sem contribuição citada devem ser descartados sem invalidar a resposta.
 67. Manter a calibração semântica estrita de `simetry` e `assimetry` separada da validade documental da resposta.
+67-A. Preservar âncoras literais exatas que não pertençam à população primária analisada; o CIE global não pode removê-las.
 68. Descartar silenciosamente uma resposta rejeitada pela validação local e permitir no máximo três tentativas totais com o mesmo contexto disponível; da segunda tentativa em diante, transmitir somente um código seguro de correção. Evidência recuperada mas não citada deve ser descartada da base final, nunca usada como motivo isolado para nova tentativa ou bloqueio integral.
 69. Exibir erro ao usuário somente depois da terceira falha consecutiva de validação, usando mensagem genérica sem identificador de evidência ou regra técnica interna.
 70. Manter módulos independentes de projetos, usuários e documentos; associações observadas pertencem ao módulo, não ao modelo persistente do Core.

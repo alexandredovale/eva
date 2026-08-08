@@ -340,13 +340,12 @@ final readonly class ProductApi
             $retriever = new DocumentContextRetriever(
                 $this->database,
                 $needsEmbedding ? $factory->embeddings() : null,
-                $detector,
-                (int) $this->container['ai']['query']['candidate_limit']
+                $detector
             );
             $result = (new DocumentQueryService($retriever, $factory->queryAnswers()))->queryDocuments(
                 $documentIds,
                 $input,
-                (int) $this->container['ai']['query']['max_evidence'],
+                (int) $this->container['ai']['query']['non_semantic_max_evidence'],
                 (int) $this->container['ai']['query']['max_interactions'],
                 $responseProfiles
             );

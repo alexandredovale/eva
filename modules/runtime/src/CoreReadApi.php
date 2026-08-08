@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Eva\ModuleRuntime;
 
+use Eva\Application\Access\ScopeAccessService;
+use Eva\Http\Security\ActorContext;
 use PDO;
 
 final readonly class CoreReadApi
@@ -11,8 +13,22 @@ final readonly class CoreReadApi
     /** @param list<string> $capabilities */
     public function __construct(
         private PDO $database,
-        private array $capabilities
+        private array $capabilities,
+        private ?ActorContext $actor = null
     ) {
+    }
+
+    /** @return array{projects: list<array<string, mixed>>, documents: list<array<string, mixed>>} */
+    public function actorScopes(): array
+    {
+        $this->requireCapability('core.read.projects');
+        $this->requireCapability('core.read.documents');
+
+        if (!$this->actor instanceof ActorContext) {
+            throw new ModuleException('Os escopos autorizados exigem um contexto de usuário autenticado.');
+        }
+
+        return (new ScopeAccessService($this->database))->scopes($this->actor);
     }
 
     /** @return array<string, mixed>|null */

@@ -6,7 +6,11 @@ use Eva\Application\Cognitive\EmbeddingBatchResult;
 use Eva\Application\Cognitive\EmbeddingProviderInterface;
 use Eva\Application\Cognitive\EmbeddingVector;
 use Eva\Application\Cognitive\EvidenceEmbeddingService;
+use Eva\Application\Cognitive\HierarchicalSummaryService;
 use Eva\Application\Cognitive\StructuredEmbeddingUnit;
+use Eva\Application\Cognitive\StructuredSummaryUnit;
+use Eva\Application\Cognitive\SummaryProviderInterface;
+use Eva\Application\Cognitive\SummaryResult;
 use Eva\Application\Ingestion\DocumentIngestionService;
 use Eva\Application\Query\DocumentContextRetriever;
 use Eva\Application\Query\DocumentQueryService;
@@ -106,6 +110,25 @@ final class SemanticFakeEmbeddingProvider implements EmbeddingProviderInterface
         }
 
         return new EmbeddingBatchResult($vectors, count($units));
+    }
+}
+
+final class QueryHierarchySummaryProvider implements SummaryProviderInterface
+{
+    public function model(): string
+    {
+        return 'fake-query-summary-v1';
+    }
+
+    public function summarize(StructuredSummaryUnit $unit): SummaryResult
+    {
+        $content = trim($unit->ownContent);
+
+        if ($content === '') {
+            $content = implode(' ', array_column($unit->childSummaries, 'summary'));
+        }
+
+        return new SummaryResult($unit->structuralPath . ' ' . $content, $this->model());
     }
 }
 
@@ -319,8 +342,11 @@ try {
     assertQuery($ingested->nodeCount === 99 && $ingested->primaryEvidenceCount === 77, 'O documento real perdeu sua estrutura.');
 
     $embeddingProvider = new SemanticFakeEmbeddingProvider();
+    $summaryBuild = (new HierarchicalSummaryService($database, new QueryHierarchySummaryProvider()))
+        ->buildForDocument($documentId);
+    assertQuery($summaryBuild->createdSummaries === 98, 'A consulta deve possuir a população hierárquica completa.');
     $embeddingBuild = (new EvidenceEmbeddingService($database, $embeddingProvider))->buildForDocument($documentId);
-    assertQuery($embeddingBuild->createdEmbeddings === 77, 'As evidências primárias não foram vetorizadas para consulta.');
+    assertQuery($embeddingBuild->createdEmbeddings === 175, 'As unidades primárias e hierárquicas não foram vetorizadas para consulta.');
     assertQuery(count($embeddingProvider->batches) === 1, 'A vetorização documental deve usar um lote.');
     assertQuery(
         max(array_map(static fn (StructuredEmbeddingUnit $unit): int => strlen($unit->text), $embeddingProvider->batches[0])) > 5_000,
@@ -428,7 +454,10 @@ try {
         'Uma correspondência textual exata conceitual deve receber evidências semânticas complementares.'
     );
     assertQuery(
-        count($literalResult->contextIntelligenceAnalyses) === 1,
+        count(array_filter(
+            $literalResult->contextIntelligenceAnalyses,
+            static fn ($analysis): bool => $analysis->stage === 'hierarchical'
+        )) === 1,
         'Uma correspondência textual exata conceitual deve executar a análise do CIE.'
     );
     assertQuery(
@@ -456,14 +485,19 @@ try {
         'O embedding transitório deve ser reutilizado no mesmo escopo multiobra.'
     );
     assertQuery(
-        count($conceptualContext->contextIntelligenceAnalyses) === 1,
+        count(array_filter(
+            $conceptualContext->contextIntelligenceAnalyses,
+            static fn ($analysis): bool => $analysis->stage === 'hierarchical'
+        )) === 1,
         'A recuperação semântica deve produzir uma análise do CIE.'
     );
     $contextAnalysis = $conceptualContext->contextIntelligenceAnalyses[0];
+    $boundary = $contextAnalysis->retrievalBoundary;
     assertQuery(
-        $contextAnalysis->toArray()['candidate_count'] <= 20
+        $boundary !== null
+            && count($boundary->scores) === 98
             && $contextAnalysis->selectedCandidates !== [],
-        'O CIE deve analisar no máximo o Top-20 e produzir um contexto estatístico.'
+        'κq deve examinar todas as 98 unidades hierárquicas antes do CIE.'
     );
     assertQuery(
         $contextAnalysis->coreCandidates !== []
@@ -479,10 +513,12 @@ try {
     );
     $secondDocumentId = $secondIngested->documentId;
     $secondStoragePath = $secondIngested->storagePath;
+    (new HierarchicalSummaryService($database, new QueryHierarchySummaryProvider()))
+        ->buildForDocument($secondDocumentId);
     $secondEmbeddingBuild = (new EvidenceEmbeddingService($database, $embeddingProvider))
         ->buildForDocument($secondDocumentId);
     assertQuery(
-        $secondEmbeddingBuild->createdEmbeddings === 77,
+        $secondEmbeddingBuild->createdEmbeddings === 175,
         'A segunda obra sintética não foi vetorizada para a regressão multiobra.'
     );
 
@@ -497,7 +533,10 @@ try {
         $multiLiteralResult->usedEvidences
     )));
     assertQuery(
-        count($multiLiteralResult->contextIntelligenceAnalyses) === 2,
+        count(array_filter(
+            $multiLiteralResult->contextIntelligenceAnalyses,
+            static fn ($analysis): bool => $analysis->stage === 'hierarchical'
+        )) === 2,
         'A correspondência literal conceitual deve executar o CIE em cada obra selecionada.'
     );
     assertQuery(

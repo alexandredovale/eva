@@ -378,7 +378,7 @@ tbody tr:hover { background: rgba(255, 255, 255, .018); }
 }
 .chat-message-user .eyebrow { margin-bottom: 6px; }
 .chat-message-user p { margin: 0; color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; }
-.chat-message-assistant { margin: 0; border-radius: 4px 16px 16px 16px; }
+.chat-message-assistant { margin: 0; scroll-margin-top: calc(var(--header-height) + 16px); border-radius: 4px 16px 16px 16px; }
 .chat-message-pending { color: var(--muted); }
 .query-loading { display: inline-flex; align-items: center; gap: 9px; margin: 0; }
 .query-loading-dots { display: inline-flex; align-items: center; gap: 5px; }
@@ -623,7 +623,15 @@ legend {
 .module-navigation { display: contents; }
 .module-dashboard-host { min-width: 0; }
 .module-dashboard-host[aria-busy="true"] { cursor: progress; }
-.module-dashboard-host[aria-busy="true"] > :not(style) { opacity: .68; }
+.module-dashboard-host[aria-busy="true"] button:disabled,
+.module-dashboard-host[aria-busy="true"] input:disabled,
+.module-dashboard-host[aria-busy="true"] select:disabled,
+.module-dashboard-host[aria-busy="true"] textarea:disabled { opacity: .68; }
+.module-action-progress { display: grid; gap: 9px; padding: 15px 17px; border: 1px solid rgba(223, 255, 0, .25); border-radius: 10px; background: rgba(223, 255, 0, .035); }
+.module-action-progress[hidden] { display: none !important; }
+.module-action-progress-copy { display: flex; align-items: center; justify-content: space-between; gap: 14px; color: var(--muted-strong); font-size: .82rem; }
+.module-action-progress progress { width: 100%; height: 5px; display: block; border: 0; border-radius: 999px; overflow: hidden; accent-color: var(--accent); }
+.module-action-progress > small { color: var(--muted); font-size: .72rem; }
 
 .text-button {
     width: 100%;

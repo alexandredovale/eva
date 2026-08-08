@@ -1,23 +1,40 @@
-# Context Intelligence Engine — fundamento arquitetural e hipótese científica
+# Context Intelligence Engine — fronteiras query-local e consolidação global
 
 **Estado:** mecanismo implementado; ganho comparativo ainda não demonstrado
-**Data:** 2 de agosto de 2026
+**Atualização:** 8 de agosto de 2026
+**English:** [Context Intelligence Engine — query-local boundaries and global consolidation](en/04_CONTEXT_INTELLIGENCE_ENGINE.md)
 
 ## Proposição
 
-O Context Intelligence Engine (CIE) transforma a seleção de contexto semântico em observação da distribuição produzida pelo próprio Retriever. Ele não substitui similaridade de cosseno, não adiciona julgamento linguístico e não procura decidir qual documento é verdadeiro, melhor ou mais importante.
+O Context Intelligence Engine (CIE) transforma a seleção de contexto semântico em observação determinística das distribuições produzidas pelo Retriever. Ele não substitui similaridade de cosseno, não atribui relevância absoluta e não decide qual documento é verdadeiro, melhor ou mais importante.
 
-Sua posição arquitetural é deliberadamente intermediária:
+O fluxo vigente é:
 
 ```text
-Retriever → Top-k → CIE → candidatos selecionados (núcleo + convergência) → fontes primárias disponíveis → LLM
+consulta q
+  → população hierárquica completa por obra
+  → κq
+  → CIE hierárquico
+  → linhagem integral separada por core/convergence
+  → cosine primário
+  → κe + CIE primário por região e obra
+  → união deduplicada dos núcleos primários locais Gq
+  → CIE global
+  → núcleo global Eq (ou convergence se o núcleo estiver vazio)
+  → LLM
 ```
 
-O Retriever localiza candidatos. O CIE identifica regiões matemáticas. As camadas cognitivas compreendem as fontes selecionadas. O provedor comunica uma resposta limitada a essas fontes. Cada componente preserva uma responsabilidade reconstruível.
+Correspondências literais exatas que não pertencem à população primária vetorial são âncoras protegidas e acompanham `Eq`.
 
-## Distribuição como estrutura do contexto
+## Por que não existe Top-k semântico
 
-Para as similaridades `sᵢ` do Top-k, o mecanismo calcula:
+Um Top-k conhecido antes da consulta definiria artificialmente a população sobre a qual média, desvio padrão e CV são calculados. O EVA calcula cosine para todos os `derived:node_summary` elegíveis de cada obra e deixa a ruptura κq emergir da curva ordenada.
+
+Se κq não encontra ruptura identificável — população pequena, ausência de dispersão, curva contínua ou ruptura ambígua — a população completa segue ao CIE. Nenhum corte substituto é fabricado.
+
+## Matemática intocada do CIE
+
+Para `N` similaridades `sᵢ`:
 
 ```text
 μ = (Σ sᵢ) / N
@@ -25,76 +42,92 @@ Para as similaridades `sᵢ` do Top-k, o mecanismo calcula:
 CV = σ / μ
 ```
 
-Da própria distribuição emergem três regiões:
+Quando `μ = 0`, `CV` é exposto como `null`. As regiões são sempre:
 
-- abaixo de `μ`: descarte;
-- de `μ` até antes de `μ + σ`: convergência;
-- a partir de `μ + σ`: núcleo.
+```text
+discard:     s < μ
+convergence: μ ≤ s < μ + σ
+core:        s ≥ μ + σ
+```
 
-O núcleo lidera o contexto disponível quando existe, e a faixa de convergência o acompanha como contexto complementar. Quando a distribuição não produz núcleo, a faixa de convergência assume o papel principal sem introduzir uma heurística externa. Se a média for zero, o CV é indefinido e representado como `null`; isso não impede a classificação por `μ` e `σ`.
+Se `core` estiver vazio, `convergence` é promovida. Se `σ = 0`, todos os valores iguais a `μ` pertencem ao núcleo. A implementação usa tolerância numérica relativa de `1e-12` apenas para impedir erro de classificação por ponto flutuante; as fórmulas não mudam.
 
-## Neutralidade
+## Três aplicações, três responsabilidades
 
-A neutralidade do CIE não significa que toda distribuição seja uma representação perfeita da relevância. Significa que, dado o conjunto recuperado, a transformação é explícita, determinística, reproduzível e independente de outro julgamento por IA.
+### 1. CIE hierárquico
 
-O CIE não atribui:
+κq legitima a população de resumos hierárquicos por obra. O CIE classifica descarte, convergência e núcleo. Neste estágio, núcleo e convergência são preservados: ambos podem apontar para fontes primárias distintas e por isso seguem separadamente para a linhagem.
 
-- verdade ou falsidade;
-- qualidade documental;
-- confiança epistêmica;
-- importância;
-- peso cognitivo;
-- superioridade entre fontes.
+### 2. κe e CIE primário
 
-A similaridade original continua sendo uma medida geométrica do espaço vetorial. Média, desvio padrão e CV descrevem esse conjunto; não convertem geometria em autoridade documental.
+A resolução de `evidence_derivations` não sofre truncagem. Cada primária herda a melhor região hierárquica que a alcançou: `core` prevalece sobre `convergence`. O mesmo embedding transitório da consulta é reutilizado para calcular cosine contra os embeddings primários, sem nova chamada externa.
 
-## Separação entre seleção e fundamentação
+κe é calculado separadamente sobre as primárias herdadas de `core` e de `convergence`, em cada obra. Cada população legitimada recebe seu próprio CIE. O núcleo local é o `core` primário ou, quando vazio, sua `convergence`.
 
-Um candidato selecionado não chega automaticamente à resposta como texto documental. Se ele for derivado, sua linhagem precisa ser resolvida até fontes primárias. Depois dessa resolução, a aplicação compõe deterministicamente o contexto primário disponível, preservando os papéis `core` e `convergence` e o limite global. O provedor não pode introduzir fontes externas, mas pode omitir candidatas que não contribuam para a resposta; somente fontes citadas analiticamente permanecem na base final. A aplicação valida IDs, papéis, citações, participantes e fragmentos literais.
+### 3. CIE global
 
-Assim, existem três filtros com naturezas distintas:
+Os núcleos primários locais são unidos e deduplicados:
 
-1. o Retriever localiza por compatibilidade vetorial;
-2. o CIE e a resolução de linhagem compõem o contexto primário disponível pela distribuição;
-3. a resposta cita o subconjunto que efetivamente contribui e a validação documental descarta candidatas não citadas, rejeitando referências externas ou decorativas.
+```text
+Gq = ⋃d (Ld,core ∪ Ld,convergence)
+```
 
-Nenhum deles substitui os demais.
+Como todos os cosines primários usam a mesma consulta e o mesmo modelo de embedding, o CIE pode classificar `Gq` globalmente. A população entregue à LLM é:
 
-## Determinabilidade e explicabilidade
+```text
+Eq = CoreG, se CoreG ≠ ∅
+Eq = ConvG, se CoreG = ∅
+K(q) = |Eq|
+```
 
-Dado o mesmo Top-k, o resultado do CIE é invariável. A saída transitória permite reconstruir:
+`K(q)` não é configurado nem conhecido antes da consulta. O papel herdado `core` ou `convergence` permanece anexado à fonte final, mesmo que sua região no CIE global seja `core`.
 
-- a média e o desvio padrão;
-- o comportamento relativo indicado pelo CV;
-- a fronteira entre as regiões;
-- quais candidatos foram descartados;
-- quais candidatos formaram o núcleo principal e a convergência complementar;
-- quando a convergência precisou assumir o papel principal por ausência de núcleo.
+## Cantelli como limite, não como quota
 
-Essa explicabilidade não exige uma segunda inferência nem uma justificativa gerada por modelo. Ela decorre das operações matemáticas executadas localmente.
+Para variância não nula, a desigualdade unilateral de Cantelli estabelece:
 
-## Contrato de contexto disponível e citação visível
+```text
+P(X − μ ≥ σ) ≤ 1/2
+```
 
-O resultado do CIE não autoriza o modelo a buscar fora do contexto. As fontes primárias resolvidas são enviadas com papéis explícitos de `core` e `convergence`; o núcleo possui precedência e a convergência pode reforçar, contextualizar, delimitar ou contrapor as conclusões quando seu conteúdo literal contribuir. `used_evidence_ids` é derivado das citações visíveis e contém somente as fontes efetivamente incorporadas.
+Logo, o núcleo `s ≥ μ + σ` contém no máximo metade da população analisada. Isso não ordena selecionar metade e não define uma porcentagem; é apenas um teto matemático derivado da fronteira preservada do CIE. Em distribuições homogêneas (`σ = 0`), a premissa de variância não nula não se aplica e todos os candidatos permanecem no núcleo.
 
-Aceitação formal não basta. Cada evidência mantida deve estar citada na frase ou no parágrafo que explica sua contribuição. A aplicação não repara citações ausentes, rejeita listas isoladas de IDs e descarta candidatas recuperadas sem citação. Essa regra mantém o universo autorizado sob controle local e permite ao modelo selecionar apenas o subconjunto documental pertinente, sem inventar relações para acomodar o restante.
+## Neutralidade e determinabilidade
 
-## Hipótese e limite científico
+Dadas as mesmas populações ordenadas e similaridades, a saída é invariável. O fluxo não:
 
-A contribuição arquitetural proposta não é o uso isolado de média ou desvio padrão. É a introdução de uma fronteira estável entre recuperação vetorial e interpretação cognitiva, na qual a seleção emerge da distribuição em vez de um reranking por IA.
+- cria pesos, notas ou thresholds semânticos configuráveis;
+- usa histórico, feedback ou reranking por IA;
+- faz chamadas extras de embedding ou múltiplas chamadas de resposta em lotes;
+- persiste vetores do input, scores, estatísticas, regiões ou contexto;
+- altera evidências, derivações ou embeddings;
+- usa similaridade como confiança epistêmica.
 
-A hipótese falsificável é: para um mesmo Retriever, corpus e orçamento de contexto, o CIE pode reduzir ruído e aumentar estabilidade entre formulações semanticamente próximas sem degradar recall relevante de forma inaceitável.
+`QUERY_NON_SEMANTIC_MAX_EVIDENCE` atua somente nas rotas direta, estrutural e ampla. Não participa de κq, κe ou de qualquer CIE.
 
-Essa hipótese exige comparação entre pelo menos:
+## Contrato com a LLM
 
-- Retriever Top-k sem CIE;
-- Retriever Top-k com CIE;
-- reranker de referência, quando aplicável.
+O provedor recebe `Eq`, âncoras literais protegidas e os papéis hierárquicos herdados. Ele não recebe liberdade para buscar fontes externas. A presença de uma fonte no contexto autoriza seu uso, mas não obriga uma citação decorativa: somente fontes incorporadas analiticamente à prosa e citadas de forma visível permanecem em `used_evidence_ids`.
 
-Devem ser medidos precision/recall, estabilidade entre paráfrases, validade de citações, recusas corretas e incorretas, tamanho de contexto, tokens, latência e custo. Distribuições assimétricas, concentradas ou com médias próximas de zero devem ser analisadas separadamente. A média como ponto de corte é uma decisão atual a ser validada, não uma lei universal de recuperação.
+## Auditabilidade
 
-## Evolução compatível
+`context_intelligence` identifica cada análise por `stage`:
 
-O CIE estabelece um ponto de expansão sem alterar o contrato das demais camadas. Analisadores futuros — robustos, temporais, topológicos, de entropia ou de grafo transitório — somente devem ser incorporados quando mantiverem neutralidade, determinismo observável, ausência de persistência indevida e avaliação experimental comparável.
+- `hierarchical`: CIE após κq;
+- `primary`: CIE após κe, com `source_region` igual a `core` ou `convergence`;
+- `global`: CIE final sobre `Gq`.
 
-A implementação vigente contém apenas o analisador de distribuição estatística descrito neste documento. A calibração semântica estrita dos operadores `simetry` e `assimetry` permanece como evolução futura separada: ela não altera a seleção do CIE, a composição do contexto disponível nem a regra de que somente evidências citadas integram a base final.
+Cada item expõe transitoriamente população, `μ`, `σ`, `CV`, limites, região eleita, núcleo, convergência, descarte e diagnóstico κ quando aplicável.
+
+## Limite científico
+
+Determinismo não prova relevância. O fluxo continua dependente da qualidade do corpus, da estrutura documental, das sínteses, dos embeddings e da capacidade de κ identificar rupturas úteis. CIE usa fronteiras relativas e não possui um limiar absoluto de “nenhum candidato relacionado”. O núcleo global também não garante cobertura equilibrada de todas as disciplinas.
+
+A hipótese falsificável é que, sob o mesmo corpus, modelos e protocolo, o fluxo atual reduza ruído, tokens e instabilidade entre paráfrases sem perda inaceitável de recall. Isso exige comparação representativa com baselines de Top-k fixo, reranking e contexto longo; o teste funcional atual não demonstra superioridade estatística.
+
+## Referências operacionais
+
+- [Contrato determinístico de evidências](05_DETERMINISTIC_EVIDENCE_CONTRACT.md)
+- [Fluxo detalhado da API](03_EVA_API_FLOW.md)
+- [Documentação operacional do CIE](../docs/14_CONTEXT_INTELLIGENCE_ENGINE.md)
+- [Especificação completa do upgrade](../updates/EVA_UPGRADE_CIE_GLOBAL_CONSOLIDATION.md)

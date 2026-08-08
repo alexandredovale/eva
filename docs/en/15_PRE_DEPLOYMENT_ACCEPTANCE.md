@@ -92,7 +92,7 @@ Security tests confirmed removal of passwords, secrets, tokens, API keys, Bearer
 
 At the original pre-CIE acceptance, 15 suites ran without paid provider calls and passed **883 assertions**. JavaScript syntax validation, the complete commented inventory of 46 `.env` variables, the real backup/restore test, and the local deployment verifier also passed.
 
-For the August 2, 2026 CIE update, `tests/ContextIntelligenceEngineTest.php` passed 13 assertions, `tests/ContextIntelligenceIntegrationTest.php` passed 10, and `tests/QueryTest.php` passed 49 without external calls. Before the next deployment, the complete regression and one controlled live semantic query must still run. The current default is `QUERY_CANDIDATE_LIMIT=20`; another value from `1` to `200` requires explicit validation.
+For the August 2, 2026 CIE update, `tests/ContextIntelligenceEngineTest.php` passed 13 assertions, `tests/ContextIntelligenceIntegrationTest.php` passed 10, and `tests/QueryTest.php` passed 49 without external calls. This record predates removal of `QUERY_CANDIDATE_LIMIT` and remains historical; the current implementation uses query-local κq.
 
 ## Mandatory post-upload procedure
 
@@ -106,7 +106,7 @@ For the August 2, 2026 CIE update, `tests/ContextIntelligenceEngineTest.php` pas
    ```
 
 5. Require zero verifier failures, then perform a final superadmin login and normal-user login on the published domain.
-6. Confirm that a conceptual or relational query returns `context_intelligence`, preserves core and convergence roles in the available context, resolves only primary sources, retains only analytically cited evidence in the final basis, and discards uncited candidates without invalidating the answer.
+6. Confirm that a conceptual or relational query returns `hierarchical`, `primary`, and `global` analyses, preserves inherited hierarchical roles, delivers the global nucleus or convergence fallback plus literal anchors, retains only analytically cited evidence in the final basis, and discards uncited candidates without invalidating the answer.
 
 If any verifier check fails, keep the release in acceptance until corrected. The entire paid AI matrix need not be repeated only when code, database, and configuration are exactly those accepted; otherwise revalidate the affected behavior. In all cases, complete the final online smoke test and one controlled profile-aware query.
 

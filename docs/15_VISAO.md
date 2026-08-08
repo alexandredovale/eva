@@ -43,9 +43,9 @@ O fluxo implementado é:
 4. Sínteses ascendentes versionadas podem ser produzidas, mantendo a linhagem entre cada síntese e suas fontes.
 5. Embeddings são gerados para unidades documentais completas e previamente estruturadas.
 6. Na consulta, o input é encaminhado para rotas diretas, estruturais, amplas ou semânticas.
-7. Nas rotas semânticas, o Context Intelligence Engine (CIE) separa candidatos em núcleo, convergência e descarte.
-8. Evidências derivadas selecionadas são resolvidas novamente até suas fontes primárias.
-9. O modelo de linguagem recebe somente o contexto primário disponível.
+7. Nas rotas semânticas, κq e CIE hierárquico atuam sobre a população completa; κe e CIE primário elegem núcleos locais.
+8. Evidências derivadas selecionadas são resolvidas integralmente até suas fontes primárias, separadas pela região herdada.
+9. O CIE global consolida os núcleos locais, e o modelo recebe apenas seu núcleo ou fallback de convergência, além de âncoras literais protegidas.
 10. A base final mantém apenas evidências incorporadas à prosa com citações visíveis; candidatas recuperadas mas não citadas são descartadas.
 11. Quando há interação demonstrável entre evidências citadas, Cnode existe apenas como derivação conceitual transitória do EVA, não como sistema, camada hierárquica ou entidade.
 12. A consulta e suas interações não alteram a memória documental persistente.
@@ -82,19 +82,19 @@ O próprio benchmark do projeto declara corretamente que não demonstra superior
 
 Esses resultados estão registrados no [benchmark interno](../philosophy/02_EVA_BENCHMARK_BASELINE.md). A execução antecede o CIE e, portanto, não prova a qualidade da arquitetura atual. O [roadmap](09_ROADMAP.md) mantém pendente a comparação representativa de qualidade, estabilidade, latência e tokens.
 
-O caso dirigido mais recente do CIE terminou em 24,32 segundos com dez evidências, mas o próprio [relatório de validação](11_VALIDACAO_GO_LIVE.md) reconhece que uma matriz representativa continua pendente.
+No teste dirigido de 8 de agosto de 2026 sobre sete obras, 350 núcleos primários locais foram consolidados pelo CIE global em 63 evidências enviadas à LLM; quatro foram citadas na resposta validada. O resultado demonstra o fluxo, não qualidade superior. O [relatório de validação](11_VALIDACAO_GO_LIVE.md) continua exigindo uma matriz representativa.
 
 ### Gargalos técnicos centrais
 
 #### Varredura vetorial
 
-A recuperação semântica carrega os vetores do documento, desserializa o JSON, calcula a similaridade de cosseno em PHP e somente depois limita o conjunto ao Top-k. Esse fluxo pode ser observado em [`DocumentContextRetriever.php`](../app/Application/Query/DocumentContextRetriever.php).
+A recuperação semântica carrega os vetores dos resumos hierárquicos elegíveis, desserializa o JSON, calcula todos os cosines em PHP, ordena globalmente e só então determina κq. Esse fluxo pode ser observado em [`DocumentContextRetriever.php`](../app/Application/Query/DocumentContextRetriever.php).
 
 O custo é aproximadamente proporcional à quantidade de embeddings multiplicada por sua dimensão, para cada documento e consulta. Em consultas multidocumentais, o trabalho se repete por obra.
 
 #### Limite por quantidade, não por tokens
 
-`QUERY_MAX_EVIDENCE` limita a quantidade de evidências, não o tamanho total em bytes ou tokens. Uma única evidência extensa pode produzir um prompt caro ou superar a janela operacional do modelo. A construção de sínteses hierárquicas também não possui atualmente uma guarda equivalente à proteção aplicada às unidades de embedding.
+Nas rotas semânticas, o CIE global substitui o antigo limite numérico de evidências. Uma única evidência extensa ainda pode produzir um prompt caro; a atomicidade das fontes primárias permanece requisito estrutural. A construção de sínteses hierárquicas também não possui atualmente uma guarda equivalente à proteção aplicada às unidades de embedding.
 
 #### Ausência de limiar absoluto de pertinência
 
@@ -154,7 +154,7 @@ A barreira de evidência do EVA responde diretamente a esse problema. Ela não p
 
 Janelas maiores não eliminam falhas de recuperação. Modelos podem usar pior as informações posicionadas no meio de contextos extensos, conforme demonstrado por [Lost in the Middle](https://aclanthology.org/2024.tacl-1.9.pdf).
 
-O EVA reduz o contexto antes da geração, preserva a estrutura documental e descarta candidatas não citadas, o que é relevante. Entretanto, limitar evidências por quantidade não substitui um orçamento real de tokens nem uma avaliação de pertinência.
+O EVA reduz o contexto antes da geração por κq, κe e CIE em três estágios, preserva a estrutura documental e descarta candidatas não citadas. Ainda assim, uma fronteira estatística por similaridade não equivale a um orçamento de tokens nem garante pertinência semântica; evidências primárias extensas continuam podendo produzir prompts caros.
 
 ### Avaliação de RAG
 

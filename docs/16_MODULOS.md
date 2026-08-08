@@ -63,7 +63,8 @@ interface ModuleInterface
 
 - `manifest`: manifesto validado e imutável;
 - `storage`: PDO SQLite exclusivo do módulo;
-- `core`: API de leitura do Core limitada às capacidades declaradas;
+- `core`: API de leitura do Core limitada às capacidades declaradas; em contextos interativos,
+  `actorScopes()` retorna somente projetos e obras autorizados para o ator autenticado;
 - `language`: geração JSON por IA sem exposição da chave ao módulo.
 - `query`: consulta documental escopada ao ator autenticado, disponível somente com `core.query.scoped` em contextos interativos.
 

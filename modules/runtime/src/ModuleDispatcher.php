@@ -62,6 +62,22 @@ final readonly class ModuleDispatcher
             'SELECT last_event_row_id FROM runtime_event_cursor WHERE singleton_id = 1'
         )->fetchColumn();
         $earliest = $this->events->earliestRowId();
+        $latest = $this->events->latestRowId();
+
+        if ($cursor > $latest) {
+            $resumedAt = $earliest > 0 ? $earliest : 0;
+            $gap = $storage->prepare(
+                "INSERT INTO runtime_event_gaps (previous_cursor, resumed_at_row_id, recorded_at)
+                 VALUES (:previous_cursor, :resumed_at_row_id, datetime('now'))"
+            );
+            $gap->execute(['previous_cursor' => $cursor, 'resumed_at_row_id' => $resumedAt]);
+            $storage->prepare(
+                "UPDATE runtime_event_cursor
+                    SET last_event_row_id = :row_id, updated_at = datetime('now')
+                  WHERE singleton_id = 1"
+            )->execute(['row_id' => max(0, $resumedAt - 1)]);
+            $cursor = max(0, $resumedAt - 1);
+        }
 
         if ($earliest > 0 && $cursor > 0 && $cursor < ($earliest - 1)) {
             $gap = $storage->prepare(

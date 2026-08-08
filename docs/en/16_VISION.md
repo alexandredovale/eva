@@ -43,9 +43,9 @@ The implemented flow is:
 4. Versioned bottom-up summaries may be produced while preserving lineage between each summary and its sources.
 5. Embeddings are generated for complete, previously structured documentary units.
 6. At query time, the input is routed through direct, structural, broad, or semantic paths.
-7. In semantic routes, the Context Intelligence Engine (CIE) separates candidates into core, convergence, and discard regions.
-8. Selected derived evidence is resolved back to its primary sources.
-9. The language model receives only the available primary context.
+7. On semantic routes, κq and hierarchical CIE operate over the complete population; κe and primary CIE elect local nuclei.
+8. Selected derived evidence is resolved completely to primary sources, split by inherited region.
+9. Global CIE consolidates local nuclei, and the model receives only its nucleus or convergence fallback, plus protected literal anchors.
 10. The final basis retains only evidence incorporated into the prose with visible citations; recovered but uncited candidates are discarded.
 11. When an interaction can be demonstrated between cited evidence, Cnode exists only as a transient conceptual derivation of EVA, not as a system, hierarchical layer, or entity.
 12. Queries and their interactions do not change persistent documentary memory.
@@ -82,19 +82,19 @@ The project's own benchmark correctly states that it does not demonstrate superi
 
 These results are recorded in the [internal benchmark](../../philosophy/02_EVA_BENCHMARK_BASELINE.md). The run predates CIE and therefore does not prove the quality of the current architecture. The [roadmap](../09_ROADMAP.md) still lists representative comparison of quality, stability, latency, and tokens as pending.
 
-The latest directed CIE case completed in 24.32 seconds with ten pieces of evidence, but the [validation report](../11_VALIDACAO_GO_LIVE.md) itself acknowledges that a representative matrix remains pending.
+In the August 8, 2026 directed test over seven works, 350 local primary-nucleus candidates were consolidated into 63 sources sent to the LLM; four were cited in the validated answer. This demonstrates the flow, not superior quality. The [validation report](../11_VALIDACAO_GO_LIVE.md) still requires a representative matrix.
 
 ### Central Technical Bottlenecks
 
 #### Vector scanning
 
-Semantic retrieval loads document vectors, deserializes JSON, calculates cosine similarity in PHP, and only then restricts the population to Top-k. This flow can be observed in [`DocumentContextRetriever.php`](../../app/Application/Query/DocumentContextRetriever.php).
+Semantic retrieval loads every eligible hierarchical-summary vector, deserializes JSON, calculates every cosine in PHP, globally orders the distribution, and only then derives κq. This flow can be observed in [`DocumentContextRetriever.php`](../../app/Application/Query/DocumentContextRetriever.php).
 
 Its cost is approximately proportional to the number of embeddings multiplied by their dimensions for every document and query. In multi-document queries, the work is repeated for each work.
 
-#### Count limit rather than token limit
+#### Statistical boundary rather than token budget
 
-`QUERY_MAX_EVIDENCE` limits the number of evidence units, not their total size in bytes or tokens. A single long evidence unit can create an expensive prompt or exceed the model's operational window. Hierarchical summary construction also lacks a guard equivalent to the protection applied to embedding units.
+On semantic routes, global CIE replaces the former configured evidence count. A single long evidence unit can still create an expensive prompt, so primary-source atomicity remains a structural requirement. Hierarchical summary construction also lacks a guard equivalent to the protection applied to embedding units.
 
 #### No absolute relevance threshold
 
@@ -154,7 +154,7 @@ EVA's evidence barrier directly addresses this problem. It does not prove that a
 
 Larger context windows do not eliminate retrieval failures. Models can make worse use of information placed in the middle of long contexts, as demonstrated by [Lost in the Middle](https://aclanthology.org/2024.tacl-1.9.pdf).
 
-EVA reduces context before generation, preserves documentary structure, and discards uncited candidates, all of which are relevant. However, limiting evidence by count does not replace a real token budget or relevance evaluation.
+EVA reduces context before generation through κq, κe, and three CIE stages, preserves documentary structure, and discards uncited candidates. However, a similarity-distribution boundary is not a token budget and does not guarantee semantic relevance; long primary units can still create expensive prompts.
 
 ### RAG evaluation
 

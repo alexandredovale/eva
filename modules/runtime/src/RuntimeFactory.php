@@ -76,7 +76,7 @@ final readonly class RuntimeFactory
         return new ModuleContext(
             $manifest,
             $this->storage->open($manifest),
-            new CoreReadApi($this->database, $manifest->capabilities),
+            new CoreReadApi($this->database, $manifest->capabilities, $actor),
             new LanguageModelApi($manifest->capabilities, $this->aiConfiguration),
             $actor instanceof ActorContext
                 ? new CoreQueryApi(

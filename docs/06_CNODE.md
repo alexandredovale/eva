@@ -6,7 +6,7 @@ Cnode ou Cognitive Node é uma derivação conceitual interna do EVA — Evidenc
 
 O EVA persiste as evidências e sua linhagem. A derivação conceitual Cnode é produzida transitoriamente a partir desse núcleo e validada contra as fontes primárias.
 
-O Context Intelligence Engine atua antes dessa compreensão relacional. Ele reduz o Top-k vetorial ao núcleo estatístico principal e à faixa de convergência complementar — promovendo a convergência quando o núcleo não existe — sem produzir `simetry`, `assimetry` ou qualquer interpretação semântica. CIE e Cnode são operações transitórias distintas dentro do EVA, sem hierarquia de sistemas: o primeiro seleciona contexto por distribuição; a segunda deriva conceitualmente interações explícitas entre fontes já selecionadas.
+As fronteiras κq/κe e os CIEs hierárquico, primário e global atuam antes dessa compreensão relacional. Eles legitimam e consolidam populações vetoriais sem produzir `simetry`, `assimetry` ou qualquer interpretação semântica. CIE e Cnode são operações transitórias distintas dentro do EVA.
 
 `simetry` e `assimetry` pertencem ao vocabulário interno do EVA. Elas não são expressões que o documento precise conter e sua ausência textual não impede que o sistema responda à questão substantiva com evidências válidas.
 

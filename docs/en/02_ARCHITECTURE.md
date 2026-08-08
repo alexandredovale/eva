@@ -13,7 +13,7 @@ The architecture separates responsibilities without duplicating concepts and wit
 5. **Embeddings:** vectorizes complete organized evidence units.
 6. **Query routing:** classifies the local retrieval path.
 7. **Retrieval:** locates and orders primary or derived candidates.
-8. **Context intelligence:** stabilizes the semantic Top-k through its similarity distribution.
+8. **Query-local boundaries and context intelligence:** κq legitimizes the complete hierarchical population; κe separately legitimizes primary sources inherited from hierarchical core and convergence; CIE classifies each stage and globally consolidates local primary nuclei.
 9. **Lineage resolution:** resolves selected derived candidates to primary sources.
 10. **Answer:** produces one structured documentary response.
 11. **Validation:** verifies evidence identifiers, visible citations, participants, orientation, and literal excerpts.
@@ -25,14 +25,17 @@ The architecture separates responsibilities without duplicating concepts and wit
 ```text
 File → parser → tree → primary evidence → summaries → derivations → embeddings
 
-Question → routing → primary/derived retrieval → Top-k → CIE (μ, σ, CV)
-         → available core + convergence context → lineage resolution → available primary sources
+Question → routing → complete hierarchical retrieval → κq → hierarchical CIE (μ, σ, CV)
+         → complete lineage resolution by inherited region
+         → primary cosine → κe → primary CIE by region and work
+         → union of local nuclei → global CIE
+         → global nucleus (or convergence fallback) + literal anchors
          → deterministic contract → answer + transient interactions → validation
 ```
 
 ## Separation of responsibilities
 
-Embeddings locate semantically compatible evidence. Similarity orders the semantic Top-k and is then observed by CIE. Candidates below the mean are discarded; the convergence core (`s ≥ μ + σ`) leads the available context, while the convergence range (`μ ≤ s < μ + σ`) provides complementary context. When the core is empty, convergence assumes the primary role. The analysis remains transient.
+Embeddings locate semantically compatible hierarchical units. Similarity globally orders the complete eligible population, κq establishes its query-local boundary, and hierarchical CIE classifies it. Lineage is resolved without truncation; primary sources separated by inherited role pass through κe and primary CIE. A final global CIE classifies the deduplicated union of local primary nuclei. Its nucleus forms the final semantic context, with convergence used only when that nucleus is empty. Exact literal matches outside the vector population remain protected anchors. All analyses remain transient.
 
 Derived evidence can guide retrieval, but the answer receives its resolved primary sources as available context with explicit `core` or `convergence` roles. The answer provider cannot introduce external sources or IDs outside that set. The final evidence basis retains only sources incorporated into the prose with visible citations; a recovered but uncited source is discarded without invalidating the entire answer. Missing, out-of-context, or citation-only inventory references remain invalid. The answer provider may declare `simetry` or `assimetry` in the same call that produces the answer. Local code accepts an interaction only when both participants belong to the recovered context, were cited, and contain the declared literal excerpts.
 

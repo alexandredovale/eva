@@ -2,7 +2,7 @@
 
 Use this checklist for every public release. Always start from a fresh clone of the canonical GitHub repository in an exclusive local analysis directory, inspect the remote state, and copy only an explicit source allowlist.
 
-## Release v2.0.0
+## Release v3.0.0
 
 - [x] Create a fresh clone from `alexandredovale/eva` under `.00-analise/` and verify `origin/main` before copying files.
 - [x] Copy only source, public documentation, empty schema, versioned migrations, and tests.
@@ -10,8 +10,9 @@ Use this checklist for every public release. Always start from a fresh clone of 
 - [x] Review the complete diff and run the offline regression suite in the release clone.
 - [x] Confirm that `database/` contains only `schema.sql`, versioned migrations, and tracked placeholders.
 - [x] Confirm that `modules/.runtime/` contains only HTTP protections and empty tracked placeholders.
+- [x] Confirm that `modules/com.eva.explorer/` and `modules/com.eva.enade/` contain only tracked `.gitkeep` placeholders and that their private implementations are ignored.
 - [x] Review attribution, `CHANGELOG.md`, `CITATION.cff`, and the public version.
-- [x] Commit and push canonical `main`, verify `origin/HEAD`, remove obsolete remote branches, create annotated tag `v2.0.0`, and publish the GitHub Release.
+- [x] Commit and push canonical `main`, verify `origin/HEAD`, create annotated tag `v3.0.0`, and publish the GitHub Release.
 
 Release tags preserve published history and are not competing development branches. Create or remove a tag only as an explicit release-management decision.
 

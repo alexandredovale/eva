@@ -13,7 +13,8 @@ final readonly class DocumentQueryService
 
     public function __construct(
         private DocumentContextRetriever $retriever,
-        private QueryAnswerProviderInterface $answerProvider
+        private QueryAnswerProviderInterface $answerProvider,
+        private ContextIntelligenceEngine $contextIntelligenceEngine = new ContextIntelligenceEngine()
     ) {
     }
 
@@ -32,6 +33,7 @@ final readonly class DocumentQueryService
             $maxEvidence,
             $maxInteractions
         );
+        $context = $this->consolidateGlobalPrimaryCore($context);
 
         if ($responseProfiles !== [] || $supplementaryInstructions !== []) {
             $context = new QueryContext(
@@ -100,6 +102,7 @@ final readonly class DocumentQueryService
         $routingPoints = [];
         $limitations = [];
         $contextIntelligenceAnalyses = [];
+        $hasPrimaryAnalysis = false;
 
         foreach ($contexts as $context) {
             $routingPoints = [...$routingPoints, ...$context->routingPoints];
@@ -112,13 +115,20 @@ final readonly class DocumentQueryService
                 ...$contextIntelligenceAnalyses,
                 ...$context->contextIntelligenceAnalyses,
             ];
+
+            foreach ($context->contextIntelligenceAnalyses as $analysis) {
+                if ($analysis->stage === 'primary') {
+                    $hasPrimaryAnalysis = true;
+                    break;
+                }
+            }
         }
 
         $evidenceByPublicId = [];
         $evidenceSelection = [];
         $position = 0;
 
-        while (count($evidenceByPublicId) < $maxEvidence) {
+        while ($hasPrimaryAnalysis || count($evidenceByPublicId) < $maxEvidence) {
             $added = false;
 
             foreach ($contexts as $context) {
@@ -136,7 +146,7 @@ final readonly class DocumentQueryService
 
                 $added = true;
 
-                if (count($evidenceByPublicId) >= $maxEvidence) {
+                if (!$hasPrimaryAnalysis && count($evidenceByPublicId) >= $maxEvidence) {
                     break;
                 }
             }
@@ -159,8 +169,74 @@ final readonly class DocumentQueryService
             $evidenceSelection,
             $supplementaryInstructions
         );
+        $context = $this->consolidateGlobalPrimaryCore($context);
 
         return $this->answerFromContext($input, $context);
+    }
+
+    private function consolidateGlobalPrimaryCore(QueryContext $context): QueryContext
+    {
+        /** @var array<int, ContextCandidate> $candidateById */
+        $candidateById = [];
+
+        foreach ($context->contextIntelligenceAnalyses as $analysis) {
+            if ($analysis->stage !== 'primary') {
+                continue;
+            }
+
+            $localNucleus = $analysis->coreCandidates !== []
+                ? $analysis->coreCandidates
+                : $analysis->convergenceCandidates;
+
+            foreach ($localNucleus as $candidate) {
+                $current = $candidateById[$candidate->evidenceId] ?? null;
+
+                if ($current === null || $candidate->similarity > $current->similarity) {
+                    $candidateById[$candidate->evidenceId] = $candidate;
+                }
+            }
+        }
+
+        if ($candidateById === []) {
+            return $context;
+        }
+
+        $globalCandidates = array_values($candidateById);
+        usort($globalCandidates, static fn (ContextCandidate $left, ContextCandidate $right): int =>
+            ($right->similarity <=> $left->similarity) ?: ($left->evidenceId <=> $right->evidenceId)
+        );
+        $globalAnalysis = $this->contextIntelligenceEngine
+            ->analyze($globalCandidates)
+            ->forGlobalStage();
+        $globalNucleus = $globalAnalysis->coreCandidates !== []
+            ? $globalAnalysis->coreCandidates
+            : $globalAnalysis->convergenceCandidates;
+        $eligiblePrimaryIds = array_fill_keys(array_map(
+            static fn (ContextCandidate $candidate): int => $candidate->evidenceId,
+            $globalNucleus
+        ), true);
+        $knownPrimaryIds = array_fill_keys(array_keys($candidateById), true);
+        $evidences = array_values(array_filter(
+            $context->evidences,
+            static fn (RetrievedEvidence $evidence): bool => !isset($knownPrimaryIds[$evidence->id])
+                || isset($eligiblePrimaryIds[$evidence->id])
+        ));
+        $retainedPublicIds = array_fill_keys(array_map(
+            static fn (RetrievedEvidence $evidence): string => $evidence->publicId,
+            $evidences
+        ), true);
+
+        return new QueryContext(
+            $context->understanding,
+            $evidences,
+            $context->interactionLimit,
+            [...$context->routingPoints, 'retrieval:cie-global:' . $globalAnalysis->selectedRegion],
+            $context->limitations,
+            $context->responseProfiles,
+            [...$context->contextIntelligenceAnalyses, $globalAnalysis],
+            array_intersect_key($context->evidenceSelection, $retainedPublicIds),
+            $context->supplementaryInstructions
+        );
     }
 
     private function answerFromContext(string $input, QueryContext $context): DocumentQueryResult

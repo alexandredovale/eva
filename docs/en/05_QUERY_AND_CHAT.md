@@ -20,15 +20,15 @@ An unsupported aspect never authorizes external knowledge and does not erase oth
 
 ## Retrieval
 
-Direct, structural, and broad routes navigate identifiers and document hierarchy. Conceptual and relational routes create a transient input embedding and search primary and derived evidence.
+Direct, structural, and broad routes navigate identifiers and document hierarchy. Conceptual and relational routes create a transient input embedding and search the complete eligible `derived:node_summary` population.
 
-On conceptual or relational queries, an exact textual match does not terminate retrieval. The literal evidence enters first as `core`, preserving the direct answer as the anchor, and the same input continues through the vector Top-k and CIE. Semantically selected primary sources compose the available context within `QUERY_MAX_EVIDENCE` without leaving the selected works. Exclusively direct, structural, or broad queries still consume no query embedding.
+On conceptual or relational queries, an exact textual match remains a protected `core` anchor. The same input continues through κq, hierarchical CIE, complete lineage resolution, κe, and primary CIE by inherited region. A global CIE consolidates the local primary nuclei without a configured evidence count.
 
 Literal, lexical, and structural matches are candidates rather than conclusions. On non-vector routes, the application composes the available context within the configured limit. The provider retains in the final basis only evidence incorporated into the answer with a visible citation, without extending its literal meaning; uncited candidates are discarded.
 
 `simetry` and `assimetry` are internal cognitive operators. They guide relational understanding but are not treated as expressions that a documentary source must contain.
 
-For semantic routes, Retriever orders up to `QUERY_CANDIDATE_LIMIT` candidates and CIE calculates the mean, population standard deviation, and coefficient of variation. Candidates below the mean are discarded. The convergence core leads the available semantic context; the convergence range follows as complementary context. If no core exists, convergence becomes the primary context. Selected derived candidates are then resolved through `evidence_derivations` until primary sources are available. The answer provider receives the deterministic `core`/`convergence` role, but not similarity values as documentary authority.
+For semantic routes, Retriever scores every eligible hierarchical unit, globally orders the distribution, and derives κq from normalized geometry and query-local gaps. If no structural break is identified, the complete population proceeds to CIE. CIE then calculates the mean, population standard deviation, and coefficient of variation. Selected derived candidates are resolved through `evidence_derivations` until primary sources are available.
 
 ## Project response governance
 
@@ -45,16 +45,15 @@ The backend merges authorized document IDs and deduplicates them before retrieva
 
 ## Evidence gate
 
-If retrieval finds no primary evidence, EVA returns an explicit documentary limitation without calling the answer provider. When context exists, the answer provider may use the relevant subset of the deterministically recovered evidence. Every retained evidence must be visibly cited where its analytical contribution is explained; recovered candidates without a citation are discarded without invalidating the answer. Core evidence leads the answer, convergence evidence may provide complementary analysis, and citation-only inventories are rejected.
+If retrieval finds no primary evidence, EVA returns an explicit documentary limitation without calling the answer provider. On semantic routes, the provider receives the global CIE nucleus—or global convergence when that nucleus is empty—plus protected literal anchors. Every source retains its inherited hierarchical `core` or `convergence` role. Every retained evidence must be visibly cited where its analytical contribution is explained; recovered candidates without a citation are discarded without invalidating the answer, and citation-only inventories are rejected.
 
 ## Query limits
 
-- `QUERY_CANDIDATE_LIMIT`: semantic Top-k analyzed by CIE per document, default `20`, effective range `1..200`.
-- `QUERY_MAX_EVIDENCE`: global primary-candidate limit, default `8`, effective range `1..50`.
+- `QUERY_NON_SEMANTIC_MAX_EVIDENCE`: limit used only by direct, structural, or broad routes, default `8`, effective range `1..50`.
 - `QUERY_MAX_INTERACTIONS`: accepted transient-interaction limit, default `20`, effective range `0..100`.
 - `AI_QUERY_MAX_OUTPUT_TOKENS`: per-attempt output ceiling, default `1800`, effective range `100..3000`.
 
-`QUERY_CANDIDATE_LIMIT` defines the statistical population before lineage resolution. `QUERY_MAX_EVIDENCE` caps the primary context after CIE and remains global across all selected works.
+Semantic evidence quantity is fully query-local: the global CIE nucleus replaces the former configured count.
 
 A response truncated by the provider is never partially decoded. EVA allows at most one complete retry with an additional compactness instruction.
 
@@ -110,7 +109,7 @@ The public query result separates:
 - `context_intelligence`;
 - `limitations`.
 
-Each used evidence item exposes `selection_region`. `evidence_selection` lists the cited core and convergence IDs. `context_intelligence` is empty on exclusively non-semantic routes and otherwise exposes the transient per-document calculation. The API returns all result fields to every authorized user; the current interface shows the answer and evidence to everyone but restricts CIE, `simetry`, `assimetry`, and technical limitations to the superadmin.
+Each used evidence item exposes `selection_region`. `evidence_selection` lists cited IDs with their inherited hierarchical role. `context_intelligence` is empty on exclusively non-semantic routes and otherwise exposes `hierarchical`, `primary`, and `global` analyses, including κ diagnostics. The API returns all result fields to every authorized user; the current interface shows the answer and evidence to everyone but restricts CIE, `simetry`, `assimetry`, and technical limitations to the superadmin.
 
 Neither CIE analysis nor interaction objects modify documentary memory. After a completed query, `audit_events` receives sanitized metadata including interaction counts. If an active module subscribes, the Runtime emits `interaction.completed` before the HTTP response and may persist its allowed envelope in `module_events`; module failures are isolated from the documentary answer.
 

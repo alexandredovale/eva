@@ -3,12 +3,13 @@
 **Versão:** 2.4
 **Data:** 2 de agosto de 2026
 **Autoria:** Projeto EVA
+**English:** [Full scientific paper](en/01_EVA_SCIENTIFIC_PAPER.md)
 
 ## Resumo
 
 Este artigo apresenta o EVA (Evidence Algorithm), uma arquitetura para consulta documental assistida por modelos de linguagem cuja memória persistente é organizada em evidências rastreáveis, e não em respostas, relações cognitivas ou grafos inferidos. O sistema transforma documentos estruturados em uma árvore normalizada, preserva seus conteúdos literais como evidências primárias e produz sínteses hierárquicas como evidências derivadas com linhagem explícita. Embeddings são gerados para essas unidades semânticas completas, respeitando a organização do documento em vez de fragmentá-lo por limites arbitrários de caracteres ou tokens.
 
-Na consulta, o EVA seleciona uma rota de recuperação compatível com o tipo de input. Perguntas diretas, estruturais e amplas podem navegar pela hierarquia; perguntas conceituais e relacionais usam uma representação vetorial transitória para localizar evidências primárias e derivadas. Nessas rotas semânticas, o Context Intelligence Engine (CIE) analisa a distribuição do Top-k por média, desvio padrão e coeficiente de variação, identificando o núcleo de convergência como referência principal e a faixa de convergência como contexto complementar disponível. Quando não há núcleo, a convergência assume o papel principal. Evidências derivadas selecionadas são resolvidas até suas fontes primárias antes da geração da resposta; somente fontes incorporadas à prosa com citações visíveis integram a base final. Se nenhuma evidência primária suficiente for encontrada, o fluxo é interrompido sem chamada ao provedor de resposta.
+Na consulta, o EVA seleciona uma rota de recuperação compatível com o tipo de input. Perguntas diretas, estruturais e amplas podem navegar pela hierarquia; perguntas conceituais e relacionais usam uma representação vetorial transitória. Nessas rotas, κq emerge da população hierárquica completa antes do primeiro Context Intelligence Engine (CIE). A linhagem selecionada é resolvida integralmente; as fontes primárias herdadas de núcleo e convergência passam separadamente por κe e CIE primário; e a união dos núcleos locais recebe um CIE global. O núcleo global — ou sua convergência quando vazio — forma o contexto semântico sem Top-k ou quantidade configurada. Somente fontes incorporadas à prosa com citações visíveis integram a base final. Se nenhuma evidência primária suficiente for encontrada, o fluxo é interrompido sem chamada ao provedor de resposta.
 
 Relações cognitivas são tratadas como interações transitórias de **simetry** ou **assimetry**, produzidas somente no contexto da consulta, sem pesos, taxonomias julgamentais ou persistência. Em projetos multidisciplinares, evidências de documentos especializados distintos podem integrar uma seleção transitória e sustentar sínteses conceituais emergentes sem que a interpretação resultante seja promovida a evidência ou memória. Citações e participantes dessas interações são validados localmente contra o contexto recuperado. A proposta separa memória documental, recuperação, interpretação e apresentação, mantendo fornecedores e modelos como componentes substituíveis configurados externamente. O artigo descreve a arquitetura vigente, suas hipóteses verificáveis, limitações e um protocolo experimental para avaliação futura.
 
@@ -42,7 +43,7 @@ Essa questão contém sete problemas interdependentes:
 4. **fundamentação:** impedir respostas documentais quando nenhuma evidência primária foi recuperada;
 5. **fronteira epistemológica:** impedir que similaridades, respostas e relações inferidas sejam promovidas automaticamente a memória.
 6. **articulação multidisciplinar:** permitir relações entre fontes especializadas distintas sem apagar sua proveniência nem contaminar o acervo com interpretações transitórias.
-7. **estabilização do contexto:** reduzir o ruído do Top-k vetorial por uma transformação determinística e auditável, sem delegar a seleção a outro modelo.
+7. **estabilização do contexto:** fazer as fronteiras semânticas emergirem da geometria query-local e consolidar núcleos primários por uma transformação determinística e auditável, sem delegar a seleção a outro modelo.
 
 O EVA aborda esses problemas como uma cadeia única. A qualidade final não depende apenas do modelo gerador, mas do contrato entre ingestão, persistência, recuperação, validação e apresentação.
 
@@ -223,7 +224,7 @@ Inputs conceituais e relacionais recebem um embedding transitório. Para uma con
 sim(q,e_i) = \frac{v_q \cdot v_i}{\|v_q\|\|v_i\|}
 \]
 
-O valor ordena candidatos primários e derivados. O Retriever preserva até o Top-k configurado por documento; esse conjunto alimenta o Context Intelligence Engine antes da resolução de linhagem. O valor não é persistido e não representa confiança epistêmica.
+O valor ordena todos os resumos hierárquicos elegíveis de cada documento. κq analisa a curva ordenada e, quando identifica uma ruptura confirmada pelos gaps da própria consulta, legitima a população anterior à ruptura; na ausência de ruptura identificável, a população completa segue ao CIE. O valor não é persistido e não representa confiança epistêmica.
 
 Para `N` candidatos com similaridades `sᵢ`, o CIE calcula as estatísticas populacionais:
 
@@ -239,19 +240,19 @@ Para `N` candidatos com similaridades `sᵢ`, o CIE calcula as estatísticas pop
 CV = \frac{\sigma}{\mu}
 \]
 
-Quando `μ = 0`, o CV é indefinido e representado como `null`. Candidatos com `s < μ` são descartados; `μ ≤ s < μ + σ` define a faixa de convergência; e `s ≥ μ + σ` define o núcleo. Se houver núcleo, ele segue como referência principal e a faixa de convergência compõe o contexto complementar disponível. Se o núcleo estiver vazio, a convergência assume o papel principal. Uma tolerância numérica mínima protege as comparações de fronteira sem alterar os valores calculados.
+Quando `μ = 0`, o CV é indefinido e representado como `null`. Candidatos com `s < μ` são descartados; `μ ≤ s < μ + σ` define a faixa de convergência; e `s ≥ μ + σ` define o núcleo. Em qualquer CIE, o núcleo é eleito e a convergência assume esse papel somente quando ele estiver vazio. No estágio hierárquico, porém, ambas as regiões são preservadas para resolução e análise primária separadas. Uma tolerância numérica mínima protege as comparações de fronteira sem alterar os valores calculados.
 
 Essa transformação é determinística e preserva a ordem original do Retriever dentro de cada região. Ela não cria peso, nota ou ranking adicional. A saída da consulta pode expor as regiões e estatísticas para auditoria, mas o provedor de resposta recebe apenas o contexto primário resolvido.
 
-Evidências derivadas selecionadas pelo CIE funcionam como mapas semânticos para regiões maiores. Antes de compor o contexto final, o EVA percorre suas derivações e recupera evidências primárias. Dessa forma, a síntese melhora a localização, enquanto a fonte literal conserva a autoridade documental.
+Evidências derivadas selecionadas pelo CIE hierárquico funcionam como mapas semânticos para regiões maiores. O EVA percorre integralmente suas derivações e recupera evidências primárias, preservando se cada fonte foi alcançada por núcleo ou convergência. As duas populações passam separadamente por κe e CIE primário com cosine próprio contra a mesma consulta. Dessa forma, a síntese melhora a localização, enquanto a fonte literal conserva a autoridade documental.
 
 ### 7.4 Consulta multidocumental e seleção transitória
 
-Quando o escopo da consulta é um projeto, o EVA mantém os documentos como unidades independentes de recuperação. Cada obra produz sua própria distribuição, analisada separadamente pelo CIE; em seguida, as fontes primárias selecionadas são intercaladas em uma seleção global limitada de evidências. A composição é determinada pelo input atual e não cria relações persistentes entre os documentos.
+Quando o escopo da consulta é um projeto, o EVA mantém os documentos como unidades independentes de recuperação. Cada obra executa κq, CIE hierárquico, κe e CIE primário separadamente. Os núcleos primários locais são então unidos, deduplicados e analisados pelo CIE global. A composição é determinada pelo input atual, não usa quantidade configurada e não cria relações persistentes entre os documentos.
 
 Essa seleção permite que evidências de disciplinas distintas cheguem simultaneamente ao provedor de resposta. Uma consulta pode, por exemplo, pedir a interseção entre um conceito jurídico, uma descrição técnica e uma análise histórica. O modelo pode formular uma síntese relacional a partir do conjunto recuperado, mas cada afirmação documental continua vinculada às evidências citadas de cada área.
 
-Adicionar documentos ao projeto amplia o universo potencial de candidatos; não cria uma malha completa de conexões e não aumenta automaticamente o número de evidências entregue à resposta, que permanece sujeito ao limite operacional. Portanto, a interdisciplinaridade é ativada pela consulta, não pré-computada como grafo nem acumulada como memória inferida.
+Adicionar documentos ao projeto amplia o universo potencial de candidatos; não cria uma malha completa de conexões e não determina antecipadamente o número entregue à resposta. A quantidade `K(q)` emerge do CIE global e pode crescer ou diminuir conforme a distribuição. Portanto, a interdisciplinaridade é ativada pela consulta, não pré-computada como grafo nem acumulada como memória inferida.
 
 ### 7.5 Barreira de evidência
 
@@ -436,7 +437,7 @@ Uma avaliação controlada deve comparar:
 4. recuperação sobre primárias e derivadas sem resolução de linhagem;
 5. EVA com roteamento, linhagem e barreira de evidência, mas sem CIE;
 6. EVA completo com CIE;
-7. reranker de referência sobre o mesmo Top-k, quando aplicável;
+7. reranker de referência sobre um orçamento de candidatos declarado, quando aplicável;
 8. contexto longo, quando tecnicamente e economicamente comparável.
 
 Todos os baselines devem usar, na medida do possível, os mesmos documentos, provedor de embeddings, provedor de resposta e orçamento de contexto.
@@ -480,7 +481,7 @@ As perguntas devem ser anotadas por avaliadores independentes e separadas em:
 - cobertura estrutural de seções relevantes;
 - duplicação de contexto;
 - cobertura equilibrada dos documentos pertinentes em consultas multidisciplinares;
-- taxa de exclusão indevida de uma disciplina relevante pelo limite global de contexto.
+- taxa de exclusão indevida de uma disciplina relevante por κq, κe ou pelo núcleo global.
 - proporção de candidatos em descarte, convergência e núcleo;
 - estabilidade da composição núcleo/convergência entre paráfrases;
 - diferença de precision/recall e tokens de contexto com e sem CIE.
@@ -549,7 +550,7 @@ Essas observações servem como verificação funcional, não como resultado cie
 
 Na rota semântica, conceitos relevantes podem receber baixa similaridade e não entrar no conjunto candidato. Embeddings também podem aproximar passagens apenas superficialmente semelhantes.
 
-O CIE opera somente sobre esse conjunto e não corrige uma ausência anterior ao Top-k. Além disso, a média como ponto de corte pressupõe que o centro aritmético seja uma fronteira útil. Distribuições assimétricas, muito concentradas ou com médias próximas de zero podem exigir medidas robustas em versões futuras. Essa possibilidade não invalida a separação arquitetural, mas impede tratar o corte atual como universalmente ótimo.
+κq observa toda a população hierárquica elegível, mas ainda depende da qualidade dos embeddings, do corpus e da capacidade do detector de reconhecer uma ruptura real; uma ruptura inexistente ou ambígua mantém a população completa. κe e os três estágios do CIE também não corrigem unidades ausentes do índice ou linhagens incompletas. A média como ponto de corte pressupõe que o centro aritmético seja uma fronteira útil. Distribuições assimétricas, muito concentradas ou com médias próximas de zero podem exigir medidas robustas em versões futuras. Essa possibilidade não invalida a separação arquitetural, mas impede tratar o corte atual como universalmente ótimo.
 
 ### 14.2 Perda em sínteses
 
@@ -587,7 +588,7 @@ A instalação atual possui superadmin, usuários, sessões e autorização gran
 
 ### 14.10 Cobertura multidisciplinar limitada pelo contexto
 
-Um projeto pode conter mais documentos e evidências do que o limite global de uma consulta comporta. A intercalação favorece diversidade documental, mas não garante que todas as disciplinas pertinentes sejam representadas no contexto final. Uma síntese multidisciplinar pode ser incompleta mesmo quando cada afirmação apresentada possui citação válida.
+Um projeto pode conter muitas obras, mas o CIE global não garante que todas as disciplinas pertinentes apareçam em seu núcleo. Uma distribuição numerosa de uma área pode alterar μ e σ globais, e nenhuma fronteira estatística prova cobertura temática completa. Uma síntese multidisciplinar pode ser incompleta mesmo quando cada afirmação apresentada possui citação válida.
 
 ## 15. Discussão
 
@@ -627,7 +628,7 @@ A simplicidade do fluxo é uma propriedade de projeto, não uma evidência de su
 
 ## 16. Conclusão
 
-O EVA organiza memória documental como um conjunto verificável de evidências primárias e derivadas sobre uma árvore estrutural preservada. Sínteses possuem linhagem, embeddings representam unidades semanticamente organizadas e consultas escolhem rotas hierárquicas ou semânticas conforme sua forma operacional. Nas rotas vetoriais, o CIE estabelece uma fronteira matemática entre recuperação e interpretação, fazendo o contexto final emergir da distribuição do Top-k.
+O EVA organiza memória documental como um conjunto verificável de evidências primárias e derivadas sobre uma árvore estrutural preservada. Sínteses possuem linhagem, embeddings representam unidades semanticamente organizadas e consultas escolhem rotas hierárquicas ou semânticas conforme sua forma operacional. Nas rotas vetoriais, κq, κe e os CIEs hierárquico, primário e global estabelecem fronteiras matemáticas entre recuperação e interpretação, fazendo a quantidade final emergir da geometria da própria consulta.
 
 O sistema impede geração documental quando não há evidência primária recuperada, valida localmente citações e participantes e trata relações cognitivas como interações transitórias de simetry ou assimetry. O antigo conceito de Cnode deixa de ser uma entidade persistente e passa a designar, quando necessário, apenas o fenômeno contextual da interação.
 

@@ -18,7 +18,11 @@ Este parecer cobre aplicação, banco, permissões, autenticação, consultas re
 
 > Ajuste operacional em 3 de agosto de 2026: o padrão corrente foi reduzido para `QUERY_CANDIDATE_LIMIT=20` após uma consulta dirigida sobre *O Evangelho Segundo o Espiritismo* produzir contexto mais concentrado e resposta documental de melhor foco. Esse caso orienta o novo padrão, mas permanece uma observação operacional; a matriz comparativa representativa continua pendente.
 
+> Estado posterior: `QUERY_CANDIDATE_LIMIT` foi removido. A fronteira κq agora emerge da população hierárquica completa de cada consulta; os valores acima permanecem apenas como registro histórico.
+
 > Revalidação do contrato de citações em 4 de agosto de 2026: a antiga exigência de incorporar todas as fontes recuperadas foi substituída pelo contrato de citações visíveis. Na chamada real “O que é ectoplasma?” sobre um projeto autorizado com sete obras, foram recuperadas dez evidências. Antes da correção, a terceira geração terminou normalmente (`finish_reason=stop`) com 659 de 1800 tokens, citou nove evidências e omitiu uma; ainda assim, toda a resposta era rejeitada. Depois da correção, a consulta terminou com sucesso, citou quatro evidências e descartou as seis candidatas não citadas. A geração validada terminou com `finish_reason=stop` e 354 tokens. As 24 suítes sem chamada ao provedor também foram aprovadas. O caso confirma que a falha não era causada pelo teto de saída e valida o novo descarte, mas não substitui a matriz comparativa representativa.
+
+> Validação do fluxo κe/CIE global em 8 de agosto de 2026: a pergunta “nossa evolução depende exclusivamente daquilo de fazemos enquanto estamos encarnados?” foi executada sobre o projeto completo *Reforma Íntima e Evolução*, com sete obras e uma chamada real paga. Após κq, CIE hierárquico, linhagem integral, κe e CIE primário, a união `Gq` continha 350 núcleos primários locais. O CIE global calculou `μ=0,4288625933904816`, `σ=0,03870533287997911` e fronteira `μ+σ=0,4675679262704607`, produzindo 63 fontes no núcleo, 97 em convergência e 190 em descarte. As 63 fontes nucleares foram enviadas à LLM, quatro foram citadas na resposta validada e a execução levou 27,641 segundos. O caso confirma operacionalmente a substituição de `QUERY_MAX_EVIDENCE`; não demonstra superioridade científica nem garante esse tamanho em outras consultas.
 
 ## Ambiente e escopo
 
@@ -32,7 +36,7 @@ Foram usados um superadmin existente e um usuário temporário criado exclusivam
 Configuração efetiva da consulta do EVA durante o teste:
 
 ```env
-QUERY_MAX_EVIDENCE=10
+QUERY_NON_SEMANTIC_MAX_EVIDENCE=10
 QUERY_MAX_INTERACTIONS=20
 AI_QUERY_MAX_OUTPUT_TOKENS=1800
 ```
@@ -72,7 +76,7 @@ Todas as nove tentativas foram recusadas com HTTP 403. Não houve vazamento de e
 
 - As 24 chamadas da matriz principal retornaram HTTP 200.
 - Cada resposta autorizada trouxe conteúdo e evidências.
-- Nenhuma resposta ultrapassou `QUERY_MAX_EVIDENCE=10`.
+- As rotas semânticas usaram CIE global; as demais respeitaram `QUERY_NON_SEMANTIC_MAX_EVIDENCE=10`.
 - Nenhuma resposta ultrapassou `QUERY_MAX_INTERACTIONS=20`.
 - As citações e os identificadores de evidência permaneceram vinculados ao contexto recuperado.
 - As perguntas amplas e conceituais funcionaram nos quatro cenários e nos dois perfis.
@@ -162,7 +166,7 @@ A matriz relacional foi repetida com as formulações naturais que haviam falhad
 - zero truncamentos;
 - zero respostas HTTP 503;
 - zero vazamentos entre obras ou projetos;
-- limites de 10 evidências e 20 interações respeitados;
+- no cenário histórico não semântico, limite de 10 evidências respeitado; em todas as rotas, limite de 20 interações respeitado;
 - usuário temporário e permissões removidos ao final.
 
 O arquivo bruto dessa execução é `go-live-relational-after-fix.json`.

@@ -2,7 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Versão atual:** [v2.0.0](https://github.com/alexandredovale/eva/releases/tag/v2.0.0)
+**Versão atual:** [v3.0.0](https://github.com/alexandredovale/eva/releases/tag/v3.0.0)
+
+**Destaque da versão:** a recuperação semântica agora deriva a população local da consulta por κq sobre toda a hierarquia elegível e, em seguida, aplica CIE hierárquico, resolução integral de linhagem, κe/CIE primário e CIE global. Esse cálculo substitui Top-k e limites configurados de evidências semânticas por fronteiras determinísticas derivadas das distribuições de similaridade da consulta atual.
 
 O EVA é uma plataforma para construir, organizar e consultar memória cognitiva documental verificável. O EVA (Evidence Algorithm) transforma documentos estruturados em evidências hierárquicas. Cnode é a compreensão transitória de uma interação explícita entre essas evidências durante a consulta, não uma entidade persistente.
 
@@ -90,7 +92,7 @@ A ingestão não produz resumos ou embeddings. A construção cognitiva é uma e
 
 `EvidenceEmbeddingService` vetoriza evidências primárias e resumos derivados com título do documento, caminho, nó e conteúdo organizado. Antes de chamar o provedor, todas as unidades pendentes são validadas contra `AI_EMBEDDING_MAX_INPUT_TOKENS`, com margem preventiva de 10%. Lotes técnicos agrupam unidades completas e nunca fragmentam nenhuma delas. Se uma primária exceder o limite, uma síntese derivada válida e rastreável assume sua rota semântica; sem essa síntese, a etapa para com o identificador da evidência e exige subdivisão estrutural real. Uma versão já existente para o mesmo modelo e hash é reutilizada antes de chamar o provedor.
 
-Na consulta conceitual ou relacional, `DocumentContextRetriever` compara o embedding transitório do input com evidências primárias e derivadas. O Retriever produz um Top-k de 20 candidatos por padrão; o CIE calcula média, desvio padrão populacional e CV, identifica o núcleo principal e a convergência complementar e só então resolve sínteses por `evidence_derivations` até suas fontes primárias. Quando não há núcleo, a convergência assume o papel principal. As fontes primárias resolvidas formam o contexto disponível: a LLM pode usar somente o subconjunto que efetivamente contribuir para a resposta, com citação visível; candidatas não citadas são descartadas da base final. Similaridades e estatísticas permanecem transitórias.
+Na consulta conceitual ou relacional, `DocumentContextRetriever` compara o embedding transitório do input com todos os resumos hierárquicos elegíveis. A distribuição global determina a fronteira query-local κq; quando não há ruptura identificável, a população completa segue ao CIE. O CIE calcula média, desvio padrão populacional e CV, identifica o núcleo principal e a convergência complementar e só então resolve sínteses por `evidence_derivations` até suas fontes primárias. Similaridades e estatísticas permanecem transitórias.
 
 `QueryAnswerProvider` pode declarar interações `simetry` ou `assimetry` na mesma chamada que produz a resposta. `DocumentQueryService` aceita cada interação somente quando os participantes pertencem ao contexto, foram citados e seus fragmentos existem literalmente nas evidências. Nada disso é persistido como Cnode.
 
@@ -132,7 +134,7 @@ A consulta real também exige dupla confirmação:
 php bin/query-document.php <document-id> --live "pergunta"
 ```
 
-Os limites padrão são Top-k de 20 candidatos vetoriais por documento, 10 evidências primárias no contexto final e 20 interações transitórias. Na API e na interface web, configure-os por `QUERY_CANDIDATE_LIMIT`, `QUERY_MAX_EVIDENCE` e `QUERY_MAX_INTERACTIONS`. Na linha de comando, os dois limites finais também podem ser substituídos na execução por `--evidence-limit=N` e `--interaction-limit=N`.
+Não existe Top-k nem limite numérico configurável para evidências semânticas. κq, CIE hierárquico, κe, CIE primário e CIE global determinam a população query-local; `QUERY_NON_SEMANTIC_MAX_EVIDENCE` e `--evidence-limit=N` atuam somente nas rotas direta, estrutural e ampla. `QUERY_MAX_INTERACTIONS` e `--interaction-limit=N` limitam apenas interações transitórias.
 
 ## Módulos conectores
 

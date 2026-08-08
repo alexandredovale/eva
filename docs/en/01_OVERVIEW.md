@@ -25,7 +25,8 @@ It does not contain persistent relationships, cognitive scores, confidence, impo
 
 ```text
 Build: source → tree → primary evidence → derived summaries → embeddings
-Semantic query: input → Retriever → Top-k → CIE → primary sources
+Semantic query: input → complete hierarchy → κq → hierarchical CIE
+                → lineage → κe/primary CIE → global CIE → primary sources
 Interaction: recovered sources → transient simetry/assimetry → literal validation
 Answer: cited evidence → answer and limitations
 ```
@@ -34,7 +35,7 @@ Answer: cited evidence → answer and limitations
 
 The system describes evidence and explicit interactions without assigning truth, superiority, quality, priority, intensity, or importance. Provider brands, endpoints, models, and credential-variable names remain configurable and do not appear in domain contracts.
 
-For vector routes, the Context Intelligence Engine (CIE) uses the candidate distribution's mean, population standard deviation, and coefficient of variation to elect a leading convergence core plus complementary convergence context before cognitive processing. When no core exists, convergence assumes the primary role. Every primary source retained in the result must be cited; recovered but uncited sources are discarded. This local recovery is deterministic and model-independent.
+For vector routes, the Context Intelligence Engine (CIE) uses mean, population standard deviation, and coefficient of variation at three stages: hierarchical, stratified primary, and global. Query-local κq and κe boundaries require no configured counts. The global core—or global convergence only when the core is empty—forms the semantic context delivered to the model, while exact literal anchors remain protected. Every primary source retained in the result must be cited; recovered but uncited sources are discarded.
 
 ## Product scope
 

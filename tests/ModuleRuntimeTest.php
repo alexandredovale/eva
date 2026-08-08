@@ -178,9 +178,40 @@ try {
     $failingStorage = $storageFactory->open($registry->find('com.example.fail'));
     assertModuleRuntime((int) $failingStorage->query('SELECT last_event_row_id FROM runtime_event_cursor')->fetchColumn() === 0, 'O cursor do módulo com falha avançou indevidamente.');
 
+    $state->setActive('com.example.fail', false);
+    $secondStorage = $storageFactory->open($registry->find('com.example.second'));
+    $database->exec('DELETE FROM module_events');
+    $database->exec("DELETE FROM sqlite_sequence WHERE name = 'module_events'");
+    $captureStorage->exec('UPDATE runtime_event_cursor SET last_event_row_id = 4 WHERE singleton_id = 1');
+    $secondStorage->exec('UPDATE runtime_event_cursor SET last_event_row_id = 4 WHERE singleton_id = 1');
+    $replacement = $bridge->emit(
+        'interaction.completed',
+        ['user_id' => 4, 'role' => 'user'],
+        ['projects' => [], 'documents' => []],
+        ['current_input' => 'Após restauração', 'contextual_input' => 'Após restauração', 'answer' => 'Resposta']
+    );
+    assertModuleRuntime($events->latestRowId() === 1, 'A caixa postal de teste não reiniciou sua numeração.');
+    $replacementResult = $dispatcher->consumeOnce();
+    assertModuleRuntime($replacementResult['processed'] === 2, 'O dispatcher não retomou os módulos após a reinicialização da caixa postal.');
+    assertModuleRuntime(
+        (int) $captureStorage->query('SELECT COUNT(*) FROM captured_events')->fetchColumn() === 3,
+        'O evento posterior à restauração não foi processado.'
+    );
+    $cursorRecovery = $captureStorage->query(
+        'SELECT previous_cursor, resumed_at_row_id FROM runtime_event_gaps ORDER BY id DESC LIMIT 1'
+    )->fetch();
+    assertModuleRuntime(
+        $cursorRecovery === ['previous_cursor' => 4, 'resumed_at_row_id' => 1],
+        'A recuperação do cursor não foi auditada corretamente.'
+    );
+    assertModuleRuntime(
+        (int) $captureStorage->query('SELECT last_event_row_id FROM runtime_event_cursor')->fetchColumn() === 1,
+        'O cursor recuperado não avançou até o novo evento.'
+    );
+    assertModuleRuntime($replacement->eventId !== $second->eventId, 'O evento de substituição perdeu sua identidade própria.');
+
     $state->setActive('com.example.capture', false);
     $state->setActive('com.example.second', false);
-    $state->setActive('com.example.fail', false);
     $state->setActive('com.example.unrelated', false);
     $bridge->emit(
         'interaction.completed',
@@ -190,17 +221,17 @@ try {
     );
     $inactiveResult = $dispatcher->consumeOnce();
     assertModuleRuntime($inactiveResult['processed'] === 0 && $inactiveResult['failed'] === 0, 'Módulos inativos receberam eventos.');
-    assertModuleRuntime((int) $captureStorage->query('SELECT COUNT(*) FROM captured_events')->fetchColumn() === 2, 'O módulo inativo persistiu evento.');
+    assertModuleRuntime((int) $captureStorage->query('SELECT COUNT(*) FROM captured_events')->fetchColumn() === 3, 'O módulo inativo persistiu evento.');
 
     echo sprintf("Runtime modular validado com %d asserções.\n", $assertions);
 } finally {
-    foreach ([$storage ?? null, $captureStorage ?? null, $failingStorage ?? null, $unrelatedStorage ?? null] as $openStorage) {
+    foreach ([$storage ?? null, $captureStorage ?? null, $secondStorage ?? null, $failingStorage ?? null, $unrelatedStorage ?? null] as $openStorage) {
         if ($openStorage instanceof PDO) {
             $openStorage->exec('PRAGMA wal_checkpoint(TRUNCATE)');
         }
     }
 
-    unset($openStorage, $storage, $captureStorage, $failingStorage, $unrelatedStorage, $dispatcher, $storageFactory, $registry, $events, $bridge, $database);
+    unset($openStorage, $storage, $captureStorage, $secondStorage, $failingStorage, $unrelatedStorage, $dispatcher, $storageFactory, $registry, $events, $bridge, $database);
     gc_collect_cycles();
     usleep(100_000);
     removeModuleRuntimeDirectory($temporaryRoot);

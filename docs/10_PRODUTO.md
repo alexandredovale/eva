@@ -52,7 +52,7 @@ O superadmin gerencia o campo **Perfil de respostas** no cadastro e na edição 
 
 O perfil é ativado apenas quando o usuário marca o projeto na raiz da árvore do chat. Seleções individuais de obras não herdam perfis, mesmo quando a obra pertence a um ou mais projetos. Essa regra torna explícita a mudança de comportamento aplicada à consulta.
 
-Projetos selecionados podem compartilhar documentos. Antes de executar a recuperação, a API transforma os documentos resolvidos em uma lista de IDs únicos. Portanto, marcar dois projetos que contenham a mesma obra não duplica recuperação, evidências ou consumo do limite global de contexto. Os perfis configurados dos dois projetos permanecem ativos porque a governança acompanha a seleção dos projetos, não a quantidade de cópias do documento.
+Projetos selecionados podem compartilhar documentos. Antes de executar a recuperação, a API transforma os documentos resolvidos em uma lista de IDs únicos. Portanto, marcar dois projetos que contenham a mesma obra não duplica recuperação nem candidatos nos CIEs locais ou global. Os perfis configurados dos dois projetos permanecem ativos porque a governança acompanha a seleção dos projetos, não a quantidade de cópias do documento.
 
 | Escopo selecionado | Resultado |
 |---|---|
@@ -99,7 +99,7 @@ Cada requisição pública recebe um `X-Request-Id` aleatório, também disponí
 
 As métricas são contagens agrupadas de documentos, classes e tipos de evidência, derivações, embeddings e trabalhos. Interações transitórias não são convertidas em métricas persistentes. As contagens não produzem ranking, relevância, confiança, intensidade ou qualquer peso cognitivo.
 
-A resposta de `POST /api/query` inclui `context_intelligence`. Em rotas semânticas, o campo permite auditar por documento a média, o desvio padrão, o CV, os limites e os candidatos de cada região do CIE. Em rotas não vetoriais, ele é uma lista vazia. O detalhamento pertence à resposta atual e não é persistido como métrica, evento ou memória.
+A resposta de `POST /api/query` inclui `context_intelligence`. Em rotas semânticas, o campo contém análises `hierarchical` por obra, até duas análises `primary` por obra e uma análise `global`; cada item expõe população, média, desvio padrão, CV, limites, regiões e diagnóstico κ quando aplicável. Em rotas não vetoriais, ele é uma lista vazia. O detalhamento pertence à resposta atual e não é persistido como métrica, evento ou memória.
 
 ## Limites operacionais
 

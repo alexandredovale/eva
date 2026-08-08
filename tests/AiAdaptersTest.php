@@ -7,6 +7,7 @@ use Eva\Application\Cognitive\StructuredSummaryUnit;
 use Eva\Application\Query\InputType;
 use Eva\Application\Query\InputUnderstanding;
 use Eva\Application\Query\QueryContext;
+use Eva\Application\Query\QueryException;
 use Eva\Application\Query\RetrievedEvidence;
 use Eva\Infrastructure\Ai\AiProviderException;
 use Eva\Infrastructure\Ai\CognitiveProviderFactory;
@@ -337,6 +338,17 @@ assertAiAdapter(
     'O prompt deve preservar a recuperação local sem obrigar o uso artificial de todas as evidências.'
 );
 assertAiAdapter(
+    preg_match(
+        '/\[EVA-E\d{6,}\]/',
+        $queryHttp->requests[0]['payload']['messages'][0]['content']
+    ) !== 1
+        && str_contains(
+            $queryHttp->requests[0]['payload']['messages'][0]['content'],
+            'presente em available_evidence_ids'
+        ),
+    'O prompt-base não deve oferecer um identificador ilustrativo que possa ser emitido como citação real.'
+);
+assertAiAdapter(
     str_contains($queryHttp->requests[0]['payload']['messages'][0]['content'], 'A aceitação formal de um identificador não equivale ao uso da evidência')
         && str_contains($queryMessage, 'uma lista isolada de citações é inválida'),
     'O prompt deve exigir incorporação analítica de núcleo e convergência, não apenas a devolução de IDs.'
@@ -510,6 +522,41 @@ assertAiAdapter(
     str_contains($supplementarySystemPrompt, 'nunca substituem nem flexibilizam as regras-base')
     && str_starts_with($supplementarySystemPrompt, $baseQuerySystemPrompt),
     'A governança modular deve permanecer subordinada ao prompt documental do Core.'
+);
+
+$maximumSupplementaryContext = new QueryContext(
+    $queryContext->understanding,
+    $queryContext->evidences,
+    $queryContext->interactionLimit,
+    $queryContext->routingPoints,
+    $queryContext->limitations,
+    [],
+    $queryContext->contextIntelligenceAnalyses,
+    $queryContext->evidenceSelection,
+    [str_repeat('a', QueryContext::MAX_SUPPLEMENTARY_INSTRUCTION_LENGTH)]
+);
+$oversizedSupplementaryRejected = false;
+
+try {
+    new QueryContext(
+        $queryContext->understanding,
+        $queryContext->evidences,
+        $queryContext->interactionLimit,
+        $queryContext->routingPoints,
+        $queryContext->limitations,
+        [],
+        $queryContext->contextIntelligenceAnalyses,
+        $queryContext->evidenceSelection,
+        [str_repeat('a', QueryContext::MAX_SUPPLEMENTARY_INSTRUCTION_LENGTH + 1)]
+    );
+} catch (QueryException) {
+    $oversizedSupplementaryRejected = true;
+}
+
+assertAiAdapter(
+    mb_strlen($maximumSupplementaryContext->supplementaryInstructions[0], 'UTF-8') === 10_000
+        && $oversizedSupplementaryRejected,
+    'O contexto de consulta não respeitou o limite compartilhado de 10 mil caracteres.'
 );
 
 $recoveredQueryPayload = [

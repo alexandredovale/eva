@@ -35,7 +35,7 @@ Client error messages remain generic. Server diagnostics use categories such as 
 6. Restrict filesystem permissions for `.env`, storage, and logs.
 7. Back up and restore the private database in an isolated verification environment.
 8. Run offline regression tests and the deployment verifier.
-9. Enable live providers only after CIE candidate limits, final-context limits, models, endpoints, and billing controls are reviewed.
+9. Enable live providers only after κq/κe and hierarchical, primary, and global CIE diagnostics, non-semantic evidence limits, models, endpoints, prompt sizes, and billing controls are reviewed.
 10. Verify sanitized error responses, audit records, CSP, security headers, and access scopes online.
 11. Run one controlled semantic query and verify its `context_intelligence` regions before production traffic.
 
@@ -47,7 +47,7 @@ After publishing, run the deployment verifier from a machine that can reach the 
 php bin\verify-deployment.php https://your-production-host.example
 ```
 
-Require zero failures. Then verify one superadmin login, one normal-user login, and one controlled conceptual or relational query. The semantic response must expose `context_intelligence`, resolve final context to primary sources, preserve core and convergence roles, and cite every evidence record retained in the result analytically.
+Require zero failures. Then verify one superadmin login, one normal-user login, and one controlled conceptual or relational query. The semantic response must expose hierarchical, primary, and global `context_intelligence`, resolve final context to primary sources, preserve inherited roles, deliver the global nucleus or convergence fallback plus literal anchors, and cite every retained evidence record analytically.
 
 If any verifier check fails, keep the release in acceptance until it is corrected. Re-run tests for any code, schema, configuration, provider, or hosting behavior that changed since the accepted build.
 

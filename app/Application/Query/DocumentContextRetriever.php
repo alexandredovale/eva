@@ -18,12 +18,9 @@ final class DocumentContextRetriever
         private readonly PDO $database,
         private readonly ?EmbeddingProviderInterface $embeddingProvider = null,
         private readonly InputTypeDetector $detector = new InputTypeDetector(),
-        private readonly int $semanticCandidateLimit = 20,
+        private readonly QueryLocalKappaDetector $kappaDetector = new QueryLocalKappaDetector(),
         private readonly ContextIntelligenceEngine $contextIntelligenceEngine = new ContextIntelligenceEngine()
     ) {
-        if ($this->semanticCandidateLimit < 1 || $this->semanticCandidateLimit > 200) {
-            throw new QueryException('O limite de candidatos semânticos do CIE é inválido.');
-        }
     }
 
     public function retrieve(
@@ -46,9 +43,10 @@ final class DocumentContextRetriever
         $limitations = [];
         $contextIntelligenceAnalyses = [];
         $evidenceSelection = [];
+        $hasSemanticContext = false;
 
         if ($understanding->has(InputType::Conceptual) || $understanding->has(InputType::Relational)) {
-            $literalEvidences = $this->loadLiteralEvidence($documentId, $input, $maxEvidence);
+            $literalEvidences = $this->loadLiteralEvidence($documentId, $input);
 
             foreach ($literalEvidences as $evidence) {
                 $evidenceById[$evidence->id] = $evidence;
@@ -95,11 +93,11 @@ final class DocumentContextRetriever
             if ($this->embeddingProvider === null) {
                 $limitations[] = 'A recuperação conceitual exige um provedor de embedding configurado.';
             } else {
-                [$semanticEvidences, $semanticRoutes, $analysis, $semanticSelection] = $this->loadSemanticEvidence(
+                [$semanticEvidences, $semanticRoutes, $analyses, $semanticSelection] = $this->loadSemanticEvidence(
                     $documentId,
-                    $input,
-                    $maxEvidence
+                    $input
                 );
+                $hasSemanticContext = true;
 
                 foreach ($semanticEvidences as $evidence) {
                     $evidenceById[$evidence->id] = $evidence;
@@ -111,14 +109,20 @@ final class DocumentContextRetriever
                 }
 
                 $routingPoints = [...$routingPoints, ...$semanticRoutes];
-                $contextIntelligenceAnalyses[] = $analysis->forDocument(
-                    $document['public_id'],
-                    $document['title']
-                );
+                foreach ($analyses as $analysis) {
+                    $contextIntelligenceAnalyses[] = $analysis->forDocument(
+                        $document['public_id'],
+                        $document['title']
+                    );
+                }
             }
         }
 
-        $evidences = array_slice(array_values($evidenceById), 0, $maxEvidence);
+        $evidences = array_values($evidenceById);
+
+        if (!$hasSemanticContext) {
+            $evidences = array_slice($evidences, 0, $maxEvidence);
+        }
         $selectedPublicIds = array_fill_keys(array_map(
             static fn (RetrievedEvidence $evidence): string => $evidence->publicId,
             $evidences
@@ -142,7 +146,7 @@ final class DocumentContextRetriever
     }
 
     /** @return list<RetrievedEvidence> */
-    private function loadLiteralEvidence(int $documentId, string $input, int $limit): array
+    private function loadLiteralEvidence(int $documentId, string $input): array
     {
         $phrase = preg_replace('/^[\p{P}\p{Z}]+|[\p{P}\p{Z}]+$/u', '', trim($input));
 
@@ -157,8 +161,7 @@ final class DocumentContextRetriever
                 AND e.evidence_class = 'primary'
                 AND e.status = 'validated'
                 AND e.content LIKE :phrase
-              ORDER BY CHAR_LENGTH(e.content) ASC, e.id ASC
-              LIMIT " . (int) $limit
+              ORDER BY CHAR_LENGTH(e.content) ASC, e.id ASC"
         );
         $statement->execute([
             'document_id' => $documentId,
@@ -329,8 +332,8 @@ final class DocumentContextRetriever
         return $this->loadEvidenceByIds($documentId, array_map('intval', array_column($statement->fetchAll(), 'id')));
     }
 
-    /** @return array{list<RetrievedEvidence>, list<string>, ContextIntelligenceAnalysis, array<string, 'core'|'convergence'>} */
-    private function loadSemanticEvidence(int $documentId, string $input, int $limit): array
+    /** @return array{list<RetrievedEvidence>, list<string>, list<ContextIntelligenceAnalysis>, array<string, 'core'|'convergence'>} */
+    private function loadSemanticEvidence(int $documentId, string $input): array
     {
         $queryVector = $this->queryVector($input);
 
@@ -339,8 +342,17 @@ final class DocumentContextRetriever
                FROM evidences e
                JOIN evidence_embeddings ee ON ee.evidence_id = e.id
               WHERE e.document_id = :document_id
-                AND e.evidence_class IN ('primary', 'derived')
+                AND e.evidence_class = 'derived'
+                AND e.evidence_type = 'node_summary'
                 AND e.status IN ('generated', 'validated')
+                AND e.id = (
+                    SELECT MAX(latest_summary.id)
+                      FROM evidences latest_summary
+                     WHERE latest_summary.node_id = e.node_id
+                       AND latest_summary.evidence_class = 'derived'
+                       AND latest_summary.evidence_type = 'node_summary'
+                       AND latest_summary.status IN ('generated', 'validated')
+                )
                 AND ee.model = :model
                 AND ee.id = (
                     SELECT MAX(latest.id)
@@ -385,13 +397,7 @@ final class DocumentContextRetriever
         usort($ranked, static fn (array $left, array $right): int =>
             ($right['similarity'] <=> $left['similarity']) ?: ($left['id'] <=> $right['id'])
         );
-        $similarityById = [];
-
-        foreach ($ranked as $match) {
-            $similarityById[$match['id']] = $match['similarity'];
-        }
-
-        $candidates = array_map(
+        $hierarchicalCandidates = array_map(
             static fn (array $match): ContextCandidate => new ContextCandidate(
                 $match['id'],
                 $match['public_id'],
@@ -399,9 +405,12 @@ final class DocumentContextRetriever
                 $match['evidence_type'],
                 $match['similarity']
             ),
-            array_slice($ranked, 0, $this->semanticCandidateLimit)
+            $ranked
         );
-        $analysis = $this->contextIntelligenceEngine->analyze($candidates);
+        $retrievalBoundary = $this->kappaDetector->analyze($hierarchicalCandidates);
+        $analysis = $this->contextIntelligenceEngine
+            ->analyze($retrievalBoundary->selectedCandidates)
+            ->withRetrievalBoundary($retrievalBoundary);
         $candidateRegions = [];
 
         foreach ($analysis->coreCandidates as $candidate) {
@@ -420,13 +429,16 @@ final class DocumentContextRetriever
             ],
             $analysis->selectedCandidates
         );
-        [$primaryIds, $selectionByInternalId] = $this->resolvePrimaryEvidenceIds(
+        $primaryRegions = $this->resolvePrimaryEvidenceRegions(
             $documentId,
-            $matches,
-            $limit,
-            $similarityById
+            $matches
         );
-        $routes = array_map(
+        [$primaryIds, $selectionByInternalId, $primaryAnalyses] = $this->analyzePrimaryEvidence(
+            $documentId,
+            $queryVector,
+            $primaryRegions
+        );
+        $routes = ['retrieval:kappa:' . $retrievalBoundary->status, ...array_map(
             static fn (ContextCandidate $candidate): string => sprintf(
                 'evidence:%s:%s:%s',
                 $candidate->publicId,
@@ -434,7 +446,7 @@ final class DocumentContextRetriever
                 $candidate->evidenceType
             ),
             $analysis->selectedCandidates
-        );
+        )];
 
         $evidences = $this->loadEvidenceByIds($documentId, $primaryIds);
         $selectionByPublicId = [];
@@ -443,7 +455,7 @@ final class DocumentContextRetriever
             $selectionByPublicId[$evidence->publicId] = $selectionByInternalId[$evidence->id] ?? 'convergence';
         }
 
-        return [$evidences, $routes, $analysis, $selectionByPublicId];
+        return [$evidences, $routes, [$analysis, ...$primaryAnalyses], $selectionByPublicId];
     }
 
     /** @return list<float> */
@@ -468,68 +480,132 @@ final class DocumentContextRetriever
 
     /**
      * @param list<array{id: int, evidence_class: string, region: 'core'|'convergence'}> $matches
-     * @param array<int, float> $similarityById
-     * @return array{list<int>, array<int, 'core'|'convergence'>}
+     * @return array<int, 'core'|'convergence'>
      */
-    private function resolvePrimaryEvidenceIds(
+    private function resolvePrimaryEvidenceRegions(
         int $documentId,
-        array $matches,
-        int $limit,
-        array $similarityById
+        array $matches
     ): array {
-        $groups = [];
+        $regions = [];
 
         foreach ($matches as $match) {
             $sources = $match['evidence_class'] === 'primary'
                 ? [$match['id']]
                 : $this->primarySourcesForEvidence($documentId, $match['id']);
 
-            usort($sources, static fn (int $left, int $right): int =>
-                (($similarityById[$right] ?? -INF) <=> ($similarityById[$left] ?? -INF))
-                    ?: ($left <=> $right)
+            foreach ($sources as $sourceId) {
+                if (($regions[$sourceId] ?? null) !== 'core') {
+                    $regions[$sourceId] = $match['region'];
+                }
+            }
+        }
+
+        return $regions;
+    }
+
+    /**
+     * @param array<int, 'core'|'convergence'> $primaryRegions
+     * @return array{list<int>, array<int, 'core'|'convergence'>, list<ContextIntelligenceAnalysis>}
+     */
+    private function analyzePrimaryEvidence(int $documentId, array $queryVector, array $primaryRegions): array
+    {
+        if ($primaryRegions === []) {
+            return [[], [], []];
+        }
+
+        [$sql, $parameters] = $this->inClause('e.id', 'primary_evidence_id', array_keys($primaryRegions));
+        $statement = $this->database->prepare(
+            "SELECT e.id, e.public_id, e.evidence_class, e.evidence_type, ee.vector_data
+               FROM evidences e
+               JOIN evidence_embeddings ee ON ee.evidence_id = e.id
+              WHERE e.document_id = :document_id
+                AND e.evidence_class = 'primary'
+                AND e.status = 'validated'
+                AND {$sql}
+                AND ee.model = :model
+                AND ee.id = (
+                    SELECT MAX(latest.id)
+                      FROM evidence_embeddings latest
+                     WHERE latest.evidence_id = e.id AND latest.model = :latest_model
+                )"
+        );
+        $model = $this->embeddingProvider?->model();
+        $statement->execute([
+            'document_id' => $documentId,
+            ...$parameters,
+            'model' => $model,
+            'latest_model' => $model,
+        ]);
+        $candidatesByRegion = ['core' => [], 'convergence' => []];
+
+        foreach ($statement->fetchAll() as $record) {
+            try {
+                $decoded = json_decode((string) $record['vector_data'], true, 512, JSON_THROW_ON_ERROR);
+            } catch (JsonException $exception) {
+                throw new QueryException('Um embedding primário não contém JSON válido.', 0, $exception);
+            }
+
+            if (!is_array($decoded)) {
+                throw new QueryException('Um embedding primário é inválido.');
+            }
+
+            $vector = array_map(static fn (mixed $value): float => is_numeric($value)
+                ? (float) $value
+                : throw new QueryException('Um embedding primário contém componente inválido.'), $decoded);
+            $similarity = $this->cosine($queryVector, $vector);
+
+            if ($similarity === null) {
+                continue;
+            }
+
+            $evidenceId = (int) $record['id'];
+            $sourceRegion = $primaryRegions[$evidenceId] ?? null;
+
+            if ($sourceRegion === null) {
+                continue;
+            }
+
+            $candidatesByRegion[$sourceRegion][] = new ContextCandidate(
+                $evidenceId,
+                (string) $record['public_id'],
+                (string) $record['evidence_class'],
+                (string) $record['evidence_type'],
+                $similarity
             );
-            $groups[] = [
-                'region' => $match['region'],
-                'sources' => $sources,
-            ];
         }
 
         $primaryIds = [];
         $selection = [];
+        $analyses = [];
 
-        while (count($primaryIds) < $limit) {
-            $added = false;
+        foreach (['core', 'convergence'] as $sourceRegion) {
+            $candidates = $candidatesByRegion[$sourceRegion];
+            usort($candidates, static fn (ContextCandidate $left, ContextCandidate $right): int =>
+                ($right->similarity <=> $left->similarity) ?: ($left->evidenceId <=> $right->evidenceId)
+            );
 
-            foreach ($groups as &$group) {
-                while ($group['sources'] !== []) {
-                    $sourceId = array_shift($group['sources']);
-
-                    if (isset($primaryIds[$sourceId])) {
-                        if ($group['region'] === 'core') {
-                            $selection[$sourceId] = 'core';
-                        }
-
-                        continue;
-                    }
-
-                    $primaryIds[$sourceId] = $sourceId;
-                    $selection[$sourceId] = $group['region'];
-                    $added = true;
-                    break;
-                }
-
-                if (count($primaryIds) >= $limit) {
-                    break;
-                }
+            if ($candidates === []) {
+                continue;
             }
-            unset($group);
 
-            if (!$added) {
-                break;
+            $boundary = $this->kappaDetector->analyze($candidates);
+            $primaryAnalysis = $this->contextIntelligenceEngine
+                ->analyze($boundary->selectedCandidates)
+                ->withRetrievalBoundary($boundary)
+                ->forPrimaryStage($sourceRegion);
+            $localNucleus = $primaryAnalysis->coreCandidates !== []
+                ? $primaryAnalysis->coreCandidates
+                : $primaryAnalysis->convergenceCandidates;
+
+            foreach ($localNucleus as $candidate) {
+                $primaryIds[$candidate->evidenceId] = $candidate->evidenceId;
+                $selection[$candidate->evidenceId] = $sourceRegion;
             }
+
+            $analyses[] = $primaryAnalysis;
         }
 
-        return [array_values($primaryIds), $selection];
+        return [array_values($primaryIds), $selection, $analyses];
     }
 
     /** @return list<int> */

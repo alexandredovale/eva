@@ -4,6 +4,8 @@ Este documento apresenta, em diagramas de texto, o fluxo vigente do EVA desde o 
 
 O diagrama visual canônico está em [`EVA_API_FLOW_CIE.svg`](EVA_API_FLOW_CIE.svg).
 
+**English:** [Complete API and documentary-processing flow](en/03_EVA_API_FLOW.md)
+
 ## 1. Anexo e construção da memória documental
 
 ```text
@@ -163,24 +165,30 @@ POST /api/query                              <- API interna do EVA
            |                                      LOCALMENTE CONTRA O ACERVO]
            |                                                   |
            |                                                   v
-           |                                     [TOP-K VETORIAL]
+           |                           [POPULAÇÃO COMPLETA + COSINE + κq]
            |                                                   |
            |                                                   v
-           |                                     [CONTEXT INTELLIGENCE ENGINE]
-           |                                     - média, desvio padrão e CV
-           |                                     - descarte abaixo da média
-           |                                     - núcleo principal + convergência complementar
+           |                                     [FRONTEIRA QUERY-LOCAL κq]
+           |                                     - curva normalizada e distância geométrica
+           |                                     - gap confirmado por μ e σ dos próprios gaps
+           |                                     - sem ruptura: população completa
            |                                                   |
            +--------------------------+------------------------+
                                       |
                                       v
-                     [CANDIDATOS SELECIONADOS PELO CIE]
-                     - core: precedência no contexto disponível
-                     - convergence: contexto complementar disponível
+                     [CIE HIERÁRQUICO POR DOCUMENTO]
+                     - core e convergence seguem separados
+                     - discard não participa da linhagem
                                       |
                                       v
-                     [RESOLUÇÃO PARA FONTES PRIMÁRIAS]
-                     - composição determinística até QUERY_MAX_EVIDENCE
+                     [RESOLUÇÃO INTEGRAL PARA FONTES PRIMÁRIAS]
+                     - κe + CIE primário por região e documento
+                     - sem truncagem ou nova chamada de embedding
+                                      |
+                                      v
+                     [UNIÃO DOS NÚCLEOS LOCAIS → CIE GLOBAL]
+                     - núcleo global ou fallback de convergence
+                     - âncoras literais exatas permanecem protegidas
                      - a LLM não pode introduzir fontes externas
                                       |
                                       v
@@ -248,10 +256,13 @@ POST /api/query                              <- API interna do EVA
            +--> candidatos de C
            |
            v
-[CIE INDEPENDENTE POR DOCUMENTO]
+[κq + CIE HIERÁRQUICO + κe + CIE PRIMÁRIO POR DOCUMENTO]
            |
            v
-[INTERCALAÇÃO EM CONTEXTO GLOBAL LIMITADO]
+[UNIÃO DEDUPLICADA DOS NÚCLEOS PRIMÁRIOS LOCAIS]
+           |
+           v
+[CIE GLOBAL DE CONSOLIDAÇÃO]
            |
            v
 [SELEÇÃO TRANSITÓRIA DE EVIDÊNCIAS PRIMÁRIAS]
@@ -288,7 +299,7 @@ NENHUMA EVIDÊNCIA OU CONEXÃO ENTRE DOCUMENTOS É CRIADA PELA CONSULTA
 
 A confiabilidade desse fluxo não é uma estimativa de verdade. Ela decorre da integridade das fontes, da seleção observável, da validação local, da antievasão e da possibilidade de retornar de cada afirmação às evidências documentais participantes. Uma síntese multidisciplinar pode ser nova no contexto da pergunta, mas não é persistida como evidência ou conceito intrínseco ao acervo.
 
-Adicionar documentos ao projeto aumenta o universo de candidatos. O limite global de evidências continua controlando o contexto entregue à resposta; portanto, não há conexão completa entre todas as obras nem garantia de cobertura de todas as disciplinas em uma única consulta.
+Adicionar documentos ao projeto aumenta o universo de candidatos e de núcleos locais. O CIE global consolida essa população sem limite numérico configurado; ainda assim, uma fronteira estatística não garante cobertura de todas as disciplinas em uma única consulta e não cria conexão persistente entre as obras.
 
 ## 6. Quantidade de chamadas por rota
 
@@ -305,8 +316,9 @@ CONSULTA DIRETA / ESTRUTURAL / AMPLA
   └── 1 chamada de resposta, somente se houver evidência
 
 CONSULTA CONCEITUAL / RELACIONAL
-  ├── 1 chamada de embedding do input
-  ├── 1 análise local do CIE por documento, sem chamada externa
+  ├── 1 chamada de embedding do input, reutilizado em todos os estágios
+  ├── κq/CIE hierárquico e κe/CIE primário por documento, sem chamada externa
+  ├── 1 CIE global, sem chamada externa
   └── 1 chamada de resposta, somente se houver evidência
 
 CONSULTA SEM EVIDÊNCIA
@@ -336,9 +348,9 @@ INPUT DO USUÁRIO                  |
    |                              |
    +----------> RECUPERAÇÃO <-----+
                      |
-              TOP-K → CIE
+     POPULAÇÃO COMPLETA → κq → CIE HIERÁRQUICO
                      |
-         NÚCLEO + CONVERGÊNCIA
+       LINHAGEM → κe → CIE PRIMÁRIO → CIE GLOBAL
                      |
         CONTEXTO PRIMÁRIO DISPONÍVEL
                      |

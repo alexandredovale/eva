@@ -52,13 +52,16 @@ The five phases and the first architectural upgrade are complete. Further work m
 
 ## Architectural upgrade — Context Intelligence Engine
 
-- separation of Retriever Top-k from final context — **completed**;
+- replacement of Retriever Top-k with query-local κq over the complete hierarchy — **completed**;
 - mean, population standard deviation, and coefficient of variation — **completed**;
 - discard, convergence, and core regions — **completed**;
 - deterministic convergence fallback when no core exists — **completed**;
-- lineage resolution only after statistical selection — **completed**;
+- complete lineage resolution only after statistical selection, preserving inherited region — **completed**;
+- separate κe and primary CIE for sources inherited from hierarchical core and convergence — **completed**;
+- deduplicated union of local primary nuclei and global consolidation CIE — **completed**;
+- removal of `QUERY_MAX_EVIDENCE` from semantic routes and isolation of `QUERY_NON_SEMANTIC_MAX_EVIDENCE` — **completed**;
 - transient auditable `context_intelligence` output — **completed**;
-- core as primary reference and convergence as available complementary context — **completed**;
+- core as the elected population at every stage, with convergence fallback only when core is empty — **completed**;
 - `used_evidence_ids` contract derived from visible citations, with omitted candidates discarded — **completed**;
 - closed validation of analytical incorporation, without automatic completion or citation inventories — **completed**;
 - directed live reference validation with 10/10 evidence records incorporated and no truncation — **completed**;

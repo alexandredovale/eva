@@ -28,6 +28,11 @@
 /modules/.runtime/logs/*
 !/modules/.runtime/data/.gitkeep
 !/modules/.runtime/logs/.gitkeep
+
+/modules/com.eva.explorer/**
+!/modules/com.eva.explorer/.gitkeep
+/modules/com.eva.enade/**
+!/modules/com.eva.enade/.gitkeep
 *.log
 *.sql.gz
 *.zip

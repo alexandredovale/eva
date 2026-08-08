@@ -18,7 +18,11 @@ This record covers the application, database, permissions, authentication, real 
 
 > Operational adjustment on August 3, 2026: the current default was reduced to `QUERY_CANDIDATE_LIMIT=20` after a directed query over *The Gospel According to Spiritism* produced a more concentrated context and a better-focused documentary answer. This case informs the new default but remains an operational observation; the representative comparative matrix is still pending.
 
+> Later state: `QUERY_CANDIDATE_LIMIT` was removed. The κq boundary now emerges from each query's complete hierarchical population; the values above remain historical records only.
+
 > Citation-contract revalidation on August 4, 2026: the former requirement to incorporate every recovered source was replaced by the visible-citation contract. In the real-provider query “O que é ectoplasma?” over an authorized seven-work project, ten evidence records were recovered. Before the correction, the third generation ended normally (`finish_reason=stop`) with 659 of 1800 tokens, cited nine evidence records, and omitted one; the entire answer was nevertheless rejected. After the correction, the query succeeded, cited four evidence records, and discarded the six uncited candidates. The validated generation ended with `finish_reason=stop` and 354 tokens. All 24 non-provider suites also passed. This case confirms that the failure was not caused by the output ceiling and validates the new discard behavior, but it does not replace the representative comparative matrix.
+
+> κe/global-CIE validation on August 8, 2026: the question “nossa evolução depende exclusivamente daquilo de fazemos enquanto estamos encarnados?” was run over the complete seven-work *Reforma Íntima e Evolução* project with one real paid call. After κq, hierarchical CIE, complete lineage, κe, and primary CIE, union `Gq` contained 350 local primary-nucleus candidates. Global CIE calculated `μ=0.4288625933904816`, `σ=0.03870533287997911`, and boundary `μ+σ=0.4675679262704607`, producing 63 core, 97 convergence, and 190 discarded sources. The 63-source nucleus was sent to the LLM, four sources were cited in the validated answer, and the request completed in 27.641 seconds. This functionally confirms replacement of `QUERY_MAX_EVIDENCE`; it does not establish scientific superiority or predict other query sizes.
 
 ## Environment and scope
 
@@ -32,7 +36,7 @@ An existing superadmin and a temporary normal user created only for the test wer
 Effective EVA query configuration during the test:
 
 ```env
-QUERY_MAX_EVIDENCE=10
+QUERY_NON_SEMANTIC_MAX_EVIDENCE=10
 QUERY_MAX_INTERACTIONS=20
 AI_QUERY_MAX_OUTPUT_TOKENS=1800
 ```
@@ -72,7 +76,7 @@ All nine attempts were refused with HTTP 403. No evidence leaked between project
 
 - All 24 calls in the main matrix returned HTTP 200.
 - Every authorized response contained an answer and evidence.
-- No response exceeded `QUERY_MAX_EVIDENCE=10`.
+- Semantic routes used global CIE; other routes respected `QUERY_NON_SEMANTIC_MAX_EVIDENCE=10`.
 - No response exceeded `QUERY_MAX_INTERACTIONS=20`.
 - Citations and evidence identifiers remained bound to recovered context.
 - Broad and conceptual questions worked in all four scenarios for both user profiles.
@@ -139,7 +143,7 @@ The relational matrix was repeated with the natural formulations that had failed
 - zero truncations;
 - zero HTTP 503 responses;
 - zero cross-work or cross-project leakage;
-- limits of 10 evidence records and 20 interactions respected;
+- in the historical non-semantic scenario, the 10-evidence limit was respected; all routes respected the 20-interaction limit;
 - temporary user and permissions removed afterward.
 
 The raw execution file was named `go-live-relational-after-fix.json`; it is an operational artifact and is not part of the public repository.

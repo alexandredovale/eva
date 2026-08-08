@@ -2,6 +2,7 @@
 
 Versão: 3.3
 Estado conceitual: arquitetura vigente
+English: [EVA Philosophy](en/00_EVA_PHILOSOPHY.md)
 
 ## 1. Proposição central
 
@@ -36,7 +37,7 @@ Toda consulta é primeiro compreendida quanto à sua forma operacional. Ela pode
 
 O EVA não reduz toda pergunta a uma única estratégia. Consultas diretas, estruturais e amplas podem ser resolvidas pela hierarquia documental. Consultas conceituais e relacionais podem usar uma representação vetorial transitória do input atual para localizar evidências primárias e derivadas semanticamente próximas.
 
-Similaridade é um mecanismo de ordenação, não um juízo de verdade, importância ou força cognitiva. Nas rotas vetoriais, o Context Intelligence Engine observa a distribuição do Top-k por média, desvio padrão e coeficiente de variação. Essa camada não escolhe por preferência: identifica o núcleo estatístico e a faixa de convergência. O núcleo recebe precedência e a convergência compõe o contexto complementar disponível; quando não há núcleo, a convergência assume o papel principal. Na base final permanecem somente as fontes que o modelo incorporou à resposta com citação visível. Valores e análise estatística são descartados após a consulta e nunca são convertidos em memória, peso ou relação permanente.
+Similaridade é um mecanismo de ordenação, não um juízo de verdade, importância ou força cognitiva. Nas rotas vetoriais, toda a população hierárquica elegível manifesta sua geometria antes que κq estabeleça uma fronteira query-local. O Context Intelligence Engine observa, por média, desvio padrão e coeficiente de variação, essa população legitimada, as fontes primárias alcançadas por sua linhagem e, por fim, a união dos núcleos primários locais. κe repete a fronteira query-local separadamente sobre primárias herdadas de núcleo e convergência. O núcleo global — ou sua convergência quando o núcleo estiver vazio — determina o contexto semântico enviado ao modelo, sem Top-k ou quantidade humana configurada. Na base final permanecem somente as fontes que o modelo incorporou à resposta com citação visível. Valores e análises estatísticas são descartados após a consulta e nunca se tornam memória, peso ou relação permanente.
 
 ## 5. Interações cognitivas transitórias
 
@@ -57,7 +58,7 @@ O conceito historicamente chamado de **Cnode** permanece apenas como uma maneira
 
 Um projeto do EVA pode reunir documentos especializados em disciplinas distintas sem fundir suas identidades, reescrever suas fontes ou construir antecipadamente uma ontologia entre elas. Cada evidência conserva o documento, a posição estrutural e a linhagem que a originaram. A reunião administrativa de obras amplia o espaço autorizado de consulta; não transforma proximidade temática em relação factual permanente.
 
-Quando um input conceitual ou relacional atravessa mais de uma disciplina, o sistema recupera candidatos e aplica o CIE separadamente em cada documento antes de montar uma seleção transitória global limitada. Evidências de campos diferentes podem então participar da mesma resposta e de interações `simetry` ou `assimetry`, desde que pertençam ao contexto recuperado, sejam citadas e mantenham fragmentos verificáveis. A relação nasce no evento de consulta e termina com ele.
+Quando um input conceitual ou relacional atravessa mais de uma disciplina, cada documento manifesta κq e seu CIE hierárquico de forma independente. A linhagem integral produz populações primárias estratificadas; κe e CIE primário elegem núcleos locais, cuja união deduplicada recebe o CIE global. Evidências de campos diferentes podem então participar da mesma resposta e de interações `simetry` ou `assimetry`, desde que pertençam ao núcleo global final ou às âncoras literais protegidas, sejam citadas e mantenham fragmentos verificáveis. A relação nasce no evento de consulta e termina com ele.
 
 Esse comportamento permite formular uma **síntese conceitual emergente**: uma articulação que pode não estar expressa integralmente em nenhum documento isolado, mas cuja composição é sustentada pelas evidências apresentadas. A síntese emergente não adquire por isso o estatuto de evidência, conceito intrínseco comprovado ou nova memória documental. Ela permanece interpretação situada, auditável e sujeita às limitações do recorte recuperado.
 
@@ -78,7 +79,7 @@ O EVA não deve preencher lacunas com plausibilidade. Se não houver evidência 
 
 Suficiência documental pode ser parcial. Se uma pergunta combina X, Y e Z, mas apenas X e Y encontram fundamento, o EVA descreve a relação sustentada entre X e Y, cita suas fontes e identifica Z como aspecto sem evidência suficiente. A lacuna de uma parte restringe essa parte; não apaga aquilo que o documento permite responder sobre as demais.
 
-Recuperar um candidato não equivale a mantê-lo como fundamento final. O Retriever localiza; o CIE classifica a distribuição; a resolução de linhagem retorna às fontes primárias; e a aplicação compõe deterministicamente o contexto disponível dentro do limite. A IA não pode introduzir fontes ou identificadores externos, mas pode omitir candidatas que não contribuam para a prosa. O núcleo possui precedência, a convergência pode complementar a análise e somente as evidências efetivamente citadas permanecem na base final.
+Recuperar um candidato não equivale a mantê-lo como fundamento final. O Retriever ordena a população hierárquica completa; κq legitima sua fronteira; o CIE hierárquico classifica a distribuição; a resolução integral de linhagem retorna às fontes primárias; κe e CIE primário elegem núcleos locais; e o CIE global consolida sua união sem quantidade configurada. A IA não pode introduzir fontes ou identificadores externos, mas pode omitir candidatas que não contribuam para a prosa. O papel hierárquico `core` ou `convergence` acompanha cada fonte, âncoras literais exatas permanecem protegidas e somente as evidências efetivamente citadas permanecem na base final.
 
 Quando o input contradiz, desloca ou questiona o conteúdo recuperado, o sistema descreve a divergência por meio das evidências disponíveis. Ele não julga o usuário, não adere automaticamente à premissa da pergunta e não transforma o documento em autoridade universal. Sua função é apresentar o que a fonte permite sustentar e o que ela não permite concluir.
 
@@ -138,7 +139,9 @@ EVIDÊNCIAS
    ↓
 LOCALIZAÇÃO / RETRIEVER
    ↓
-CIE (EM ROTAS VETORIAIS)
+κq → CIE HIERÁRQUICO → LINHAGEM
+   ↓
+κe → CIE PRIMÁRIO → CIE GLOBAL
    ↓
 PROVEDOR DE RESPOSTA
    ↓
@@ -147,7 +150,7 @@ VALIDAÇÃO LOCAL
 RESPOSTA
 ```
 
-Cada etapa possui uma responsabilidade verificável. O documento fornece a origem; as evidências preservam conteúdo e linhagem; a recuperação localiza candidatos; o CIE estabiliza matematicamente o conjunto vetorial; a aplicação compõe o contexto disponível; o modelo comunica a resposta e propõe interações dentro desse contexto; e a validação local mantém apenas citações e interações reconstruíveis.
+Cada etapa possui uma responsabilidade verificável. O documento fornece a origem; as evidências preservam conteúdo e linhagem; a recuperação calcula a população; κq e κe legitimam fronteiras query-local; os três estágios do CIE estabilizam e consolidam o conjunto vetorial; o modelo comunica a resposta e propõe interações dentro do contexto final; e a validação local mantém apenas citações e interações reconstruíveis.
 
 Essa divisão limita a autoridade dos modelos sem dispensar sua capacidade:
 

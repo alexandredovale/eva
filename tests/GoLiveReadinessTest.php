@@ -168,7 +168,14 @@ function readinessRunQuery(
 
     readinessAssert($answer !== '', "{$scenario}/{$role}/Q{$questionNumber} retornou resposta vazia.");
     readinessAssert($evidences !== [], "{$scenario}/{$role}/Q{$questionNumber} não utilizou evidência documental.");
-    readinessAssert(count($evidences) <= 10, "{$scenario}/{$role}/Q{$questionNumber} excedeu QUERY_MAX_EVIDENCE.");
+    $isSemantic = in_array('conceptual', $inputTypes, true) || in_array('relational', $inputTypes, true);
+
+    if (!$isSemantic) {
+        readinessAssert(
+            count($evidences) <= 10,
+            "{$scenario}/{$role}/Q{$questionNumber} excedeu QUERY_NON_SEMANTIC_MAX_EVIDENCE."
+        );
+    }
     readinessAssert(
         count($simetry) + count($assimetry) <= 20,
         "{$scenario}/{$role}/Q{$questionNumber} excedeu QUERY_MAX_INTERACTIONS."
@@ -692,7 +699,7 @@ $report = [
     'started_at' => date(DATE_ATOM, (int) $startedAt),
     'duration_seconds' => round(microtime(true) - $startedAt, 3),
     'configuration' => [
-        'max_evidence' => (int) $container['ai']['query']['max_evidence'],
+        'max_evidence' => (int) $container['ai']['query']['non_semantic_max_evidence'],
         'max_interactions' => (int) $container['ai']['query']['max_interactions'],
     ],
     'summary' => [

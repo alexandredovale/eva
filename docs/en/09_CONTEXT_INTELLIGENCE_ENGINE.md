@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The Context Intelligence Engine is the mathematical layer between vector retrieval and EVA's cognitive layers. The Retriever still locates and orders candidates by cosine similarity. CIE observes the Top-k distribution and determines the final semantic context without another model, an AI reranker, subjective weights, or learned relevance rules.
+The Context Intelligence Engine is the mathematical layer between vector retrieval and EVA's cognitive layers. Retriever scores the complete eligible hierarchical population, globally orders it, and applies the query-local κq boundary. CIE then receives the statistically legitimized population while preserving its mean, standard-deviation, and CV rules.
 
 CIE applies only to conceptual and relational routes because only those routes produce vector-similarity distributions. Direct, structural, and broad routes continue to use identifiers, literal content, and document hierarchy.
 
@@ -12,10 +12,13 @@ CIE applies only to conceptual and relational routes because only those routes p
 conceptual or relational input
         → transient input embedding
         → Retriever
-        → vector Top-k (20 by default)
-        → Context Intelligence Engine
-        → derived-to-primary lineage resolution
-        → global final-context limit
+        → complete eligible hierarchical population
+        → global cosine ordering and query-local κq
+        → hierarchical CIE
+        → complete lineage resolution by inherited region
+        → primary cosine → κe → primary CIE by region and work
+        → union of local nuclei → global CIE
+        → global nucleus (or convergence fallback) + literal anchors
         → cognitive layers
         → LLM
 ```
@@ -34,38 +37,37 @@ CV = σ / μ
 - **Convergence range:** `μ ≤ s < μ + σ`; complementary analysis context.
 - **Convergence core:** `s ≥ μ + σ`; primary answer context.
 
-When the core is non-empty, it leads the available semantic context and the convergence range follows as complementary context. When no core exists, the convergence range becomes the primary context. Candidates below the mean remain discarded. If `μ = 0`, CV is undefined and the auditable output uses `null`. A homogeneous distribution has `σ = 0`, so all candidates equal to the mean belong to the core.
+At any CIE stage, a non-empty core is the elected population; convergence is promoted only when that core is empty. At the hierarchical stage, both core and convergence are retained for lineage resolution and pass separately through the primary stage. Candidates below the mean remain discarded. If `μ = 0`, CV is undefined and the auditable output uses `null`. A homogeneous distribution has `σ = 0`, so all candidates equal to the mean belong to the core.
 
 Boundary comparisons use a scale-aware `1e-12` numerical tolerance so that binary floating-point representation cannot misclassify a value mathematically equal to a threshold. The formulas and reported values are unchanged.
 
 ## Determinism and neutrality
 
-The same ordered candidates and similarities always produce the same result. CIE preserves Retriever order within each region. It does not judge truth, correctness, quality, or importance; create artificial scores or weights; make external calls; alter evidence; or persist its analysis. Similarities are not sent to the answer provider as documentary authority.
+The same ordered candidates and similarities always produce the same result. CIE preserves Retriever order within each region. It does not judge truth, correctness, quality, or importance; create artificial scores or weights; make external calls; alter evidence; or persist its analysis. The answer provider receives only the global CIE nucleus—or global convergence when that nucleus is empty—plus protected literal anchors. Each source retains its inherited `core` or `convergence` role; that role does not imply that global convergence was also sent. Similarities are never documentary authority.
 
-Selected derived candidates are resolved through `evidence_derivations` until primary sources are reached. Resolution distributes the bounded primary context across selected candidates and orders lineage sources by their query similarity, instead of exhausting the limit with the first broad lineage. Only literal primary evidence enters the answer context, annotated as `core` or `convergence`; scores are not sent as documentary authority. Every source retained in the result must be incorporated where its analytical contribution is explained. Recovered but uncited sources are discarded, while out-of-context citations and citation-only inventories are rejected.
+Selected derived candidates are resolved without truncation through `evidence_derivations`. Primary populations inherited from hierarchical `core` and `convergence` pass separately through κe and primary CIE. Their local nuclei form one deduplicated population for a final global CIE, while each retained source preserves its inherited documentary role.
 
-For multiple works, CIE analyzes each document distribution independently. `DocumentQueryService` then interleaves selected primary sources, deduplicates them, and applies the global `QUERY_MAX_EVIDENCE` cap.
+For multiple works, each document stabilizes κq, hierarchical CIE, κe, and primary CIE independently. Only the local primary nuclei are pooled for global CIE consolidation.
+
+## Query-local κq boundary
+
+κq is calculated over every eligible hierarchical summary in the work. Rank and similarity are normalized to `[0,1]`; the geometric candidate comes from maximum perpendicular distance to the endpoint chord, and an adjacent gap must confirm exceptional separation using only that query's gap mean and standard deviation. There are no configured semantic thresholds, weights, history, or training.
+
+Degenerate states are explicit: empty or insufficient population, no dispersion, no structural break, and ambiguous break. Whenever κq is not identified, the complete population proceeds to CIE; no artificial cutoff is introduced.
 
 ## Configuration
 
-```env
-QUERY_CANDIDATE_LIMIT=20
-QUERY_MAX_EVIDENCE=8
-```
-
-- `QUERY_CANDIDATE_LIMIT`: semantic Top-k analyzed per document; default `20`, effective range `1..200`.
-- `QUERY_MAX_EVIDENCE`: primary-evidence cap delivered to the answer provider; default `8`, effective range `1..50`.
-
-The first limit defines the statistical population. The second bounds the available primary context after CIE selection and lineage resolution; the final basis is the subset effectively cited.
+Semantic evidence count has no configured limit. `QUERY_NON_SEMANTIC_MAX_EVIDENCE` is restricted to routes that do not execute CIE. The final basis remains the effectively cited subset of the global nucleus.
 
 ## Auditable output and tests
 
-Query responses include `context_intelligence`, with one transient analysis for each semantic retrieval. It reports candidate count, mean, population standard deviation, CV, convergence bounds, selected region, and the core/convergence/discard candidate groups with original similarities. The list is empty for exclusively direct, structural, or broad queries.
+Query responses identify hierarchical, primary, and global analyses through `stage`; primary analyses also expose `source_region`. Every analysis reports mean, population standard deviation, CV, convergence bounds, selected region, and candidate groups, while κ diagnostics remain attached where applicable.
 
 Run the database-independent mathematical test with:
 
 ```powershell
 php tests\ContextIntelligenceEngineTest.php
+php tests\QueryLocalKappaDetectorTest.php
 php tests\ContextIntelligenceIntegrationTest.php
 ```
 

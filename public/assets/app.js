@@ -11,6 +11,7 @@ const state = {
     moduleInterfaces: [],
     activeModuleId: '',
     moduleLocalFilter: '',
+    moduleLocalIdFilter: '',
     scopes: { projects: [], documents: [] },
     queryHistory: [],
     secretOwner: '',
@@ -176,6 +177,7 @@ function disconnect(showMessage = true) {
     state.moduleInterfaces = [];
     state.activeModuleId = '';
     state.moduleLocalFilter = '';
+    state.moduleLocalIdFilter = '';
     elements.moduleNavigation.innerHTML = '';
     elements.moduleDashboard.innerHTML = '<div class="card empty">Selecione um módulo ativo.</div>';
     resetChat();
@@ -431,24 +433,34 @@ function renderModuleInterfaces(modules) {
 
 function filterModuleEntries() {
     const filter = elements.moduleDashboard.querySelector('[data-module-content-filter]');
+    const idFilter = elements.moduleDashboard.querySelector('[data-module-id-filter]');
     const entries = Array.from(elements.moduleDashboard.querySelectorAll('[data-module-entry]'));
-    if (!filter) return;
-    const query = normalizeSearchText(filter.value);
-    state.moduleLocalFilter = filter.value;
+    if (!filter && !idFilter) return;
+    const query = normalizeSearchText(filter?.value || '');
+    const idQuery = String(idFilter?.value || '').trim().replace(/^(?:#|id\s*)/i, '');
+    state.moduleLocalFilter = filter?.value || '';
+    state.moduleLocalIdFilter = idFilter?.value || '';
     let visible = 0;
 
     entries.forEach(entry => {
-        const matches = !query || normalizeSearchText(entry.textContent).includes(query);
+        const filterSources = Array.from(entry.querySelectorAll('[data-module-filter-source]'));
+        const filterText = filterSources.length
+            ? filterSources.map(source => source.textContent || '').join(' ')
+            : entry.textContent;
+        const matchesContent = !query || normalizeSearchText(filterText).includes(query);
+        const matchesId = !idQuery || String(entry.dataset.moduleEntryId || '') === idQuery;
+        const matches = matchesContent && matchesId;
         entry.hidden = !matches;
         if (matches) {
             visible += 1;
             return;
         }
 
-        const toggle = entry.querySelector('[data-module-accordion-toggle]');
-        const body = toggle ? document.getElementById(toggle.getAttribute('aria-controls')) : null;
-        if (toggle) toggle.setAttribute('aria-expanded', 'false');
-        if (body) body.hidden = true;
+        entry.querySelectorAll('[data-module-accordion-toggle]').forEach(toggle => {
+            const body = document.getElementById(toggle.getAttribute('aria-controls'));
+            toggle.setAttribute('aria-expanded', 'false');
+            if (body) body.hidden = true;
+        });
     });
 
     const total = entries.length;
@@ -457,8 +469,39 @@ function filterModuleEntries() {
     const plural = count?.dataset.moduleItemPlural || 'itens';
     const totalLabel = `${total} ${total === 1 ? singular : plural}`;
     const empty = elements.moduleDashboard.querySelector('[data-module-filter-empty]');
-    if (count) count.textContent = query ? `${visible} de ${totalLabel}` : totalLabel;
-    if (empty) empty.hidden = !query || visible > 0 || total === 0;
+    const filtering = Boolean(query || idQuery);
+    if (count) count.textContent = filtering ? `${visible} de ${totalLabel}` : totalLabel;
+    if (empty) empty.hidden = !filtering || visible > 0 || total === 0;
+}
+
+function syncModuleModePanels(root = elements.moduleDashboard) {
+    root.querySelectorAll('[data-module-mode-panel]').forEach(panel => {
+        const form = panel.closest('form');
+        const selected = form?.querySelector('[data-module-mode-control]:checked');
+        const active = Boolean(selected && panel.dataset.moduleModePanel === selected.value);
+        panel.hidden = !active;
+
+        panel.querySelectorAll('button, input, select, textarea').forEach(control => {
+            if (control.dataset.moduleModeInitiallyDisabled === undefined) {
+                control.dataset.moduleModeInitiallyDisabled = control.disabled ? '1' : '0';
+            }
+
+            control.disabled = !active || control.dataset.moduleModeInitiallyDisabled === '1';
+        });
+    });
+}
+
+function syncModuleCharacterCounters(root = elements.moduleDashboard) {
+    root.querySelectorAll('[data-module-character-counter]').forEach(counter => {
+        const control = document.getElementById(counter.dataset.moduleCharacterCounter || '');
+        if (!(control instanceof HTMLTextAreaElement) || !root.contains(control)) return;
+        const maximum = control.maxLength > 0 ? control.maxLength : 0;
+        const current = control.value.length;
+        counter.textContent = maximum > 0
+            ? `${current.toLocaleString('pt-BR')} / ${maximum.toLocaleString('pt-BR')} caracteres`
+            : `${current.toLocaleString('pt-BR')} caracteres`;
+        counter.classList.toggle('is-at-limit', maximum > 0 && current >= maximum);
+    });
 }
 
 function renderModuleDashboard(dashboard) {
@@ -474,9 +517,15 @@ function renderModuleDashboard(dashboard) {
     elements.moduleDashboard.prepend(style);
 
     const filter = elements.moduleDashboard.querySelector('[data-module-content-filter]');
+    const idFilter = elements.moduleDashboard.querySelector('[data-module-id-filter]');
     if (filter && state.moduleLocalFilter) {
         filter.value = state.moduleLocalFilter;
     }
+    if (idFilter && state.moduleLocalIdFilter) {
+        idFilter.value = state.moduleLocalIdFilter;
+    }
+    syncModuleModePanels();
+    syncModuleCharacterCounters();
     filterModuleEntries();
 }
 
@@ -484,8 +533,9 @@ async function loadModuleDashboard(moduleId) {
     if (!moduleId || moduleId !== state.activeModuleId) return;
     const parameters = new URLSearchParams();
     elements.moduleDashboard.querySelectorAll('[data-module-filter]').forEach(control => {
-        if (control.name && control.value !== '') parameters.set(control.name, control.value);
-        else if (control.dataset.moduleFilter && control.value !== '') parameters.set(control.dataset.moduleFilter, control.value);
+        if (control.matches('input[type="checkbox"], input[type="radio"]') && !control.checked) return;
+        const parameterName = control.name || control.dataset.moduleFilter || '';
+        if (parameterName && control.value !== '') parameters.set(parameterName, control.value);
     });
     elements.moduleDashboard.setAttribute('aria-busy', 'true');
 
@@ -537,11 +587,17 @@ async function executeModuleAction(actionId, form = null, submitter = null) {
         throw new Error('A ação modular solicitada é inválida.');
     }
 
+    const actionInput = serializeModuleActionInput(form, submitter);
     const controls = form instanceof HTMLFormElement
         ? Array.from(form.querySelectorAll('button, input, select, textarea'))
         : submitter ? [submitter] : [];
     const previousDisabled = controls.map(control => control.disabled);
+    const actionProgress = form instanceof HTMLFormElement
+        ? form.querySelector('[data-module-action-progress]')
+        : null;
     controls.forEach(control => { control.disabled = true; });
+    if (form instanceof HTMLFormElement) form.setAttribute('aria-busy', 'true');
+    if (actionProgress) actionProgress.hidden = false;
     elements.moduleDashboard.setAttribute('aria-busy', 'true');
 
     try {
@@ -551,7 +607,7 @@ async function executeModuleAction(actionId, form = null, submitter = null) {
                 method: 'POST',
                 body: JSON.stringify({
                     request_id: moduleActionRequestId(),
-                    input: serializeModuleActionInput(form, submitter),
+                    input: actionInput,
                 }),
             }
         );
@@ -573,6 +629,8 @@ async function executeModuleAction(actionId, form = null, submitter = null) {
         if (moduleId === state.activeModuleId) {
             elements.moduleDashboard.removeAttribute('aria-busy');
         }
+        if (form instanceof HTMLFormElement && form.isConnected) form.removeAttribute('aria-busy');
+        if (actionProgress?.isConnected) actionProgress.hidden = true;
         controls.forEach((control, index) => {
             if (control.isConnected) control.disabled = previousDisabled[index];
         });
@@ -764,21 +822,33 @@ function permissionDocumentNode(document, explicit, inherited) {
 }
 
 function renderQuery(result, question, index) {
-    const evidences = result.evidences_used || [], simetry = result.simetry_interactions || [], assimetry = result.assimetry_interactions || [], limitations = result.limitations || [], contextIntelligence = result.context_intelligence || [];
+    const answer = result.answer || '';
+    const evidences = orderEvidencesByCitation(result.evidences_used || [], answer), simetry = result.simetry_interactions || [], assimetry = result.assimetry_interactions || [], limitations = result.limitations || [], contextIntelligence = result.context_intelligence || [];
     const technicalDetails = state.user?.role === 'superadmin'
         ? `${renderContextIntelligence(contextIntelligence)}<div class="result-section"><h2>Interações simetry</h2>${renderList(simetry, item => item.summary)}</div><div class="result-section"><h2>Interações assimetry</h2>${renderList(assimetry, item => item.summary)}</div><div class="result-section"><h2>Limitações</h2>${renderList(limitations, item => item)}</div>`
         : '';
 
-    return `<section class="chat-turn"><article class="chat-message-user"><p class="eyebrow">Você</p><p>${escapeHtml(question)}</p></article><article class="card chat-message-assistant"><p class="eyebrow">Resposta documental</p><div class="answer">${escapeHtml(result.answer || '')}</div><div class="result-section"><h2>Evidências utilizadas</h2>${renderEvidenceList(evidences)}</div><div class="copy-result-action"><button type="button" class="button button-quiet button-copy-result" data-copy-query="${index}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copiar pergunta e resposta</span></button></div>${technicalDetails}</article></section>`;
+    return `<section class="chat-turn"><article class="chat-message-user"><p class="eyebrow">Você</p><p>${escapeHtml(question)}</p></article><article class="card chat-message-assistant"><p class="eyebrow">Resposta documental</p><div class="answer">${escapeHtml(answer)}</div><div class="result-section"><h2>Evidências utilizadas</h2>${renderEvidenceList(evidences)}</div><div class="copy-result-action"><button type="button" class="button button-quiet button-copy-result" data-copy-query="${index}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copiar pergunta e resposta</span></button></div>${technicalDetails}</article></section>`;
 }
 
-function renderConversation(pendingQuestion = '') {
+function renderConversation(pendingQuestion = '', alignLatestAnswer = false) {
     const completed = state.queryHistory.map((turn, index) => renderQuery(turn.result, turn.user, index)).join('');
     const pending = pendingQuestion
         ? `<section class="chat-turn"><article class="chat-message-user"><p class="eyebrow">Você</p><p>${escapeHtml(pendingQuestion)}</p></article><article class="card chat-message-assistant chat-message-pending"><p class="query-loading"><span>Consultando evidências</span><span class="query-loading-dots" aria-hidden="true"><span class="query-loading-dot"></span><span class="query-loading-dot"></span><span class="query-loading-dot"></span></span><span class="sr-only">…</span></p></article></section>`
         : '';
 
     elements.queryResult.innerHTML = `<div class="chat-transcript">${completed}${pending}</div>`;
+
+    if (alignLatestAnswer) {
+        const assistantMessages = elements.queryResult.querySelectorAll('.chat-message-assistant:not(.chat-message-pending)');
+        const latestAnswer = assistantMessages[assistantMessages.length - 1];
+
+        if (latestAnswer) {
+            requestAnimationFrame(() => latestAnswer.scrollIntoView({ block: 'start', inline: 'nearest' }));
+            return;
+        }
+    }
+
     elements.queryResult.scrollTop = elements.queryResult.scrollHeight;
 }
 
@@ -814,6 +884,26 @@ function renderContextIntelligence(analyses) {
         const source = analysis.document ? `${analysis.document}${analysis.document_id ? ` (${analysis.document_id})` : ''}` : `Distribuição ${index + 1}`;
         return `<li><strong>${escapeHtml(source)}:</strong> ${Number(analysis.candidate_count || 0)} candidatos · μ ${formatMetric(analysis.mean)} · σ ${formatMetric(analysis.standard_deviation)} · CV ${formatMetric(analysis.coefficient_of_variation)} · contexto: ${escapeHtml(region)} (${Number(analysis.selected_count || 0)}) · regiões ${coreCount}/${convergenceCount}/${discardedCount}</li>`;
     }).join('')}</ul></div>`;
+}
+
+function orderEvidencesByCitation(evidences, answer) {
+    if (!Array.isArray(evidences) || evidences.length < 2) return Array.isArray(evidences) ? evidences : [];
+    const citationPositions = new Map();
+
+    for (const match of String(answer || '').matchAll(/\[(EVA-E\d{6,})\]/g)) {
+        if (!citationPositions.has(match[1])) citationPositions.set(match[1], match.index);
+    }
+
+    return evidences
+        .map((evidence, index) => ({
+            evidence,
+            index,
+            citationPosition: citationPositions.get(String(evidence?.id || '')) ?? Number.POSITIVE_INFINITY,
+        }))
+        .sort((left, right) => left.citationPosition === right.citationPosition
+            ? left.index - right.index
+            : left.citationPosition - right.citationPosition)
+        .map(item => item.evidence);
 }
 
 function renderEvidenceList(evidences) {
@@ -852,8 +942,9 @@ function formatStructuralSegment(segment) {
 }
 
 function buildQueryCopyText(question, answer, evidences) {
-    const references = evidences.length
-        ? evidences.map(evidence => `${evidence.id} — ${formatEvidenceBreadcrumb(evidence)}`).join('\n')
+    const orderedEvidences = orderEvidencesByCitation(evidences, answer);
+    const references = orderedEvidences.length
+        ? orderedEvidences.map(evidence => `${evidence.id} — ${formatEvidenceBreadcrumb(evidence)}`).join('\n')
         : 'Nenhuma evidência utilizada.';
 
     return `Pergunta\n${String(question || '').trim()}\n\nResposta\n${String(answer || '').trim()}\n\nEvidências utilizadas\n${references}`;
@@ -1066,7 +1157,8 @@ document.addEventListener('click', event => {
 });
 
 elements.moduleDashboard.addEventListener('input', event => {
-    if (event.target.matches('[data-module-content-filter]')) filterModuleEntries();
+    if (event.target.matches('[data-module-content-filter], [data-module-id-filter]')) filterModuleEntries();
+    if (event.target.matches('[data-module-character-limit]')) syncModuleCharacterCounters();
 });
 elements.moduleDashboard.addEventListener('submit', event => {
     const form = event.target.closest('[data-module-action-form]');
@@ -1076,11 +1168,34 @@ elements.moduleDashboard.addEventListener('submit', event => {
     executeModuleAction(actionId, form, event.submitter).catch(error => notify(error.message, true));
 });
 elements.moduleDashboard.addEventListener('change', event => {
+    if (event.target.matches('[data-module-mode-control]')) {
+        syncModuleModePanels(event.target.closest('form') || elements.moduleDashboard);
+        return;
+    }
+
     if (!event.target.matches('[data-module-filter]')) return;
     state.moduleLocalFilter = '';
+    state.moduleLocalIdFilter = '';
     loadModuleDashboard(state.activeModuleId).catch(error => notify(error.message, true));
 });
-elements.moduleDashboard.addEventListener('click', event => {
+elements.moduleDashboard.addEventListener('click', async event => {
+    const confirmControl = event.target.closest('[data-module-confirm-action]');
+    if (confirmControl) {
+        event.preventDefault();
+        const confirmed = await confirmTypedDeletion(
+            confirmControl.dataset.moduleConfirmLabel || 'item',
+            confirmControl.dataset.moduleConfirmValue || '',
+            confirmControl.dataset.moduleConfirmConsequence || 'Esta ação não poderá ser desfeita.'
+        );
+
+        if (!confirmed) return;
+
+        const form = confirmControl.closest('[data-module-action-form]');
+        executeModuleAction(confirmControl.dataset.moduleConfirmAction || '', form, confirmControl)
+            .catch(error => notify(error.message, true));
+        return;
+    }
+
     const actionControl = event.target.closest('[data-module-action]');
     if (actionControl) {
         const form = actionControl.closest('[data-module-action-form]');
@@ -1089,6 +1204,60 @@ elements.moduleDashboard.addEventListener('click', event => {
             event.preventDefault();
             executeModuleAction(actionControl.dataset.moduleAction || '', form, actionControl)
                 .catch(error => notify(error.message, true));
+        }
+        return;
+    }
+
+    const downloadControl = event.target.closest('[data-module-download-target]');
+    if (downloadControl) {
+        event.preventDefault();
+        const source = document.getElementById(downloadControl.dataset.moduleDownloadTarget || '');
+
+        if (!source || !elements.moduleDashboard.contains(source)) {
+            notify('O conteúdo solicitado para download não está disponível.', true);
+            return;
+        }
+
+        const downloadContent = 'value' in source ? source.value : source.textContent;
+        const requestedFilename = downloadControl.dataset.moduleDownloadFilename || 'conteudo.txt';
+        const filename = requestedFilename.replace(/[\\/:*?"<>|\u0000-\u001f]/g, '-');
+        const mimeType = downloadControl.dataset.moduleDownloadType || 'text/plain;charset=utf-8';
+        const objectUrl = URL.createObjectURL(new Blob([String(downloadContent || '')], { type: mimeType }));
+        const anchor = document.createElement('a');
+        anchor.href = objectUrl;
+        anchor.download = filename;
+        document.body.append(anchor);
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(objectUrl);
+        notify('Arquivo-base baixado.');
+        return;
+    }
+
+    const copyControl = event.target.closest('[data-module-copy-target]');
+    if (copyControl) {
+        event.preventDefault();
+        const source = document.getElementById(copyControl.dataset.moduleCopyTarget || '');
+
+        if (!source || !elements.moduleDashboard.contains(source)) {
+            notify('O conteúdo solicitado para cópia não está disponível.', true);
+            return;
+        }
+
+        const copyContent = 'value' in source ? source.value : source.textContent;
+        const label = copyControl.querySelector('[data-module-copy-label]');
+        const originalLabel = label?.textContent || '';
+        copyControl.disabled = true;
+
+        try {
+            await copyText(String(copyContent || '').trim());
+            if (label) label.textContent = label.dataset.moduleCopySuccess || 'Copiado';
+            notify(copyControl.dataset.moduleCopyNotice || 'Conteúdo copiado.');
+            setTimeout(() => { if (label) label.textContent = originalLabel; }, 1800);
+        } catch (error) {
+            notify(error.message || 'Não foi possível copiar o conteúdo.', true);
+        } finally {
+            copyControl.disabled = false;
         }
         return;
     }
@@ -1245,7 +1414,7 @@ document.querySelector('#query-form').addEventListener('submit', async event => 
     event.preventDefault(); const scopes = selectedQueryScopes(), input = document.querySelector('#query-input').value.trim(), button = event.currentTarget.querySelector('button[type="submit"]');
     if (!scopes.length || !input) return notify('Selecione ao menos um projeto ou obra e informe a consulta.', true);
     button.disabled = true; elements.restartChat.disabled = true; renderConversation(input);
-    try { const payload = await api('query', { method: 'POST', body: JSON.stringify({ scopes, current_input: input, input: buildConversationalInput(input) }) }); setQueryScopePanel(false); rememberConversationTurn(input, payload.query); renderConversation(); document.querySelector('#query-input').value = ''; document.querySelector('#query-input').focus(); }
+    try { const payload = await api('query', { method: 'POST', body: JSON.stringify({ scopes, current_input: input, input: buildConversationalInput(input) }) }); setQueryScopePanel(false); rememberConversationTurn(input, payload.query); renderConversation('', true); document.querySelector('#query-input').value = ''; document.querySelector('#query-input').focus({ preventScroll: true }); }
     catch (error) { if (state.queryHistory.length) renderConversation(); else elements.queryResult.innerHTML = initialChatEmptyMarkup; notify(error.message, true); }
     finally { button.disabled = false; elements.restartChat.disabled = false; }
 });

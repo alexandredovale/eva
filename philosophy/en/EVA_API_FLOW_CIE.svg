@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1180" viewBox="0 0 1600 1180" role="img" aria-labelledby="title desc">
+  <title id="title">Complete EVA flow with query-local boundaries and Context Intelligence Engine</title>
+  <desc id="desc">English diagram covering document ingestion, cognitive build, semantic and non-semantic retrieval, hierarchical primary and global CIE, answer validation, transient interactions, audit, modules, and delivery.</desc>
+  <defs>
+    <style>
+      .bg{fill:#07111f}.panel{fill:#0d2137;stroke:#467c9c;stroke-width:2}.ai{fill:#241c47;stroke:#a78bfa;stroke-width:2}.cie{fill:#17371e;stroke:#a9ed4b;stroke-width:3}.db{fill:#102c3c;stroke:#55c2d9;stroke-width:2}.warn{fill:#48231d;stroke:#ff9f68;stroke-width:2}.out{fill:#18304b;stroke:#73b7ff;stroke-width:2}.line{fill:none;stroke:#8cb4ca;stroke-width:2;marker-end:url(#arrow)}.branch{fill:none;stroke:#8cb4ca;stroke-width:2}.title{font:700 28px Arial;fill:#f4f8fb}.section{font:700 19px Arial;fill:#a9ed4b}.label{font:700 15px Arial;fill:#f4f8fb}.text{font:13px Arial;fill:#c8d9e4}.tiny{font:11px Arial;fill:#9db7c8}.accent{font:700 14px Arial;fill:#a9ed4b}
+    </style>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#8cb4ca"/></marker>
+  </defs>
+  <rect width="1600" height="1180" class="bg"/>
+  <text x="800" y="42" text-anchor="middle" class="title">EVA — Evidence Algorithm · Complete Current Flow</text>
+  <text x="800" y="68" text-anchor="middle" class="text">Ingestion · cognitive build · Retriever · κq/κe · hierarchical/primary/global CIE · answer · validation · delivery</text>
+
+  <text x="40" y="110" class="section">1 · DOCUMENTARY MEMORY CONSTRUCTION</text>
+  <g transform="translate(40 135)"><rect width="230" height="92" rx="14" class="panel"/><text x="115" y="28" text-anchor="middle" class="label">Document upload</text><text x="115" y="51" text-anchor="middle" class="text">POST /api/documents</text><text x="115" y="73" text-anchor="middle" class="tiny">Markdown · JSON · XML</text></g>
+  <path d="M270 181H310" class="line"/>
+  <g transform="translate(310 135)"><rect width="250" height="92" rx="14" class="panel"/><text x="125" y="28" text-anchor="middle" class="label">Local validation + parser</text><text x="125" y="51" text-anchor="middle" class="text">size · integrity · format</text><text x="125" y="73" text-anchor="middle" class="tiny">no external AI call</text></g>
+  <path d="M560 181H600" class="line"/>
+  <g transform="translate(600 135)"><rect width="260" height="92" rx="14" class="db"/><text x="130" y="28" text-anchor="middle" class="label">Normalized document tree</text><text x="130" y="51" text-anchor="middle" class="text">nodes · order · source refs</text><text x="130" y="73" text-anchor="middle" class="tiny">literal primary evidence · hashes</text></g>
+  <path d="M860 181H900" class="line"/>
+  <g transform="translate(900 135)"><rect width="260" height="92" rx="14" class="ai"/><text x="130" y="28" text-anchor="middle" class="label">Hierarchical summaries</text><text x="130" y="51" text-anchor="middle" class="text">bottom-up derived evidence</text><text x="130" y="73" text-anchor="middle" class="tiny">external summary calls · explicit lineage</text></g>
+  <path d="M1160 181H1200" class="line"/>
+  <g transform="translate(1200 135)"><rect width="350" height="92" rx="14" class="ai"/><text x="175" y="28" text-anchor="middle" class="label">Collection embeddings</text><text x="175" y="51" text-anchor="middle" class="text">structured primary + derived units</text><text x="175" y="73" text-anchor="middle" class="tiny">batched external calls · versioned vectors</text></g>
+
+  <text x="40" y="275" class="section">2 · QUERY ROUTING AND RETRIEVAL</text>
+  <g transform="translate(40 300)"><rect width="240" height="100" rx="14" class="panel"/><text x="120" y="28" text-anchor="middle" class="label">Current input</text><text x="120" y="52" text-anchor="middle" class="text">POST /api/query</text><text x="120" y="75" text-anchor="middle" class="tiny">up to 3 prior transient rounds</text></g>
+  <path d="M280 350H320" class="line"/>
+  <g transform="translate(320 300)"><rect width="240" height="100" rx="14" class="panel"/><text x="120" y="28" text-anchor="middle" class="label">Local route detection</text><text x="120" y="53" text-anchor="middle" class="text">direct · structural · broad</text><text x="120" y="75" text-anchor="middle" class="text">conceptual · relational</text></g>
+  <path d="M560 350H610" class="branch"/><path d="M610 350V305H665" class="line"/><path d="M610 350V405H665" class="line"/>
+  <g transform="translate(665 260)"><rect width="300" height="90" rx="14" class="panel"/><text x="150" y="27" text-anchor="middle" class="label">Non-semantic route</text><text x="150" y="51" text-anchor="middle" class="text">IDs · phrases · titles · paths</text><text x="150" y="72" text-anchor="middle" class="tiny">QUERY_NON_SEMANTIC_MAX_EVIDENCE only</text></g>
+  <g transform="translate(665 365)"><rect width="300" height="90" rx="14" class="ai"/><text x="150" y="27" text-anchor="middle" class="label">Semantic route</text><text x="150" y="51" text-anchor="middle" class="text">one transient input embedding</text><text x="150" y="72" text-anchor="middle" class="tiny">complete eligible population · local cosine</text></g>
+  <path d="M965 410H1010" class="line"/>
+  <g transform="translate(1010 365)"><rect width="250" height="90" rx="14" class="cie"/><text x="125" y="27" text-anchor="middle" class="label">Query-local κq</text><text x="125" y="51" text-anchor="middle" class="text">normalized geometry + gaps</text><text x="125" y="72" text-anchor="middle" class="tiny">no break → complete population</text></g>
+  <path d="M1260 410H1300" class="line"/>
+  <g transform="translate(1300 365)"><rect width="250" height="90" rx="14" class="cie"/><text x="125" y="27" text-anchor="middle" class="label">Hierarchical CIE</text><text x="125" y="51" text-anchor="middle" class="accent">μ · σ · CV</text><text x="125" y="72" text-anchor="middle" class="tiny">discard · convergence · core</text></g>
+
+  <text x="40" y="510" class="section">3 · PRIMARY RESOLUTION AND GLOBAL CONSOLIDATION</text>
+  <g transform="translate(80 535)"><rect width="300" height="105" rx="14" class="db"/><text x="150" y="28" text-anchor="middle" class="label">Complete lineage resolution</text><text x="150" y="53" text-anchor="middle" class="text">evidence_derivations → primary</text><text x="150" y="76" text-anchor="middle" class="tiny">split by inherited core/convergence</text><text x="150" y="94" text-anchor="middle" class="tiny">no truncation</text></g>
+  <path d="M380 587H430" class="line"/>
+  <g transform="translate(430 535)"><rect width="300" height="105" rx="14" class="cie"/><text x="150" y="28" text-anchor="middle" class="label">κe + primary CIE</text><text x="150" y="53" text-anchor="middle" class="text">per inherited region and work</text><text x="150" y="76" text-anchor="middle" class="tiny">cached query embedding · primary cosine</text><text x="150" y="94" text-anchor="middle" class="tiny">local nucleus or convergence fallback</text></g>
+  <path d="M730 587H780" class="line"/>
+  <g transform="translate(780 535)"><rect width="300" height="105" rx="14" class="db"/><text x="150" y="28" text-anchor="middle" class="label">Global population Gq</text><text x="150" y="53" text-anchor="middle" class="text">deduplicated local nuclei</text><text x="150" y="76" text-anchor="middle" class="tiny">every work · both inherited regions</text><text x="150" y="94" text-anchor="middle" class="tiny">not the raw corpus</text></g>
+  <path d="M1080 587H1130" class="line"/>
+  <g transform="translate(1130 535)"><rect width="300" height="105" rx="14" class="cie"/><text x="150" y="28" text-anchor="middle" class="label">Global CIE</text><text x="150" y="53" text-anchor="middle" class="accent">Eq = global core or fallback</text><text x="150" y="76" text-anchor="middle" class="tiny">K(q) is emergent, never configured</text><text x="150" y="94" text-anchor="middle" class="tiny">exact literal anchors remain protected</text></g>
+
+  <text x="40" y="690" class="section">4 · ANSWER, VALIDATION, TRANSIENCE, AND DELIVERY</text>
+  <g transform="translate(40 715)"><rect width="250" height="105" rx="14" class="warn"/><text x="125" y="28" text-anchor="middle" class="label">Primary-evidence gate</text><text x="125" y="53" text-anchor="middle" class="text">no evidence → limitation</text><text x="125" y="76" text-anchor="middle" class="tiny">zero answer-provider calls</text><text x="125" y="94" text-anchor="middle" class="tiny">partial coverage remains possible</text></g>
+  <path d="M290 767H340" class="line"/>
+  <g transform="translate(340 715)"><rect width="290" height="105" rx="14" class="ai"/><text x="145" y="28" text-anchor="middle" class="label">Answer provider</text><text x="145" y="53" text-anchor="middle" class="text">answer + visible citations</text><text x="145" y="76" text-anchor="middle" class="tiny">simetry/assimetry in the same call</text><text x="145" y="94" text-anchor="middle" class="tiny">bounded retries · no external sources</text></g>
+  <path d="M630 767H680" class="line"/>
+  <g transform="translate(680 715)"><rect width="300" height="105" rx="14" class="panel"/><text x="150" y="28" text-anchor="middle" class="label">Local closed validation</text><text x="150" y="53" text-anchor="middle" class="text">IDs · analytical citations · excerpts</text><text x="150" y="76" text-anchor="middle" class="tiny">participants · direction · forbidden fields</text><text x="150" y="94" text-anchor="middle" class="tiny">uncited candidates are discarded</text></g>
+  <path d="M980 767H1030" class="line"/>
+  <g transform="translate(1030 715)"><rect width="250" height="105" rx="14" class="db"/><text x="125" y="28" text-anchor="middle" class="label">Sanitized audit</text><text x="125" y="53" text-anchor="middle" class="text">counts + request metadata</text><text x="125" y="76" text-anchor="middle" class="tiny">optional interaction.completed event</text><text x="125" y="94" text-anchor="middle" class="tiny">never documentary memory</text></g>
+  <path d="M1280 767H1330" class="line"/>
+  <g transform="translate(1330 715)"><rect width="220" height="105" rx="14" class="out"/><text x="110" y="28" text-anchor="middle" class="label">API + interface</text><text x="110" y="53" text-anchor="middle" class="text">answer · used evidence</text><text x="110" y="76" text-anchor="middle" class="tiny">CIE · interactions · limitations</text><text x="110" y="94" text-anchor="middle" class="tiny">transcript stays in browser memory</text></g>
+
+  <text x="40" y="875" class="section">5 · PERSISTENCE BOUNDARY</text>
+  <g transform="translate(40 900)"><rect width="470" height="160" rx="16" class="db"/><text x="235" y="30" text-anchor="middle" class="label">PERSISTENT DOCUMENTARY MEMORY</text><text x="235" y="60" text-anchor="middle" class="text">documents · normalized nodes · source references</text><text x="235" y="86" text-anchor="middle" class="text">primary/derived evidence · derivation lineage</text><text x="235" y="112" text-anchor="middle" class="text">versioned collection embeddings · processing state</text><text x="235" y="140" text-anchor="middle" class="tiny">changed only by explicit ingestion/build operations</text></g>
+  <g transform="translate(565 900)"><rect width="470" height="160" rx="16" class="panel"/><text x="235" y="30" text-anchor="middle" class="label">TRANSIENT QUERY STATE</text><text x="235" y="60" text-anchor="middle" class="text">input vector · similarities · κ diagnostics</text><text x="235" y="86" text-anchor="middle" class="text">hierarchical/primary/global CIE · final context</text><text x="235" y="112" text-anchor="middle" class="text">answer · simetry/assimetry · conversation</text><text x="235" y="140" text-anchor="middle" class="tiny">discarded after request or browser lifecycle</text></g>
+  <g transform="translate(1090 900)"><rect width="460" height="160" rx="16" class="out"/><text x="230" y="30" text-anchor="middle" class="label">OPERATIONAL OBSERVABILITY</text><text x="230" y="60" text-anchor="middle" class="text">sanitized audit_events · interaction counts</text><text x="230" y="86" text-anchor="middle" class="text">optional module_events contractual envelope</text><text x="230" y="112" text-anchor="middle" class="text">private module state under module governance</text><text x="230" y="140" text-anchor="middle" class="tiny">cannot rewrite Core documentary memory</text></g>
+
+  <text x="800" y="1115" text-anchor="middle" class="accent">summary locates · source supports · application validates · model communicates</text>
+  <text x="800" y="1145" text-anchor="middle" class="tiny">No semantic Top-k · no QUERY_MAX_EVIDENCE · no query-time relationship graph · no documentary-memory mutation</text>
+</svg>

@@ -5,6 +5,7 @@
 **Revisão arquitetural:** 2 de agosto de 2026
 **Documento:** `EVA-D000060` — *O Livro dos Médiuns*  
 **Tipo de execução:** sequência única, sem concorrência
+**English:** [Complete benchmark baseline](en/02_EVA_BENCHMARK_BASELINE.md)
 
 ## 1. Objetivo
 
@@ -22,7 +23,7 @@ Identidades de fornecedores e modelos foram omitidas em conformidade com o princ
 | Evidências primárias | 371 |
 | Evidências derivadas | 472 |
 | Embeddings persistentes | 843 |
-| Limite de evidências por consulta | 8 |
+| Limite de evidências por consulta na execução histórica | 8 |
 | Limite de interações por consulta | 4 |
 
 ## 3. Metodologia
@@ -294,7 +295,7 @@ Cada resposta deverá ser avaliada quanto a:
 - validade dos fragmentos e participantes de `simetry`/`assimetry`;
 - taxa de afirmações que extrapolam as fontes citadas;
 - declaração não evasiva das áreas sem fundamento;
-- diversidade de documentos no contexto diante do limite global;
+- diversidade de documentos no núcleo global final;
 - estabilidade da resposta sob variações do input;
 - invariância da memória documental antes e depois das consultas.
 
@@ -310,12 +311,12 @@ Uma síntese conceitual emergente será considerada válida somente quando seus 
 
 ## 12. Baseline do Context Intelligence Engine a executar
 
-As execuções registradas em 20 de julho de 2026 antecedem o CIE e não demonstram seus efeitos. Elas permanecem como baseline histórico sem estabilização estatística. A próxima rodada deve repetir as mesmas consultas conceituais e relacionais, preservando corpus, modelos, prompts, limites finais e condições operacionais, e comparar:
+As execuções registradas em 20 de julho de 2026 antecedem o CIE e não demonstram seus efeitos. Elas permanecem como baseline histórico sem estabilização estatística. A próxima rodada deve repetir as mesmas consultas conceituais e relacionais, preservando corpus, modelos, prompts e condições operacionais, e comparar:
 
-1. Top-k vetorial direto;
-2. Top-k vetorial seguido pelo CIE;
+1. Top-k vetorial direto, identificado explicitamente como baseline legado;
+2. fluxo atual com população hierárquica completa, κq, CIE hierárquico, κe, CIE primário e CIE global;
 3. reranker de referência, quando disponível sob orçamento comparável.
 
-Além das métricas já registradas, a rodada deve capturar `QUERY_CANDIDATE_LIMIT`, `μ`, `σ`, `CV`, quantidade em cada região, fontes primárias após resolução, cobertura analítica de núcleo e convergência, precision/recall, tokens de contexto, latência local e estabilidade entre paráfrases. Resultados precisam separar núcleo principal, convergência complementar e promoção da convergência quando o núcleo estiver vazio, além de reportar distribuições assimétricas ou com média próxima de zero.
+Além das métricas já registradas, a rodada deve capturar a população hierárquica total, κq, cada κe, `μ`, `σ`, `CV` e quantidades de descarte/convergência/núcleo nos estágios hierárquico, primário e global, fontes após resolução, tamanho de `Gq`, tamanho final `K(q)`, precision/recall, tokens de contexto, latência local e estabilidade entre paráfrases. O baseline legado deve registrar seu Top-k como variável experimental, nunca como configuração do fluxo atual.
 
 O teste matemático offline comprova a execução determinística das fórmulas e fronteiras; não substitui essa avaliação empírica de qualidade de recuperação.

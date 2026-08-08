@@ -94,7 +94,7 @@ O teste de segurança confirmou a remoção de senha, segredo, token, chave de A
 
 Foram executadas 15 suítes sem chamadas pagas ao provedor, com **883 asserções aprovadas**. Também passaram a validação sintática do JavaScript, o inventário completo e comentado das 46 variáveis do `.env`, o teste real de backup/restauração e o verificador de deploy local.
 
-Esse total registra a homologação anterior ao CIE. Para o update de 2 de agosto de 2026, `tests/ContextIntelligenceEngineTest.php` foi aprovado com 13 asserções, `tests/ContextIntelligenceIntegrationTest.php` com 10 e `tests/QueryTest.php` com 49, sem chamadas externas. Antes do próximo deploy, ainda é necessário executar a regressão completa e uma consulta semântica controlada ao vivo. O padrão corrente é `QUERY_CANDIDATE_LIMIT=20`; outro valor entre 1 e 200 exige validação explícita.
+Esse total registra a homologação anterior ao CIE. Para o update de 2 de agosto de 2026, `tests/ContextIntelligenceEngineTest.php` foi aprovado com 13 asserções, `tests/ContextIntelligenceIntegrationTest.php` com 10 e `tests/QueryTest.php` com 49, sem chamadas externas. Esse registro antecede a remoção de `QUERY_CANDIDATE_LIMIT` e permanece apenas como histórico; a implementação atual usa κq query-local.
 
 ## Procedimento obrigatório depois do upload
 
@@ -108,6 +108,6 @@ php bin\verify-deployment.php https://eva.oceanno.com.br
 ```
 
 5. Exigir zero falhas no verificador e realizar um último login de superadmin e de usuário comum no domínio publicado.
-6. Confirmar que uma consulta conceitual ou relacional retorna `context_intelligence`, preserva os papéis de núcleo e convergência no contexto disponível, resolve somente fontes primárias, mantém na base final apenas evidências citadas analiticamente e descarta candidatas não citadas sem invalidar a resposta.
+6. Confirmar que uma consulta conceitual ou relacional retorna análises `hierarchical`, `primary` e `global`, preserva os papéis hierárquicos herdados, entrega o núcleo global ou fallback de convergência mais âncoras literais, mantém na base final apenas evidências citadas analiticamente e descarta candidatas não citadas sem invalidar a resposta.
 
 Se o verificador tiver qualquer falha, a publicação deve permanecer em homologação até a correção. Não é necessário repetir toda a matriz paga de IA se código, banco e configuração forem exatamente os homologados; basta o smoke online final e uma consulta controlada por perfil.
