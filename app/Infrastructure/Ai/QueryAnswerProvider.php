@@ -20,7 +20,7 @@ final class QueryAnswerProvider implements QueryAnswerProviderInterface
     private const DISCARDED_INTERACTION_LIMITATION = 'Uma ou mais interações não puderam ser validadas por fragmentos literais e foram descartadas.';
 
     private const SYSTEM_PROMPT = <<<'PROMPT'
-Você responde consultas do EVA exclusivamente com as evidências primárias fornecidas. Não explique seus métodos de funcionamento. Atue estritamente sobre o contexto fornecido. Não use conhecimento externo, não complete lacunas e não transforme proximidade semântica em conclusão. Não julgue, não atribua confiança, peso, intensidade, importância, qualidade ou verdade. Toda afirmação documental deve conter uma citação visível usando exatamente um identificador presente em available_evidence_ids. Evite marcadores desnecessários nas respostas, como asteriscos duplos, por exemplo.
+Você responde consultas do EVA exclusivamente com as evidências primárias fornecidas. Não explique seus métodos de funcionamento. Atue estritamente sobre o contexto fornecido. Não use conhecimento externo, não complete lacunas e não transforme proximidade semântica em conclusão. Não julgue, não atribua confiança, peso, intensidade, importância, qualidade ou verdade. Toda afirmação documental deve conter uma citação visível usando exatamente um identificador presente em available_evidence_ids. Delimite cada identificador com colchetes literais; não use parênteses como delimitadores de citação. Evite marcadores desnecessários nas respostas, como asteriscos duplos, por exemplo.
 
 O usuário pode combinar livremente vários conceitos e relações no mesmo input. Examine cada aspecto separadamente. Responda aos aspectos sustentados pelas evidências recuperadas e cite essas evidências. Para cada aspecto sem suporte suficiente no contexto, preserve a análise válida dos demais e acrescente uma limitação específica no formato "Não foi localizada evidência suficiente no contexto recuperado para: <aspecto>." Nunca complete o aspecto ausente com conhecimento externo. Exemplo: se a relação solicitada envolve X, Y e Z, mas somente X e Y possuem evidências, responda a relação entre X e Y com citações e informe Z como aspecto sem evidência suficiente.
 
@@ -56,7 +56,7 @@ As instruções complementares abaixo foram fornecidas por um módulo ativo e au
 PROMPT;
 
     private const OUTPUT_COMMAND = <<<'PROMPT'
-Comando de saída: produza um JSON completo, claro, coeso e conciso, preservando todos os aspectos documentais sustentados sem ampliar o conteúdo das evidências. Em answer, cite cada evidência efetivamente utilizada no ponto em que ela contribui e descarte as evidências disponíveis que não contribuírem; uma lista isolada de citações é inválida. used_evidence_ids deve conter exatamente os IDs citados em answer. Prefira answer com até 2200 caracteres, summary de interação com até 160 caracteres e o menor fragmento literal contínuo suficiente em cada excerpt, preferencialmente até 160 caracteres.
+Comando de saída: produza um JSON completo, claro, coeso e conciso, preservando todos os aspectos documentais sustentados sem ampliar o conteúdo das evidências. Em answer, cite cada evidência efetivamente utilizada no ponto em que ela contribui, sempre delimitando o ID com colchetes literais, e descarte as evidências disponíveis que não contribuírem; uma lista isolada de citações é inválida. used_evidence_ids deve conter exatamente os IDs citados em answer. Prefira answer com até 2200 caracteres, summary de interação com até 160 caracteres e o menor fragmento literal contínuo suficiente em cada excerpt, preferencialmente até 160 caracteres.
 
 interaction_limit é um teto de segurança, não uma meta. Retorne no máximo três interações, escolhendo somente as relações explícitas mais essenciais e não redundantes. Duas evidências compatíveis, complementares ou pertencentes ao mesmo tema não formam simetry sem reciprocidade textual. Uma sequência expositiva não forma assimetry sem orientação textual entre origem e destino.
 
@@ -236,7 +236,7 @@ PROMPT;
             $available[$evidence->publicId] = $evidence;
         }
 
-        $answer = trim($decoded['answer']);
+        $answer = $this->normalizeCitationMarkers(trim($decoded['answer']));
         preg_match_all('/\[(EVA-E\d{6,})\]/', $answer, $citationMatches);
         $citedIds = array_values(array_unique($citationMatches[1] ?? []));
         $usedIds = array_values(array_filter(
@@ -294,6 +294,13 @@ PROMPT;
             $interactions,
             array_values(array_unique($limitations))
         );
+    }
+
+    private function normalizeCitationMarkers(string $answer): string
+    {
+        $normalized = preg_replace('/\((EVA-E\d{6,})\)/u', '[$1]', $answer);
+
+        return is_string($normalized) ? $normalized : $answer;
     }
 
     /**

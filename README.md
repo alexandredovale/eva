@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Current release:** [v3.0.0](https://github.com/alexandredovale/eva/releases/tag/v3.0.0)
+**Current release:** [v3.0.1](https://github.com/alexandredovale/eva/releases/tag/v3.0.1)
 
-**Release highlight:** semantic retrieval now derives the query-local population through κq over the complete eligible hierarchy, then applies hierarchical CIE, complete lineage resolution, κe/primary CIE, and global CIE. This calculation replaces configured semantic Top-k and evidence-count limits with deterministic boundaries derived from the current score distributions.
+**Release highlight:** EXPLORER is now the standard public cartridge for EVA Module Contract. Version 3.0.1 also expands κq/CIE mathematical regression coverage and normalizes unambiguous parenthetical citations to the canonical syntax before validation, without inferring or forcing evidence.
 
 EVA is a provider-neutral PHP system for building and querying **verifiable documentary memory**. It preserves document hierarchy, keeps literal source evidence separate from generated summaries, and validates every answer against the primary evidence recovered for the current query.
 
@@ -131,7 +131,7 @@ The superadmin interface discovers packages present in `modules/` and offers onl
 
 Dashboard modules supply their own HTML and CSS. The Core knows only the generic dashboard contract and manifest name, so installing an unknown future module requires no module-specific menu, renderer, or style in `public/`.
 
-The included `com.eva.education` connector is a reference implementation. It maps user trajectories from completed documentary interactions, produces descriptive evidence-grounded observations without scores or weights, extracts linguistic concepts from the complete question-and-answer object, localizes output to the question language, and persists everything in its own SQLite database.
+The included `com.eva.explorer` connector is the public reference implementation. Teachers create Learning Themes, students progress through Quiz, Nodes, and Exam interactions, and institutional staff follow the learning process. The module reuses actor-scoped documentary queries from the Core, keeps profiles and history in its own SQLite database, and provides qualitative correction or deepening guidance without grades, weights, or rankings.
 
 See [Connector modules](docs/en/17_MODULE_CONNECTORS.md) for contracts, installation, operation, backup, update, and removal.
 

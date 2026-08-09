@@ -123,17 +123,27 @@ php modules/runtime/bin/prune.php --days=90 --confirm
 
 The retention period must exceed the longest acceptable module outage. Definitive history belongs to each module SQLite database, not to the Core mailbox.
 
-## Education reference connector
+## EXPLORER reference connector
 
-`com.eva.education` demonstrates the full contract. It observes completed documentary interactions, processes them immediately, and produces descriptive pedagogical observations without scores, weights, percentages, confidence, mastery levels, or rankings.
+`com.eva.explorer` is the public reference cartridge for EVA Module Contract v1. It does not subscribe to Core events: its flow is interactive and starts from explicit dashboard actions. Its manifest declares its own dashboard, schema 2 SQLite storage, and only the generic capabilities required for authorized reads, actor-scoped documentary queries, and language generation.
 
-Its active governance uses only three dimensions:
+The module has three internal profiles:
 
-- conceptual articulation;
-- evidence use;
-- contextual connection.
+- **Teacher** creates Learning Themes and defines the path guidance;
+- **Student** progresses through Quiz, Nodes, and Exam;
+- **Institutional staff** follows themes, assignments, and learning progress.
 
-The connector extracts linguistic units and concepts from the inseparable question-and-answer object, validates exact source spans and evidence IDs, localizes human-facing output to the question language, and renders a searchable accordion timeline. Its schema version 2 removes the retired redundant “Question Refinement” observation from existing histories while preserving interactions and every other analysis.
+Activities reuse Core RAG through `core.query.scoped`. The Runtime binds the authenticated actor, while projects and documents remain subject to Core authorization. Used evidence preserves its complete excerpt and reference. The module never broadens scope or changes κq, CIE, lineage, κe, or any Core calculation.
+
+Quiz and Nodes provide qualitative **correction** or **deepening** support. Exam uses its own answer contract. The path produces no grades, weights, percentages, confidence, mastery levels, or rankings.
+
+Profiles, Learning Themes, assignments, idempotent actions, results, and progress belong exclusively to the EXPLORER private SQLite database. Installation creates no domain table or structure in the Core database. HTML and CSS also remain inside the package; the frontend discovers only the generic contract and the manifest name `EXPLORER`.
+
+The public reference test validates the manifest, capabilities, database isolation, authorization for all three profiles, actions, scoped queries, answer contracts, evidence preservation, and interface:
+
+```bash
+php tests/ExplorerModuleTest.php
+```
 
 ## Distribution and marketplace readiness
 

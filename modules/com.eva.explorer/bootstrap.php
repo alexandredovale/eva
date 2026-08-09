@@ -5,7 +5,7 @@ declare(strict_types=1);
 $moduleRoot = __DIR__;
 
 spl_autoload_register(static function (string $class) use ($moduleRoot): void {
-    $prefix = 'EvaModule\\Education\\';
+    $prefix = 'EvaModule\\Explorer\\';
 
     if (!str_starts_with($class, $prefix)) {
         return;
@@ -19,4 +19,4 @@ spl_autoload_register(static function (string $class) use ($moduleRoot): void {
     }
 });
 
-return new EvaModule\Education\EducationModule();
+return new EvaModule\Explorer\ExplorerModule();

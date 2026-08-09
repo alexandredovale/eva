@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Versão atual:** [v3.0.0](https://github.com/alexandredovale/eva/releases/tag/v3.0.0)
+**Versão atual:** [v3.0.1](https://github.com/alexandredovale/eva/releases/tag/v3.0.1)
 
-**Destaque da versão:** a recuperação semântica agora deriva a população local da consulta por κq sobre toda a hierarquia elegível e, em seguida, aplica CIE hierárquico, resolução integral de linhagem, κe/CIE primário e CIE global. Esse cálculo substitui Top-k e limites configurados de evidências semânticas por fronteiras determinísticas derivadas das distribuições de similaridade da consulta atual.
+**Destaque da versão:** o EXPLORER passa a ser o cartucho público standard do EVA Module Contract. A 3.0.1 também amplia as regressões matemáticas de κq/CIE e normaliza citações parentéticas inequívocas para o formato canônico antes da validação, sem inferir ou forçar evidências.
 
 O EVA é uma plataforma para construir, organizar e consultar memória cognitiva documental verificável. O EVA (Evidence Algorithm) transforma documentos estruturados em evidências hierárquicas. Cnode é a compreensão transitória de uma interação explícita entre essas evidências durante a consulta, não uma entidade persistente.
 
@@ -29,7 +29,7 @@ A base atual contém:
 - métricas descritivas e auditoria sanitizada, sem exposição de segredos ou conteúdo consultado;
 - execução real de IA bloqueada por padrão e reaproveitamento por modelo/hash;
 - Runtime de módulos conectores independentes, com descoberta, ativação, desativação, exclusão confirmada e SQLite próprio por pacote;
-- módulo `com.eva.education` de referência, sem notas ou pesos e sem conhecimento educacional no Core.
+- módulo `com.eva.explorer` como cartucho público de referência, sem conhecimento pedagógico no Core.
 
 As Fases 1 a 5 estão funcionais e o roadmap original está concluído. O estado de cada entrega está em [docs/09_ROADMAP.md](docs/09_ROADMAP.md).
 
@@ -146,7 +146,7 @@ O superadmin apenas ativa, desativa ou exclui definitivamente os pacotes encontr
 
 Interfaces modulares fornecem o próprio HTML e CSS. O Core conhece somente o contrato genérico de dashboard e o nome do manifesto. Assim, um conector futuro pode acrescentar sua própria interface sem inserir menu, renderer, estilo ou regra de domínio específica no Core.
 
-O pacote `com.eva.education` demonstra o contrato: observa interações concluídas, mapeia trajetos, produz observações descritivas ancoradas em evidências e extrai conceitos linguísticos do objeto completo pergunta+resposta. Não utiliza pontuações, pesos, percentuais, confiança ou rankings. Sua governança atual possui somente articulação conceitual, uso de evidências e conexão contextual.
+O pacote `com.eva.explorer` é a implementação pública de referência. Professores criam Temas de Aprendizado; alunos percorrem Quizz, Nodes e Prova; e a Secretaria acompanha o processo institucional. O módulo reutiliza consultas documentais escopadas do Core, mantém perfis e histórico em SQLite próprio e oferece devolutivas qualitativas de correção ou aprofundamento, sem notas, pesos ou rankings.
 
 Consulte [Módulos do EVA](docs/16_MODULOS.md) para instalação, contratos, operação, backup, atualização e remoção.
 

@@ -6,9 +6,9 @@ $root = dirname(__DIR__);
 $html = file_get_contents($root . '/public/app.html');
 $script = file_get_contents($root . '/public/assets/app.js');
 $style = file_get_contents($root . '/public/assets/app.css');
-$manifest = file_get_contents($root . '/modules/com.eva.education/module.json');
-$presenter = file_get_contents($root . '/modules/com.eva.education/src/Dashboard/EducationDashboardPresenter.php');
-$moduleStyle = file_get_contents($root . '/modules/com.eva.education/assets/dashboard.css');
+$manifest = file_get_contents($root . '/modules/com.eva.explorer/module.json');
+$presenter = file_get_contents($root . '/modules/com.eva.explorer/src/Dashboard/ExplorerDashboardPresenter.php');
+$moduleStyle = file_get_contents($root . '/modules/com.eva.explorer/assets/dashboard.css');
 $index = file_get_contents($root . '/public/index.php');
 $manifestSchema = file_get_contents($root . '/modules/runtime/contracts/module-manifest.schema.json');
 $actionSchema = file_get_contents($root . '/modules/runtime/contracts/module-action.schema.json');
@@ -44,8 +44,9 @@ $assertions = [
     [$script, "style.setAttribute('nonce', cspStyleNonce)", 'O CSS modular não recebe autorização da CSP.'],
     [$html, 'name="csp-style-nonce"', 'A página não transporta o nonce de estilo.'],
     [$index, "'nonce-{\$styleNonce}'", 'A CSP não autoriza estilos modulares por nonce.'],
-    [$manifest, '"id": "com.eva.education"', 'O módulo ainda utiliza um identificador proprietário.'],
-    [$manifest, '"name": "Education"', 'O nome canônico do módulo não foi aplicado.'],
+    [$manifest, '"id": "com.eva.explorer"', 'O módulo de referência perdeu seu identificador canônico.'],
+    [$manifest, '"name": "EXPLORER"', 'O nome canônico do módulo não foi aplicado em letras maiúsculas.'],
+    [$presenter, '<h1>EXPLORER<span>.</span></h1>', 'O page-heading não exibe o nome canônico EXPLORER.'],
     [$manifestSchema, '"order": {"type": "integer"', 'O contrato perdeu a ordenação genérica das interfaces.'],
     [$actionSchema, '"const": "eva.module.action/1"', 'O contrato genérico de ações modulares está ausente.'],
     [$script, '[data-module-action-form]', 'O host não reconhece formulários declarativos de módulos.'],
@@ -58,10 +59,10 @@ $assertions = [
     [$moduleManager, 'instanceof ModuleActionInterface', 'O Runtime não valida módulos interativos.'],
     [$coreQueryApi, 'QueryContext::MAX_SUPPLEMENTARY_INSTRUCTION_LENGTH', 'O Runtime não compartilha o limite de instruções com o contexto de consulta.'],
     [$coreQueryApi, "['query']['non_semantic_max_evidence']", 'O Runtime modular ainda lê a antiga configuração geral de evidências.'],
-    [$presenter, 'class="card learning-entry" data-module-entry', 'O módulo não produz seus próprios cards.'],
+    [$presenter, 'class="card explorer-professor-theme" data-module-entry', 'O módulo não produz seus próprios cards.'],
     [$presenter, 'data-module-content-filter', 'O filtro não pertence à apresentação do módulo.'],
-    [$presenter, "return \$parts[3] . '-' . \$parts[2]", 'A data institucional não é formatada pelo módulo.'],
-    [$moduleStyle, '.education-dashboard .learning-entry', 'O layout dos cards não está no pacote educacional.'],
+    [$presenter, 'data-module-action-form="create_theme"', 'A ação de criação de tema não pertence ao módulo.'],
+    [$moduleStyle, '.explorer-dashboard .explorer-learning-card', 'O layout dos cards não está no pacote EXPLORER.'],
     [$script, 'class="query-loading-dots" aria-hidden="true"', 'O estado de consulta não possui indicador visual acessível.'],
     [$style, '@keyframes query-loading-dot', 'Os pontos de espera não possuem animação.'],
     [$style, '.query-loading-dot { opacity: 1; transform: none; }', 'O indicador não respeita movimento reduzido.'],
@@ -71,7 +72,7 @@ foreach ($assertions as [$source, $needle, $message]) {
     if (!str_contains($source, $needle)) throw new RuntimeException($message);
 }
 
-$forbiddenCoreTerms = ['com.oceanno.education', 'com.eva.education', 'educationModule', 'learning-entry', 'Trajeto', 'Education'];
+$forbiddenCoreTerms = ['com.eva.explorer', 'ExplorerModule', 'explorer-dashboard', 'explorer-learning-card', 'EXPLORER'];
 foreach ($forbiddenCoreTerms as $term) {
     if (str_contains($html, $term) || str_contains($script, $term) || str_contains($style, $term)) {
         throw new RuntimeException('O Core contém conhecimento específico de módulo: ' . $term);
@@ -79,12 +80,7 @@ foreach ($forbiddenCoreTerms as $term) {
 }
 
 $connectorCore = strtolower($script . $productApi . $moduleManager . $coreQueryApi);
-$forbiddenConnectorTerms = [
-    strtolower('Ena' . 'de'),
-    strtolower('Profes' . 'sor'),
-    'create_' . 'item',
-    'review_' . 'item',
-];
+$forbiddenConnectorTerms = ['create_theme', 'prepare_interaction', 'submit_interaction'];
 
 foreach ($forbiddenConnectorTerms as $term) {
     if (str_contains($connectorCore, $term)) {

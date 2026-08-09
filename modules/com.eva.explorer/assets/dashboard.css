@@ -1,0 +1,943 @@
+.explorer-dashboard {
+    display: grid;
+    gap: 22px;
+}
+
+body:has(.explorer-dashboard .explorer-dialog) {
+    overflow: hidden;
+}
+
+.view:has(.explorer-dashboard .explorer-dialog) {
+    animation: none !important;
+    transform: none !important;
+}
+
+.explorer-dashboard .explorer-section-heading,
+.explorer-dashboard .explorer-form-footer,
+.explorer-dashboard .explorer-theme-meta,
+.explorer-dashboard .explorer-filters {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.eyebrow {
+    font-size: 1.5rem;
+}
+.eyebrow-date {
+    display: none;
+}
+.explorer-dashboard .explorer-section-heading h2,
+.explorer-dashboard .explorer-section-heading .eyebrow,
+.explorer-dashboard .explorer-theme-form h2,
+.explorer-dashboard .explorer-theme-form .eyebrow {
+    margin: 0;
+}
+
+.explorer-dashboard .explorer-muted,
+.explorer-dashboard .explorer-field-help,
+.explorer-dashboard .explorer-character,
+.explorer-dashboard table small,
+.explorer-dashboard .explorer-student-row small {
+    color: var(--muted);
+}
+
+.explorer-dashboard .explorer-profile-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.explorer-dashboard .explorer-profile {
+    padding: 18px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .012);
+}
+
+.explorer-dashboard .explorer-profile > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.explorer-dashboard .explorer-profile h3,
+.explorer-dashboard .explorer-profile p {
+    margin: 0;
+}
+
+.explorer-dashboard .explorer-profile p {
+    margin-top: 12px;
+    color: var(--muted-strong);
+    line-height: 1.55;
+}
+
+.explorer-dashboard .explorer-assignment {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+}
+
+.explorer-dashboard .explorer-assignment fieldset {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0;
+    border: 0;
+}
+
+.explorer-dashboard .explorer-assignment label {
+    display: inline-grid;
+    grid-template-columns: 18px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    padding: 8px 11px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--muted-strong);
+    cursor: pointer;
+}
+
+.explorer-dashboard input[type="radio"] {
+    width: 18px;
+    min-width: 18px;
+    height: 18px;
+    margin: 0;
+    padding: 0;
+    border-radius: 50%;
+    box-shadow: none;
+    accent-color: var(--accent);
+}
+
+.explorer-dashboard .explorer-assignment label:has(input:checked),
+.explorer-dashboard .explorer-options label:has(input:checked) {
+    border-color: rgba(223, 255, 0, .45);
+    color: var(--ink);
+    background: rgba(223, 255, 0, .055);
+}
+
+.explorer-dashboard .explorer-theme-form {
+    display: grid;
+    gap: 16px;
+}
+
+.explorer-dashboard .explorer-profile-badge {
+    padding: 7px 11px;
+    border: 1px solid rgba(223, 255, 0, .3);
+    border-radius: 999px;
+    color: var(--accent);
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.explorer-dashboard .explorer-character {
+    display: block;
+    margin-top: 7px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.explorer-dashboard .explorer-search {
+    display: grid;
+    grid-template-columns: minmax(120px, .3fr) minmax(220px, 1fr);
+    align-items: center;
+    gap: 14px;
+    margin: 16px 0;
+}
+
+.explorer-dashboard .explorer-search label {
+    color: var(--muted-strong);
+    font-size: .82rem;
+    font-weight: 700;
+}
+
+.explorer-dashboard .explorer-professor-list {
+    display: grid;
+    gap: 16px;
+}
+
+.explorer-dashboard .explorer-professor-theme {
+    display: grid;
+    gap: 16px;
+}
+
+.explorer-dashboard .explorer-professor-theme > header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.explorer-dashboard .explorer-professor-theme h3,
+.explorer-dashboard .explorer-professor-theme .eyebrow,
+.explorer-dashboard .explorer-professor-theme > p {
+    margin: 0;
+}
+
+.explorer-dashboard .explorer-professor-theme > p {
+    color: var(--muted-strong);
+    line-height: 1.6;
+}
+
+.explorer-dashboard .explorer-theme-meta {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+.explorer-dashboard .explorer-theme-meta span {
+    padding: 7px 10px;
+    border-radius: 999px;
+    color: var(--muted);
+    background: rgba(255, 255, 255, .035);
+    font-size: .75rem;
+}
+
+.explorer-dashboard .explorer-progress,
+.explorer-dashboard .explorer-student-summary {
+    display: grid;
+    grid-template-columns: minmax(180px, .5fr) minmax(180px, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+}
+
+.explorer-dashboard .explorer-progress > div,
+.explorer-dashboard .explorer-student-summary > div {
+    display: grid;
+    gap: 3px;
+}
+
+.explorer-dashboard .explorer-progress span,
+.explorer-dashboard .explorer-student-summary span {
+    color: var(--muted);
+    font-size: .76rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+.explorer-dashboard progress {
+    width: 100%;
+    height: 8px;
+    border: 0;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, .08);
+}
+
+.explorer-dashboard progress::-webkit-progress-bar {
+    background: rgba(255, 255, 255, .08);
+}
+
+.explorer-dashboard progress::-webkit-progress-value {
+    background: var(--accent);
+}
+
+.explorer-dashboard progress::-moz-progress-bar {
+    background: var(--accent);
+}
+
+.explorer-dashboard .explorer-student-list {
+    display: grid;
+    gap: 8px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+}
+
+.explorer-dashboard .explorer-student-row {
+    display: grid;
+    grid-template-columns: minmax(180px, .42fr) minmax(260px, 1fr);
+    gap: 18px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, .012);
+}
+
+.explorer-dashboard .explorer-mini-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 9px;
+}
+
+.explorer-dashboard .explorer-mini-step {
+    padding: 4px 8px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: .68rem;
+}
+
+.explorer-dashboard .explorer-mini-step.is-complete {
+    border-color: rgba(223, 255, 0, .4);
+    color: var(--accent);
+    background: rgba(223, 255, 0, .055);
+}
+
+.explorer-dashboard .explorer-student-analyses {
+    display: grid;
+    gap: 7px;
+}
+
+.explorer-dashboard .explorer-student-analyses details {
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, .022);
+}
+
+.explorer-dashboard .explorer-student-analyses summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 18px;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted-strong);
+    cursor: pointer;
+    list-style: none;
+}
+
+.explorer-dashboard .explorer-student-analyses summary::-webkit-details-marker {
+    display: none;
+}
+
+.explorer-dashboard .explorer-student-analyses summary::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    justify-self: end;
+    border-right: 2px solid var(--muted);
+    border-bottom: 2px solid var(--muted);
+    transform: rotate(45deg) translateY(-2px);
+    transition: transform .18s ease, border-color .18s ease;
+}
+
+.explorer-dashboard .explorer-student-analyses details[open] > summary::after {
+    border-color: var(--accent);
+    transform: rotate(225deg) translate(-1px, -1px);
+}
+
+.explorer-dashboard .explorer-student-analyses summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+    border-radius: 3px;
+}
+
+.explorer-dashboard .explorer-student-analyses p {
+    margin: 10px 0 0;
+    color: var(--muted-strong);
+    line-height: 1.55;
+}
+
+.explorer-dashboard .explorer-student-analyses .explorer-analysis-copy {
+    display: grid;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.explorer-dashboard .explorer-student-analyses .explorer-analysis-copy p {
+    margin: 0;
+}
+
+.explorer-dashboard .explorer-theme-toggle {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.explorer-dashboard .explorer-card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 18px;
+}
+
+.explorer-dashboard .explorer-learning-card {
+    min-width: 0;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--surface);
+    box-shadow: 0 16px 38px rgba(0, 0, 0, .16);
+}
+
+.explorer-dashboard .explorer-learning-card > header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(223, 255, 0, .18);
+    background: rgba(223, 255, 0, .045);
+}
+
+.explorer-dashboard .explorer-learning-card > header span {
+    color: var(--muted);
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.explorer-dashboard .explorer-learning-card > header strong {
+    color: var(--accent);
+    overflow-wrap: anywhere;
+}
+
+.explorer-dashboard .explorer-card-body {
+    padding: 22px;
+}
+
+.explorer-dashboard .explorer-card-body h2,
+.explorer-dashboard .explorer-card-body .eyebrow {
+    margin: 0;
+}
+
+.explorer-dashboard .explorer-card-body h2 {
+    margin-top: 5px;
+    font-size: clamp(1.2rem, 2vw, 1.55rem);
+}
+
+.explorer-dashboard .explorer-card-body > p:last-of-type {
+    color: var(--muted-strong);
+    line-height: 1.65;
+}
+
+.explorer-dashboard .explorer-results {
+    display: grid;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.explorer-dashboard .explorer-result {
+    padding: 0;
+    border-left: 3px solid rgba(223, 255, 0, .42);
+    border-radius: 0 8px 8px 0;
+    background: rgba(255, 255, 255, .02);
+    overflow: hidden;
+}
+
+.explorer-dashboard .explorer-result > summary {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) 18px;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 13px;
+    font-size: .84rem;
+    cursor: pointer;
+    list-style: none;
+}
+
+.explorer-dashboard .explorer-result > summary::-webkit-details-marker {
+    display: none;
+}
+
+.explorer-dashboard .explorer-result > summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+}
+
+.explorer-dashboard .explorer-result > summary > span {
+    color: var(--accent);
+    font-size: 1rem;
+}
+
+.explorer-dashboard .explorer-result > summary > strong {
+    color: var(--muted-strong);
+    text-align: right;
+}
+
+.explorer-dashboard .explorer-result > summary > i {
+    width: 8px;
+    height: 8px;
+    justify-self: end;
+    border-right: 2px solid var(--muted);
+    border-bottom: 2px solid var(--muted);
+    transform: rotate(45deg) translateY(-2px);
+    transition: transform .18s ease, border-color .18s ease;
+}
+
+.explorer-dashboard .explorer-result[open] > summary {
+    border-bottom: 1px solid var(--line);
+}
+
+.explorer-dashboard .explorer-result[open] > summary > i {
+    border-color: var(--accent);
+    transform: rotate(225deg) translate(-1px, -1px);
+}
+
+.explorer-dashboard .explorer-result-content {
+    padding: 2px 13px 13px;
+}
+
+.explorer-dashboard .explorer-result .explorer-analysis-copy {
+    display: grid;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.explorer-dashboard .explorer-result .explorer-analysis-copy p {
+    margin: 0;
+    color: var(--muted-strong);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.explorer-dashboard .explorer-learning-card > footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 16px 18px;
+    border-top: 1px solid var(--line);
+    background: rgba(0, 0, 0, .08);
+}
+
+.explorer-dashboard .explorer-learning-card > footer > span {
+    color: var(--muted);
+    font-size: .72rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.explorer-dashboard .explorer-steps {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.explorer-dashboard .explorer-steps form {
+    margin: 0;
+}
+
+.explorer-dashboard .explorer-step {
+    display: grid;
+    justify-items: center;
+    gap: 5px;
+    padding: 0;
+    border: 0;
+    color: var(--muted);
+    background: transparent;
+    cursor: pointer;
+}
+
+.explorer-dashboard .explorer-step > span {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--muted);
+    border-radius: 50%;
+    background: transparent;
+    transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+.explorer-dashboard .explorer-step:hover > span,
+.explorer-dashboard .explorer-step:focus-visible > span {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(223, 255, 0, .08);
+}
+
+.explorer-dashboard .explorer-step.is-complete > span {
+    border-color: var(--accent);
+    background: var(--accent);
+    box-shadow: inset 0 0 0 4px var(--surface);
+}
+
+.explorer-dashboard .explorer-step small {
+    color: inherit;
+    font-size: .86rem;
+}
+
+.explorer-dashboard .explorer-step-waiting {
+    display: none;
+}
+
+.explorer-dashboard .explorer-step.is-complete {
+    color: var(--accent);
+}
+
+.explorer-dashboard .explorer-step:disabled {
+    color: var(--accent);
+    cursor: wait;
+    opacity: 1;
+}
+
+.explorer-dashboard .explorer-step:disabled > span {
+    border: 3px solid rgba(223, 255, 0, .28);
+    border-top-color: var(--accent);
+    border-right-color: var(--accent);
+    background: transparent;
+    box-shadow: 0 0 0 4px rgba(223, 255, 0, .08), 0 0 14px rgba(223, 255, 0, .2);
+    animation: explorer-step-spin .72s linear infinite;
+}
+
+.explorer-dashboard .explorer-step:disabled .explorer-step-label {
+    display: none;
+}
+
+.explorer-dashboard .explorer-step:disabled .explorer-step-waiting {
+    display: inline;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+@keyframes explorer-step-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.explorer-dashboard .explorer-dialog {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    display: grid;
+    place-items: start center;
+    padding: 22px;
+    border: 0;
+    background: rgba(3, 4, 6, .82);
+    backdrop-filter: blur(8px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-padding-top: 22px;
+}
+
+.explorer-dashboard .explorer-dialog-shell {
+    width: min(720px, 100%);
+    max-height: calc(100vh - 44px);
+    overflow: auto;
+    scroll-margin-block-start: 22px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--surface-raised);
+    box-shadow: 0 28px 90px rgba(0, 0, 0, .48);
+}
+
+.explorer-dashboard .explorer-dialog-shell > header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 20px 22px;
+    border-bottom: 1px solid var(--line);
+}
+
+.explorer-dashboard .explorer-dialog-shell h2,
+.explorer-dashboard .explorer-dialog-shell .eyebrow {
+    margin: 0;
+}
+
+.explorer-dashboard .explorer-dialog-close {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    color: var(--muted-strong);
+    background: transparent;
+    font-size: 1.45rem;
+    cursor: pointer;
+}
+
+.explorer-dashboard .explorer-dialog-body {
+    display: grid;
+    gap: 18px;
+    padding: 22px;
+}
+
+.explorer-dashboard .explorer-dialog-prompt {
+    margin: 0;
+    color: var(--ink);
+    font-size: 1.05rem;
+    line-height: 1.65;
+}
+
+.explorer-dashboard .explorer-response-form {
+    display: grid;
+    gap: 16px;
+}
+
+.explorer-dashboard .explorer-options {
+    display: grid;
+    gap: 9px;
+    padding: 0;
+    border: 0;
+}
+
+.explorer-dashboard .explorer-options legend {
+    margin-bottom: 8px;
+    color: var(--muted-strong);
+    font-weight: 700;
+}
+
+.explorer-dashboard .explorer-options label {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr);
+    gap: 11px;
+    align-items: start;
+    padding: 13px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    color: var(--muted-strong);
+    cursor: pointer;
+}
+
+.explorer-dashboard .explorer-options label span {
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr);
+    gap: 8px;
+}
+
+.explorer-dashboard .explorer-options label strong {
+    color: var(--accent);
+}
+
+.explorer-dashboard .explorer-dialog-actions,
+.explorer-dashboard .explorer-dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.explorer-dashboard .explorer-dialog-footer {
+    padding: 0 22px 22px;
+}
+
+.explorer-dashboard .explorer-dialog-response,
+.explorer-dashboard .explorer-dialog-analysis {
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .018);
+}
+
+.explorer-dashboard .explorer-dialog-response span,
+.explorer-dashboard .explorer-dialog-analysis span {
+    color: var(--muted);
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.explorer-dashboard .explorer-dialog-response p,
+.explorer-dashboard .explorer-dialog-analysis .explorer-analysis-copy p {
+    margin: 8px 0 0;
+    line-height: 1.6;
+}
+
+.explorer-dashboard .explorer-dialog-analysis .explorer-analysis-copy {
+    display: grid;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.explorer-dashboard .explorer-dialog-analysis .explorer-analysis-copy p {
+    margin: 0;
+}
+
+.explorer-dashboard .explorer-dialog-analysis.is-correct {
+    border-color: rgba(223, 255, 0, .35);
+}
+
+.explorer-dashboard .explorer-dialog-analysis.is-correct span {
+    color: var(--accent);
+}
+
+.explorer-dashboard .explorer-dialog-analysis.is-deepen {
+    border-color: rgba(255, 190, 70, .35);
+}
+
+.explorer-dashboard .explorer-dialog-analysis.is-deepen span {
+    color: #ffbe46;
+}
+
+.explorer-dashboard .explorer-evidence-footer {
+    display: grid;
+    gap: 9px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+}
+
+.explorer-dashboard .explorer-evidence-footer > strong {
+    color: var(--muted);
+    font-size: .7rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.explorer-dashboard .explorer-evidence-footer ul {
+    display: grid;
+    gap: 7px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.explorer-dashboard .explorer-evidence-footer li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 9px;
+    align-items: start;
+    color: var(--muted-strong);
+    font-size: .76rem;
+}
+
+.explorer-dashboard .explorer-evidence-footer code {
+    color: var(--accent);
+    font-family: "Cascadia Mono", monospace;
+    font-size: .7rem;
+    white-space: nowrap;
+}
+
+.explorer-dashboard .explorer-result .explorer-evidence-footer li > span,
+.explorer-dashboard .explorer-dialog-analysis .explorer-evidence-footer li > span,
+.explorer-dashboard .explorer-student-analyses .explorer-evidence-footer li > span {
+    color: var(--muted-strong);
+    font-size: .76rem;
+    font-weight: 400;
+    letter-spacing: normal;
+    line-height: 1.45;
+    text-transform: none;
+    overflow-wrap: anywhere;
+}
+
+.explorer-dashboard .explorer-filters {
+    align-items: end;
+}
+
+.explorer-dashboard .explorer-filters > div:first-child {
+    flex: 1 1 auto;
+}
+
+.explorer-dashboard .explorer-filters h2,
+.explorer-dashboard .explorer-filters .eyebrow {
+    margin: 0;
+}
+
+.explorer-dashboard .explorer-filters .form-field {
+    min-width: 190px;
+}
+
+.explorer-dashboard .explorer-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.explorer-dashboard .explorer-metric {
+    display: grid;
+    gap: 7px;
+}
+
+.explorer-dashboard .explorer-metric span,
+.explorer-dashboard .explorer-metric small {
+    color: var(--muted);
+}
+
+.explorer-dashboard .explorer-metric strong {
+    color: var(--ink);
+    font-size: clamp(1.6rem, 3vw, 2.3rem);
+}
+
+.explorer-dashboard .explorer-analytics-grid {
+    display: grid;
+    grid-template-columns: minmax(260px, .7fr) minmax(360px, 1.3fr);
+    gap: 14px;
+}
+
+.explorer-dashboard .explorer-bars {
+    display: grid;
+    gap: 15px;
+    padding: 0;
+    margin: 18px 0 0;
+    list-style: none;
+}
+
+.explorer-dashboard .explorer-bars li > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 7px;
+}
+
+.explorer-dashboard .explorer-bars progress {
+    display: block;
+}
+
+@media (max-width: 980px) {
+    .explorer-dashboard .explorer-profile-grid,
+    .explorer-dashboard .explorer-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .explorer-dashboard .explorer-card-grid,
+    .explorer-dashboard .explorer-analytics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .explorer-dashboard .explorer-student-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 680px) {
+    .explorer-dashboard .explorer-profile-grid,
+    .explorer-dashboard .explorer-metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .explorer-dashboard .explorer-section-heading,
+    .explorer-dashboard .explorer-professor-theme > header,
+    .explorer-dashboard .explorer-learning-card > footer,
+    .explorer-dashboard .explorer-filters {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .explorer-dashboard .explorer-assignment,
+    .explorer-dashboard .explorer-search,
+    .explorer-dashboard .explorer-progress,
+    .explorer-dashboard .explorer-student-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .explorer-dashboard .explorer-assignment .button,
+    .explorer-dashboard .explorer-form-footer .button {
+        width: 100%;
+    }
+
+    .explorer-dashboard .explorer-steps {
+        width: 100%;
+        justify-content: space-around;
+    }
+
+    .explorer-dashboard .explorer-dialog {
+        padding: 10px;
+        scroll-padding-top: 10px;
+    }
+
+    .explorer-dashboard .explorer-dialog-shell {
+        max-height: calc(100vh - 20px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .explorer-dashboard .explorer-step > span,
+    .explorer-dashboard .explorer-result > summary > i,
+    .explorer-dashboard .explorer-student-analyses summary::after {
+        transition: none;
+    }
+
+    .explorer-dashboard .explorer-step:disabled > span {
+        animation: none;
+    }
+}

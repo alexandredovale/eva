@@ -73,4 +73,61 @@ foreach ([[.9], [.9, .4]] as $smallPopulation) {
 $repeat = $detector->analyze(kappaCandidates([.95, .93, .91, .89, .87, .65, .64, .63, .62]));
 assertKappa($repeat->toArray() === $clearBreak->toArray(), 'κq deve ser determinístico para a mesma distribuição.');
 
+$unsortedRejected = false;
+
+try {
+    $detector->analyze(kappaCandidates([.8, .9, .7]));
+} catch (Throwable $exception) {
+    $unsortedRejected = str_contains($exception->getMessage(), 'não está ordenada');
+}
+
+assertKappa($unsortedRejected, 'κq deve rejeitar uma população fora da ordem decrescente exigida.');
+
+mt_srand(20260809);
+$propertyChecksPassed = true;
+
+for ($round = 0; $round < 300; $round++) {
+    $count = $round % 101;
+    $scores = [];
+
+    for ($index = 0; $index < $count; $index++) {
+        $scores[] = mt_rand(-1_000_000, 1_000_000) / 1_000_000;
+    }
+
+    rsort($scores, SORT_NUMERIC);
+    $candidates = kappaCandidates($scores);
+    $propertyAnalysis = $detector->analyze($candidates);
+    $expectedSelectedCount = $propertyAnalysis->status === 'identified'
+        ? $propertyAnalysis->kappa
+        : $count;
+
+    if (count($propertyAnalysis->scores) !== $count
+        || count($propertyAnalysis->normalizedRanks) !== $count
+        || count($propertyAnalysis->normalizedSimilarities) !== $count
+        || count($propertyAnalysis->gaps) !== max(0, $count - 1)
+        || count($propertyAnalysis->gapZScores) !== max(0, $count - 1)
+        || count($propertyAnalysis->selectedCandidates) !== $expectedSelectedCount
+        || ($propertyAnalysis->status === 'identified'
+            && ($propertyAnalysis->kappa === null
+                || $propertyAnalysis->kappa < 1
+                || $propertyAnalysis->kappa >= $count
+                || array_column($propertyAnalysis->selectedCandidates, 'evidenceId')
+                    !== array_column(array_slice($candidates, 0, $propertyAnalysis->kappa), 'evidenceId')))) {
+        $propertyChecksPassed = false;
+        break;
+    }
+
+    foreach ($propertyAnalysis->gaps as $gap) {
+        if ($gap < 0.0 || !is_finite($gap)) {
+            $propertyChecksPassed = false;
+            break 2;
+        }
+    }
+}
+
+assertKappa(
+    $propertyChecksPassed,
+    'As propriedades de cardinalidade, prefixo, gaps e estados degenerados de κq falharam.'
+);
+
 echo sprintf("Fronteira query-local κq validada com %d asserções.\n", $assertions);

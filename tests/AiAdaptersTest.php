@@ -354,6 +354,10 @@ assertAiAdapter(
     'O prompt deve exigir incorporação analítica de núcleo e convergência, não apenas a devolução de IDs.'
 );
 assertAiAdapter(
+    str_contains($queryHttp->requests[0]['payload']['messages'][0]['content'], 'colchetes literais'),
+    'O prompt deve fixar o delimitador canônico das citações.'
+);
+assertAiAdapter(
     str_contains($queryHttp->requests[0]['payload']['messages'][0]['content'], 'avalie por si mesmo se a solicitação atual é continuidade')
         && str_contains($queryHttp->requests[0]['payload']['messages'][0]['content'], 'não são evidências documentais'),
     'O prompt deve avaliar a continuidade sem transformar o histórico em evidência.'
@@ -384,6 +388,29 @@ $selectiveQueryAnswer = (new QueryAnswerProvider(
 assertAiAdapter(
     $selectiveQueryAnswer->usedEvidenceIds === ['EVA-E000001'],
     'Uma evidência declarada pelo provedor, mas ausente das citações visíveis, deve ser descartada.'
+);
+
+$parentheticalCitationHttp = new CapturingJsonHttpClient([[
+    'choices' => [[
+        'message' => ['content' => json_encode([
+            'answer' => 'A primeira evidência contribui diretamente (EVA-E000001).',
+            'used_evidence_ids' => ['EVA-E000001'],
+            'interactions' => [],
+            'limitations' => [],
+        ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE)],
+    ]],
+]]);
+$parentheticalCitationAnswer = (new QueryAnswerProvider(
+    $parentheticalCitationHttp,
+    'test-key',
+    'language-model-test',
+    'https://language-provider.test/v1/chat/completions'
+))->answer('Explique a primeira unidade.', $queryContext, []);
+
+assertAiAdapter(
+    $parentheticalCitationAnswer->answer === 'A primeira evidência contribui diretamente [EVA-E000001].'
+        && $parentheticalCitationAnswer->usedEvidenceIds === ['EVA-E000001'],
+    'Uma citação parentética inequívoca deve ser normalizada para o formato canônico antes da validação.'
 );
 
 $correctiveQueryHttp = new CapturingJsonHttpClient([[

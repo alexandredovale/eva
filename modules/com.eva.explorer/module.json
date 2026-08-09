@@ -1,0 +1,25 @@
+{
+  "id": "com.eva.explorer",
+  "name": "EXPLORER",
+  "vendor": "EVA",
+  "version": "1.1.0",
+  "eva_contract": "1",
+  "entrypoint": "bootstrap.php",
+  "subscribed_events": [],
+  "capabilities": [
+    "ai.language.generate",
+    "core.read.users",
+    "core.read.projects",
+    "core.read.documents",
+    "core.query.scoped"
+  ],
+  "dashboard": {
+    "enabled": true,
+    "entrypoint": "dashboard.php",
+    "order": 75
+  },
+  "storage": {
+    "driver": "sqlite",
+    "schema_version": 2
+  }
+}

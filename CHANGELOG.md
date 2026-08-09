@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project uses [Semantic Versioning](https://semver.org/).
 
+## [3.0.1] - 2026-08-09
+
+### Added
+
+- Public `com.eva.explorer` reference cartridge with Teacher, Student, and Institutional Staff profiles, Learning Themes, Quiz, Nodes, Exam, actor-scoped Core queries, isolated SQLite storage, and its complete offline regression test.
+- Stronger property and boundary regression coverage for query-local κq and the Context Intelligence Engine calculations.
+
+### Changed
+
+- Portuguese and English module documentation now uses EXPLORER as the standard public implementation and describes its actual interactive contracts.
+- The answer adapter normalizes unambiguous parenthetical evidence markers to the canonical bracket syntax before local citation validation; it does not infer, add, or force evidence.
+
+### Removed
+
+- The retired initial reference cartridge and all of its package-specific tests and documentation.
+- Private ENADE package placeholders and tests from the public release compendium.
+
+### Fixed
+
+- Stale module-interface and product tests that still expected the retired reference package.
+- Citation validation failures caused solely by a model returning an already elected evidence ID in parentheses instead of canonical brackets.
+
 ## [3.0.0] - 2026-08-08
 
 ### Added
@@ -68,14 +90,14 @@ and the project uses [Semantic Versioning](https://semver.org/).
 - Independent module discovery, activation, deactivation, definitive removal, event fan-out, retention, backup, and per-module SQLite storage.
 - Generic module-dashboard discovery in the white-label interface, including declarative filtering, accordion behavior, refresh, CSP-nonced module CSS, and manifest-defined ordering.
 - Neutral `module_events` mailbox as the only new Core table; no existing table was altered for modules.
-- Reference connector `com.eva.education`, with descriptive pedagogical observations, immediate transactional processing, localized labels, linguistic concept extraction from question and answer, and an independent learning-trajectory dashboard.
+- Initial reference connector experiment, with descriptive observations, independent persistence, and a package-owned dashboard.
 - Animated yellow waiting indicator for documentary queries, with reduced-motion support.
 
 ### Changed
 
 - Locally rejected answers now receive deterministic corrective feedback on the next bounded attempt: a safe failure code and, only when applicable, an already elected evidence ID.
 - Module interfaces, names, styles, persistence, and domain rules remain inside their packages; the Core exposes only generic contracts and hosts.
-- The Education connector now uses three non-valuative dimensions: conceptual articulation, evidence use, and contextual connection.
+- The initial reference connector uses three non-valuative dimensions: conceptual articulation, evidence use, and contextual connection.
 - Authentication-dialog focus now moves before the access panel is hidden, using `inert` to preserve accessibility.
 
 ### Fixed
@@ -84,8 +106,8 @@ and the project uses [Semantic Versioning](https://semver.org/).
 - Removed legacy separate credential-file loading and aligned all public guidance with `.env` as the only local configuration source.
 - Removed three unused credential variables and their obsolete documentation references from the local configuration inventory.
 - Corrective retries no longer repeat an identical rejected generation without validation guidance.
-- Education trajectory labels, dates, evidence layout, concepts, direct-reference text, and accordion filtering now remain readable and localized to the question language.
-- Removed the redundant Education observation “Question Refinement” from new and existing module histories through schema migration 2.
+- Reference-connector trajectory labels, dates, evidence layout, concepts, direct-reference text, and accordion filtering now remain readable and localized to the question language.
+- Removed the redundant reference-connector observation “Question Refinement” from new and existing module histories through schema migration 2.
 
 ### Security
 

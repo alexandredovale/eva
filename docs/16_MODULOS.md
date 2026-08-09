@@ -76,7 +76,7 @@ Interfaces opcionais:
 
 O Core não contém menus, textos, estilos, IDs ou renderizadores de um módulo específico. Quando um módulo ativo declara `dashboard.enabled`, a rota autenticada `GET /api/modules` publica somente seu descritor genérico (`id`, `name`, `order`). O frontend monta a navegação a partir desses descritores e entrega a resposta de `DashboardModuleInterface` a um único host visual.
 
-O menu sempre utiliza exatamente `module.name`. Não existe `dashboard.label`, alias de navegação ou nome sobrescrito pelo Core. Assim, um manifesto com `"name": "Education"` produz automaticamente o menu **Education**.
+O menu sempre utiliza exatamente `module.name`. Não existe `dashboard.label`, alias de navegação ou nome sobrescrito pelo Core. Assim, um manifesto com `"name": "EXPLORER"` produz automaticamente o menu **EXPLORER**.
 
 A navegação não apresenta números ou índices visuais antes dos nomes. A posição continua determinada pelo layout fixo do Core e, entre módulos, por `dashboard.order`.
 
@@ -179,41 +179,27 @@ Desativar nunca exclui dados. Para uma remoção definitiva, clique em **Excluir
 
 A exclusão é irreversível e não gera backup automaticamente. Execute `backup.php` antes dela quando houver necessidade institucional de arquivamento.
 
-## Módulo Education de referência
+## Módulo EXPLORER de referência
 
-O pacote `com.eva.education` observa e interpreta `interaction.completed` no próprio processamento transacional do evento. Não há cron ou comando manual no fluxo normal. O Runtime confirma conjuntamente a interação, seu estado final, o registro idempotente do evento e o avanço do cursor. A interação termina como `completed` quando a análise é validada ou como `failed` se o módulo ou o provedor falhar; `pending` não é confirmado como estado final desse fluxo.
+O pacote `com.eva.explorer` é o cartucho público de referência do EVA Module Contract v1. Ele não assina eventos do Core: seu fluxo é interativo e parte de ações explícitas no dashboard. O manifesto declara dashboard próprio, armazenamento SQLite schema 2 e somente as capacidades genéricas necessárias para leitura autorizada, consulta documental escopada e geração de linguagem.
 
-A governança ativa possui somente três dimensões descritivas: `conceptual_articulation`, `evidence_use` e `contextual_connection`. A antiga dimensão redundante `question_refinement` foi retirada. O schema 2 do SQLite remove essa observação de interpretações antigas sem apagar interações, perguntas, respostas, evidências, conceitos ou as demais observações.
+O módulo possui três perfis internos:
 
-Os textos, estados e rótulos exibidos no trajeto são produzidos no idioma de `current_input`. Os identificadores internos de dimensão e estado permanecem canônicos e não são apresentados quando os rótulos localizados estão disponíveis.
+- **Professor**: cria Temas de Aprendizado e define a orientação do percurso;
+- **Aluno**: percorre, em ordem, Quizz, Nodes e Prova;
+- **Secretaria**: acompanha temas, vínculos e evolução institucional.
 
-O rodapé de uma consulta direta omite o campo técnico de escopo e apresenta somente `Documento · Referências Diretas · Conceitos`. Rótulos produzidos pelo provedor são normalizados para texto humano com espaços, e o presenter interno do módulo também humaniza registros antigos que contenham underscore. `Referências Diretas` representa somente as referências explicitamente identificadas pelo Core e não deve ser apresentado como extração de conceitos.
+As atividades reutilizam o RAG do Core por `core.query.scoped`. O ator autenticado é vinculado pelo Runtime, e projetos ou documentos continuam sujeitos à autorização do Core. A evidência empregada preserva integralmente trecho e referência; o módulo não amplia o escopo e não altera κq, CIE, linhagem, κe ou qualquer cálculo do Core.
 
-O próprio pacote produz a interface interna de trajeto, seus estilos, os cards em acordeão, a formatação de data e os campos de filtro. No card de observação, o estado positivo padrão `observed` não é repetido no título; estados que alteram a leitura — ausência, insuficiência ou conflito — permanecem explícitos. As evidências são apresentadas em linha própria abaixo da descrição. O frontend do EVA recebe somente o nome `Education` pela descoberta genérica e não conhece o ID ou o domínio educacional. Desativar ou excluir o pacote remove o descritor da descoberta e, consequentemente, sua guia.
+Quizz e Nodes retornam apoio qualitativo de **correção** ou **aprofundamento**. A Prova utiliza seu contrato próprio de resposta. O percurso não produz notas, pesos, percentuais, confiança, níveis de domínio ou rankings.
 
-### Extração conceitual linguística
+Perfis, Temas de Aprendizado, vínculos, ações idempotentes, resultados e progresso pertencem exclusivamente ao SQLite privado do EXPLORER. A instalação não cria tabelas ou estruturas de domínio no banco do Core. HTML e CSS também permanecem no pacote; o frontend descobre somente o contrato genérico e o nome `EXPLORER` do manifesto.
 
-O Interpreter produz uma análise linguística versionada dentro de `observations_json`, sem nova tabela. A estrutura contém:
-
-- unidades extraídas de trechos literais da pergunta ou da resposta;
-- papéis canônicos `subject`, `predicate`, `object`, `complement`, `predicative`, `adjective` e `adverbial_modifier`;
-- relações formadas exclusivamente por identificadores dessas unidades;
-- conceitos normalizados obrigatoriamente vinculados às unidades linguísticas das quais foram derivados;
-- referências de evidência limitadas aos IDs presentes no evento.
-
-O validador descarta unidades ausentes da fonte declarada e remove relações ou conceitos que dependam delas. A análise somente é aceita se, após essa normalização, conservar a cobertura obrigatória de pergunta e resposta. IDs de evidência inexistentes, duplicidades e qualquer campo valorativo continuam sendo recusados. `Referências diretas` e `Conceitos` permanecem campos distintos no Dashboard.
-
-Pergunta e resposta constituem conjuntamente o objeto da interação. A análise somente é concluída quando contém unidades linguísticas das duas fontes e quando o conjunto de conceitos referencia ao menos uma unidade de `current_input` e uma unidade da resposta. Se o provedor omitir a cobertura conceitual de uma das fontes, o validador a completa somente a partir de um núcleo linguístico já ancorado e validado — sujeito, predicado, objeto, complemento ou predicativo. Dessa forma, a resposta pode ampliar a pergunta, mas não substituí-la na trilha conceitual.
-
-O comando abaixo permanece somente para recuperar interações antigas que ainda estejam pendentes:
+O teste público de referência valida manifesto, capacidades, isolamento do banco, autorização dos três perfis, ações, consultas escopadas, contratos de resposta, preservação das evidências e interface:
 
 ```powershell
-C:\xampp\php\php.exe modules\com.eva.education\bin\process.php --live --limit=10
+php tests\ExplorerModuleTest.php
 ```
-
-O comando recusa chamadas sem `--live`, e o servidor também exige `AI_LIVE_ENABLED=true`. A governança aceita somente versão de protocolo, taxonomia, dimensões observáveis e política de evidências. Pontuações, pesos, notas, percentuais, confiança, níveis de domínio e rankings são recusados.
-
-Os únicos estados de observação são `observed`, `not_observed`, `insufficient_evidence` e `conflicting_evidence`.
 
 ## Distribuição e ecossistema
 

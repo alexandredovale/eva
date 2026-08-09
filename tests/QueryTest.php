@@ -566,6 +566,47 @@ try {
     assertQuery(str_contains($relationalResult->answer, '[EVA-E'), 'A resposta validada deve mostrar citação primária.');
     assertQuery(count($relationalResult->usedEvidences) >= 3, 'A resposta deve aceitar todo o contexto eleito e validar as fontes das interações.');
 
+    $primaryAnalyses = array_values(array_filter(
+        $relationalResult->contextIntelligenceAnalyses,
+        static fn ($analysis): bool => $analysis->stage === 'primary'
+    ));
+    $globalAnalyses = array_values(array_filter(
+        $relationalResult->contextIntelligenceAnalyses,
+        static fn ($analysis): bool => $analysis->stage === 'global'
+    ));
+    $knownLocalNucleusIds = [];
+
+    foreach ($primaryAnalyses as $primaryAnalysis) {
+        $localNucleus = $primaryAnalysis->coreCandidates !== []
+            ? $primaryAnalysis->coreCandidates
+            : $primaryAnalysis->convergenceCandidates;
+
+        foreach ($localNucleus as $candidate) {
+            $knownLocalNucleusIds[$candidate->evidenceId] = true;
+        }
+    }
+
+    $globalAnalysis = $globalAnalyses[0] ?? null;
+    $expectedGlobalNucleusIds = $globalAnalysis === null
+        ? []
+        : array_column(
+            $globalAnalysis->coreCandidates !== []
+                ? $globalAnalysis->coreCandidates
+                : $globalAnalysis->convergenceCandidates,
+            'evidenceId'
+        );
+    sort($expectedGlobalNucleusIds);
+    $actualAnalyzedIds = array_values(array_filter(
+        array_column($relationalResult->usedEvidences, 'id'),
+        static fn (int $evidenceId): bool => isset($knownLocalNucleusIds[$evidenceId])
+    ));
+    sort($actualAnalyzedIds);
+
+    assertQuery(
+        count($globalAnalyses) === 1 && $actualAnalyzedIds === $expectedGlobalNucleusIds,
+        'O contexto semântico final deve coincidir com o núcleo global ou seu fallback, sem convergência global excedente.'
+    );
+
     $recoveringProvider = new RecoveringAnswerProvider();
     $recoveredResult = (new DocumentQueryService($retriever, $recoveringProvider))
         ->query($documentId, 'Explique ' . $intelligence['public_id']);

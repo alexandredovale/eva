@@ -75,12 +75,12 @@ try {
     $modules = $api->handle('GET', '/api/admin/modules', $authorized, [], [], '');
     assertProduct($modules->status === 200, 'A listagem administrativa de módulos falhou.');
     assertProduct(
-        in_array('com.eva.education', array_column($modules->payload['modules'], 'id'), true),
+        in_array('com.eva.explorer', array_column($modules->payload['modules'], 'id'), true),
         'O pacote educacional instalado não foi descoberto pelo Runtime.'
     );
     $unconfirmedModuleDeletion = $api->handle(
         'DELETE',
-        '/api/admin/modules/com.eva.education',
+        '/api/admin/modules/com.eva.explorer',
         $authorized,
         [],
         [],
@@ -88,7 +88,7 @@ try {
     );
     assertProduct($unconfirmedModuleDeletion->status === 422, 'A exclusão modular aceitou confirmação incorreta.');
     assertProduct(
-        is_dir(dirname(__DIR__) . '/modules/com.eva.education'),
+        is_dir(dirname(__DIR__) . '/modules/com.eva.explorer'),
         'Uma confirmação incorreta excluiu o pacote educacional.'
     );
     $documents = $api->handle('GET', '/api/documents', $authorized, [], [], '');

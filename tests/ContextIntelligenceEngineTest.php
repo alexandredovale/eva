@@ -116,4 +116,56 @@ assertContextIntelligence(
     'A saída auditável do CIE perdeu suas contagens ou região selecionada.'
 );
 
+mt_srand(20260809);
+$propertyChecksPassed = true;
+
+for ($round = 0; $round < 300; $round++) {
+    $count = 1 + ($round % 97);
+    $population = [];
+
+    for ($index = 0; $index < $count; $index++) {
+        $similarity = (mt_rand(-1_000_000, 1_000_000) / 1_000_000);
+        $population[] = candidate(20_000 + ($round * 100) + $index, $similarity);
+    }
+
+    usort($population, static fn (ContextCandidate $left, ContextCandidate $right): int =>
+        ($right->similarity <=> $left->similarity) ?: ($left->evidenceId <=> $right->evidenceId)
+    );
+    $propertyAnalysis = $engine->analyze($population);
+    $partitionIds = [
+        ...array_column($propertyAnalysis->coreCandidates, 'evidenceId'),
+        ...array_column($propertyAnalysis->convergenceCandidates, 'evidenceId'),
+        ...array_column($propertyAnalysis->discardedCandidates, 'evidenceId'),
+    ];
+    $inputIds = array_column($population, 'evidenceId');
+    sort($partitionIds);
+    sort($inputIds);
+    $expectedSelection = $propertyAnalysis->coreCandidates !== []
+        ? [...$propertyAnalysis->coreCandidates, ...$propertyAnalysis->convergenceCandidates]
+        : $propertyAnalysis->convergenceCandidates;
+
+    if ($partitionIds !== $inputIds
+        || count($partitionIds) !== count(array_unique($partitionIds))
+        || array_column($propertyAnalysis->selectedCandidates, 'evidenceId')
+            !== array_column($expectedSelection, 'evidenceId')
+        || !is_finite($propertyAnalysis->mean)
+        || !is_finite($propertyAnalysis->standardDeviation)
+        || ($propertyAnalysis->coefficientOfVariation !== null
+            && !is_finite($propertyAnalysis->coefficientOfVariation))) {
+        $propertyChecksPassed = false;
+        break;
+    }
+
+    if ($propertyAnalysis->standardDeviation > 1e-12
+        && count($propertyAnalysis->coreCandidates) > (count($population) / 2)) {
+        $propertyChecksPassed = false;
+        break;
+    }
+}
+
+assertContextIntelligence(
+    $propertyChecksPassed,
+    'As propriedades de partição, seleção, finitude e limite de Cantelli falharam.'
+);
+
 echo sprintf("Context Intelligence Engine validado com %d asserções.\n", $assertions);
