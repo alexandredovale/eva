@@ -9,12 +9,17 @@ use Eva\Application\Product\ContentDeletionService;
 use Eva\Application\Queue\ProcessingQueueService;
 use Eva\Infrastructure\Database\Connection;
 use Eva\Infrastructure\Storage\DocumentStorage;
+use Eva\Infrastructure\Storage\FigureStorage;
 
 $container = require __DIR__ . '/bootstrap.php';
 $database = Connection::create($container['database']);
 $storage = new DocumentStorage($container['ingestion']['document_storage']);
+$figureStorage = new FigureStorage(
+    $container['ingestion']['figure_storage'],
+    $container['ingestion']['max_figure_bytes']
+);
 $ingestion = new DocumentIngestionService($database, $storage, $container['ingestion']['max_document_bytes']);
-$deletion = new ContentDeletionService($database, $storage);
+$deletion = new ContentDeletionService($database, $storage, $figureStorage);
 $management = new AccessManagementService(
     $database,
     new AuthService($database, $container['security'])
@@ -108,6 +113,12 @@ try {
 
     foreach ($documentResults as $result) {
         assertDeletion(is_file($storage->absolutePath($result->storagePath)), 'A fonte temporária não foi armazenada.');
+        $figureDirectory = $container['ingestion']['figure_storage']
+            . DIRECTORY_SEPARATOR . $result->documentPublicId;
+        if (!mkdir($figureDirectory, 0775, true) && !is_dir($figureDirectory)) {
+            throw new RuntimeException('Não foi possível preparar a figura temporária.');
+        }
+        file_put_contents($figureDirectory . DIRECTORY_SEPARATOR . 'temporaria.png', 'fixture');
     }
 
     $deleted = $deletion->deleteProject($projectIds[0]);
@@ -132,6 +143,10 @@ try {
 
     foreach ($documentResults as $result) {
         assertDeletion(!is_file($storage->absolutePath($result->storagePath)), 'A fonte excluída permaneceu no armazenamento.');
+        assertDeletion(
+            !is_dir($container['ingestion']['figure_storage'] . DIRECTORY_SEPARATOR . $result->documentPublicId),
+            'O diretório de figuras permaneceu após a exclusão da obra.'
+        );
     }
 
     $standalone = $ingestion->ingest(
@@ -140,10 +155,17 @@ try {
         'Obra isolada ' . $suffix
     );
     $documentResults[] = $standalone;
+    $standaloneFigureDirectory = $container['ingestion']['figure_storage']
+        . DIRECTORY_SEPARATOR . $standalone->documentPublicId;
+    if (!mkdir($standaloneFigureDirectory, 0775, true) && !is_dir($standaloneFigureDirectory)) {
+        throw new RuntimeException('Não foi possível preparar a figura isolada temporária.');
+    }
+    file_put_contents($standaloneFigureDirectory . DIRECTORY_SEPARATOR . 'temporaria.png', 'fixture');
     $standaloneDeleted = $deletion->deleteDocument($standalone->documentId);
     assertDeletion($standaloneDeleted['documents_deleted'] === 1, 'A exclusão individual não removeu a obra.');
     assertDeletion((int) $database->query("SELECT COUNT(*) FROM documents WHERE id = {$standalone->documentId}")->fetchColumn() === 0, 'A obra individual permaneceu no banco.');
     assertDeletion(!is_file($storage->absolutePath($standalone->storagePath)), 'A fonte individual permaneceu no armazenamento.');
+    assertDeletion(!is_dir($standaloneFigureDirectory), 'As figuras da obra individual permaneceram no armazenamento.');
 } finally {
     foreach ($projectIds as $projectId) {
         $statement = $database->prepare('DELETE FROM projects WHERE id = :id');
@@ -161,6 +183,11 @@ try {
 
         try {
             $storage->remove($result->storagePath);
+        } catch (Throwable) {
+        }
+
+        try {
+            $figureStorage->removeDocument($result->documentPublicId);
         } catch (Throwable) {
         }
     }

@@ -6,12 +6,16 @@
 !/database/actual/.gitkeep
 
 /storage/documents/*
+/storage/figures/*
 /storage/logs/*
 !/storage/documents/.gitkeep
+!/storage/figures/.gitkeep
 !/storage/logs/.gitkeep
 
 /.00-analise/
+/backup/
 /database/backups/
+/updates/
 /updates/backups/
 
 /docs/test/
@@ -30,9 +34,13 @@
 !/modules/.runtime/logs/.gitkeep
 
 /modules/com.eva.enade/
+/tests/EnadeModuleTest.php
+/tests/img-test/
 *.log
 *.sql.gz
 *.zip
+*.rar
+*.7z
 *.tar
 *.tar.gz
 Thumbs.db

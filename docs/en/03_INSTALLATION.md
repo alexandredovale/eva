@@ -14,6 +14,8 @@ Copy `.env.example` to `.env`. Set application URL, database connection, brandin
 
 Leave provider fields empty and `AI_LIVE_ENABLED=false` until the local installation and offline tests are complete.
 
+In production, use `APP_ENV=production` and `APP_DEBUG=false`.
+
 Never copy production secrets into examples, issue reports, test output, or documentation. Provider configuration stores the *name* of the credential environment variable; the credential itself belongs only in that local variable.
 
 ## 3. Database
@@ -33,10 +35,11 @@ The PHP process needs read/write access to:
 
 ```text
 storage/documents/
+storage/figures/
 storage/logs/
 ```
 
-These directories contain only `.gitkeep` in the public repository. Runtime contents are ignored by Git.
+These directories contain only `.gitkeep` in the public repository. Runtime contents are ignored by Git. Documentary figure directories are not created by ingestion or processing: after a work receives its `EVA-D...` identifier, an authorized collection manager creates `storage/figures/{EVA-D...}/` and places approved files there. The PHP process still needs sufficient access to serve authorized figures and remove a work's private figure directory during managed deletion.
 
 Do not make the entire project writable. Keep `.env`, application source, database artifacts, and server configuration readable only by the accounts that need them.
 

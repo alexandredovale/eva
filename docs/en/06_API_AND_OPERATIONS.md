@@ -22,14 +22,16 @@ The table reflects the implemented dispatcher. Request and response bodies are J
 | Authenticated | `POST` | `/api/me/recovery-code` | Rotate and return a recovery code after password confirmation |
 | Authenticated | `GET` | `/api/scopes` | Projects and works available to the current actor |
 | Authenticated | `POST` | `/api/query` | Query authorized selected scopes |
+| Authenticated | `GET` | `/api/documents/{EVA-D...}/figures/{file}` | Read a local figure from an authorized work |
 | Authenticated | `GET` | `/api/modules` | Discover interface entries exposed by active connector modules |
 | Authenticated | `GET` | `/api/modules/{id}/dashboard` | Load a connector-owned generic dashboard payload |
+| Authenticated | `POST` | `/api/modules/{id}/actions/{action-id}` | Execute an authenticated action owned by the connector module |
 | Superadmin | `POST` | `/api/admin/queue/run` | Run one explicitly confirmed worker pass |
 | Superadmin | `GET` | `/api/admin/modules` | List connector packages discovered under `modules/` |
 | Superadmin | `PATCH` | `/api/admin/modules/{id}` | Activate or deactivate one connector module |
 | Superadmin | `DELETE` | `/api/admin/modules/{id}` | Permanently remove a confirmed package and its private module data |
 | Superadmin | `GET`, `POST` | `/api/admin/users` | List users or create a normal user |
-| Superadmin | `PATCH` | `/api/admin/users/{id}` | Activate or deactivate a normal user |
+| Superadmin | `PATCH` | `/api/admin/users/{id}` | Rename, activate, or deactivate a normal user |
 | Superadmin | `POST` | `/api/admin/users/{id}/reset-password` | Reset a password and return a new recovery code |
 | Superadmin | `PUT` | `/api/admin/users/{id}/permissions` | Replace project and individual-work grants |
 | Superadmin | `GET`, `POST` | `/api/admin/projects` | List or create projects |
@@ -63,9 +65,66 @@ Projects may also contain an optional superadmin-managed response profile. The p
 
 Profile content is not exposed to normal users or written to audit metadata. Audit events record only whether a project profile is configured and how many profiles were active for a query.
 
+## Document figures
+
+Markdown, JSON, and XML accept figure contracts in Portuguese or English. The visual node uses `Figura` or `Figure`, must be the immediate child of a non-visual thematic topic, and cannot occur directly at the document root or under another figure. Descriptive content is indexed normally; EVA does not apply OCR or multimodal interpretation.
+
+### Bilingual fields
+
+| Value | Português | English | Required |
+|---|---|---|---|
+| logical image path | `Arquivo` | `File` | yes |
+| documentary classification | `Tipo` | `Type` | no |
+| objective description | `Descrição factual` | `Factual description` | no |
+| transcription shown in the image | `Texto visível` | `Visible text` | no |
+| explicitly depicted relationships | `Relações representadas` | `Represented relationships` | no |
+
+Field recognition is case-insensitive. JSON may use the space-separated names in the table. XML uses `_` or `-` instead of spaces, such as `descricao_factual` and `factual_description`. Both languages are equivalent; keeping one language throughout each contract is recommended.
+
+### Structure by format
+
+- **Markdown:** a `Figura...`/`Figure...` heading contains `Field: value` lines and is the immediate child of another thematic heading.
+- **JSON:** a `Figura...`/`Figure...` property contains an object with the fields and is the immediate child of another thematic object.
+- **XML:** a `<figura titulo="Figura...">` or `<figure title="Figure...">` element contains the fields as child elements and is the immediate child of another thematic element.
+
+When contract evidence is cited, the resolver reads the Markdown block or gathers only direct child fields from the JSON object/XML element. This does not create or alter evidence; the tree, content, and source reference remain those produced by the corresponding parser.
+
+An independent minimal document is available for every format/language combination:
+
+| Language | Markdown | JSON | XML |
+|---|---|---|---|
+| Português | [`figure.md`](../examples/figure-contracts/pt-BR/figure.md) | [`figure.json`](../examples/figure-contracts/pt-BR/figure.json) | [`figure.xml`](../examples/figure-contracts/pt-BR/figure.xml) |
+| English | [`figure.md`](../examples/figure-contracts/en/figure.md) | [`figure.json`](../examples/figure-contracts/en/figure.json) | [`figure.xml`](../examples/figure-contracts/en/figure.xml) |
+
+Portuguese Markdown example:
+
+```md
+## Sistema solar
+
+### Figura 4 — Movimento de translação
+
+Arquivo: figuras/translacao-terra.png
+Tipo: diagrama didático
+Descrição factual: A Terra aparece em quatro posições ao redor do Sol.
+Texto visível: março, junho, setembro e dezembro.
+Relações representadas: as setas indicam movimento orbital no sentido anti-horário.
+
+---
+```
+
+In Markdown, the contract and explanatory content must remain directly in the visual node; a new child heading starts another evidence record and does not inherit the contract. In JSON/XML, fields must be direct children of the visual object/element. This composition keeps topic, structural path, evidence, and file in the same documentary chain.
+
+For `Arquivo: figuras/translacao-terra.png` or `File: figures/translacao-terra.png` in document `EVA-D000060`, place the image at `storage/figures/EVA-D000060/translacao-terra.png`. The logical prefixes `figuras/` and `figures/` are not repeated in physical storage. When contract evidence is cited and the file exists, the query response includes it in `query.figures`; the browser retrieves it with the current authenticated session and displays it inside the answer card.
+
+Because an `<img>` element does not send the Bearer header, the frontend fetches the figure route with the session credential, validates an `image/*` MIME, and creates a local `blob:` URL for display. CSP permits `blob:` only in `img-src`; scripts, connections, and all other resources retain their restrictive directives. These local URLs are revoked when Chat is reset or the session ends.
+
+Making the physical figure available is a deliberately manual and controlled operation. Processing recognizes and indexes the textual contract, but it does not create `storage/figures/{EVA-D...}/`, copy images from the source directory, import URLs, or publish files automatically. After ingestion assigns the work's public identifier, the authorized collection manager creates the corresponding directory and places only approved figures there. This operational exclusivity is enforced by filesystem permissions and institutional procedure, not merely by the application's superadmin role; write access to `storage/figures/` must remain restricted to authorized operators and to the PHP process only to the extent required for managed reads and deletion.
+
+Only PNG, JPEG, and WebP are accepted. The server verifies the real MIME type, rejects external, absolute, and traversal paths, applies `FIGURE_MAX_BYTES`, and silently omits missing or invalid figures without failing the documentary answer. Deleting a work also removes its private figure directory.
+
 ## Queue
 
-Processing jobs are idempotent by document, stage, and capability version. The normal worker claims one job. Summary work interrupted by the configured safe limit returns to the queue with progress preserved. Failed jobs require an explicit allowed retry.
+Processing jobs are idempotent by document, stage, and capability version. The normal worker claims one job. Summary work interrupted by the configured safe limit returns to the queue with progress preserved. Failed jobs require an explicit allowed retry and remain subject to `QUEUE_MAX_FAILURES`.
 
 ```bash
 php bin/queue-worker.php --live
@@ -77,6 +136,12 @@ Both commands still require `AI_LIVE_ENABLED=true`. `--drain` can consume many r
 The superadmin interface offers the same deliberate drain flow without shell access. `POST /api/admin/queue/run` executes one worker pass and requires both `AI_LIVE_ENABLED=true` and a JSON body containing `{"confirm_live": true}`. The browser repeats that request until the returned worker status is `idle`; the tab must remain open during processing. The endpoint invokes `CognitiveQueueWorker` directly and never exposes arbitrary command execution.
 
 The interface polls queue state every three seconds while work is `queued` or `running`. Summary progress follows persisted hierarchical units; embedding batches are persisted incrementally so their progress can advance during processing.
+
+## White-label and provider neutrality
+
+Capabilities are named through neutral boundaries such as `EmbeddingProvider`, `SummaryProvider`, and `QueryAnswerProvider`; `CognitiveProviderFactory` builds them from neutral configuration. The local `.env` is the operational binding point between each capability, provider, endpoint, model, and credential-variable name. Provider identities do not enter domain contracts, routes, or public responses.
+
+Brand name, description, colors, and logo are configured through `BRAND_*`. Colors accept only six-digit hexadecimal values. The logo accepts a path beginning with `/` or an HTTPS URL; when `BRAND_LOGO_URL` is empty, the interface uses its typographic fallback without requesting a nonexistent asset.
 
 ## Audit and metrics
 
@@ -98,6 +163,7 @@ Deleting a work cascades through its nodes, evidence, derivations, embeddings, j
 - request JSON is limited to 64 KiB;
 - query input is limited to 20,000 bytes;
 - uploads obey `DOCUMENT_MAX_BYTES`;
+- each local figure obeys `FIGURE_MAX_BYTES`;
 - jobs are unique by version and processed individually by default.
 
 Functional scripts and styles are served locally. Web fonts may be loaded only from the Google Fonts domains allowed by the Content Security Policy.

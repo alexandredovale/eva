@@ -20,7 +20,7 @@ PROMPT;
         private readonly string $apiKey,
         private readonly string $model,
         private readonly string $endpoint,
-        private readonly int $maxOutputTokens = 500,
+        private readonly int $maxOutputTokens = 1500,
         private readonly int $timeoutSeconds = 30
     ) {
         if (trim($this->apiKey) === '') {

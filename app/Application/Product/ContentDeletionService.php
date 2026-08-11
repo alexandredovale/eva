@@ -6,13 +6,17 @@ namespace Eva\Application\Product;
 
 use Eva\Http\Security\AccessException;
 use Eva\Infrastructure\Storage\DocumentStorage;
+use Eva\Infrastructure\Storage\FigureStorage;
 use PDO;
 use Throwable;
 
 final readonly class ContentDeletionService
 {
-    public function __construct(private PDO $database, private DocumentStorage $storage)
-    {
+    public function __construct(
+        private PDO $database,
+        private DocumentStorage $storage,
+        private ?FigureStorage $figureStorage = null
+    ) {
     }
 
     /** @return array<string, mixed> */
@@ -175,14 +179,22 @@ final readonly class ContentDeletionService
         foreach ($documents as $document) {
             $path = $document['storage_path'] ?? null;
 
-            if (!is_string($path) || $path === '') {
-                continue;
+            if (is_string($path) && $path !== '') {
+                try {
+                    $this->storage->remove($path);
+                } catch (Throwable) {
+                    $failures++;
+                }
             }
 
-            try {
-                $this->storage->remove($path);
-            } catch (Throwable) {
-                $failures++;
+            $publicId = $document['public_id'] ?? null;
+
+            if ($this->figureStorage !== null && is_string($publicId) && $publicId !== '') {
+                try {
+                    $this->figureStorage->removeDocument($publicId);
+                } catch (Throwable) {
+                    $failures++;
+                }
             }
         }
 

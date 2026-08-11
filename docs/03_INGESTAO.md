@@ -14,15 +14,18 @@ Antes do processamento, o sistema confirma:
 - UTF-8 válido para Markdown e JSON;
 - JSON ou XML bem-formado;
 - ausência de `DOCTYPE` no XML;
+- hierarquia válida para figuras Markdown, JSON e XML: todo nó `Figura`/`Figure` deve possuir um nó temático não visual como pai imediato;
 - hash SHA-256 da fonte.
 
 ## Parsers
 
-- **Markdown:** títulos definem níveis; blocos numerados autorais de primeiro nível formam subunidades `item`; o texto contínuo permanece no nó estrutural correspondente. Numerações dentro de blocos de código não alteram a árvore.
-- **JSON:** objetos e listas formam a árvore, preservando chaves e ordem.
-- **XML:** elementos formam a árvore, preservando nomes, atributos e ordem.
+- **Markdown:** títulos definem níveis; blocos numerados autorais de primeiro nível formam subunidades `item`; o texto contínuo permanece no nó estrutural correspondente. Numerações dentro de blocos de código não alteram a árvore. Uma seção cujo título começa com `Figura` ou `Figure` é aceita somente como filha imediata de outra seção temática não visual; figuras diretamente na raiz ou filhas de outra figura causam rejeição da ingestão.
+- **JSON:** objetos e listas formam a árvore, preservando chaves e ordem. Uma propriedade `Figura...` ou `Figure...` deve pertencer imediatamente a um objeto temático e seus campos contratuais são propriedades filhas.
+- **XML:** elementos formam a árvore, preservando nomes, atributos e ordem. Um elemento `<figura>` ou `<figure>` deve pertencer imediatamente a outro elemento temático e seus campos contratuais são elementos filhos.
 
 Os parsers produzem o mesmo contrato normalizado e não geram resumos, embeddings ou interações cognitivas.
+
+O contrato bilíngue completo e os seis templates por formato e idioma estão documentados em [`10_PRODUTO.md`](10_PRODUTO.md#figuras-documentais) e [`examples/figure-contracts/`](examples/figure-contracts/README.pt-BR.md).
 
 ## Contrato normalizado
 

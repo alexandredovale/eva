@@ -38,7 +38,9 @@ final class JsonParser implements DocumentParserInterface
                     $childValue,
                     '/' . $this->pointerSegment((string) $key),
                     1,
-                    count($children)
+                    count($children),
+                    'document',
+                    $documentTitle
                 );
             }
 
@@ -47,7 +49,15 @@ final class JsonParser implements DocumentParserInterface
             }
         } elseif (is_array($value)) {
             foreach ($value as $index => $childValue) {
-                $children[] = $this->buildNode('[' . $index . ']', $childValue, '/' . $index, 1, count($children));
+                $children[] = $this->buildNode(
+                    '[' . $index . ']',
+                    $childValue,
+                    '/' . $index,
+                    1,
+                    count($children),
+                    'document',
+                    $documentTitle
+                );
             }
 
             if ($children === []) {
@@ -72,15 +82,38 @@ final class JsonParser implements DocumentParserInterface
         return new NormalizedDocument($this->format(), $documentTitle, $sourceHash, $root);
     }
 
-    private function buildNode(string $title, mixed $value, string $path, int $depth, int $order): NormalizedNode
-    {
+    private function buildNode(
+        string $title,
+        mixed $value,
+        string $path,
+        int $depth,
+        int $order,
+        string $parentType,
+        string $parentTitle
+    ): NormalizedNode {
+        if ($this->isFigureTitle($title)
+            && ($parentType !== 'object' || $this->isFigureTitle($parentTitle))) {
+            throw new ParserException(sprintf(
+                'O objeto de figura em json-pointer:%s deve ser filho de um objeto temático.',
+                $path
+            ));
+        }
+
         $children = [];
         $content = '';
 
         if ($value instanceof stdClass) {
             foreach (get_object_vars($value) as $key => $childValue) {
                 $childPath = $path . '/' . $this->pointerSegment((string) $key);
-                $children[] = $this->buildNode((string) $key, $childValue, $childPath, $depth + 1, count($children));
+                $children[] = $this->buildNode(
+                    (string) $key,
+                    $childValue,
+                    $childPath,
+                    $depth + 1,
+                    count($children),
+                    'object',
+                    $title
+                );
             }
 
             if ($children === []) {
@@ -89,7 +122,15 @@ final class JsonParser implements DocumentParserInterface
         } elseif (is_array($value)) {
             foreach ($value as $index => $childValue) {
                 $childPath = $path . '/' . $index;
-                $children[] = $this->buildNode('[' . $index . ']', $childValue, $childPath, $depth + 1, count($children));
+                $children[] = $this->buildNode(
+                    '[' . $index . ']',
+                    $childValue,
+                    $childPath,
+                    $depth + 1,
+                    count($children),
+                    'array',
+                    $title
+                );
             }
 
             if ($children === []) {
@@ -115,6 +156,11 @@ final class JsonParser implements DocumentParserInterface
     private function pointerSegment(string $value): string
     {
         return str_replace(['~', '/'], ['~0', '~1'], $value);
+    }
+
+    private function isFigureTitle(string $title): bool
+    {
+        return preg_match('/^(?:Figura|Figure)\b/iu', trim($title)) === 1;
     }
 
     private function nodeType(mixed $value): string
@@ -154,4 +200,3 @@ final class JsonParser implements DocumentParserInterface
         };
     }
 }
-

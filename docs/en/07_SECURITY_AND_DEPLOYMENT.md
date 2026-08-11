@@ -19,7 +19,7 @@ The application emits a restrictive Content Security Policy, framing, MIME-sniff
 
 Operational dumps, uploaded documents, logs, user records, access grants, and password hashes are not source code and are excluded from the public repository. The public package contains only the empty schema and versioned migrations.
 
-Back up the database and `storage/documents/` together. A production procedure needs a schedule, retention policy, restoration test, and a copy outside the application server. Never use an operational dump as installation seed data.
+Back up the database, `storage/documents/`, and `storage/figures/` together. A production procedure needs a schedule, retention policy, restoration test, and a copy outside the application server. Never use an operational dump as installation seed data.
 
 ## Safe diagnostics
 
@@ -33,7 +33,7 @@ Client error messages remain generic. Server diagnostics use categories such as 
 4. Serve only `public/` and deny directory listing.
 5. Apply global Apache hardening such as `TraceEnable Off` and reduced server tokens.
 6. Restrict filesystem permissions for `.env`, storage, and logs.
-7. Back up and restore the private database in an isolated verification environment.
+7. Back up and restore the private database, documentary sources, and figures in an isolated verification environment.
 8. Run offline regression tests and the deployment verifier.
 9. Enable live providers only after κq/κe and hierarchical, primary, and global CIE diagnostics, non-semantic evidence limits, models, endpoints, prompt sizes, and billing controls are reviewed.
 10. Verify sanitized error responses, audit records, CSP, security headers, and access scopes online.

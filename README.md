@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Current release:** [v3.0.1](https://github.com/alexandredovale/eva/releases/tag/v3.0.1)
+**Current version:** `4.0.0`
 
-**Release highlight:** EXPLORER is now the standard public cartridge for EVA Module Contract. Version 3.0.1 also expands κq/CIE mathematical regression coverage and normalizes unambiguous parenthetical citations to the canonical syntax before validation, without inferring or forcing evidence.
+**Version highlight:** EVA 4.0.0 adds deterministic documentary-figure contracts in Portuguese and English for Markdown, JSON, and XML, with authenticated rendering from private per-document storage and no OCR or multimodal interpretation. It also refines responsive layout and menu positioning and keeps EXPLORER as the public reference cartridge for the EVA Module Contract.
 
 EVA is a provider-neutral PHP system for building and querying **verifiable documentary memory**. It preserves document hierarchy, keeps literal source evidence separate from generated summaries, and validates every answer against the primary evidence recovered for the current query.
 
@@ -131,7 +131,7 @@ The superadmin interface discovers packages present in `modules/` and offers onl
 
 Dashboard modules supply their own HTML and CSS. The Core knows only the generic dashboard contract and manifest name, so installing an unknown future module requires no module-specific menu, renderer, or style in `public/`.
 
-The included `com.eva.explorer` connector is the public reference implementation. Teachers create Learning Themes, students progress through Quiz, Nodes, and Exam interactions, and institutional staff follow the learning process. The module reuses actor-scoped documentary queries from the Core, keeps profiles and history in its own SQLite database, and provides qualitative correction or deepening guidance without grades, weights, or rankings.
+The current public distribution includes `com.eva.explorer` as the independent reference connector. It is not a Core dependency: installed packages are discovered from their manifests, and removing a connector must not invalidate the product layer or unrelated tests.
 
 See [Connector modules](docs/en/17_MODULE_CONNECTORS.md) for contracts, installation, operation, backup, update, and removal.
 

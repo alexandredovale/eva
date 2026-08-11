@@ -14,19 +14,44 @@ A raiz HTTP encaminha somente rotas virtuais e assets para `public`. Arquivos ou
 
 ## Rotas
 
-| Método | Rota | Função |
-|---|---|---|
-| `GET` | `/api/health` | Diagnóstico da aplicação e do banco |
-| `GET` | `/api/branding` | Identidade visual pública sanitizada |
-| `GET` | `/api/documents` | Lista o acervo e contagens documentais |
-| `POST` | `/api/documents` | Persiste Markdown, JSON ou XML |
-| `POST` | `/api/documents/{id}/process` | Agenda sínteses e embeddings |
-| `POST` | `/api/admin/queue/run` | Executa uma passagem confirmada do worker; exclusivo do superadmin |
-| `GET` | `/api/jobs` | Lista o estado da fila |
-| `POST` | `/api/jobs/{id}/retry` | Retoma explicitamente um trabalho com falha |
-| `POST` | `/api/query` | Executa consulta documental validada |
-| `GET` | `/api/metrics` | Retorna apenas contagens descritivas |
-| `GET` | `/api/audit` | Retorna eventos administrativos sanitizados |
+A tabela reflete o dispatcher implementado. Os corpos de requisição e resposta são JSON, exceto o upload multipart indicado.
+
+| Acesso | Método | Rota | Função |
+|---|---|---|---|
+| Público | `GET` | `/api/health` | Diagnóstico da aplicação e do banco |
+| Público | `GET` | `/api/branding` | Identidade visual pública sanitizada |
+| Público | `POST` | `/api/auth/login` | Autentica usuário comum e emite sessão |
+| Público | `POST` | `/api/auth/recover` | Redefine senha com código de recuperação |
+| Autenticado | `GET` | `/api/me` | Retorna identidade e papel do ator atual |
+| Autenticado | `POST` | `/api/logout` | Invalida a sessão atual |
+| Autenticado | `POST` | `/api/me/password` | Altera a senha do usuário comum atual |
+| Autenticado | `POST` | `/api/me/recovery-code` | Rotaciona o código de recuperação após confirmar a senha |
+| Autenticado | `GET` | `/api/scopes` | Lista projetos e obras disponíveis ao ator atual |
+| Autenticado | `POST` | `/api/query` | Consulta os escopos selecionados e autorizados |
+| Autenticado | `GET` | `/api/documents/{EVA-D...}/figures/{arquivo}` | Entrega uma figura local da obra autorizada |
+| Autenticado | `GET` | `/api/modules` | Descobre entradas de interface dos módulos ativos |
+| Autenticado | `GET` | `/api/modules/{id}/dashboard` | Carrega o dashboard genérico pertencente ao módulo |
+| Autenticado | `POST` | `/api/modules/{id}/actions/{action-id}` | Executa uma ação autenticada pertencente ao módulo |
+| Superadmin | `POST` | `/api/admin/queue/run` | Executa uma passagem explicitamente confirmada do worker |
+| Superadmin | `GET` | `/api/admin/modules` | Lista pacotes descobertos em `modules/` |
+| Superadmin | `PATCH` | `/api/admin/modules/{id}` | Ativa ou desativa um módulo |
+| Superadmin | `DELETE` | `/api/admin/modules/{id}` | Exclui definitivamente um pacote confirmado e seus dados privados |
+| Superadmin | `GET`, `POST` | `/api/admin/users` | Lista usuários ou cria um usuário comum |
+| Superadmin | `PATCH` | `/api/admin/users/{id}` | Renomeia, ativa ou desativa um usuário comum |
+| Superadmin | `POST` | `/api/admin/users/{id}/reset-password` | Redefine senha e retorna novo código de recuperação |
+| Superadmin | `PUT` | `/api/admin/users/{id}/permissions` | Substitui concessões de projetos e obras individuais |
+| Superadmin | `GET`, `POST` | `/api/admin/projects` | Lista ou cria projetos |
+| Superadmin | `PUT`, `DELETE` | `/api/admin/projects/{id}` | Atualiza ou exclui um projeto |
+| Superadmin | `GET` | `/api/documents` | Lista obras e contagens descritivas |
+| Superadmin | `POST` | `/api/documents` | Ingere upload multipart Markdown, JSON ou XML |
+| Superadmin | `DELETE` | `/api/documents/{id}` | Exclui uma obra e seu estado dependente |
+| Superadmin | `POST` | `/api/documents/{id}/process` | Agenda sínteses e embeddings de forma idempotente |
+| Superadmin | `GET` | `/api/jobs` | Lista o estado da fila |
+| Superadmin | `POST` | `/api/jobs/{EVA-J...}/retry` | Retoma explicitamente um trabalho elegível com falha |
+| Superadmin | `GET` | `/api/metrics` | Retorna apenas contagens descritivas |
+| Superadmin | `GET` | `/api/audit` | Retorna eventos administrativos sanitizados |
+
+Rotas desconhecidas retornam 404. Rotas conhecidas recusam métodos não suportados com 405 e o cabeçalho `Allow`. Autenticação, autorização, validação, conflitos de fila, violações do contrato de consulta, indisponibilidade do provedor e falhas inesperadas permanecem condições HTTP distintas com mensagens seguras ao cliente.
 
 ## Chat conversacional
 
@@ -37,6 +62,63 @@ Durante uma nova requisição, o transcript preserva as rodadas anteriores e acr
 O estado visual pode conter todas as rodadas da conversa atual, mas somente as três rodadas concluídas mais recentes participam do próximo `POST /api/query`. Elas são anexadas ao próprio campo `input`; nenhuma nova rota, tabela ou entidade de conversa foi criada. Se o limite de 20.000 bytes exigir redução, a rodada mais antiga é removida por inteiro.
 
 **Reiniciar chat** limpa o transcript e o contexto curto sem desmarcar os projetos ou obras selecionados. O estado não sobrevive a logout, novo login ou recarregamento e não é persistido no banco, na auditoria ou no armazenamento do navegador.
+
+## Figuras documentais
+
+Markdown, JSON e XML aceitam contratos de figura em português ou inglês. O nó visual usa `Figura` ou `Figure`, deve ser filho imediato de um tópico temático não visual e não pode ficar diretamente na raiz documental nem sob outra figura. O conteúdo descritivo participa normalmente da indexação; a imagem não é interpretada por OCR ou por modelo multimodal.
+
+### Campos bilíngues
+
+| Valor | Português | English | Obrigatório |
+|---|---|---|---|
+| caminho lógico da imagem | `Arquivo` | `File` | sim |
+| classificação documental | `Tipo` | `Type` | não |
+| descrição objetiva | `Descrição factual` | `Factual description` | não |
+| transcrição presente na imagem | `Texto visível` | `Visible text` | não |
+| relações explicitamente desenhadas | `Relações representadas` | `Represented relationships` | não |
+
+Maiúsculas e minúsculas não alteram o reconhecimento. Em JSON, podem ser usados os nomes com espaços mostrados na tabela. Em XML, use `_` ou `-` no lugar dos espaços, como `descricao_factual` e `factual_description`. Os campos dos dois idiomas são equivalentes; recomenda-se não misturá-los no mesmo contrato.
+
+### Estrutura por formato
+
+- **Markdown:** um heading `Figura...`/`Figure...` contém as linhas `Campo: valor` e é filho imediato de outro heading temático.
+- **JSON:** uma propriedade `Figura...`/`Figure...` contém um objeto com os campos e é filha imediata de outro objeto temático.
+- **XML:** um elemento `<figura titulo="Figura...">` ou `<figure title="Figure...">` contém os campos como elementos filhos e é filho imediato de outro elemento temático.
+
+Quando uma evidência do contrato é citada, o resolvedor usa o bloco Markdown ou reúne somente os campos filhos diretos do objeto JSON/elemento XML. Essa reunião não cria nem altera evidências; a árvore, o conteúdo e a referência da fonte permanecem os produzidos pelo parser correspondente.
+
+Há um documento mínimo independente para cada combinação de formato e idioma:
+
+| Idioma | Markdown | JSON | XML |
+|---|---|---|---|
+| Português | [`figure.md`](examples/figure-contracts/pt-BR/figure.md) | [`figure.json`](examples/figure-contracts/pt-BR/figure.json) | [`figure.xml`](examples/figure-contracts/pt-BR/figure.xml) |
+| English | [`figure.md`](examples/figure-contracts/en/figure.md) | [`figure.json`](examples/figure-contracts/en/figure.json) | [`figure.xml`](examples/figure-contracts/en/figure.xml) |
+
+Exemplo Markdown em português:
+
+```md
+## Sistema solar
+
+### Figura 4 — Movimento de translação
+
+Arquivo: figuras/translacao-terra.png
+Tipo: diagrama didático
+Descrição factual: A Terra aparece em quatro posições ao redor do Sol.
+Texto visível: março, junho, setembro e dezembro.
+Relações representadas: as setas indicam movimento orbital no sentido anti-horário.
+
+---
+```
+
+No Markdown, o contrato e o conteúdo explicativo devem permanecer diretamente no nó visual; um novo subtítulo inicia outra evidência e não herda o contrato. Em JSON/XML, os campos devem ser filhos diretos do objeto/elemento visual. Essa composição mantém tópico, caminho estrutural, evidência e arquivo na mesma cadeia documental.
+
+Após a ingestão, o arquivo deve ser colocado manualmente em `storage/figures/{EVA-D...}/translacao-terra.png`. Os prefixos lógicos aceitos `figuras/` e `figures/` não são repetidos dentro do diretório do documento. Quando uma evidência do contrato for efetivamente citada e o arquivo existir, `POST /api/query` inclui a figura em `query.figures` e o chat a carrega no corpo da resposta usando a sessão autenticada.
+
+Como o elemento `<img>` não envia o cabeçalho Bearer, o frontend busca a rota da figura com a credencial da sessão, valida o MIME `image/*` e cria uma URL local `blob:` para exibição. A CSP permite `blob:` somente em `img-src`; scripts, conexões e demais recursos preservam suas diretivas restritivas. Essas URLs locais são revogadas ao reiniciar o chat ou encerrar a sessão.
+
+A disponibilização física da figura é uma operação deliberadamente manual e controlada. O processamento reconhece e indexa o contrato textual, mas não cria `storage/figures/{EVA-D...}/`, não copia imagens do diretório de origem, não importa URLs e não publica arquivos automaticamente. Depois que a ingestão atribui o identificador público da obra, o gestor autorizado cria o diretório correspondente e coloca somente as figuras aprovadas. Essa exclusividade operacional é sustentada pelas permissões do sistema de arquivos e pelo procedimento institucional, não apenas pelo papel de superadmin da aplicação; a escrita em `storage/figures/` deve permanecer restrita aos responsáveis autorizados e ao processo PHP somente no limite necessário para leitura e exclusão gerenciada.
+
+Somente PNG, JPEG e WebP são aceitos. O MIME real é conferido, URLs externas e caminhos absolutos ou com `..` são rejeitados, e `FIGURE_MAX_BYTES` limita o tamanho individual. Arquivo ausente ou inválido não interrompe a resposta: a referência visual é simplesmente omitida. Excluir a obra remove também seu diretório privado de figuras.
 
 ## Módulos conectores
 
@@ -101,10 +183,15 @@ As métricas são contagens agrupadas de documentos, classes e tipos de evidênc
 
 A resposta de `POST /api/query` inclui `context_intelligence`. Em rotas semânticas, o campo contém análises `hierarchical` por obra, até duas análises `primary` por obra e uma análise `global`; cada item expõe população, média, desvio padrão, CV, limites, regiões e diagnóstico κ quando aplicável. Em rotas não vetoriais, ele é uma lista vazia. O detalhamento pertence à resposta atual e não é persistido como métrica, evento ou memória.
 
+## Exclusão
+
+Excluir uma obra remove em cascata seus nós, evidências, derivações, embeddings, trabalhos, permissões e vínculos com projetos; depois, remove o arquivo-fonte privado e o diretório privado de figuras. Excluir um projeto pela camada de produto também remove todas as obras ainda vinculadas a ele, inclusive obras compartilhadas com outro projeto. Uma obra compartilhada que precise sobreviver deve ser desvinculada e preservada antes da exclusão do projeto.
+
 ## Limites operacionais
 
 - listagens retornam no máximo 100 registros pela API atual;
 - o upload respeita `DOCUMENT_MAX_BYTES`;
+- cada figura local respeita `FIGURE_MAX_BYTES`;
 - o corpo JSON possui limite de 64 KiB;
 - o input de consulta possui limite de 20.000 bytes;
 - trabalhos são únicos por versão e processados individualmente;

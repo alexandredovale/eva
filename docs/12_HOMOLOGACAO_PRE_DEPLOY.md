@@ -100,7 +100,7 @@ Esse total registra a homologação anterior ao CIE. Para o update de 2 de agost
 
 1. Publicar o projeto preservando os arquivos `.htaccess` e sem expor `.env`, chaves, logs, dumps ou `.git`.
 2. Configurar o `.env` de produção, permissões graváveis de `storage/documents` e `storage/logs`; em banco novo, importar o `database/schema.sql` consolidado; em banco existente, aplicar todas as migrations pendentes — inclusive `20260803_010_module_events.sql` quando a instalação for anterior à consolidação — e configurar o worker/cron da fila.
-3. Configurar backup recorrente do banco e dos documentos, com retenção e cópia externa.
+3. Configurar backup recorrente do banco, de `storage/documents/` e de `storage/figures/`, com retenção, teste de restauração e cópia externa.
 4. Executar, a partir de uma máquina que acesse o domínio:
 
 ```powershell
@@ -111,3 +111,7 @@ php bin\verify-deployment.php https://eva.oceanno.com.br
 6. Confirmar que uma consulta conceitual ou relacional retorna análises `hierarchical`, `primary` e `global`, preserva os papéis hierárquicos herdados, entrega o núcleo global ou fallback de convergência mais âncoras literais, mantém na base final apenas evidências citadas analiticamente e descarta candidatas não citadas sem invalidar a resposta.
 
 Se o verificador tiver qualquer falha, a publicação deve permanecer em homologação até a correção. Não é necessário repetir toda a matriz paga de IA se código, banco e configuração forem exatamente os homologados; basta o smoke online final e uma consulta controlada por perfil.
+
+## Relato de vulnerabilidades
+
+Use o processo privado definido em [`SECURITY.md`](../SECURITY.md). Nunca publique exploração ativa, credencial real ou segredo operacional em issue pública.

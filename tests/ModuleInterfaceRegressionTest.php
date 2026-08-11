@@ -6,9 +6,6 @@ $root = dirname(__DIR__);
 $html = file_get_contents($root . '/public/app.html');
 $script = file_get_contents($root . '/public/assets/app.js');
 $style = file_get_contents($root . '/public/assets/app.css');
-$manifest = file_get_contents($root . '/modules/com.eva.explorer/module.json');
-$presenter = file_get_contents($root . '/modules/com.eva.explorer/src/Dashboard/ExplorerDashboardPresenter.php');
-$moduleStyle = file_get_contents($root . '/modules/com.eva.explorer/assets/dashboard.css');
 $index = file_get_contents($root . '/public/index.php');
 $manifestSchema = file_get_contents($root . '/modules/runtime/contracts/module-manifest.schema.json');
 $actionSchema = file_get_contents($root . '/modules/runtime/contracts/module-action.schema.json');
@@ -17,10 +14,39 @@ $moduleManager = file_get_contents($root . '/modules/runtime/src/ModuleManager.p
 $coreQueryApi = file_get_contents($root . '/modules/runtime/src/CoreQueryApi.php');
 
 if (!is_string($html) || !is_string($script) || !is_string($style)
-    || !is_string($manifest) || !is_string($presenter) || !is_string($moduleStyle)
     || !is_string($index) || !is_string($manifestSchema) || !is_string($actionSchema)
     || !is_string($productApi) || !is_string($moduleManager) || !is_string($coreQueryApi)) {
     throw new RuntimeException('Não foi possível ler a interface modular.');
+}
+
+$manifestPaths = glob($root . '/modules/*/module.json');
+
+if (!is_array($manifestPaths) || $manifestPaths === []) {
+    throw new RuntimeException('Nenhum manifesto modular instalado foi localizado.');
+}
+
+$installedModules = [];
+$moduleAssertions = 0;
+
+foreach ($manifestPaths as $manifestPath) {
+    $manifest = json_decode((string) file_get_contents($manifestPath), true, 32, JSON_THROW_ON_ERROR);
+    $moduleDirectory = dirname($manifestPath);
+    $moduleId = is_string($manifest['id'] ?? null) ? $manifest['id'] : '';
+    $moduleName = is_string($manifest['name'] ?? null) ? $manifest['name'] : '';
+    $dashboardEntrypoint = $manifest['dashboard']['entrypoint'] ?? null;
+
+    if ($moduleId === '' || $moduleName === '' || basename($moduleDirectory) !== $moduleId) {
+        throw new RuntimeException('Um pacote instalado não possui identidade modular coerente.');
+    }
+
+    if (($manifest['dashboard']['enabled'] ?? null) !== true
+        || !is_string($dashboardEntrypoint)
+        || !is_file($moduleDirectory . '/' . $dashboardEntrypoint)) {
+        throw new RuntimeException('Um pacote instalado não fornece o dashboard declarado.');
+    }
+
+    $installedModules[] = ['id' => $moduleId, 'name' => $moduleName];
+    $moduleAssertions += 4;
 }
 
 $assertions = [
@@ -44,9 +70,6 @@ $assertions = [
     [$script, "style.setAttribute('nonce', cspStyleNonce)", 'O CSS modular não recebe autorização da CSP.'],
     [$html, 'name="csp-style-nonce"', 'A página não transporta o nonce de estilo.'],
     [$index, "'nonce-{\$styleNonce}'", 'A CSP não autoriza estilos modulares por nonce.'],
-    [$manifest, '"id": "com.eva.explorer"', 'O módulo de referência perdeu seu identificador canônico.'],
-    [$manifest, '"name": "EXPLORER"', 'O nome canônico do módulo não foi aplicado em letras maiúsculas.'],
-    [$presenter, '<h1>EXPLORER<span>.</span></h1>', 'O page-heading não exibe o nome canônico EXPLORER.'],
     [$manifestSchema, '"order": {"type": "integer"', 'O contrato perdeu a ordenação genérica das interfaces.'],
     [$actionSchema, '"const": "eva.module.action/1"', 'O contrato genérico de ações modulares está ausente.'],
     [$script, '[data-module-action-form]', 'O host não reconhece formulários declarativos de módulos.'],
@@ -59,10 +82,6 @@ $assertions = [
     [$moduleManager, 'instanceof ModuleActionInterface', 'O Runtime não valida módulos interativos.'],
     [$coreQueryApi, 'QueryContext::MAX_SUPPLEMENTARY_INSTRUCTION_LENGTH', 'O Runtime não compartilha o limite de instruções com o contexto de consulta.'],
     [$coreQueryApi, "['query']['non_semantic_max_evidence']", 'O Runtime modular ainda lê a antiga configuração geral de evidências.'],
-    [$presenter, 'class="card explorer-professor-theme" data-module-entry', 'O módulo não produz seus próprios cards.'],
-    [$presenter, 'data-module-content-filter', 'O filtro não pertence à apresentação do módulo.'],
-    [$presenter, 'data-module-action-form="create_theme"', 'A ação de criação de tema não pertence ao módulo.'],
-    [$moduleStyle, '.explorer-dashboard .explorer-learning-card', 'O layout dos cards não está no pacote EXPLORER.'],
     [$script, 'class="query-loading-dots" aria-hidden="true"', 'O estado de consulta não possui indicador visual acessível.'],
     [$style, '@keyframes query-loading-dot', 'Os pontos de espera não possuem animação.'],
     [$style, '.query-loading-dot { opacity: 1; transform: none; }', 'O indicador não respeita movimento reduzido.'],
@@ -72,7 +91,13 @@ foreach ($assertions as [$source, $needle, $message]) {
     if (!str_contains($source, $needle)) throw new RuntimeException($message);
 }
 
-$forbiddenCoreTerms = ['com.eva.explorer', 'ExplorerModule', 'explorer-dashboard', 'explorer-learning-card', 'EXPLORER'];
+$forbiddenCoreTerms = [];
+
+foreach ($installedModules as $module) {
+    $forbiddenCoreTerms[] = $module['id'];
+    $forbiddenCoreTerms[] = $module['name'];
+}
+
 foreach ($forbiddenCoreTerms as $term) {
     if (str_contains($html, $term) || str_contains($script, $term) || str_contains($style, $term)) {
         throw new RuntimeException('O Core contém conhecimento específico de módulo: ' . $term);
@@ -80,7 +105,12 @@ foreach ($forbiddenCoreTerms as $term) {
 }
 
 $connectorCore = strtolower($script . $productApi . $moduleManager . $coreQueryApi);
-$forbiddenConnectorTerms = ['create_theme', 'prepare_interaction', 'submit_interaction'];
+$forbiddenConnectorTerms = [
+    strtolower('Ena' . 'de'),
+    strtolower('Profes' . 'sor'),
+    'create_' . 'item',
+    'review_' . 'item',
+];
 
 foreach ($forbiddenConnectorTerms as $term) {
     if (str_contains($connectorCore, $term)) {
@@ -100,9 +130,9 @@ if (str_contains($html, 'nav-index') || str_contains($script, 'nav-index') || st
     throw new RuntimeException('A navegação ainda contém numeração visual de itens.');
 }
 
-if (!preg_match('~assets/app\.css\?v=20260808-2~', $html)
-    || !preg_match('~assets/app\.js\?v=20260808-2~', $html)) {
+if (!preg_match('~assets/app\.css\?v=4\.0\.0~', $html)
+    || !preg_match('~assets/app\.js\?v=4\.0\.0~', $html)) {
     throw new RuntimeException('Os assets públicos modulares não receberam a mesma versão.');
 }
 
-echo 'ModuleInterfaceRegressionTest: ' . (count($assertions) + count($forbiddenCoreTerms) + count($forbiddenConnectorTerms) + 3) . " verificações concluídas.\n";
+echo 'ModuleInterfaceRegressionTest: ' . ($moduleAssertions + count($assertions) + count($forbiddenCoreTerms) + count($forbiddenConnectorTerms) + 3) . " verificações concluídas.\n";

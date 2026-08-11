@@ -110,6 +110,66 @@ assertContainsValue('Continuação da primeira unidade.', $chapter?->children[0]
 assertSameValue('2', $chapter?->children[1]->metadata['ordinal'] ?? null, 'A ordem autoral deve integrar os metadados da unidade.');
 assertSameValue('/parte-1/tópico-repetido-2', $markdownDocument->root->children[0]->children[2]->structuralPath, 'Títulos repetidos devem receber caminhos únicos.');
 
+$markdownWithFigure = <<<'MD'
+# Atlas geográfico
+
+## América do Sul
+
+### Figura 1 — Mapa político
+
+Arquivo: figuras/america-do-sul.png
+Tipo: mapa político
+Descrição factual: O mapa apresenta os países da América do Sul.
+Texto visível: Brasil, Argentina e Chile.
+Relações representadas: as fronteiras delimitam os territórios nacionais.
+MD;
+
+$figureDocument = (new MarkdownParser())->parse($markdownWithFigure, 'Atlas');
+$figureNode = findNode($figureDocument->root, '/atlas-geográfico/américa-do-sul/figura-1-mapa-político');
+assertSameValue(true, $figureNode !== null, 'A figura filha de tópico temático deve ser aceita.');
+assertContainsValue('Arquivo: figuras/america-do-sul.png', $figureNode?->content ?? '', 'O contrato visual deve permanecer no conteúdo da evidência filha.');
+assertThrowsParserException(
+    static fn () => (new MarkdownParser())->parse(
+        "# Figura 1 — Mapa órfão\n\nArquivo: figuras/orfao.png",
+        'Figura sem tópico'
+    ),
+    'Uma figura diretamente sob a raiz documental deve ser rejeitada.'
+);
+assertThrowsParserException(
+    static fn () => (new MarkdownParser())->parse(
+        "# Atlas\n\n## Figura 1 — Mapa geral\n\n### Figura 2 — Detalhe sem tópico\n\nArquivo: figuras/detalhe.png",
+        'Figura filha de figura'
+    ),
+    'Uma figura não pode usar outra figura como pai temático.'
+);
+
+$englishMarkdownWithFigure = <<<'MD'
+# Astronomy
+
+## Earth orbit
+
+### Figure 1 — Orbital motion
+
+File: figures/earth-orbit.png
+Type: educational diagram
+Factual description: Earth appears around the Sun.
+Visible text: Earth and Sun.
+Represented relationships: the line represents Earth's orbit.
+MD;
+$englishFigureDocument = (new MarkdownParser())->parse($englishMarkdownWithFigure, 'Astronomy');
+assertSameValue(
+    true,
+    findNode($englishFigureDocument->root, '/astronomy/earth-orbit/figure-1-orbital-motion') !== null,
+    'A seção Figure em inglês deve ser aceita sob tópico temático.'
+);
+assertThrowsParserException(
+    static fn () => (new MarkdownParser())->parse(
+        "# Figure 1 — Orphan figure\n\nFile: figures/orphan.png",
+        'Orphan figure'
+    ),
+    'Uma seção Figure em inglês diretamente na raiz deve ser rejeitada.'
+);
+
 $json = "\xEF\xBB\xBF" . <<<'JSON'
 {
   "título": "Obra JSON",
@@ -130,6 +190,29 @@ assertSameValue('json-pointer:/parte/capítulos/1/nome', $jsonNode?->sourceRefer
 $booleanNode = findNode($jsonDocument->root, '/parte/capítulos/1/ativo');
 assertSameValue('true', $booleanNode?->content, 'Booleanos JSON não devem virar números ou texto vazio.');
 
+$jsonFigure = (new JsonParser())->parse(<<<'JSON'
+{
+  "Astronomy": {
+    "Figure 1 — Orbital motion": {
+      "File": "figures/earth-orbit.png",
+      "Factual description": "Earth appears around the Sun."
+    }
+  }
+}
+JSON, 'JSON figure');
+assertSameValue(
+    'figures/earth-orbit.png',
+    findNode($jsonFigure->root, '/Astronomy/Figure 1 — Orbital motion/File')?->content,
+    'O contrato Figure em JSON deve preservar seus campos estruturados.'
+);
+assertThrowsParserException(
+    static fn () => (new JsonParser())->parse(
+        '{"Figure 1 — Orphan figure":{"File":"figures/orphan.png"}}',
+        'Orphan JSON figure'
+    ),
+    'Um contrato Figure no objeto raiz JSON deve ser rejeitado.'
+);
+
 $xml = <<<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
 <obra idioma="pt-BR">
@@ -146,6 +229,30 @@ assertSameValue('pt-BR', $xmlRoot?->metadata['attributes']['idioma'] ?? null, 'A
 $xmlChapter = findNode($xmlDocument->root, '/obra[1]/parte[1]/capitulo[2]');
 assertSameValue('Segundo & completo', $xmlChapter?->content, 'CDATA deve ser preservado como conteúdo.');
 assertSameValue('xpath:/obra[1]/parte[1]/capitulo[2]', $xmlChapter?->sourceReference, 'A origem XML deve usar XPath.');
+
+$xmlFigure = (new XmlParser())->parse(<<<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+  <topic>
+    <figure title="Figure 1 — Orbital motion">
+      <file>figures/earth-orbit.png</file>
+      <factual_description>Earth appears around the Sun.</factual_description>
+    </figure>
+  </topic>
+</document>
+XML, 'XML figure');
+assertSameValue(
+    'figures/earth-orbit.png',
+    findNode($xmlFigure->root, '/document[1]/topic[1]/figure[1]/file[1]')?->content,
+    'O contrato figure em XML deve preservar seus campos estruturados.'
+);
+assertThrowsParserException(
+    static fn () => (new XmlParser())->parse(
+        '<figure title="Figure 1 — Orphan figure"><file>figures/orphan.png</file></figure>',
+        'Orphan XML figure'
+    ),
+    'Um elemento figure usado como raiz XML deve ser rejeitado.'
+);
 
 assertSameValue('markdown', ParserFactory::forFilename('arquivo.md')->format(), 'A fábrica deve reconhecer .md.');
 assertSameValue('json', ParserFactory::forFormat('.JSON')->format(), 'A fábrica deve ignorar ponto e caixa.');
@@ -165,5 +272,24 @@ assertThrowsParserException(
     static fn () => ParserFactory::forFilename('arquivo.txt'),
     'Extensões não suportadas devem ser rejeitadas.'
 );
+
+$figureTemplatePaths = glob(dirname(__DIR__) . '/docs/examples/figure-contracts/{pt-BR,en}/figure.{md,json,xml}', GLOB_BRACE);
+assertSameValue(6, count($figureTemplatePaths ?: []), 'Os seis templates de figura devem estar disponíveis.');
+
+foreach ($figureTemplatePaths ?: [] as $templatePath) {
+    $templateContent = file_get_contents($templatePath);
+    assertSameValue(true, is_string($templateContent), 'O template de figura deve ser legível.');
+    $templateDocument = ParserFactory::forFilename($templatePath)->parse(
+        (string) $templateContent,
+        basename($templatePath)
+    );
+    assertSameValue(
+        pathinfo($templatePath, PATHINFO_EXTENSION) === 'md'
+            ? 'markdown'
+            : pathinfo($templatePath, PATHINFO_EXTENSION),
+        $templateDocument->format,
+        'O template deve usar um formato aceito pelo parser correspondente.'
+    );
+}
 
 echo sprintf("Parsers validados com %d asserções.\n", $assertions);

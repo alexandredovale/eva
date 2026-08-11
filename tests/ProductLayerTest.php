@@ -48,6 +48,34 @@ function productServer(?string $token = null): array
 }
 
 try {
+    $applicationMarkup = file_get_contents(dirname(__DIR__) . '/public/app.html');
+    $applicationStyles = file_get_contents(dirname(__DIR__) . '/public/assets/app.css');
+    $markupDocument = new DOMDocument();
+    $markupLoaded = is_string($applicationMarkup) && @$markupDocument->loadHTML($applicationMarkup);
+    $projectForm = $markupLoaded
+        ? (new DOMXPath($markupDocument))->query('//*[@id="project-form"]')->item(0)
+        : null;
+    $lastProjectFormElement = null;
+
+    if ($projectForm instanceof DOMElement) {
+        foreach ($projectForm->childNodes as $child) {
+            if ($child instanceof DOMElement) {
+                $lastProjectFormElement = $child;
+            }
+        }
+    }
+
+    assertProduct(
+        $lastProjectFormElement instanceof DOMElement
+            && str_contains(' ' . $lastProjectFormElement->getAttribute('class') . ' ', ' project-form-actions '),
+        'As ações do projeto devem ser o último bloco do formulário.'
+    );
+    assertProduct(
+        is_string($applicationStyles)
+            && preg_match('/\.project-form-actions\s*\{[^}]*justify-content:\s*flex-end;/s', $applicationStyles) === 1,
+        'As ações do projeto devem permanecer alinhadas ao canto direito.'
+    );
+
     $ingestion = new DocumentIngestionService(
         $database,
         $storage,
@@ -74,13 +102,15 @@ try {
     assertProduct($moduleInterfaces->status === 200 && is_array($moduleInterfaces->payload['modules']), 'A descoberta genérica de interfaces modulares falhou.');
     $modules = $api->handle('GET', '/api/admin/modules', $authorized, [], [], '');
     assertProduct($modules->status === 200, 'A listagem administrativa de módulos falhou.');
+    $installedModules = $modules->payload['modules'] ?? [];
     assertProduct(
-        in_array('com.eva.explorer', array_column($modules->payload['modules'], 'id'), true),
-        'O pacote educacional instalado não foi descoberto pelo Runtime.'
+        is_array($installedModules) && $installedModules !== [],
+        'Nenhum pacote modular instalado foi descoberto pelo Runtime.'
     );
+    $protectedModuleId = (string) $installedModules[0]['id'];
     $unconfirmedModuleDeletion = $api->handle(
         'DELETE',
-        '/api/admin/modules/com.eva.explorer',
+        '/api/admin/modules/' . $protectedModuleId,
         $authorized,
         [],
         [],
@@ -88,8 +118,8 @@ try {
     );
     assertProduct($unconfirmedModuleDeletion->status === 422, 'A exclusão modular aceitou confirmação incorreta.');
     assertProduct(
-        is_dir(dirname(__DIR__) . '/modules/com.eva.explorer'),
-        'Uma confirmação incorreta excluiu o pacote educacional.'
+        is_dir(dirname(__DIR__) . '/modules/' . $protectedModuleId),
+        'Uma confirmação incorreta excluiu um pacote modular instalado.'
     );
     $documents = $api->handle('GET', '/api/documents', $authorized, [], [], '');
     assertProduct($documents->status === 200, 'A listagem autenticada falhou.');

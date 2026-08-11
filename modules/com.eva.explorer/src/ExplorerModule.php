@@ -374,7 +374,7 @@ final class ExplorerModule implements ModuleInterface, DashboardModuleInterface,
         return $presenter->student(
             $profile,
             $repository->activeThemes(),
-            $repository->interactionsForStudent($userId),
+            $repository->interactionsForActiveThemesByStudent($userId),
             $openTheme,
             $openItem
         );

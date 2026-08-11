@@ -13,6 +13,7 @@ use Eva\Application\Product\ContentDeletionService;
 use Eva\Application\Product\ProductReadService;
 use Eva\Application\Query\DocumentContextRetriever;
 use Eva\Application\Query\DocumentQueryService;
+use Eva\Application\Query\FigureReferenceResolver;
 use Eva\Application\Query\InputType;
 use Eva\Application\Query\InputTypeDetector;
 use Eva\Application\Query\QueryException;
@@ -31,6 +32,7 @@ use Eva\Infrastructure\Audit\AuditRecorder;
 use Eva\Infrastructure\Logging\FileLogger;
 use Eva\Infrastructure\Logging\SafeFailureDiagnostics;
 use Eva\Infrastructure\Storage\DocumentStorage;
+use Eva\Infrastructure\Storage\FigureStorage;
 use Eva\ModuleRuntime\CoreEventSnapshotBuilder;
 use Eva\ModuleRuntime\ModuleAccessDeniedException;
 use Eva\ModuleRuntime\ModuleException;
@@ -253,6 +255,38 @@ final readonly class ProductApi
                 : $this->methodNotAllowed('GET');
         }
 
+        if (preg_match('~^/api/documents/(EVA-D\d{6,})/figures/(.+)$~', $path, $matches) === 1) {
+            if ($method !== 'GET') {
+                return $this->methodNotAllowed('GET');
+            }
+
+            $statement = $this->database->prepare(
+                "SELECT id FROM documents WHERE public_id = :public_id AND status = 'ready'"
+            );
+            $statement->execute(['public_id' => $matches[1]]);
+            $documentId = $statement->fetchColumn();
+
+            if ($documentId === false) {
+                throw new ProductHttpException('Figura não localizada.', 404);
+            }
+
+            $scopeAccess->resolveDocumentIds($actor, 'document', (int) $documentId);
+            $storage = $this->figureStorage();
+            $asset = $storage->read($matches[1], rawurldecode($matches[2]));
+
+            if ($asset === null) {
+                throw new ProductHttpException('Figura não localizada.', 404);
+            }
+
+            return new HttpResponse(200, [], [
+                'Content-Type' => $asset['mime_type'],
+                'Content-Length' => (string) $asset['size'],
+                'Cache-Control' => 'private, no-store',
+                'Content-Security-Policy' => "default-src 'none'; sandbox",
+                'Cross-Origin-Resource-Policy' => 'same-origin',
+            ], $asset['content']);
+        }
+
         if (preg_match('~^/api/modules/([a-z0-9.-]+)/dashboard$~', $path, $matches) === 1) {
             if ($method !== 'GET') {
                 return $this->methodNotAllowed('GET');
@@ -367,7 +401,13 @@ final readonly class ProductApi
                 $result
             );
 
-            return new HttpResponse(200, ['query' => $result->toArray()]);
+            $query = $result->toArray();
+            $query['figures'] = (new FigureReferenceResolver(
+                $this->database,
+                $this->figureStorage()
+            ))->resolve($result->usedEvidences);
+
+            return new HttpResponse(200, ['query' => $query]);
         }
 
         if (!$actor->isSuperadmin()) {
@@ -606,7 +646,8 @@ final readonly class ProductApi
             if ($method === 'DELETE') {
                 $result = (new ContentDeletionService(
                     $this->database,
-                    new DocumentStorage($this->container['ingestion']['document_storage'])
+                    new DocumentStorage($this->container['ingestion']['document_storage']),
+                    $this->figureStorage()
                 ))->deleteProject((int) $matches[1]);
                 $audit->record('project_deleted', 'project', $matches[1], $actor->fingerprint, $networkAddress, $result);
 
@@ -696,7 +737,8 @@ final readonly class ProductApi
 
             $result = (new ContentDeletionService(
                 $this->database,
-                new DocumentStorage($this->container['ingestion']['document_storage'])
+                new DocumentStorage($this->container['ingestion']['document_storage']),
+                $this->figureStorage()
             ))->deleteDocument((int) $matches[1]);
             $audit->record('document_deleted', 'document', (string) $result['public_id'], $actor->fingerprint, $networkAddress, $result);
 
@@ -760,6 +802,14 @@ final readonly class ProductApi
     private function methodNotAllowed(string $allowed): HttpResponse
     {
         return new HttpResponse(405, ['error' => 'Método não permitido.'], ['Allow' => $allowed]);
+    }
+
+    private function figureStorage(): FigureStorage
+    {
+        return new FigureStorage(
+            (string) $this->container['ingestion']['figure_storage'],
+            (int) $this->container['ingestion']['max_figure_bytes']
+        );
     }
 
     private function moduleRuntime(): RuntimeFactory

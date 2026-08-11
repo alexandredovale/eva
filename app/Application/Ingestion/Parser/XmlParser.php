@@ -56,7 +56,7 @@ final class XmlParser implements DocumentParserInterface
 
         $element = $document->documentElement;
         $elementPath = '/' . $element->nodeName . '[1]';
-        $elementNode = $this->buildElement($element, $elementPath, 1, 0);
+        $elementNode = $this->buildElement($element, $elementPath, 1, 0, false);
 
         $root = new NormalizedNode(
             type: 'document',
@@ -77,8 +77,20 @@ final class XmlParser implements DocumentParserInterface
         return new NormalizedDocument($this->format(), $documentTitle, $sourceHash, $root);
     }
 
-    private function buildElement(DOMElement $element, string $path, int $depth, int $order): NormalizedNode
-    {
+    private function buildElement(
+        DOMElement $element,
+        string $path,
+        int $depth,
+        int $order,
+        bool $hasThematicParent
+    ): NormalizedNode {
+        if ($this->isFigureElement($element) && !$hasThematicParent) {
+            throw new ParserException(sprintf(
+                'O elemento de figura em xpath:%s deve ser filho de um elemento temático.',
+                $path
+            ));
+        }
+
         $attributes = [];
 
         foreach ($element->attributes as $attribute) {
@@ -102,7 +114,13 @@ final class XmlParser implements DocumentParserInterface
             $name = $child->nodeName;
             $occurrences[$name] = ($occurrences[$name] ?? 0) + 1;
             $childPath = $path . '/' . $name . '[' . $occurrences[$name] . ']';
-            $children[] = $this->buildElement($child, $childPath, $depth + 1, count($children));
+            $children[] = $this->buildElement(
+                $child,
+                $childPath,
+                $depth + 1,
+                count($children),
+                !$this->isFigureElement($element)
+            );
         }
 
         $content = implode('', $textParts);
@@ -124,5 +142,9 @@ final class XmlParser implements DocumentParserInterface
             children: $children
         );
     }
-}
 
+    private function isFigureElement(DOMElement $element): bool
+    {
+        return preg_match('/^(?:figura|figure)$/iu', $element->nodeName) === 1;
+    }
+}

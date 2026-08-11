@@ -460,6 +460,34 @@ try {
             && !str_contains($secretariaDashboard['html'], 'data-module-action-form="create_theme"'),
         'A Secretaria não recebeu o dashboard estatístico exclusivamente consultivo.'
     );
+
+    $module->action(
+        $context,
+        $professor,
+        'set_theme_active',
+        ['theme_id' => (string) $theme['id'], 'active' => '0'],
+        'explorer-pause-completed-theme-001'
+    );
+    $module->action(
+        $context,
+        $professor,
+        'create_theme',
+        [
+            'scope_key' => '10:EVA-D000020',
+            'title' => 'Novo percurso disponível',
+            'description' => 'Tema ativo ainda sem etapas concluídas pelo aluno.',
+        ],
+        'explorer-create-theme-002'
+    );
+    $activeOnlyProgress = $module->dashboard($context, $student, []);
+    assertExplorer(
+        str_contains($activeOnlyProgress['html'], '<strong>0 de 3</strong>')
+            && str_contains($activeOnlyProgress['html'], '0% do percurso disponível')
+            && str_contains($activeOnlyProgress['html'], 'Novo percurso disponível')
+            && !str_contains($activeOnlyProgress['html'], 'Linguagem e construção de sentido')
+            && !str_contains($activeOnlyProgress['html'], 'A resposta relaciona adequadamente'),
+        'O percurso do Aluno ainda contou interações pertencentes a um tema pausado.'
+    );
     assertExplorer(
         str_contains($adminDashboard['css'], '.explorer-dashboard .explorer-step.is-complete > span')
             && str_contains($adminDashboard['css'], 'background: var(--accent);')

@@ -31,7 +31,7 @@ The audit from which this document originated was read-only:
 - no provider or paid call was executed;
 - no operational file was modified.
 
-All 114 available PHP files were syntax-checked and none returned an error. The functional suite was not rerun because its bootstrap loads `.env`. Test and benchmark results already documented by the project were treated as internal evidence, not independent validation.
+That record describes the original audit on which this document was based. For the public 4.0.0 preparation, the tree without private connector packages contains 170 PHP files: every file was syntax-checked, and all 29 public offline suites were rerun with real AI calls disabled. Historical quality results and benchmarks remain internal evidence rather than independent validation.
 
 ## How EVA Currently Works
 

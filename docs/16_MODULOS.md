@@ -76,7 +76,7 @@ Interfaces opcionais:
 
 O Core não contém menus, textos, estilos, IDs ou renderizadores de um módulo específico. Quando um módulo ativo declara `dashboard.enabled`, a rota autenticada `GET /api/modules` publica somente seu descritor genérico (`id`, `name`, `order`). O frontend monta a navegação a partir desses descritores e entrega a resposta de `DashboardModuleInterface` a um único host visual.
 
-O menu sempre utiliza exatamente `module.name`. Não existe `dashboard.label`, alias de navegação ou nome sobrescrito pelo Core. Assim, um manifesto com `"name": "EXPLORER"` produz automaticamente o menu **EXPLORER**.
+O menu sempre utiliza exatamente `module.name`. Não existe `dashboard.label`, alias de navegação ou nome sobrescrito pelo Core. Assim, um manifesto com `"name": "Education"` produz automaticamente o menu **Education**.
 
 A navegação não apresenta números ou índices visuais antes dos nomes. A posição continua determinada pelo layout fixo do Core e, entre módulos, por `dashboard.order`.
 

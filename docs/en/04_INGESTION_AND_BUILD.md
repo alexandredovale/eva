@@ -2,7 +2,7 @@
 
 ## Input validation
 
-The upload layer accepts Markdown, JSON, and XML. It verifies extension, configured size, name/title constraints, UTF-8 where applicable, well-formed JSON/XML, absence of XML `DOCTYPE`, and the SHA-256 source hash.
+The upload layer accepts Markdown, JSON, and XML. It verifies extension, configured size, name/title constraints, UTF-8 where applicable, well-formed JSON/XML, absence of XML `DOCTYPE`, valid figure hierarchy, and the SHA-256 source hash. Every `Figura`/`Figure` node must have an immediate non-visual thematic node as its parent.
 
 The original filename is metadata only. Physical storage uses an internal identifier outside the public web directory.
 
@@ -12,11 +12,13 @@ Application logs may contain identifiers, format, size, and counts. Documentary 
 
 ## Parsers
 
-- **Markdown:** headings define levels. Authorial numbered blocks at the first level form `item` subunits; continuous text remains on its corresponding structural node. Numbering inside code blocks does not change the tree.
-- **JSON:** objects and arrays form the tree while preserving keys and order.
-- **XML:** elements form the tree while preserving names, attributes, and order.
+- **Markdown:** headings define levels. Authorial numbered blocks at the first level form `item` subunits; continuous text remains on its corresponding structural node. Numbering inside code blocks does not change the tree. A heading beginning with `Figura` or `Figure` is accepted only as the immediate child of another non-visual thematic section; a figure directly under the document root or under another figure rejects ingestion.
+- **JSON:** objects and arrays form the tree while preserving keys and order. A `Figura...` or `Figure...` property must belong immediately to a thematic object, with contract fields as child properties.
+- **XML:** elements form the tree while preserving names, attributes, and order. A `<figura>` or `<figure>` element must belong immediately to a thematic element, with contract fields as child elements.
 
 All parsers produce the same normalized contract. They do not create summaries, embeddings, or cognitive interactions.
+
+The complete bilingual contract and all six format/language templates are documented in [`06_API_AND_OPERATIONS.md`](06_API_AND_OPERATIONS.md#document-figures) and [`../examples/figure-contracts/`](../examples/figure-contracts/README.md).
 
 ## Normalized document contract
 

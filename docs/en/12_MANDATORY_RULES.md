@@ -82,5 +82,7 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 77. Reject events containing sensitive fields and never let modules write into Core documentary memory.
 78. Require typed confirmation for permanent deletion and remove both the package and its corresponding private data directory.
 79. Do not assign scores, weights, confidence, or any subjective value to pedagogical observations produced by modules.
+80. Keep the physical availability of documentary figures a manual operation by an authorized collection manager: ingestion and processing may recognize the textual contract but must not create directories, copy, import, or publish images automatically; institutional procedure and restricted permissions on `storage/figures/` must enforce that exclusivity.
+81. Require every `Figura`/`Figure` contract in Markdown, JSON, or XML to be the immediate child of a non-visual thematic node; reject figures at the document root or under another figure during ingestion, preserve fields in the Markdown visual node or as direct children of the structured container, and accept only the documented Portuguese or English field names.
 
 Related explanations are available in [Architecture](02_ARCHITECTURE.md), [Query and conversational continuity](05_QUERY_AND_CHAT.md), [Cnode as an EVA conceptual derivation](10_CNODE.md), [Context Intelligence Engine](09_CONTEXT_INTELLIGENCE_ENGINE.md), and [Connector modules](17_MODULE_CONNECTORS.md).

@@ -31,7 +31,7 @@ A auditoria que originou este documento foi exclusivamente de leitura:
 - nenhum provedor ou chamada paga foi executado;
 - nenhum arquivo operacional foi alterado.
 
-Os 114 arquivos PHP disponíveis foram submetidos à validação sintática e nenhum apresentou erro. A suíte funcional não foi reexecutada porque seu bootstrap carrega o `.env`. Resultados de testes e benchmarks já documentados pelo projeto foram tratados como evidência interna, não como validação independente.
+Esse registro descreve a auditoria original que fundamentou o documento. Na preparação pública da versão 4.0.0, a árvore sem pacotes conectores privados contém 170 arquivos PHP: todos foram submetidos à validação sintática, e as 29 suítes offline públicas foram reexecutadas com chamadas reais de IA desabilitadas. Resultados históricos de qualidade e benchmarks continuam sendo tratados como evidência interna, não como validação independente.
 
 ## Como o EVA funciona atualmente
 

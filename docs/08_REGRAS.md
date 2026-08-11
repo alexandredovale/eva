@@ -80,3 +80,5 @@
 77. Rejeitar eventos com campos sensíveis e não permitir que módulos escrevam na memória documental do Core.
 78. Exigir confirmação digitada para exclusão definitiva e remover o pacote e todo o diretório privado de dados correspondente.
 79. Não atribuir notas, pesos, confiança ou qualquer valor subjetivo às observações pedagógicas produzidas por módulos.
+80. Manter a disponibilização física de figuras documentais como operação manual do gestor autorizado: ingestão e processamento podem reconhecer o contrato textual, mas não devem criar diretórios, copiar, importar ou publicar imagens automaticamente; a exclusividade deve ser aplicada por procedimento institucional e permissões restritas em `storage/figures/`.
+81. Exigir que todo contrato `Figura`/`Figure` em Markdown, JSON ou XML seja filho imediato de um nó temático não visual; rejeitar na ingestão figuras na raiz documental ou filhas de outra figura, preservar os campos no nó visual Markdown ou como filhos diretos do contêiner estruturado e aceitar somente os nomes de campo documentados em português ou inglês.

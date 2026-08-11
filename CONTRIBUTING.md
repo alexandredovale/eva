@@ -31,7 +31,7 @@ Thank you for helping improve verifiable documentary intelligence.
 Run PHP syntax validation before submitting a pull request:
 
 ```bash
-find app bin bootstrap config public tests -name '*.php' -print0 | xargs -0 -n1 php -l
+find app bin bootstrap config modules public tests -name '*.php' -print0 | xargs -0 -n1 php -l
 ```
 
 Run relevant tests individually with an isolated test database. Tests use simulated AI providers and must not consume external credits unless a command explicitly documents and requires `--live`.
@@ -47,4 +47,3 @@ Describe:
 - security, privacy, and evidence-traceability considerations.
 
 By submitting a contribution, you agree that it is licensed under Apache License 2.0.
-

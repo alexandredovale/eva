@@ -10,29 +10,29 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cascadia+Mono:wght@400;500;600;700&family=Share+Tech&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/app.css?v=20260808-2">
-    <link rel="icon" type="image/x-icon" href="public/logo/icone.png">
-    <link rel="apple-touch-icon" href="public/logo/icone.png">
-    <link rel="shortcut icon" href="public/logo/icone.png">
+    <link rel="stylesheet" href="assets/app.css?v=4.0.0">
+    <link rel="icon" type="image/png" href="logo/icone.png">
+    <link rel="apple-touch-icon" href="logo/icone.png">
+    <link rel="shortcut icon" href="logo/icone.png">
 
 </head>
 <body class="auth-locked">
     <header class="topbar">
         <a class="brand" href="#overview" data-view="overview" aria-label="Ir para a página inicial">
             <span class="brand-logo-slot" aria-hidden="true"><img id="brand-logo" alt="EVA logo" src="logo/logo.svg"><span class="brand-mark" id="brand-mark"></span></span>
-            <span class="brand-copy"><strong id="brand-name">EVA</strong><small id="brand-tagline">Evidency Algorithm</small></span>
+            <span class="brand-copy"><strong id="brand-name">EVA</strong><small id="brand-tagline"></small></span>
         </a>
         <button type="button" class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="top-navigation"><span></span><span></span><span></span><span class="sr-only">Abrir menu</span></button>
         <nav class="top-navigation" id="top-navigation" aria-label="Navegação principal">
             <a href="#overview" data-view="overview" data-admin-only class="active"><span>Visão geral</span></a>
             <a href="#documents" data-view="documents" data-admin-only><span>Documentos</span></a>
-            <a href="#query" data-view="query"><span>Chat</span></a>
-            <a href="#users" data-view="users" data-admin-only><span>Usuários</span></a>
-            <a href="#projects" data-view="projects" data-admin-only><span>Projetos</span></a>
             <a href="#jobs" data-view="jobs" data-admin-only><span>Processamento</span></a>
+            <a href="#projects" data-view="projects" data-admin-only><span>Projetos</span></a>
+            <a href="#users" data-view="users" data-admin-only><span>Usuários</span></a>
+            <a href="#query" data-view="query"><span>Chat</span></a>
             <a href="#audit" data-view="audit" data-admin-only><span>Auditoria</span></a>
-            <span id="module-navigation" class="module-navigation"></span>
             <a href="#modules" data-view="modules" data-admin-only><span>Módulos</span></a>
+            <span id="module-navigation" class="module-navigation"></span>
             <a href="#settings" data-view="settings" data-user-only hidden><span>Alterar senha</span></a>
         </nav>
         <div class="top-actions">
@@ -78,7 +78,7 @@
 
         <section class="view" id="view-projects" data-view-panel="projects" data-admin-only hidden>
             <div class="page-heading"><div><p class="eyebrow">Organização do acervo</p><h1>Projetos<span>.</span></h1><p>Agrupe obras para conceder acesso ao conjunto completo com um único checkbox.</p></div></div>
-            <form id="project-form" class="card"><input id="project-id" type="hidden"><div class="compact-form project-name-row"><div class="form-field"><label for="project-name">Nome do projeto</label><input id="project-name" maxlength="180" required placeholder="Ex.: Pentateuco Espírita"></div><button class="button button-primary" type="submit">Salvar projeto</button><button class="button button-quiet" id="project-cancel" type="button" hidden>Cancelar edição</button></div><div class="form-field project-profile-field"><label for="project-response-profile">Perfil de respostas</label><textarea id="project-response-profile" rows="6" maxlength="6000" placeholder="Ex.: Você auxiliará professores de Matemática na elaboração de questões e no esclarecimento de atividades extraclasse."></textarea><small>Governança complementar aplicada somente quando este projeto estiver habilitado no chat. As regras documentais e de citação da EVA continuam obrigatórias.</small></div><fieldset class="project-documents"><legend>Obras do projeto</legend><div id="project-documents" class="check-list check-grid"></div></fieldset></form>
+            <form id="project-form" class="card"><input id="project-id" type="hidden"><div class="compact-form project-name-row"><div class="form-field"><label for="project-name">Nome do projeto</label><input id="project-name" maxlength="180" required placeholder="Ex.: Pentateuco Espírita"></div></div><div class="form-field project-profile-field"><label for="project-response-profile">Perfil de respostas</label><textarea id="project-response-profile" rows="6" maxlength="6000" placeholder="Ex.: Você auxiliará professores de Matemática na elaboração de questões e no esclarecimento de atividades extraclasse."></textarea><small>Governança complementar aplicada somente quando este projeto estiver habilitado no chat. As regras documentais e de citação da EVA continuam obrigatórias.</small></div><fieldset class="project-documents"><legend>Obras do projeto</legend><div id="project-documents" class="check-list check-grid"></div></fieldset><div class="project-form-actions"><button class="button button-quiet" id="project-cancel" type="button" hidden>Cancelar edição</button><button class="button button-primary" type="submit">Salvar projeto</button></div></form>
             <div id="projects-list" class="project-grid"></div>
         </section>
 
@@ -169,6 +169,6 @@
         </form>
     </div>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-    <script src="assets/app.js?v=20260808-2" defer></script>
+    <script src="assets/app.js?v=4.0.0" defer></script>
 </body>
 </html>

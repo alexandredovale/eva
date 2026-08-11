@@ -23,12 +23,18 @@ jobs:
 
       - name: Validate PHP syntax
         shell: bash
-        run: find app bin bootstrap config public tests -name '*.php' -print0 | xargs -0 -n1 php -l
+        run: find app bin bootstrap config modules public tests -name '*.php' -print0 | xargs -0 -n1 php -l
 
       - name: Verify public-package boundaries
         shell: bash
         run: |
           test ! -e .env
+          test ! -d backup
+          test ! -e send.zip
           test ! -e database/actual/eva.sql
+          test ! -d database/backups
           test ! -e docs/doc_test.md
           test ! -d docs/test
+          test ! -d modules/com.eva.enade
+          test ! -e tests/EnadeModuleTest.php
+          test ! -d tests/img-test

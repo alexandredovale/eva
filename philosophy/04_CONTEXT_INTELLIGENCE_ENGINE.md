@@ -130,4 +130,4 @@ A hipótese falsificável é que, sob o mesmo corpus, modelos e protocolo, o flu
 - [Contrato determinístico de evidências](05_DETERMINISTIC_EVIDENCE_CONTRACT.md)
 - [Fluxo detalhado da API](03_EVA_API_FLOW.md)
 - [Documentação operacional do CIE](../docs/14_CONTEXT_INTELLIGENCE_ENGINE.md)
-- [Especificação completa do upgrade](../updates/EVA_UPGRADE_CIE_GLOBAL_CONSOLIDATION.md)
+- [Consulta documental e composição da resposta](../docs/05_CONSULTA.md)

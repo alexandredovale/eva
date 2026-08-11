@@ -130,4 +130,4 @@ The falsifiable hypothesis is that, under the same corpus, models, and protocol,
 - [Deterministic evidence contract](05_DETERMINISTIC_EVIDENCE_CONTRACT.md)
 - [Current API flow](03_EVA_API_FLOW.md)
 - [Operational CIE documentation](../../docs/en/09_CONTEXT_INTELLIGENCE_ENGINE.md)
-- [Complete upgrade specification in Portuguese](../../updates/EVA_UPGRADE_CIE_GLOBAL_CONSOLIDATION.md)
+- [Documentary query and answer composition](../../docs/en/05_QUERY_AND_CHAT.md)

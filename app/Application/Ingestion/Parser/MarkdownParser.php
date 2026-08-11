@@ -80,6 +80,14 @@ final class MarkdownParser implements DocumentParserInterface
                 }
 
                 $parent = $stack[array_key_last($stack)]['node'];
+
+                if ($this->isFigureTitle($title) && !$this->isThematicFigureParent($parent)) {
+                    throw new ParserException(sprintf(
+                        'A seção de figura na linha %d deve ser filha de um tópico temático.',
+                        $lineNumber
+                    ));
+                }
+
                 $node = new MutableNode(
                     type: 'section',
                     title: $title,
@@ -159,6 +167,16 @@ final class MarkdownParser implements DocumentParserInterface
         $title = trim($title);
 
         return $title === '' ? 'Seção sem título' : $title;
+    }
+
+    private function isFigureTitle(string $title): bool
+    {
+        return preg_match('/^(?:Figura|Figure)\b/iu', trim($title)) === 1;
+    }
+
+    private function isThematicFigureParent(MutableNode $parent): bool
+    {
+        return $parent->type === 'section' && !$this->isFigureTitle($parent->title);
     }
 
     /** @return array{string, string}|null */

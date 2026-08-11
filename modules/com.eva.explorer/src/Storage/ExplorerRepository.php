@@ -363,11 +363,13 @@ final readonly class ExplorerRepository
     }
 
     /** @return list<array<string, mixed>> */
-    public function interactionsForStudent(int $studentId): array
+    public function interactionsForActiveThemesByStudent(int $studentId): array
     {
         $statement = $this->database->prepare(
             'SELECT si.*, ip.prompt_text, ip.options_json, ip.correct_option, ip.answer_contract_json
-             FROM student_interactions si JOIN interaction_prompts ip ON ip.id = si.prompt_id
+             FROM student_interactions si
+             JOIN interaction_prompts ip ON ip.id = si.prompt_id
+             JOIN learning_themes lt ON lt.id = si.theme_id AND lt.active = 1
              WHERE si.student_user_id = :student_user_id ORDER BY si.created_at DESC, si.id DESC'
         );
         $statement->execute(['student_user_id' => $studentId]);

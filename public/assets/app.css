@@ -214,7 +214,7 @@ p { color: var(--muted); }
     margin-bottom: 14px;
     color: var(--accent);
     font-family: "Cascadia Mono", monospace;
-    font-size: .72rem;
+    font-size: 1rem;
     font-weight: 600;
     letter-spacing: .13em;
     text-transform: uppercase;
@@ -397,6 +397,15 @@ tbody tr:hover { background: rgba(255, 255, 255, .018); }
     35% { opacity: 1; transform: translateY(-4px) scale(1); }
 }
 .answer { color: var(--ink); font-size: clamp(1.08rem, 1.3vw, 1.22rem); line-height: 1.75; white-space: pre-wrap; }
+.answer-figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 18px; margin-top: 26px; }
+.answer-figure { min-width: 0; margin: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: rgba(255, 255, 255, .018); }
+.answer-figure-media { min-height: 190px; display: grid; place-items: center; background: #0a0a0a; }
+.answer-figure-media img { width: 100%; max-height: 620px; display: block; object-fit: contain; }
+.answer-figure-status { color: var(--muted); font-size: .82rem; }
+.answer-figure figcaption { display: grid; gap: 7px; padding: 14px 16px 16px; }
+.answer-figure figcaption strong { color: var(--ink); font-size: .95rem; }
+.answer-figure figcaption span { color: var(--muted-strong); line-height: 1.55; }
+.answer-figure figcaption small { color: var(--muted); font-family: "Cascadia Mono", monospace; }
 .result-section { margin-top: 28px; padding-top: 26px; border-top: 1px solid var(--line); }
 .result-section h2 { font-size: .95rem; }
 .result-section ul { margin: 12px 0 0; padding-left: 20px; }
@@ -600,10 +609,11 @@ legend {
 .document-actions, .project-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .document-actions .status { white-space: nowrap; }
 .project-actions { margin-top: 18px; }
-.project-name-row { grid-template-columns: minmax(260px, 1fr) auto auto; padding: 0; margin-bottom: 22px; }
+.project-name-row { grid-template-columns: minmax(260px, 1fr); padding: 0; margin-bottom: 22px; }
 .project-profile-field { margin-bottom: 22px; }
 .project-profile-field textarea { min-height: 132px; line-height: 1.55; }
 .project-documents { margin-top: 8px; }
+.project-form-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 22px; }
 .project-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .project-card { margin: 0; }
 .project-profile-status { margin: 10px 0 14px; color: var(--muted); font-family: "Cascadia Mono", monospace; font-size: .7rem; }

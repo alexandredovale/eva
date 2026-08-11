@@ -84,7 +84,7 @@ $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 $path = requestPath();
 $logger = new FileLogger($container['logging']['path']);
 
-if ($path === '/' || $path === '/app') {
+if ($path === '/') {
     if ($method !== 'GET') {
         jsonResponse(405, ['error' => 'Método não permitido.'], ['Allow' => 'GET']);
     }
@@ -97,7 +97,7 @@ if ($path === '/' || $path === '/app') {
     }
 
     header('Content-Type: text/html; charset=utf-8');
-    header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'nonce-{$styleNonce}' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'");
+    header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'nonce-{$styleNonce}' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'");
     echo str_replace('{{CSP_STYLE_NONCE}}', htmlspecialchars($styleNonce, ENT_QUOTES, 'UTF-8'), $applicationHtml);
     exit;
 }
@@ -124,7 +124,7 @@ if ($path === '/api/health') {
         'application' => (new BrandingPresenter($container['branding']))->toArray()['name'],
         'status' => $httpStatus === 200 ? 'ready' : 'degraded',
         'database' => $databaseStatus,
-        'version' => '1.2.0',
+        'version' => '4.0.0',
     ]);
 }
 
@@ -139,6 +139,18 @@ if (str_starts_with($path, '/api/')) {
             $_POST,
             (string) file_get_contents('php://input')
         );
+
+        if ($response->body !== null) {
+            http_response_code($response->status);
+
+            foreach ($response->headers as $name => $value) {
+                header($name . ': ' . $value);
+            }
+
+            echo $response->body;
+            exit;
+        }
+
         jsonResponse($response->status, $response->payload, $response->headers);
     } catch (Throwable $exception) {
         $logger->error('product_endpoint_unavailable', SafeFailureDiagnostics::context($exception, [

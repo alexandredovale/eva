@@ -14,6 +14,7 @@ const state = {
     moduleLocalIdFilter: '',
     scopes: { projects: [], documents: [] },
     queryHistory: [],
+    figureObjectUrls: new Map(),
     secretOwner: '',
     jobPollTimer: null,
     workerDrainActive: false,
@@ -189,6 +190,7 @@ function disconnect(showMessage = true) {
 }
 
 function resetChat() {
+    releaseFigureImages();
     state.scopes = { projects: [], documents: [] };
     state.queryHistory = [];
     elements.queryResult.innerHTML = initialChatEmptyMarkup;
@@ -200,6 +202,7 @@ function resetChat() {
 }
 
 function restartChat() {
+    releaseFigureImages();
     state.queryHistory = [];
     elements.queryResult.innerHTML = initialChatEmptyMarkup;
     document.querySelector('#query-input').value = '';
@@ -824,11 +827,12 @@ function permissionDocumentNode(document, explicit, inherited) {
 function renderQuery(result, question, index) {
     const answer = result.answer || '';
     const evidences = orderEvidencesByCitation(result.evidences_used || [], answer), simetry = result.simetry_interactions || [], assimetry = result.assimetry_interactions || [], limitations = result.limitations || [], contextIntelligence = result.context_intelligence || [];
+    const figures = Array.isArray(result.figures) ? result.figures : [];
     const technicalDetails = state.user?.role === 'superadmin'
         ? `${renderContextIntelligence(contextIntelligence)}<div class="result-section"><h2>Interações simetry</h2>${renderList(simetry, item => item.summary)}</div><div class="result-section"><h2>Interações assimetry</h2>${renderList(assimetry, item => item.summary)}</div><div class="result-section"><h2>Limitações</h2>${renderList(limitations, item => item)}</div>`
         : '';
 
-    return `<section class="chat-turn"><article class="chat-message-user"><p class="eyebrow">Você</p><p>${escapeHtml(question)}</p></article><article class="card chat-message-assistant"><p class="eyebrow">Resposta documental</p><div class="answer">${escapeHtml(answer)}</div><div class="result-section"><h2>Evidências utilizadas</h2>${renderEvidenceList(evidences)}</div><div class="copy-result-action"><button type="button" class="button button-quiet button-copy-result" data-copy-query="${index}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copiar pergunta e resposta</span></button></div>${technicalDetails}</article></section>`;
+    return `<section class="chat-turn"><article class="chat-message-user"><p class="eyebrow">Você</p><p>${escapeHtml(question)}</p></article><article class="card chat-message-assistant"><p class="eyebrow">Resposta documental</p><div class="answer">${escapeHtml(answer)}</div>${renderFigures(figures)}<div class="result-section"><h2>Evidências utilizadas</h2>${renderEvidenceList(evidences)}</div><div class="copy-result-action"><button type="button" class="button button-quiet button-copy-result" data-copy-query="${index}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copiar pergunta e resposta</span></button></div>${technicalDetails}</article></section>`;
 }
 
 function renderConversation(pendingQuestion = '', alignLatestAnswer = false) {
@@ -838,6 +842,7 @@ function renderConversation(pendingQuestion = '', alignLatestAnswer = false) {
         : '';
 
     elements.queryResult.innerHTML = `<div class="chat-transcript">${completed}${pending}</div>`;
+    hydrateFigureImages(elements.queryResult);
 
     if (alignLatestAnswer) {
         const assistantMessages = elements.queryResult.querySelectorAll('.chat-message-assistant:not(.chat-message-pending)');
@@ -910,6 +915,85 @@ function renderEvidenceList(evidences) {
     if (!evidences.length) return '<p>Nenhum registro.</p>';
 
     return `<ul class="evidence-list">${evidences.map(evidence => `<li><code>${escapeHtml(evidence.id)}</code><span>${escapeHtml(formatEvidenceBreadcrumb(evidence))}</span></li>`).join('')}</ul>`;
+}
+
+function renderFigures(figures) {
+    if (!figures.length) return '';
+
+    return `<div class="answer-figures" aria-label="Figuras relacionadas">${figures.map(figure => {
+        const description = String(figure.description || '').trim();
+        const type = String(figure.type || '').trim();
+        const evidenceId = String(figure.evidence_id || '').trim();
+        const metadata = [type, evidenceId].filter(Boolean).join(' · ');
+        const alternativeText = description || String(figure.title || 'Figura documental').trim();
+
+        return `<figure class="answer-figure"><div class="answer-figure-media"><img data-figure-url="${escapeHtml(figure.url || '')}" alt="${escapeHtml(alternativeText)}" hidden><span class="answer-figure-status">Carregando figura…</span></div><figcaption><strong>${escapeHtml(figure.title || 'Figura documental')}</strong>${description ? `<span>${escapeHtml(description)}</span>` : ''}${metadata ? `<small>${escapeHtml(metadata)}</small>` : ''}</figcaption></figure>`;
+    }).join('')}</div>`;
+}
+
+function releaseFigureImages() {
+    for (const objectUrl of state.figureObjectUrls.values()) URL.revokeObjectURL(objectUrl);
+    state.figureObjectUrls.clear();
+}
+
+function hydrateFigureImages(root) {
+    root.querySelectorAll('img[data-figure-url]').forEach(async image => {
+        const path = image.dataset.figureUrl || '';
+        const status = image.parentElement?.querySelector('.answer-figure-status');
+
+        if (!path) {
+            if (status) status.textContent = 'Figura indisponível.';
+            return;
+        }
+
+        const cachedUrl = state.figureObjectUrls.get(path);
+
+        if (cachedUrl) {
+            image.src = cachedUrl;
+            image.hidden = false;
+            if (status) status.hidden = true;
+            return;
+        }
+
+        const requestToken = state.token;
+
+        try {
+            const response = await fetch(apiPath(path), {
+                headers: { Authorization: `Bearer ${requestToken}` },
+                cache: 'no-store',
+            });
+
+            if (response.status === 401 && state.token === requestToken) disconnect(false);
+            if (!response.ok) throw new Error(`Falha HTTP ${response.status}.`);
+
+            const blob = await response.blob();
+
+            if (!blob.type.startsWith('image/')) throw new Error('Conteúdo visual inválido.');
+
+            const concurrentlyCachedUrl = state.figureObjectUrls.get(path);
+
+            if (concurrentlyCachedUrl) {
+                image.src = concurrentlyCachedUrl;
+                image.hidden = false;
+                if (status) status.hidden = true;
+                return;
+            }
+
+            const objectUrl = URL.createObjectURL(blob);
+
+            if (state.token !== requestToken) {
+                URL.revokeObjectURL(objectUrl);
+                return;
+            }
+
+            state.figureObjectUrls.set(path, objectUrl);
+            image.src = objectUrl;
+            image.hidden = false;
+            if (status) status.hidden = true;
+        } catch (_) {
+            if (status) status.textContent = 'Figura indisponível.';
+        }
+    });
 }
 
 function formatEvidenceBreadcrumb(evidence) {

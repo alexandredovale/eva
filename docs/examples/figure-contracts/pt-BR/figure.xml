@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<documento>
+  <pessoas_da_organizacao>
+    <figura titulo="Figura 1 — Retrato de Marina Duarte">
+      <arquivo>figuras/profile-1.jpg</arquivo>
+      <tipo>retrato de perfil fictício</tipo>
+      <descricao_factual>Uma profissional sorridente usa blazer cinza diante de um fundo escuro.</descricao_factual>
+      <texto_visivel>não há texto relevante na imagem.</texto_visivel>
+      <relacoes_representadas>o retrato corresponde à persona fictícia Marina Duarte e ao identificador ORQUIDEA-47.</relacoes_representadas>
+    </figura>
+  </pessoas_da_organizacao>
+</documento>

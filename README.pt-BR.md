@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Versão atual:** [v3.0.1](https://github.com/alexandredovale/eva/releases/tag/v3.0.1)
+**Versão atual:** `4.0.0`
 
-**Destaque da versão:** o EXPLORER passa a ser o cartucho público standard do EVA Module Contract. A 3.0.1 também amplia as regressões matemáticas de κq/CIE e normaliza citações parentéticas inequívocas para o formato canônico antes da validação, sem inferir ou forçar evidências.
+**Destaque da versão:** o EVA 4.0.0 acrescenta contratos determinísticos de figuras documentais em português e inglês para Markdown, JSON e XML, com exibição autenticada a partir do armazenamento privado de cada documento e sem OCR ou interpretação multimodal. A versão também refina o layout responsivo e o posicionamento dos menus e mantém o EXPLORER como cartucho público de referência do EVA Module Contract.
 
 O EVA é uma plataforma para construir, organizar e consultar memória cognitiva documental verificável. O EVA (Evidence Algorithm) transforma documentos estruturados em evidências hierárquicas. Cnode é a compreensão transitória de uma interação explícita entre essas evidências durante a consulta, não uma entidade persistente.
 
@@ -29,7 +29,7 @@ A base atual contém:
 - métricas descritivas e auditoria sanitizada, sem exposição de segredos ou conteúdo consultado;
 - execução real de IA bloqueada por padrão e reaproveitamento por modelo/hash;
 - Runtime de módulos conectores independentes, com descoberta, ativação, desativação, exclusão confirmada e SQLite próprio por pacote;
-- módulo `com.eva.explorer` como cartucho público de referência, sem conhecimento pedagógico no Core.
+- cartucho público independente `com.eva.explorer`, sem dependência de domínio no Core.
 
 As Fases 1 a 5 estão funcionais e o roadmap original está concluído. O estado de cada entrega está em [docs/09_ROADMAP.md](docs/09_ROADMAP.md).
 
@@ -146,7 +146,7 @@ O superadmin apenas ativa, desativa ou exclui definitivamente os pacotes encontr
 
 Interfaces modulares fornecem o próprio HTML e CSS. O Core conhece somente o contrato genérico de dashboard e o nome do manifesto. Assim, um conector futuro pode acrescentar sua própria interface sem inserir menu, renderer, estilo ou regra de domínio específica no Core.
 
-O pacote `com.eva.explorer` é a implementação pública de referência. Professores criam Temas de Aprendizado; alunos percorrem Quizz, Nodes e Prova; e a Secretaria acompanha o processo institucional. O módulo reutiliza consultas documentais escopadas do Core, mantém perfis e histórico em SQLite próprio e oferece devolutivas qualitativas de correção ou aprofundamento, sem notas, pesos ou rankings.
+A distribuição pública atual inclui `com.eva.explorer` como cartucho independente de referência. Ele utiliza somente os contratos genéricos do Runtime, não constitui dependência do Core e pode ser removido sem invalidar a camada de produto ou testes não relacionados.
 
 Consulte [Módulos do EVA](docs/16_MODULOS.md) para instalação, contratos, operação, backup, atualização e remoção.
 

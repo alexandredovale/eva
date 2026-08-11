@@ -13,7 +13,8 @@ final readonly class HttpResponse
     public function __construct(
         public int $status,
         public array $payload,
-        public array $headers = []
+        public array $headers = [],
+        public ?string $body = null
     ) {
     }
 }

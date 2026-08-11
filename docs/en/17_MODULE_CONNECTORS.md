@@ -12,8 +12,8 @@ No specialized module table is added to the Core database. The modular release a
 
 1. Audit and extract the package to `modules/<module-id>/`.
 2. Confirm that the directory name exactly matches the `id` in `module.json`.
-3. Open **Modules** as superadmin.
-4. Activate the discovered package.
+3. Open **Modules** as superadmin. An invalid manifest is shown as invalid and cannot be activated.
+4. Activate the discovered package. Opening its dashboard incorporates pending events before presenting data.
 
 Only the superadmin manages this lifecycle. Deactivation preserves package files and runtime data. Definitive deletion requires typed confirmation and removes both the package directory and `modules/.runtime/data/<module-id>/`, including all module history.
 
@@ -43,11 +43,16 @@ To update a connector, deactivate it, back up its SQLite database, replace only 
 }
 ```
 
-The Runtime rejects unknown fields, invalid identifiers or versions, directory and manifest ID mismatches, absolute paths, `..`, missing entrypoints, and unsupported EVA contracts. Canonical schemas are stored in `modules/runtime/contracts/`.
+The Runtime rejects unknown fields, invalid identifiers or versions, directory and manifest ID mismatches, absolute paths, `..`, missing entrypoints, and unsupported EVA contracts. The canonical schemas are:
+
+- `modules/runtime/contracts/module-manifest.schema.json`;
+- `modules/runtime/contracts/module-event.schema.json`;
+- `modules/runtime/contracts/module-dashboard.schema.json`;
+- `modules/runtime/contracts/module-action.schema.json`.
 
 ## PHP SDK and capabilities
 
-The package entrypoint returns `ModuleInterface`:
+The package entrypoint returns `Eva\ModuleRuntime\ModuleInterface`:
 
 ```php
 interface ModuleInterface
@@ -60,17 +65,44 @@ interface ModuleInterface
 
 `ModuleContext` exposes only:
 
-- the validated immutable manifest;
-- a private PDO SQLite connection;
-- a capability-limited Core read API;
-- a provider-neutral JSON language interface;
-- an actor-bound scoped documentary query interface when the package declares `core.query.scoped`.
+- `manifest`: the validated immutable manifest;
+- `storage`: a private PDO SQLite connection;
+- `core`: a capability-limited Core read API; in interactive contexts, `actorScopes()` returns only projects and works authorized for the authenticated actor;
+- `language`: a provider-neutral `LanguageModelInterface` for JSON generation;
+- `query`: an actor-bound scoped documentary query interface, available only in interactive contexts when the package declares `core.query.scoped`.
+
+Optional interfaces are:
+
+- `DashboardModuleInterface`, which returns `contract`, `html`, and `css` through the generic dashboard endpoint;
+- `ModuleAccessInterface`, which decides whether an actor can discover, open, and execute the module while preserving superadmin administrative access;
+- `ModuleActionInterface`, which receives authenticated actions and returns `eva.module.action/1` with an updated dashboard.
 
 AI keys, database credentials, bearer tokens, and raw Core PDO access are not provided to modules. Packages must be idempotent by `event_id` and cannot call one another.
 
 ## Events and deterministic processing
 
 The first official event is `interaction.completed`. It contains actor identity, occurrence time, contextual project and document snapshots, the current question, the conversational input used by the Core, the validated answer, public evidence references, and limitations.
+
+```json
+{
+  "event_id": "EVA-EVT-0123456789ABCDEF01234567",
+  "event_type": "interaction.completed",
+  "contract_version": 1,
+  "occurred_at": "2026-08-03T15:30:00-03:00",
+  "actor": {"user_id": 18, "role": "user"},
+  "scope": {
+    "projects": [{"id": 3, "name": "Project A"}],
+    "documents": [{"id": 12, "public_id": "EVA-D000012", "title": "Document A"}]
+  },
+  "interaction": {
+    "current_input": "Current question",
+    "contextual_input": "Current question and conversational context used by the Core",
+    "answer": "Final answer"
+  },
+  "evidences": [{"id": "EVA-E000120", "document": "Document A"}],
+  "limitations": []
+}
+```
 
 Sensitive keys such as `password`, `secret`, `token`, `api_key`, and `authorization` are rejected recursively. Payload size is limited to 1 MB.
 
@@ -83,11 +115,23 @@ php modules/runtime/bin/consume.php --limit=50
 php modules/runtime/bin/consume.php --limit=50 --drain
 ```
 
+Periodic scheduling is optional for modules with dashboards: opening or refreshing the dashboard executes a recovery pass before reading its data. The CLI remains available to process events in advance and for modules without a dashboard. For every existing mailbox item, the module confirms processing, the idempotent event record, and cursor advancement together in its private SQLite transaction.
+
 ## Generic dashboards and white-label isolation
 
-Dashboard modules implement `DashboardModuleInterface` and return the contract `eva.module.dashboard/1` with HTML and CSS. The Core frontend discovers active descriptors through `GET /api/modules`, uses the canonical manifest `name` for navigation, and renders all module output in one generic host.
+Dashboard modules implement `DashboardModuleInterface` and return the contract `eva.module.dashboard/1` with HTML and CSS. When a module declares `dashboard.enabled`, the Core frontend discovers its active descriptor through `GET /api/modules`, uses the canonical manifest `name` for navigation, and renders all module output in one generic host.
 
-The package owns its styles and markup. CSP authorizes returned CSS with a request nonce; `unsafe-inline` remains disabled. Generic declarative attributes provide refresh, remote filters, local content filters, entries, and accordion toggles without module-specific JavaScript in the Core.
+The package owns its styles and markup and may keep its stylesheet under `assets/`. CSP authorizes returned CSS with a request nonce; `unsafe-inline` remains disabled. Generic declarative attributes provide refresh, remote filters, local content filters, entries, and accordion toggles without module-specific JavaScript in the Core.
+
+The navigation label is always exactly `module.name`; there is no `dashboard.label` or Core-owned alias. A manifest with `"name": "Education"` therefore produces the **Education** menu automatically. Navigation does not display numeric indexes before module names. Its position follows the fixed Core layout and, among modules, `dashboard.order`.
+
+The recognized declarative attributes are:
+
+- `data-module-filter` for a remote filter sent back to the dashboard;
+- `data-module-refresh` for interface refresh;
+- `data-module-content-filter` and `data-module-entry` for local filtering;
+- `data-module-accordion-toggle` for exclusive item expansion;
+- `data-module-action-form` and `data-module-action` for authenticated submission to a module-owned action.
 
 Removing or deactivating a package removes its descriptor and menu entry automatically. The Core contains no module ID, domain label, renderer, or stylesheet.
 
@@ -103,7 +147,9 @@ POST /api/modules/<module-id>/actions/<action-id>
 
 The request contains a bounded `input` object and a `request_id` that packages can use for SQLite idempotency. A valid `eva.module.action/1` response returns a fresh `eva.module.dashboard/1` payload and may include a neutral notice. Packages still cannot provide executable JavaScript or expose direct HTTP files.
 
-The optional `core.query.scoped` capability lets an authorized action reuse Core retrieval and answer validation. The Runtime binds the authenticated actor, Core scope authorization runs again, and supplementary module instructions remain subordinate to documentary evidence, citations, limitations, and the base answer contract.
+Sensitive fields are rejected recursively. The input payload is limited to 128 KiB, and returned HTML and CSS have their own bounded limits.
+
+The optional `core.query.scoped` capability lets an authorized action call `ModuleContext::scopedQuery()` to reuse Core retrieval and answer validation. The Runtime binds the authenticated actor, `ScopeAccessService` runs Core scope authorization again, and supplementary module instructions remain subordinate to documentary evidence, citations, limitations, and the base answer contract.
 
 Module-specific profiles, preferences, authorization records, and action history remain in the package SQLite database. The connector adds no MySQL table and contains no domain-specific identifier, label, renderer, or action name.
 
@@ -122,6 +168,14 @@ php modules/runtime/bin/prune.php --days=90 --confirm
 ```
 
 The retention period must exceed the longest acceptable module outage. Definitive history belongs to each module SQLite database, not to the Core mailbox.
+
+Deactivation never deletes data. Definitive deletion requires typing the exact module ID in the system modal and removes:
+
+- `modules/<module-id>/`, including the executable package;
+- `modules/.runtime/data/<module-id>/`, including `module.sqlite`, WAL files, local backups, and history;
+- the activation record in `modules/.runtime/state.json`.
+
+Deletion is irreversible and does not create a backup automatically. Run `backup.php` first whenever institutional archiving is required.
 
 ## EXPLORER reference connector
 

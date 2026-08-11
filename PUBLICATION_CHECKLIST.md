@@ -2,18 +2,20 @@
 
 Use this checklist for every public release. Always start from a fresh clone of the canonical GitHub repository in an exclusive local analysis directory, inspect the remote state, and copy only an explicit source allowlist.
 
-## Release v3.0.1
+## Release v4.0.0
 
-- [x] Create a fresh clone from `alexandredovale/eva` under `.00-analise/` and verify `origin/main` before copying files.
-- [x] Copy only source, public documentation, empty schema, versioned migrations, and tests.
-- [x] Confirm that `.env`, operational databases, module SQLite files, Runtime state, uploaded documents, logs, dumps, backups, and private corpora are absent.
-- [x] Review the complete diff and run the offline regression suite in the release clone.
+- [x] Create a fresh clone from `alexandredovale/eva` under an exclusive local analysis directory and verify `origin/main` before copying files.
+- [x] Copy only source, public documentation, empty schema, versioned migrations, public tests, and approved figure-contract examples.
+- [x] Confirm that `.env`, operational databases, module SQLite files, Runtime state, uploaded documents, logs, dumps, backups, archives, private corpora, and manual portrait fixtures are absent.
+- [x] Review the complete diff from `v3.0.1` and confirm that the 4.0.0 highlight is documentary-figure support, with the documented interface and EXPLORER corrections.
+- [x] Run PHP syntax validation and the complete public offline regression suite in the release clone with `AI_LIVE_ENABLED=false`.
 - [x] Confirm that `database/` contains only `schema.sql`, versioned migrations, and tracked placeholders.
 - [x] Confirm that `modules/.runtime/` contains only HTTP protections and empty tracked placeholders.
-- [x] Confirm that `modules/com.eva.explorer/` contains the complete public reference cartridge and no runtime data.
-- [x] Confirm that the private ENADE package, runtime data, and tests are absent from the public compendium and ignored.
-- [x] Review attribution, `CHANGELOG.md`, `CITATION.cff`, and the public version.
-- [x] Commit and push canonical `main`, verify `origin/HEAD`, create annotated tag `v3.0.1`, and publish the GitHub Release.
+- [x] Confirm that `modules/com.eva.explorer/` contains the complete public reference cartridge and no Runtime data.
+- [x] Confirm that the private ENADE package, its package-specific tests and documentation, placeholders, and Runtime data are absent from the public release.
+- [x] Confirm Portuguese-English documentation parity for every current technical specification changed by 4.0.0.
+- [x] Review attribution, `CHANGELOG.md`, `CITATION.cff`, health-endpoint version, README versions, and asset cache version.
+- [x] Commit and push canonical `main`, verify `origin/HEAD`, create annotated tag `v4.0.0`, and publish the GitHub Release.
 
 Release tags preserve published history and are not competing development branches. Create or remove a tag only as an explicit release-management decision.
 

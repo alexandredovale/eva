@@ -23,7 +23,7 @@ body:has(.explorer-dashboard .explorer-dialog) {
 }
 
 .eyebrow {
-    font-size: 1.5rem;
+    font-size: 1rem;
 }
 .eyebrow-date {
     display: none;

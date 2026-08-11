@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project uses [Semantic Versioning](https://semver.org/).
 
+## [4.0.0] - 2026-08-11
+
+### Added
+
+- Deterministic documentary-figure contracts in Portuguese and English for Markdown, JSON, and XML.
+- Authenticated local rendering from private per-document figure storage, without OCR or multimodal interpretation.
+- Portuguese and English figure-contract templates for every accepted documentary format.
+
+### Changed
+
+- Figure recognition, hierarchy validation, structured-field resolution, and logical storage prefixes now support the documented Portuguese and English contracts across all three formats while preserving original normalized nodes and primary evidence.
+- Responsive layout, asset cache versioning, and menu positioning were refined for the 4.0.0 interface.
+- The public connector distribution remains centered on the independent `com.eva.explorer` reference cartridge.
+
+### Fixed
+
+- The EXPLORER student dashboard now calculates completed steps and progress exclusively from currently active learning themes, preventing paused-theme history from producing totals above 100%.
+
+## [3.0.2] - 2026-08-09
+
+### Added
+
+- Deterministic document-figure contracts for Markdown evidence, with authenticated local rendering from per-document private storage and no OCR or multimodal interpretation.
+- Validation of figure paths, real MIME types, supported PNG/JPEG/WebP formats, configurable size limits, access control, and cleanup with document deletion.
+
+### Fixed
+
+- Removed residual `com.eva.education` requirements from active tests and operational documentation after that connector was removed.
+- Product and modular-interface tests now validate generic installed connectors while private connector packages remain outside the public release compendium.
+
 ## [3.0.1] - 2026-08-09
 
 ### Added
@@ -90,14 +120,14 @@ and the project uses [Semantic Versioning](https://semver.org/).
 - Independent module discovery, activation, deactivation, definitive removal, event fan-out, retention, backup, and per-module SQLite storage.
 - Generic module-dashboard discovery in the white-label interface, including declarative filtering, accordion behavior, refresh, CSP-nonced module CSS, and manifest-defined ordering.
 - Neutral `module_events` mailbox as the only new Core table; no existing table was altered for modules.
-- Initial reference connector experiment, with descriptive observations, independent persistence, and a package-owned dashboard.
+- Reference connector `com.eva.education`, with descriptive pedagogical observations, immediate transactional processing, localized labels, linguistic concept extraction from question and answer, and an independent learning-trajectory dashboard.
 - Animated yellow waiting indicator for documentary queries, with reduced-motion support.
 
 ### Changed
 
 - Locally rejected answers now receive deterministic corrective feedback on the next bounded attempt: a safe failure code and, only when applicable, an already elected evidence ID.
 - Module interfaces, names, styles, persistence, and domain rules remain inside their packages; the Core exposes only generic contracts and hosts.
-- The initial reference connector uses three non-valuative dimensions: conceptual articulation, evidence use, and contextual connection.
+- The Education connector now uses three non-valuative dimensions: conceptual articulation, evidence use, and contextual connection.
 - Authentication-dialog focus now moves before the access panel is hidden, using `inert` to preserve accessibility.
 
 ### Fixed
@@ -106,8 +136,8 @@ and the project uses [Semantic Versioning](https://semver.org/).
 - Removed legacy separate credential-file loading and aligned all public guidance with `.env` as the only local configuration source.
 - Removed three unused credential variables and their obsolete documentation references from the local configuration inventory.
 - Corrective retries no longer repeat an identical rejected generation without validation guidance.
-- Reference-connector trajectory labels, dates, evidence layout, concepts, direct-reference text, and accordion filtering now remain readable and localized to the question language.
-- Removed the redundant reference-connector observation “Question Refinement” from new and existing module histories through schema migration 2.
+- Education trajectory labels, dates, evidence layout, concepts, direct-reference text, and accordion filtering now remain readable and localized to the question language.
+- Removed the redundant Education observation “Question Refinement” from new and existing module histories through schema migration 2.
 
 ### Security
 

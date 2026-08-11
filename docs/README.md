@@ -56,8 +56,13 @@ The English edition is organized by reader task rather than as filename-for-file
 | `15_VISAO.md` | [Project vision and impact assessment](en/16_VISION.md) |
 | `16_MODULOS.md` | [Connector modules](en/17_MODULE_CONNECTORS.md) |
 | `17_RELACIONAMENTO_BANCO_DADOS.md` | [Database relationships](en/18_DATABASE_RELATIONSHIPS.md) |
+| `18_INSTALACAO.md` | [Installation](en/03_INSTALLATION.md) |
 
-[Installation](en/03_INSTALLATION.md) is an additional English operational guide assembled from the current repository configuration and deployment requirements.
+The installation guide is maintained as a paired operational document in both languages.
+
+## Figure contract templates
+
+Ready-to-ingest Portuguese and English examples for Markdown, JSON, and XML are indexed in [`examples/figure-contracts/`](examples/figure-contracts/README.md). The matching operational specifications are [API and operations](en/06_API_AND_OPERATIONS.md#document-figures) and [Produto](10_PRODUTO.md#figuras-documentais).
 
 ## Original Portuguese specifications
 
@@ -80,6 +85,7 @@ The English edition is organized by reader task rather than as filename-for-file
 | [`15_VISAO.md`](15_VISAO.md) | Visão crítica, impacto potencial, limites atuais e prioridades de evolução |
 | [`16_MODULOS.md`](16_MODULOS.md) | Instalação, contratos, SDK, operação, backup e remoção de módulos |
 | [`17_RELACIONAMENTO_BANCO_DADOS.md`](17_RELACIONAMENTO_BANCO_DADOS.md) | Cardinalidades, chaves estrangeiras, relações lógicas, fluxos e efeitos de exclusão |
+| [`18_INSTALACAO.md`](18_INSTALACAO.md) | Plataforma, ambiente, banco, permissões, servidor web e ativação de provedores |
 
 The complete English philosophical and scientific collection is available in [`philosophy/en/`](../philosophy/en/README.md), including the [full scientific paper](../philosophy/en/01_EVA_SCIENTIFIC_PAPER.md), [API flow](../philosophy/en/03_EVA_API_FLOW.md), [Context Intelligence Engine](../philosophy/en/04_CONTEXT_INTELLIGENCE_ENGINE.md), and [deterministic evidence contract](../philosophy/en/05_DETERMINISTIC_EVIDENCE_CONTRACT.md).
 
