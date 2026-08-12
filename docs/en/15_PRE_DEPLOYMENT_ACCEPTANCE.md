@@ -4,7 +4,7 @@
 
 **Result on July 22, 2026: APPROVED FOR CONTROLLED UPLOAD.**
 
-This is a readiness decision from before the application upload. At the time of execution, the application was not yet published at `https://eva.oceanno.com.br`; the page then served by that domain was therefore not treated as an application failure. Online acceptance must be completed after upload by running the verifier described below.
+This is a readiness decision from before the application upload. At the time of execution, the application was not yet published at `https://eva.your-domain.com`; the page then served by that domain was therefore not treated as an application failure. Online acceptance must be completed after upload by running the verifier described below.
 
 This document preserves the original environment-specific record. It does not certify a later build, database, host, or provider configuration.
 
@@ -37,7 +37,7 @@ The original screenshots were stored in a local validation-artifact directory ou
 The local automated verifier passed **18 of 18 checks**:
 
 ```powershell
-php bin\verify-deployment.php https://localhost/eva.oceanno.com.br --local
+php bin\verify-deployment.php https://localhost/eva.your-domain.com --local
 ```
 
 Confirmed results:
@@ -69,7 +69,7 @@ These figures are a local smoke check, not a hosting-plan capacity forecast.
 Even before application publication, the domain layer confirmed:
 
 - HTTP-to-HTTPS redirect;
-- TLS 1.3 and a certificate valid for `eva.oceanno.com.br`;
+- TLS 1.3 and a certificate valid for `eva.your-domain.com`;
 - HTTP 405 for `TRACE`.
 
 After upload, these properties and the application headers must be validated together. The code emits HSTS only for HTTPS requests outside local hosts.
@@ -102,7 +102,7 @@ For the August 2, 2026 CIE update, `tests/ContextIntelligenceEngineTest.php` pas
 4. From a machine that can reach the public domain, run:
 
    ```powershell
-   php bin\verify-deployment.php https://eva.oceanno.com.br
+   php bin\verify-deployment.php https://eva.your-domain.com
    ```
 
 5. Require zero verifier failures, then perform a final superadmin login and normal-user login on the published domain.

@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Current version:** `4.0.0`
+**Current version:** `4.0.1`
 
-**Version highlight:** EVA 4.0.0 adds deterministic documentary-figure contracts in Portuguese and English for Markdown, JSON, and XML, with authenticated rendering from private per-document storage and no OCR or multimodal interpretation. It also refines responsive layout and menu positioning and keeps EXPLORER as the public reference cartridge for the EVA Module Contract.
+**Version highlight:** EVA 4.0.1 removes installation-specific domain references from public documentation and uses `eva.your-domain.com` in deployment examples, preserving the white-label distribution contract.
 
 EVA is a provider-neutral PHP system for building and querying **verifiable documentary memory**. It preserves document hierarchy, keeps literal source evidence separate from generated summaries, and validates every answer against the primary evidence recovered for the current query.
 

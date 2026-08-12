@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Versão atual:** `4.0.0`
+**Versão atual:** `4.0.1`
 
-**Destaque da versão:** o EVA 4.0.0 acrescenta contratos determinísticos de figuras documentais em português e inglês para Markdown, JSON e XML, com exibição autenticada a partir do armazenamento privado de cada documento e sem OCR ou interpretação multimodal. A versão também refina o layout responsivo e o posicionamento dos menus e mantém o EXPLORER como cartucho público de referência do EVA Module Contract.
+**Destaque da versão:** o EVA 4.0.1 remove referências a domínios específicos de instalação da documentação pública e adota `eva.your-domain.com` nos exemplos de deploy, preservando o contrato de distribuição white label.
 
 O EVA é uma plataforma para construir, organizar e consultar memória cognitiva documental verificável. O EVA (Evidence Algorithm) transforma documentos estruturados em evidências hierárquicas. Cnode é a compreensão transitória de uma interação explícita entre essas evidências durante a consulta, não uma entidade persistente.
 
@@ -166,7 +166,7 @@ O superadmin também pode excluir uma obra ou um projeto mediante confirmação 
 
 Para preservar uma obra compartilhada antes de excluir um projeto, o superadmin deve editar esse projeto, desmarcar a obra, salvar o projeto sem o vínculo e somente então excluí-lo. O modal de exclusão identifica as obras compartilhadas e apresenta essa orientação antes da confirmação destrutiva.
 
-No XAMPP com o projeto dentro de `htdocs`, a raiz `http://localhost/eva.oceanno.com.br/` é encaminhada internamente para `public`. O `.htaccess` da raiz bloqueia qualquer arquivo ou diretório real fora dessa superfície, desativa listagens e impede acesso HTTP a credenciais, código, banco, documentação, testes e armazenamento. Essa proteção exige `mod_rewrite`, `mod_headers` e `AllowOverride All`.
+No XAMPP com o projeto dentro de `htdocs`, a raiz `http://localhost/eva.your-domain.com/` é encaminhada internamente para `public`. O `.htaccess` da raiz bloqueia qualquer arquivo ou diretório real fora dessa superfície, desativa listagens e impede acesso HTTP a credenciais, código, banco, documentação, testes e armazenamento. Essa proteção exige `mod_rewrite`, `mod_headers` e `AllowOverride All`.
 
 Diretivas globais do Apache, como `TraceEnable Off` e `ServerTokens Prod`, devem ser configuradas no servidor quando o ambiente deixar de ser exclusivamente local; elas não são permitidas em `.htaccess`.
 

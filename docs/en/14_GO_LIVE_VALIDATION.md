@@ -167,7 +167,7 @@ The first raw report was created before correcting a bookkeeping error in the te
 The pre-deployment criteria were met. The system was approved for a controlled upload; definitive online acceptance requires zero failures from:
 
 ```powershell
-php bin\verify-deployment.php https://eva.oceanno.com.br
+php bin\verify-deployment.php https://eva.your-domain.com
 ```
 
 ## Reproduction

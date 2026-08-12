@@ -4,7 +4,7 @@
 
 **Resultado em 22/07/2026: APROVADO PARA UPLOAD CONTROLADO.**
 
-Este é um parecer de prontidão anterior ao upload. A aplicação ainda não está publicada em `https://eva.oceanno.com.br`; portanto, a página atualmente servida pelo domínio não foi tratada como falha da aplicação. O aceite online será concluído depois do upload, executando o verificador descrito neste documento.
+Este é um parecer de prontidão anterior ao upload. A aplicação ainda não está publicada em `https://eva.your-domain.com`; portanto, a página atualmente servida pelo domínio não foi tratada como falha da aplicação. O aceite online será concluído depois do upload, executando o verificador descrito neste documento.
 
 ## Smoke test visual
 
@@ -39,7 +39,7 @@ O usuário temporário, suas permissões, sessões e eventos de auditoria exclus
 O verificador automatizado local aprovou **18 de 18 verificações**:
 
 ```powershell
-php bin\verify-deployment.php https://localhost/eva.oceanno.com.br --local
+php bin\verify-deployment.php https://localhost/eva.your-domain.com --local
 ```
 
 Resultados confirmados:
@@ -71,7 +71,7 @@ Esses números são um smoke de concorrência no ambiente local, não uma previs
 Mesmo sem a aplicação publicada, a camada atual do domínio confirmou:
 
 - redirecionamento HTTP para HTTPS;
-- TLS 1.3 e certificado válido para `eva.oceanno.com.br`;
+- TLS 1.3 e certificado válido para `eva.your-domain.com`;
 - método `TRACE` recusado com HTTP 405.
 
 Depois do upload, esses itens e os cabeçalhos da aplicação precisam ser validados em conjunto. O código envia HSTS somente em HTTPS e fora de hosts locais.
@@ -104,7 +104,7 @@ Esse total registra a homologação anterior ao CIE. Para o update de 2 de agost
 4. Executar, a partir de uma máquina que acesse o domínio:
 
 ```powershell
-php bin\verify-deployment.php https://eva.oceanno.com.br
+php bin\verify-deployment.php https://eva.your-domain.com
 ```
 
 5. Exigir zero falhas no verificador e realizar um último login de superadmin e de usuário comum no domínio publicado.

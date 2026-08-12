@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project uses [Semantic Versioning](https://semver.org/).
 
+## [4.0.1] - 2026-08-12
+
+### Fixed
+
+- Replaced installation-specific domain references in Portuguese and English public documentation with the white-label example `eva.your-domain.com`.
+
 ## [4.0.0] - 2026-08-11
 
 ### Added

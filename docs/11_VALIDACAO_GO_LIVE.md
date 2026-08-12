@@ -195,7 +195,7 @@ O primeiro relatório bruto foi gerado antes da correção de um erro de contabi
 6. ~~Executar um smoke test no navegador para a árvore de checkboxes, seleção múltipla, estado do chat após logout e responsividade em desktop e dispositivos móveis.~~ Concluído no ambiente local por HTTPS.
 7. ~~Executar a homologação pré-deploy: cabeçalhos, permissões de arquivos, backup com restauração, diagnóstico, concorrência básica e camada HTTPS do domínio.~~ Concluído. A verificação conjunta no domínio permanece obrigatória depois do upload.
 
-Os critérios pré-deploy foram atendidos. O sistema está aprovado para upload controlado; o parecer online definitivo exige zero falhas em `php bin\verify-deployment.php https://eva.oceanno.com.br` depois da publicação.
+Os critérios pré-deploy foram atendidos. O sistema está aprovado para upload controlado; o parecer online definitivo exige zero falhas em `php bin\verify-deployment.php https://eva.your-domain.com` depois da publicação.
 
 ## Reexecução
 
