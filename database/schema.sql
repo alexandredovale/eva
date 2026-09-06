@@ -44,32 +44,19 @@ CREATE TABLE IF NOT EXISTS evidences (
     public_id VARCHAR(32) NOT NULL,
     document_id BIGINT UNSIGNED NOT NULL,
     node_id BIGINT UNSIGNED NULL,
-    evidence_class ENUM('primary', 'derived') NOT NULL,
+    evidence_class ENUM('primary') NOT NULL,
     evidence_type VARCHAR(60) NOT NULL,
     content LONGTEXT NOT NULL,
-    summary LONGTEXT NULL,
     source_hash CHAR(64) NULL,
-    generation_model VARCHAR(120) NULL,
-    generation_input_hash CHAR(64) NULL,
     status ENUM('pending', 'generated', 'validated', 'rejected') NOT NULL DEFAULT 'pending',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_evidences_document FOREIGN KEY (document_id) REFERENCES documents (id) ON DELETE CASCADE,
     CONSTRAINT fk_evidences_node FOREIGN KEY (node_id) REFERENCES document_nodes (id) ON DELETE SET NULL,
     UNIQUE KEY uq_evidences_public_id (public_id),
-    UNIQUE KEY uq_evidence_generation (node_id, evidence_type, generation_model, generation_input_hash),
     KEY idx_evidences_document_class (document_id, evidence_class),
     KEY idx_evidences_node (node_id),
     KEY idx_evidences_status (status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS evidence_derivations (
-    evidence_id BIGINT UNSIGNED NOT NULL,
-    source_evidence_id BIGINT UNSIGNED NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (evidence_id, source_evidence_id),
-    CONSTRAINT fk_derivations_evidence FOREIGN KEY (evidence_id) REFERENCES evidences (id) ON DELETE CASCADE,
-    CONSTRAINT fk_derivations_source FOREIGN KEY (source_evidence_id) REFERENCES evidences (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS evidence_embeddings (
@@ -88,7 +75,7 @@ CREATE TABLE IF NOT EXISTS processing_jobs (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     public_id VARCHAR(32) NOT NULL,
     document_id BIGINT UNSIGNED NOT NULL,
-    stage ENUM('summaries', 'embeddings') NOT NULL,
+    stage ENUM('embeddings') NOT NULL,
     version_key VARCHAR(255) NOT NULL,
     job_key CHAR(64) NOT NULL,
     status ENUM('queued', 'running', 'completed', 'failed') NOT NULL DEFAULT 'queued',

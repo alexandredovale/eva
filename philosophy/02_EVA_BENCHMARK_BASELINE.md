@@ -21,7 +21,7 @@ Identidades de fornecedores e modelos foram omitidas em conformidade com o princ
 |---|---:|
 | Nós documentais | 472 |
 | Evidências primárias | 371 |
-| Evidências derivadas | 472 |
+| Evidências derivadas (registro histórico; removidas na 6.0.0) | 472 |
 | Embeddings persistentes | 843 |
 | Limite de evidências por consulta na execução histórica | 8 |
 | Limite de interações por consulta | 4 |
@@ -314,7 +314,7 @@ Uma síntese conceitual emergente será considerada válida somente quando seus 
 As execuções registradas em 20 de julho de 2026 antecedem o CIE e não demonstram seus efeitos. Elas permanecem como baseline histórico sem estabilização estatística. A próxima rodada deve repetir as mesmas consultas conceituais e relacionais, preservando corpus, modelos, prompts e condições operacionais, e comparar:
 
 1. Top-k vetorial direto, identificado explicitamente como baseline legado;
-2. fluxo 4.0.2 com população primária completa, κq, primeiro CIE sobre fontes, κe, CIE primário e CIE global;
+2. fluxo 6.0.0 exclusivamente primário, com população completa, κq, primeiro CIE sobre fontes, κe, CIE primário e CIE global;
 3. reranker de referência, quando disponível sob orçamento comparável.
 
 Além das métricas já registradas, a rodada deve capturar a população primária inicial total, κq, cada κe, `μ`, `σ`, `CV` e quantidades de descarte/convergência/núcleo nos estágios inicial, primário e global, fontes após cada corte, tamanho de `Gq`, tamanho final `K(q)`, precision/recall, tokens de contexto, latência local e estabilidade entre paráfrases. O baseline legado deve registrar seu Top-k como variável experimental, nunca como configuração do fluxo atual.

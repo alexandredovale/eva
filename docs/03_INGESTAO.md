@@ -86,7 +86,7 @@ Não geram evidência primária:
 - objetos JSON vazios `{}`;
 - listas JSON vazias `[]`.
 
-A evidência copia literalmente o conteúdo e o hash do nó de origem. Ela recebe classe `primary`, tipo `node_content`, resumo nulo e estado `validated`. Nesse contexto, `validated` confirma a rastreabilidade da extração, não a verdade do conteúdo.
+A evidência copia literalmente o conteúdo e o hash do nó de origem. Ela recebe classe `primary`, tipo `node_content` e estado `validated`. Nesse contexto, `validated` confirma a rastreabilidade da extração, não a verdade do conteúdo.
 
 Identificadores seguem os formatos:
 
@@ -99,12 +99,10 @@ Evidência: EVA-E000001
 
 A ingestão não gera:
 
-- resumos;
-- evidências derivadas;
 - embeddings;
 - interações `simetry` ou `assimetry`.
 
-Essas operações pertencem às etapas cognitivas posteriores.
+Essas operações pertencem à etapa cognitiva posterior.
 
 ## Public regression fixture
 

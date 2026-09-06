@@ -18,7 +18,6 @@ function assertWhiteLabel(bool $condition, string $message): void
 
 $genericImplementations = [
     'EmbeddingProvider.php',
-    'SummaryProvider.php',
     'QueryAnswerProvider.php',
     'CognitiveProviderFactory.php',
 ];
@@ -95,7 +94,7 @@ if (is_string($environmentTemplate)) {
 
 $credentialNames = [];
 
-foreach (['AI_EMBEDDING_API_KEY_ENV', 'AI_SUMMARY_API_KEY_ENV', 'AI_QUERY_API_KEY_ENV'] as $referenceName) {
+foreach (['AI_EMBEDDING_API_KEY_ENV', 'AI_QUERY_API_KEY_ENV'] as $referenceName) {
     $credentialName = $environment[$referenceName] ?? '';
     assertWhiteLabel(
         preg_match('/^[A-Z][A-Z0-9_]*$/', $credentialName) === 1,
@@ -123,7 +122,7 @@ foreach ($credentialNames as $credentialName) {
     }
 }
 
-foreach (['embeddings', 'summaries', 'query_answers'] as $capability) {
+foreach (['embeddings', 'query_answers'] as $capability) {
     $config = $container['ai']['providers'][$capability] ?? null;
     assertWhiteLabel(is_array($config), 'Capacidade sem configuração: ' . $capability);
     assertWhiteLabel(

@@ -18,13 +18,10 @@ final readonly class CognitiveJobPlanner
     {
         $providers = is_array($this->aiConfig['providers'] ?? null) ? $this->aiConfig['providers'] : [];
         $embeddings = is_array($providers['embeddings'] ?? null) ? $providers['embeddings'] : [];
-        $summaries = is_array($providers['summaries'] ?? null) ? $providers['summaries'] : [];
         $embeddingVersion = (string) ($embeddings['provider'] ?? '') . ':' . (string) ($embeddings['model'] ?? '');
-        $summaryVersion = (string) ($summaries['provider'] ?? '') . ':' . (string) ($summaries['model'] ?? '');
 
         return [
-            $this->queue->enqueue($documentId, 'summaries', 'summary:' . $summaryVersion),
-            $this->queue->enqueue($documentId, 'embeddings', 'embedding:' . $embeddingVersion),
+            $this->queue->enqueue($documentId, 'embeddings', 'embedding-primary-v6:' . $embeddingVersion),
         ];
     }
 }

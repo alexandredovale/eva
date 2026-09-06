@@ -15,15 +15,13 @@ The architecture operates in layers:
 ```text
 Question
 ↓
-hierarchical retrieval
+primary retrieval
 ↓
 κq
 ↓
 first source CIE
 ↓
-lineage resolution
-↓
-primary evidence
+selected primary sources
 ↓
 κe
 ↓
@@ -164,9 +162,9 @@ At this initial stage, only the `s ≥ μ + σ` core is forwarded. Convergence i
 
 # 3. From first selection to primary refinement
 
-From the first calculation onward, EVA 4.0.2 works directly with **primary evidence**.
+From the first calculation onward, EVA 6.0.0 works exclusively with **primary evidence**.
 
-The first CIE forwards its upper core or, when that core is empty, its convergence. Derived-summary traceability remains in built memory but does not participate in this first selection.
+The first CIE forwards its upper core or, when that core is empty, its convergence. There is no intermediate summary or lineage-resolution stage.
 
 The forwarded flow is:
 
@@ -738,7 +736,7 @@ This explanation corresponds mainly to the architecture documented in:
 ## Phase 4 — Query
 
 - direct, structural, conceptual, relational, and broad input detection — **completed**;
-- adaptive search across primary and derived evidence — **completed**;
+- adaptive search across validated primary evidence — **completed**;
 - resolution of syntheses down to primary sources — **completed**;
 - Cnode defined as an internal transient conceptual derivation of EVA, without hierarchy or persistence — **completed**;
 - `simetry`/`assimetry` in the same response call — **completed**;
@@ -769,7 +767,7 @@ The five phases and the first architectural upgrade are complete. New phases mus
 - mean, population standard deviation, and coefficient of variation — **completed**;
 - discard, convergence, and core regions — **completed**;
 - deterministic convergence fallback when no core exists — **completed**;
-- complete lineage resolution only after statistical selection, preserving inherited region — **completed**;
+- direct source forwarding after statistical selection, preserving inherited region — **completed**;
 - κe and primary CIE preserved for sources forwarded by the initial core or its convergence fallback — **completed**;
 - deduplicated union of local primary cores and global consolidation CIE — **completed**;
 - removal of `QUERY_MAX_EVIDENCE` from semantic routes and isolation of `QUERY_NON_SEMANTIC_MAX_EVIDENCE` — **completed**;

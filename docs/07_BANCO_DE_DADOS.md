@@ -10,10 +10,9 @@ As cardinalidades, chaves estrangeiras, vínculos lógicos e efeitos de exclusã
 
 - **documents:** fonte, formato, hash, caminho privado e estado.
 - **document_nodes:** árvore normalizada, conteúdo, metadados e caminho estrutural.
-- **evidences:** unidades `primary` ou `derived`, classificadas também por `evidence_type`.
-- **evidence_derivations:** linhagem das evidências derivadas.
+- **evidences:** unidades literais `primary`, classificadas também por `evidence_type`.
 - **evidence_embeddings:** vetores versionados usados para localização.
-- **processing_jobs:** fila das etapas `summaries` e `embeddings`.
+- **processing_jobs:** fila da etapa `embeddings`.
 - **audit_events:** eventos administrativos sanitizados.
 - **users:** identidades normais, hashes de senha e de recuperação e estado de acesso.
 - **user_sessions:** sessões autenticadas com token armazenado somente como hash e expiração.
@@ -35,7 +34,7 @@ Cada módulo persiste seu próprio estado em `modules/.runtime/data/<module-id>/
 
 Nós com conteúdo direto geram evidências `primary` do tipo `node_content`. Elas mantêm conteúdo e hash idênticos à origem e recebem identificador público `EVA-E`.
 
-Sínteses geram evidências `derived` do tipo `node_summary`. `generation_model` e `generation_input_hash` versionam tecnicamente o conteúdo gerado. `evidence_derivations` conecta cada síntese ao conteúdo próprio e às sínteses filhas que a originaram.
+Desde a versão 6.0.0, resumos derivados e sua tabela de linhagem não integram o esquema operacional.
 
 ## Embeddings
 
@@ -54,7 +53,7 @@ O esquema não armazena confiança, pontuação, similaridade cognitiva, intensi
 ## Regras
 
 - Identificadores públicos são estáveis e diferentes das chaves internas.
-- Conteúdo original nunca é substituído por síntese.
+- Conteúdo original nunca é substituído por conteúdo gerado.
 - A fonte permanece fora da pasta pública.
 - Exclusão de documento remove seus registros dependentes; o arquivo exige tratamento explícito.
 - Operações que alteram árvore e evidências usam transação.
@@ -62,4 +61,4 @@ O esquema não armazena confiança, pontuação, similaridade cognitiva, intensi
 - O perfil de respostas de um projeto orienta a geração somente quando esse projeto é selecionado explicitamente e não substitui as regras documentais do sistema.
 - Eventos de módulos são sanitizados, rejeitam campos sensíveis e não autorizam escrita de volta no núcleo documental.
 
-O esquema consolidado está em `database/schema.sql` e cria todas as 14 tabelas atuais, inclusive `module_events`. Instalações novas importam somente esse arquivo. Instalações existentes aplicam em ordem todas as migrations ainda ausentes; a migration `010` continua sendo o caminho de upgrade para bancos anteriores à consolidação da caixa postal modular.
+O esquema consolidado está em `database/schema.sql`. Instalações novas importam somente esse arquivo. Instalações 4.x executam manualmente `database/migrations/20260906_011_remove_derived_summaries.sql` depois de backup completo e com os workers interrompidos.

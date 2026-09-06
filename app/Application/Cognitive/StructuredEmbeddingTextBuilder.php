@@ -14,7 +14,6 @@ final class StructuredEmbeddingTextBuilder
      *   evidence_class: string,
      *   evidence_type: string,
      *   content: string,
-     *   summary: ?string,
      *   document_title: string,
      *   node_type: string,
      *   node_title: string,
@@ -24,9 +23,7 @@ final class StructuredEmbeddingTextBuilder
      */
     public function build(array $record): StructuredEmbeddingUnit
     {
-        $organizedContent = is_string($record['summary']) && trim($record['summary']) !== ''
-            ? $record['summary']
-            : $record['content'];
+        $organizedContent = $record['content'];
 
         if (trim($organizedContent) === '') {
             throw new CognitiveBuildException('A evidência não possui conteúdo semântico organizado.');

@@ -337,22 +337,6 @@ final class DocumentContextRetriever
     {
         $queryVector = $this->queryVector($input);
 
-        /*
-         * Modo alternativo — primeira consulta sobre resumos hierárquicos.
-         * Para reativá-lo, substitua na consulta abaixo as condições de evidência primária por:
-         *
-         * AND e.evidence_class = 'derived'
-         * AND e.evidence_type = 'node_summary'
-         * AND e.status IN ('generated', 'validated')
-         * AND e.id = (
-         *     SELECT MAX(latest_summary.id)
-         *       FROM evidences latest_summary
-         *      WHERE latest_summary.node_id = e.node_id
-         *        AND latest_summary.evidence_class = 'derived'
-         *        AND latest_summary.evidence_type = 'node_summary'
-         *        AND latest_summary.status IN ('generated', 'validated')
-         * )
-         */
         $statement = $this->database->prepare(
             "SELECT e.id, e.public_id, e.evidence_class, e.evidence_type, ee.vector_data
                FROM evidences e
@@ -439,15 +423,11 @@ final class DocumentContextRetriever
         $matches = array_map(
             static fn (ContextCandidate $candidate): array => [
                 'id' => $candidate->evidenceId,
-                'evidence_class' => $candidate->evidenceClass,
                 'region' => $candidateRegions[$candidate->evidenceId] ?? 'convergence',
             ],
             $firstStageCandidates
         );
-        $primaryRegions = $this->resolvePrimaryEvidenceRegions(
-            $documentId,
-            $matches
-        );
+        $primaryRegions = array_column($matches, 'region', 'id');
         [$primaryIds, $selectionByInternalId, $primaryAnalyses] = $this->analyzePrimaryEvidence(
             $documentId,
             $queryVector,
@@ -491,31 +471,6 @@ final class DocumentContextRetriever
         }
 
         return $this->queryVectorCache[$cacheKey] = $queryVector->vector;
-    }
-
-    /**
-     * @param list<array{id: int, evidence_class: string, region: 'core'|'convergence'}> $matches
-     * @return array<int, 'core'|'convergence'>
-     */
-    private function resolvePrimaryEvidenceRegions(
-        int $documentId,
-        array $matches
-    ): array {
-        $regions = [];
-
-        foreach ($matches as $match) {
-            $sources = $match['evidence_class'] === 'primary'
-                ? [$match['id']]
-                : $this->primarySourcesForEvidence($documentId, $match['id']);
-
-            foreach ($sources as $sourceId) {
-                if (($regions[$sourceId] ?? null) !== 'core') {
-                    $regions[$sourceId] = $match['region'];
-                }
-            }
-        }
-
-        return $regions;
     }
 
     /**
@@ -621,46 +576,6 @@ final class DocumentContextRetriever
         }
 
         return [array_values($primaryIds), $selection, $analyses];
-    }
-
-    /** @return list<int> */
-    private function primarySourcesForEvidence(int $documentId, int $evidenceId): array
-    {
-        $statement = $this->database->prepare(
-            'SELECT source.id, source.evidence_class
-               FROM evidence_derivations derivation
-               JOIN evidences source ON source.id = derivation.source_evidence_id
-              WHERE derivation.evidence_id = :evidence_id
-                AND source.document_id = :document_id
-                AND source.status IN (\'generated\', \'validated\')
-              ORDER BY source.id ASC'
-        );
-        $queue = [$evidenceId];
-        $visited = [];
-        $primaryIds = [];
-
-        while ($queue !== []) {
-            $currentId = array_shift($queue);
-
-            if (isset($visited[$currentId])) {
-                continue;
-            }
-
-            $visited[$currentId] = true;
-            $statement->execute(['evidence_id' => $currentId, 'document_id' => $documentId]);
-
-            foreach ($statement->fetchAll() as $source) {
-                $sourceId = (int) $source['id'];
-
-                if ($source['evidence_class'] === 'primary') {
-                    $primaryIds[$sourceId] = $sourceId;
-                } else {
-                    $queue[] = $sourceId;
-                }
-            }
-        }
-
-        return array_values($primaryIds);
     }
 
     /** @param list<int> $ids @return list<RetrievedEvidence> */

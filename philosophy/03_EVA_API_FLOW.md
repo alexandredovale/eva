@@ -53,55 +53,20 @@ POST /api/documents/{id}/process            <- API interna do EVA
            v
 [FILA DE PROCESSAMENTO]
            |
-           +--> trabalho: summaries
-           |
            +--> trabalho: embeddings
 
        ATÉ AQUI: AINDA NÃO HOUVE CHAMADA EXTERNA
 ```
 
-## 2. Sínteses hierárquicas
-
-```text
-[WORKER COGNITIVO]
-        |
-        v
-┌─────────────────────────────────────────────────────────────┐
-│ ETAPA A — SÍNTESES HIERÁRQUICAS                             │
-└─────────────────────────────────────────────────────────────┘
-        |
-        v
-[SELECIONA UMA UNIDADE HIERÁRQUICA COMPLETA]
-        |
-        v
-╔═════════════════════════════════════════════════════════════╗
-║ API EXTERNA 1 — PROVEDOR DE SÍNTESES                        ║
-║                                                             ║
-║ Uma chamada para cada nova unidade hierárquica.             ║
-║ Podem ocorrer muitas chamadas para um documento grande.     ║
-╚═════════════════════════════════════════════════════════════╝
-        |
-        v
-[EVIDÊNCIA DERIVADA]
-        |
-        +--> resumo
-        +--> modelo utilizado
-        +--> hash do input
-        +--> linhagem até as evidências de origem
-        |
-        v
-[BANCO DE DADOS]
-```
-
-## 3. Embeddings do acervo
+## 2. Embeddings do acervo
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
-│ ETAPA B — EMBEDDINGS DO ACERVO                              │
+│ ETAPA ÚNICA — EMBEDDINGS DO ACERVO                          │
 └─────────────────────────────────────────────────────────────┘
         |
         v
-[CARREGA EVIDÊNCIAS PRIMÁRIAS E DERIVADAS]
+[CARREGA EVIDÊNCIAS PRIMÁRIAS]
         |
         v
 [MONTA UNIDADES SEMÂNTICAS ESTRUTURADAS]
@@ -109,11 +74,11 @@ POST /api/documents/{id}/process            <- API interna do EVA
 - caminho estrutural
 - tipo e título do nó
 - referência à fonte
-- conteúdo ou síntese
+- conteúdo literal
         |
         v
 ╔═════════════════════════════════════════════════════════════╗
-║ API EXTERNA 2 — PROVEDOR DE EMBEDDINGS                      ║
+║ API EXTERNA 1 — PROVEDOR DE EMBEDDINGS                      ║
 ║                                                             ║
 ║ Envio em lotes. Padrão atual: até 64 unidades por chamada.  ║
 ║ Documentos maiores podem exigir várias chamadas.            ║
@@ -126,7 +91,7 @@ POST /api/documents/{id}/process            <- API interna do EVA
 [DOCUMENTO PRONTO PARA CONSULTA SEMÂNTICA]
 ```
 
-## 4. Input e resposta ao usuário
+## 3. Input e resposta ao usuário
 
 ```text
 ===============================================================================
@@ -236,7 +201,7 @@ POST /api/query                              <- API interna do EVA
                                     - não persiste memória documental
 ```
 
-## 5. Consulta multidisciplinar em projeto
+## 4. Consulta multidisciplinar em projeto
 
 ```text
 [PROJETO COM DOCUMENTOS ESPECIALIZADOS]
@@ -301,15 +266,14 @@ A confiabilidade desse fluxo não é uma estimativa de verdade. Ela decorre da i
 
 Adicionar documentos ao projeto aumenta o universo de candidatos e de núcleos locais. O CIE global consolida essa população sem limite numérico configurado; ainda assim, uma fronteira estatística não garante cobertura de todas as disciplinas em uma única consulta e não cria conexão persistente entre as obras.
 
-## 6. Quantidade de chamadas por rota
+## 5. Quantidade de chamadas por rota
 
 ```text
 UPLOAD
   └── 0 chamadas externas
 
 PROCESSAMENTO DO DOCUMENTO
-  ├── N chamadas para sínteses
-  └── M chamadas em lotes para embeddings do acervo
+  └── M chamadas em lotes para embeddings das evidências primárias
 
 CONSULTA DIRETA / ESTRUTURAL / AMPLA
   ├── 0 chamadas de embedding
@@ -327,7 +291,7 @@ CONSULTA SEM EVIDÊNCIA
 
 As quantidades acima descrevem o caminho nominal. Uma tentativa do `QueryAnswerProvider` admite no máximo uma regeneração compacta quando o provedor termina com `finish_reason=length`. Separadamente, `DocumentQueryService` admite no máximo três tentativas totais de resposta validada com o mesmo contexto disponível; saídas rejeitadas são descartadas integralmente e não chegam ao transcript.
 
-## 7. Fluxo resumido
+## 6. Fluxo resumido
 
 ```text
 DOCUMENTO
@@ -337,8 +301,6 @@ PARSER LOCAL
    |
    v
 EVIDÊNCIAS PRIMÁRIAS
-   |
-   +--> API DE SÍNTESES --> EVIDÊNCIAS DERIVADAS
    |
    +--> API DE EMBEDDINGS --> VETORES PERSISTIDOS
                                   |
@@ -369,7 +331,7 @@ INPUT DO USUÁRIO                  |
                       RESPOSTA
 ```
 
-## 8. Regra de persistência da consulta
+## 7. Regra de persistência da consulta
 
 ```text
 NÃO SÃO PERSISTIDOS COMO MEMÓRIA DOCUMENTAL:
@@ -383,7 +345,7 @@ NÃO SÃO PERSISTIDOS COMO MEMÓRIA DOCUMENTAL:
 - histórico conversacional.
 ```
 
-Essa regra não significa ausência absoluta de observabilidade. `audit_events` mantém metadados sanitizados da consulta concluída, inclusive `simetry_count` e `assimetry_count`, sem pares ou fragmentos. Quando existe módulo ativo assinante, `module_events`, incluída no schema consolidado, pode receber o envelope permitido de `interaction.completed`, com input atual, input contextual, resposta validada, referências públicas de evidência e limitações; cada módulo governa seu próprio estado privado. Bancos legados usam a migration `20260803_010_module_events.sql`. Ausência da tabela em uma instalação incompleta ou falha modular gera diagnóstico seguro, mas não derruba a resposta já validada. Nenhum desses registros altera documentos, evidências, derivações ou embeddings.
+Essa regra não significa ausência absoluta de observabilidade. `audit_events` mantém metadados sanitizados da consulta concluída, inclusive `simetry_count` e `assimetry_count`, sem pares ou fragmentos. Quando existe módulo ativo assinante, `module_events`, incluída no schema consolidado, pode receber o envelope permitido de `interaction.completed`, com input atual, input contextual, resposta validada, referências públicas de evidência e limitações; cada módulo governa seu próprio estado privado. Bancos legados usam a migration `20260803_010_module_events.sql`. Ausência da tabela em uma instalação incompleta ou falha modular gera diagnóstico seguro, mas não derruba a resposta já validada. Nenhum desses registros altera documentos, evidências primárias ou embeddings.
 
 As relações físicas e lógicas que sustentam essa fronteira estão mapeadas em [`docs/17_RELACIONAMENTO_BANCO_DADOS.md`](../docs/17_RELACIONAMENTO_BANCO_DADOS.md).
 

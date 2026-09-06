@@ -10,8 +10,7 @@ final readonly class EmbeddingBuildResult
         public int $eligibleUnits,
         public int $createdEmbeddings,
         public int $reusedEmbeddings,
-        public int $inputTokens,
-        public int $representedByDerived = 0
+        public int $inputTokens
     ) {
     }
 
@@ -23,7 +22,6 @@ final readonly class EmbeddingBuildResult
             'created_embeddings' => $this->createdEmbeddings,
             'reused_embeddings' => $this->reusedEmbeddings,
             'input_tokens' => $this->inputTokens,
-            'represented_by_derived' => $this->representedByDerived,
         ];
     }
 }

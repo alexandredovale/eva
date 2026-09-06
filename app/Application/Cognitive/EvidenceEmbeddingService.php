@@ -35,13 +35,11 @@ final readonly class EvidenceEmbeddingService
         $records = $this->loadEligibleEvidence($documentId);
         $unitsByPublicId = [];
         $databaseIds = [];
-        $recordsByPublicId = [];
 
         foreach ($records as $record) {
             $unit = $this->textBuilder->build($record);
             $unitsByPublicId[$unit->evidencePublicId] = $unit;
             $databaseIds[$unit->evidencePublicId] = (int) $record['id'];
-            $recordsByPublicId[$unit->evidencePublicId] = $record;
         }
 
         $pendingUnits = [];
@@ -70,15 +68,10 @@ final readonly class EvidenceEmbeddingService
             $pendingUnits[] = $unit;
         }
 
-        [$pendingUnits, $representedByDerived] = $this->filterIncompatiblePrimaryUnits(
-            $documentId,
-            $pendingUnits,
-            $unitsByPublicId,
-            $recordsByPublicId
-        );
+        $this->guardEmbeddingUnits($pendingUnits);
 
         if ($pendingUnits === []) {
-            return new EmbeddingBuildResult(count($unitsByPublicId), 0, $reused, 0, $representedByDerived);
+            return new EmbeddingBuildResult(count($unitsByPublicId), 0, $reused, 0);
         }
 
         $created = 0;
@@ -100,92 +93,27 @@ final readonly class EvidenceEmbeddingService
             count($unitsByPublicId),
             $created,
             $reused + count($pendingUnits) - $created,
-            $inputTokens,
-            $representedByDerived
+            $inputTokens
         );
     }
 
-    /**
-     * @param list<StructuredEmbeddingUnit> $pendingUnits
-     * @param array<string, StructuredEmbeddingUnit> $unitsByPublicId
-     * @param array<string, array<string, mixed>> $recordsByPublicId
-     * @return array{list<StructuredEmbeddingUnit>, int}
-     */
-    private function filterIncompatiblePrimaryUnits(
-        int $documentId,
-        array $pendingUnits,
-        array $unitsByPublicId,
-        array $recordsByPublicId
-    ): array {
+    /** @param list<StructuredEmbeddingUnit> $pendingUnits */
+    private function guardEmbeddingUnits(array $pendingUnits): void
+    {
         $guard = new EmbeddingInputGuard($this->maxInputTokens);
-        $derivedBySourceId = $this->loadDerivedRepresentations($documentId);
-        $compatibleUnits = [];
-        $representedByDerived = 0;
 
         foreach ($pendingUnits as $unit) {
             if ($guard->isCompatible($unit)) {
-                $compatibleUnits[] = $unit;
                 continue;
             }
 
-            $record = $recordsByPublicId[$unit->evidencePublicId] ?? null;
-
-            if (!is_array($record) || ($record['evidence_class'] ?? null) !== 'primary') {
-                throw new CognitiveBuildException(sprintf(
-                    'A unidade de embedding %s excede o orçamento seguro estimado (%d tokens; limite operacional %d) e exige reorganização estrutural.',
-                    $unit->evidencePublicId,
-                    $guard->estimateTokens($unit->text),
-                    $guard->safeTokenLimit()
-                ));
-            }
-
-            $hasCompatibleDerived = false;
-
-            foreach ($derivedBySourceId[(int) $record['id']] ?? [] as $derivedPublicId) {
-                $derivedUnit = $unitsByPublicId[$derivedPublicId] ?? null;
-
-                if ($derivedUnit instanceof StructuredEmbeddingUnit && $guard->isCompatible($derivedUnit)) {
-                    $hasCompatibleDerived = true;
-                    break;
-                }
-            }
-
-            if (!$hasCompatibleDerived) {
-                throw new CognitiveBuildException(sprintf(
-                    'A evidência primária %s excede o orçamento seguro de embedding (%d tokens estimados; limite operacional %d), não possui síntese derivada compatível e exige subdivisão estrutural real.',
-                    $unit->evidencePublicId,
-                    $guard->estimateTokens($unit->text),
-                    $guard->safeTokenLimit()
-                ));
-            }
-
-            $representedByDerived++;
+            throw new CognitiveBuildException(sprintf(
+                'A evidência primária %s excede o orçamento seguro de embedding (%d tokens estimados; limite operacional %d) e exige subdivisão estrutural real.',
+                $unit->evidencePublicId,
+                $guard->estimateTokens($unit->text),
+                $guard->safeTokenLimit()
+            ));
         }
-
-        return [$compatibleUnits, $representedByDerived];
-    }
-
-    /** @return array<int, list<string>> */
-    private function loadDerivedRepresentations(int $documentId): array
-    {
-        $statement = $this->database->prepare(
-            "SELECT ed.source_evidence_id, derived.public_id
-               FROM evidence_derivations ed
-               JOIN evidences derived ON derived.id = ed.evidence_id
-              WHERE derived.document_id = :document_id
-                AND derived.evidence_class = 'derived'
-                AND derived.evidence_type = 'node_summary'
-                AND derived.status IN ('generated', 'validated')
-              ORDER BY derived.id DESC"
-        );
-        $statement->execute(['document_id' => $documentId]);
-        $derivedBySourceId = [];
-
-        foreach ($statement->fetchAll() as $record) {
-            $derivedBySourceId[(int) $record['source_evidence_id']][] = (string) $record['public_id'];
-        }
-
-        return $derivedBySourceId;
     }
 
     /**
@@ -267,15 +195,16 @@ final readonly class EvidenceEmbeddingService
     private function loadEligibleEvidence(int $documentId): array
     {
         $statement = $this->database->prepare(
-            "SELECT e.id, e.public_id, e.evidence_class, e.evidence_type, e.content, e.summary,
+            "SELECT e.id, e.public_id, e.evidence_class, e.evidence_type, e.content,
                     d.title AS document_title, n.node_type, n.title AS node_title,
                     n.structural_path, n.source_reference
                FROM evidences e
                JOIN documents d ON d.id = e.document_id
                JOIN document_nodes n ON n.id = e.node_id
               WHERE e.document_id = :document_id
-                AND e.evidence_class IN ('primary', 'derived')
-                AND e.status IN ('generated', 'validated')
+                AND e.evidence_class = 'primary'
+                AND e.evidence_type = 'node_content'
+                AND e.status = 'validated'
               ORDER BY n.depth ASC, n.sort_order ASC, e.id ASC"
         );
         $statement->execute(['document_id' => $documentId]);

@@ -15,7 +15,7 @@ final readonly class ContextCandidate
     ) {
         if ($this->evidenceId < 1
             || trim($this->publicId) === ''
-            || !in_array($this->evidenceClass, ['primary', 'derived'], true)
+            || $this->evidenceClass !== 'primary'
             || trim($this->evidenceType) === ''
             || !is_finite($this->similarity)) {
             throw new QueryException('Um candidato do contexto estatístico é inválido.');

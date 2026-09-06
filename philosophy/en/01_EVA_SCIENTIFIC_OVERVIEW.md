@@ -2,13 +2,13 @@
 
 ## Abstract
 
-The Evidence Algorithm (EVA) is a provider-neutral architecture for verifiable documentary memory. It parses structured sources into a normalized hierarchy, persists literal primary evidence, produces traceable hierarchical derived evidence, and embeds complete semantic units. During a semantic query, it scores the complete eligible primary population, derives the query-local κq boundary, and applies a first source CIE. Only its upper core—or convergence when that core is empty—passes through κe and primary CIE. A global CIE consolidates the deduplicated union of local primary nuclei. Its global nucleus—or global convergence when that nucleus is empty—forms the semantic context without a configured Top-k or evidence count. Exact literal anchors remain protected. The final documentary basis retains only sources incorporated into the answer with visible citations.
+The Evidence Algorithm (EVA) is a provider-neutral architecture for verifiable documentary memory. It parses structured sources into a normalized hierarchy, persists literal primary evidence, and embeds complete source units. During a semantic query, it scores the complete eligible primary population, derives the query-local κq boundary, and applies a first source CIE. Only its upper core—or convergence when that core is empty—passes through κe and primary CIE. A global CIE consolidates the deduplicated union of local primary nuclei. Its global nucleus—or global convergence when that nucleus is empty—forms the semantic context without a configured Top-k or evidence count. Exact literal anchors remain protected. The final documentary basis retains only sources incorporated into the answer with visible citations.
 
 EVA treats a Cnode as the transient understanding of an explicit interaction between cited evidence. The interaction is never stored as a graph edge, score, vector, or permanent cognitive entity. Its two internal forms are `simetry`, for an explicit reciprocal interaction, and `assimetry`, for an explicit directed interaction. Neither form implies truth, importance, superiority, confidence, intensity, or inferred causality.
 
 ## Research problem
 
-Documentary retrieval systems frequently lose provenance through arbitrary chunking, conflate generated summaries with source material, or materialize semantic relationships before a user request establishes their relevance. EVA investigates whether documentary hierarchy, evidence-class separation, explicit lineage, and transient interaction analysis can improve process auditability without creating redundant persistent cognitive structures.
+Documentary retrieval systems frequently lose provenance through arbitrary chunking, compress source material before retrieval, or materialize semantic relationships before a user request establishes their relevance. EVA investigates whether documentary hierarchy, direct primary-evidence retrieval, and transient interaction analysis can improve process auditability without creating redundant persistent cognitive structures.
 
 ## Architecture under study
 
@@ -17,8 +17,7 @@ Structured source
   → deterministic parser
   → normalized documentary tree
   → literal primary evidence
-  → hierarchical derived summaries with lineage
-  → embeddings of complete organized units
+  → embeddings of complete source units
 
 User query
   → deterministic route detection
@@ -30,23 +29,23 @@ User query
   → local validation of citations and interactions
 ```
 
-The persistent state contains documents, nodes, evidence, derivations, and embeddings. Similarities and CIE analyses are transient. Interactions are query-scoped. Previous chat turns can resolve conversational references but never become documentary evidence.
+The persistent state contains documents, nodes, primary evidence, and embeddings. Similarities and CIE analyses are transient. Interactions are query-scoped. Previous chat turns can resolve conversational references but never become documentary evidence.
 
 ## Falsifiable hypotheses
 
 The architecture motivates, but does not by itself prove, the following hypotheses:
 
 1. Structure-preserving evidence improves provenance compared with fixed-size chunks.
-2. Explicit separation of primary and derived evidence improves auditability.
-3. Derived retrieval resolved to primary sources reduces unsupported citation behavior.
+2. Direct retrieval over primary evidence reduces compression loss while preserving auditability.
+3. Primary-only source selection reduces unsupported citation behavior.
 4. Query-scoped interactions can provide relational explanation without persistent graph expansion.
 5. Deterministic routing and evidence gating can reduce unnecessary external calls.
-6. Versioned reuse can amortize summary and embedding construction across repeated queries.
+6. Versioned reuse can amortize embedding construction across repeated queries.
 7. Distribution-based context stabilization can reduce retrieval noise and improve stability without an AI reranker.
 
 ## Existing observations
 
-The current implementation and offline tests verify structural preservation, literal persistence, complete lineage resolution, deterministic κq/κe boundaries, hierarchical/primary/global CIE regions, query-local context composition, version reuse, bounded provider calls, analytical citation coverage, rejection of citation-only inventories, transient interaction validation, partial coverage reporting, and no-generation behavior when evidence is absent. On August 8, 2026, a directed seven-work query produced 350 local primary-nucleus candidates, a 63-source global nucleus, and a validated answer citing four sources. This is a functional observation, not proof of retrieval superiority.
+The current implementation and offline tests verify structural preservation, literal persistence, direct primary-evidence indexing, deterministic κq/κe boundaries, source/primary/global CIE regions, query-local context composition, version reuse, bounded provider calls, analytical citation coverage, rejection of citation-only inventories, transient interaction validation, partial coverage reporting, and no-generation behavior when evidence is absent. On August 8, 2026, a directed seven-work query produced 350 local primary-nucleus candidates, a 63-source global nucleus, and a validated answer citing four sources. This is a functional observation, not proof of retrieval superiority.
 
 The recorded operational baseline is intentionally small. It demonstrates observable behavior and exposes failure modes, but it does not establish statistical superiority. Rejected generated outputs can still consume tokens before local validation; complete semantic units can produce large prompts; and provider compliance remains an empirical factor.
 
@@ -69,7 +68,7 @@ Minimum measures include:
 
 ## Epistemic boundary
 
-EVA verifies that a response is traceable to supplied documentary evidence. It does not establish that the source itself is universally true. Validation is therefore process validation: known sources, literal content, explicit lineage, visible citations, analytical incorporation of every retained source, and locally reconstructible interactions. Strict semantic discrimination between thematic convergence and reciprocal `simetry` remains a future calibration boundary.
+EVA verifies that a response is traceable to supplied documentary evidence. It does not establish that the source itself is universally true. Validation is therefore process validation: known sources, literal content, visible citations, analytical incorporation of every retained source, and locally reconstructible interactions. Strict semantic discrimination between thematic convergence and reciprocal `simetry` remains a future calibration boundary.
 
 ## Complete English record
 

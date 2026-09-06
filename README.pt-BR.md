@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Versão atual:** `4.0.2`
+**Versão atual:** `6.0.0`
 
-**Destaque da versão:** o EVA 4.0.2 torna a recuperação semântica orientada às fontes: a primeira distribuição de similaridade é calculada diretamente sobre evidências primárias e encaminha somente o núcleo superior, com convergência como fallback. A resposta também separa cada viés de análise em novo parágrafo.
+**Destaque da versão:** o EVA 6.0.0 remove os resumos hierárquicos da construção, persistência, vetorização, fila e recuperação. O fluxo operacional passa a trabalhar exclusivamente com evidências primárias literais da ingestão à validação da resposta.
 
 O EVA é uma plataforma para construir, organizar e consultar memória cognitiva documental verificável. O EVA (Evidence Algorithm) transforma documentos estruturados em evidências hierárquicas. Cnode é a compreensão transitória de uma interação explícita entre essas evidências durante a consulta, não uma entidade persistente.
 
@@ -19,8 +19,8 @@ A base atual contém:
 - endpoint de diagnóstico e upload documental;
 - parsers funcionais de Markdown, JSON e XML com árvore normalizada comum;
 - persistência transacional da fonte, da árvore e das evidências primárias;
-- adaptadores substituíveis por capacidade: embeddings, sínteses e respostas;
-- resumos ascendentes rastreáveis e embeddings contextuais versionados;
+- adaptadores substituíveis por capacidade: embeddings e respostas;
+- embeddings contextuais versionados das evidências primárias;
 - recuperação vetorial transitória orientada diretamente às evidências primárias;
 - Context Intelligence Engine determinístico entre o Retriever e as camadas cognitivas;
 - consulta adaptativa que produz interações `simetry`/`assimetry` validadas por fragmentos literais;
@@ -84,13 +84,11 @@ Sucesso retorna HTTP `201`. Arquivos ausentes, incompletos, acima do limite, com
 
 `DocumentIngestionService` seleciona o parser, armazena a fonte fora da pasta pública, persiste a árvore e gera evidências primárias literais. O limite padrão é 10 MB e pode ser ajustado por `DOCUMENT_MAX_BYTES`.
 
-A ingestão não produz resumos ou embeddings. A construção cognitiva é uma etapa posterior e explícita.
+A ingestão não produz embeddings. A construção cognitiva é uma etapa posterior e explícita.
 
 ## Construção cognitiva
 
-`HierarchicalSummaryService` percorre a árvore de baixo para cima. Cada resumo derivado registra modelo, hash da entrada estrutural e evidências de origem. Nós sem conteúdo próprio nem descendente permanecem sem síntese.
-
-`EvidenceEmbeddingService` vetoriza evidências primárias e resumos derivados com título do documento, caminho, nó e conteúdo organizado. Antes de chamar o provedor, todas as unidades pendentes são validadas contra `AI_EMBEDDING_MAX_INPUT_TOKENS`, com margem preventiva de 10%. Lotes técnicos agrupam unidades completas e nunca fragmentam nenhuma delas. Na recuperação orientada às fontes da versão 4.0.2, somente primárias compatíveis e efetivamente vetorizadas participam da primeira consulta; unidades maiores exigem subdivisão estrutural real para ingressar nessa população. Uma versão já existente para o mesmo modelo e hash é reutilizada antes de chamar o provedor.
+`EvidenceEmbeddingService` vetoriza exclusivamente evidências primárias com título do documento, caminho, nó e conteúdo literal organizado. Antes de chamar o provedor, todas as unidades pendentes são validadas contra `AI_EMBEDDING_MAX_INPUT_TOKENS`, com margem preventiva de 10%. Lotes técnicos agrupam unidades completas e nunca fragmentam nenhuma delas. Unidades maiores exigem subdivisão estrutural real para ingressar na população semântica. Uma versão já existente para o mesmo modelo e hash é reutilizada antes de chamar o provedor.
 
 Na consulta conceitual ou relacional, `DocumentContextRetriever` compara o embedding transitório do input com todas as evidências primárias `primary:node_content` elegíveis. A distribuição determina a fronteira query-local κq; quando não há ruptura identificável, a população completa segue ao primeiro CIE. Esse estágio calcula média, desvio padrão populacional e CV e encaminha somente o núcleo superior (`s ≥ μ + σ`), usando a convergência (`μ ≤ s < μ + σ`) apenas quando o núcleo estiver vazio. Os cálculos primários posteriores, a consolidação entre documentos e as validações permanecem intactos. Similaridades e estatísticas são transitórias.
 
@@ -112,11 +110,10 @@ Quando dois projetos marcados compartilham a mesma obra, o ID documental é dedu
 A construção com provedores reais pode ser iniciada pela linha de comando ou pela interface administrativa e sempre exige confirmação explícita:
 
 ```powershell
-php bin/build-cognitive.php <document-id> --stage=summaries --live
 php bin/build-cognitive.php <document-id> --stage=embeddings --live
 ```
 
-Além de `--live`, `AI_LIVE_ENABLED=true` deve estar configurado. Resumos criam no máximo 5 novas versões por execução por padrão (`AI_MAX_NEW_SUMMARIES_PER_RUN`). O limite pode ser reduzido na chamada com `--summary-limit=N`.
+Além de `--live`, `AI_LIVE_ENABLED=true` deve estar configurado.
 
 ## Consulta documental
 
@@ -162,7 +159,7 @@ As tabelas dessa camada estão na migração `database/migrations/20260721_008_u
 
 O mapa completo de cardinalidades, chaves estrangeiras, tabelas de junção, relações lógicas e cascatas está em [Relacionamento do banco de dados](docs/17_RELACIONAMENTO_BANCO_DADOS.md).
 
-O superadmin também pode excluir uma obra ou um projeto mediante confirmação digitada. Excluir uma obra remove em cascata seus nós, evidências, derivações, embeddings, trabalhos de processamento, permissões e vínculos com projetos. Excluir um projeto remove igualmente todas as obras nele contidas, mesmo que alguma também esteja associada a outro projeto, e depois remove suas fontes do armazenamento privado.
+O superadmin também pode excluir uma obra ou um projeto mediante confirmação digitada. Excluir uma obra remove em cascata seus nós, evidências, embeddings, trabalhos de processamento, permissões e vínculos com projetos. Excluir um projeto remove igualmente todas as obras nele contidas, mesmo que alguma também esteja associada a outro projeto, e depois remove suas fontes do armazenamento privado.
 
 Para preservar uma obra compartilhada antes de excluir um projeto, o superadmin deve editar esse projeto, desmarcar a obra, salvar o projeto sem o vínculo e somente então excluí-lo. O modal de exclusão identifica as obras compartilhadas e apresenta essa orientação antes da confirmação destrutiva.
 
@@ -170,7 +167,7 @@ No XAMPP com o projeto dentro de `htdocs`, a raiz `http://localhost/eva.your-dom
 
 Diretivas globais do Apache, como `TraceEnable Off` e `ServerTokens Prod`, devem ser configuradas no servidor quando o ambiente deixar de ser exclusivamente local; elas não são permitidas em `.htaccess`.
 
-O produto permite enviar e listar documentos, agendar sínteses e embeddings, consultar evidências, acompanhar trabalhos, retomar falhas permitidas e inspecionar auditoria e métricas. Fornecedor, endpoint, modelo e variável de credencial são definidos exclusivamente no `.env` e não aparecem na interface ou nas respostas administrativas.
+O produto permite enviar e listar documentos, agendar embeddings primários, consultar evidências, acompanhar trabalhos, retomar falhas permitidas e inspecionar auditoria e métricas. Fornecedor, endpoint, modelo e variável de credencial são definidos exclusivamente no `.env` e não aparecem na interface ou nas respostas administrativas.
 
 Cada execução do worker processa no máximo um trabalho:
 

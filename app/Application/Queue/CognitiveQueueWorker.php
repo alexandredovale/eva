@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Eva\Application\Queue;
 
 use Eva\Application\Cognitive\EvidenceEmbeddingService;
-use Eva\Application\Cognitive\HierarchicalSummaryService;
 use Eva\Infrastructure\Ai\CognitiveProviderFactory;
 use Eva\Infrastructure\Audit\AuditRecorder;
 use Eva\Infrastructure\Logging\FileLogger;
@@ -76,15 +75,6 @@ final readonly class CognitiveQueueWorker
     /** @return array<string, int|bool> */
     private function execute(ProcessingJob $job): array
     {
-        if ($job->stage === 'summaries') {
-            return (new HierarchicalSummaryService($this->database, $this->providers->summaries()))
-                ->buildForDocument(
-                    $job->documentId,
-                    (int) ($this->aiConfig['max_new_summaries_per_run'] ?? 5)
-                )
-                ->toArray();
-        }
-
         if ($job->stage === 'embeddings') {
             $embeddingConfig = $this->aiConfig['providers']['embeddings'] ?? [];
 

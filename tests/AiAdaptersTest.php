@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use Eva\Application\Cognitive\StructuredEmbeddingUnit;
-use Eva\Application\Cognitive\StructuredSummaryUnit;
 use Eva\Application\Query\InputType;
 use Eva\Application\Query\InputUnderstanding;
 use Eva\Application\Query\QueryContext;
@@ -11,7 +10,6 @@ use Eva\Application\Query\QueryException;
 use Eva\Application\Query\RetrievedEvidence;
 use Eva\Infrastructure\Ai\AiProviderException;
 use Eva\Infrastructure\Ai\CognitiveProviderFactory;
-use Eva\Infrastructure\Ai\SummaryProvider;
 use Eva\Infrastructure\Ai\QueryAnswerProvider;
 use Eva\Infrastructure\Ai\JsonHttpClientInterface;
 use Eva\Infrastructure\Ai\EmbeddingProvider;
@@ -98,156 +96,6 @@ assertAiAdapter(count($embeddingResult->vectors) === 2, 'Quantidade de vetores s
 assertAiAdapter($embeddingResult->vectors[0]->contentHash === hash('sha256', $longOrganizedContent), 'Hash do conteúdo vetorizado inválido.');
 assertAiAdapter($embeddingResult->vectors[0]->dimensions() === 3, 'Dimensão vetorial inválida.');
 assertAiAdapter($embeddingResult->inputTokens === 123, 'Uso de tokens do provedor inválido.');
-
-$summaryHttp = new CapturingJsonHttpClient([[
-    'model' => 'language-model-test',
-    'choices' => [[
-        'message' => ['role' => 'assistant', 'content' => '{"summary":"Síntese neutra e rastreável."}'],
-    ]],
-    'usage' => ['prompt_tokens' => 70, 'completion_tokens' => 12],
-]]);
-$summaryProvider = new SummaryProvider(
-    $summaryHttp,
-    'test-key',
-    'language-model-test',
-    'https://language-provider.test/v1/chat/completions',
-    300,
-    19
-);
-$summaryUnit = new StructuredSummaryUnit(
-    'Documento real',
-    'chapter',
-    'Capítulo completo',
-    '/capitulo-completo',
-    $longOrganizedContent,
-    [[
-        'title' => 'Subseção',
-        'structural_path' => '/capitulo-completo/subsecao',
-        'summary' => 'Resumo filho explícito.',
-    ]]
-);
-$summaryResult = $summaryProvider->summarize($summaryUnit);
-$summaryRequest = $summaryHttp->requests[0];
-$userMessage = $summaryRequest['payload']['messages'][1]['content'];
-$encodedUnit = substr($userMessage, strpos($userMessage, "\n") + 1);
-$decodedUnit = json_decode($encodedUnit, true, 512, JSON_THROW_ON_ERROR);
-$systemPrompt = $summaryRequest['payload']['messages'][0]['content'];
-
-assertAiAdapter($summaryRequest['url'] === 'https://language-provider.test/v1/chat/completions', 'Endpoint de sínteses inválido.');
-assertAiAdapter($decodedUnit['own_content'] === $longOrganizedContent, 'O conteúdo do resumo foi cortado.');
-assertAiAdapter($decodedUnit['child_summaries'][0]['summary'] === 'Resumo filho explícito.', 'O resumo filho foi alterado.');
-assertAiAdapter(str_contains($systemPrompt, 'não atribua pesos'), 'A neutralidade cognitiva não está explícita no prompt.');
-assertAiAdapter(str_contains($systemPrompt, 'Não invente relações'), 'O prompt deve proibir relações inferidas.');
-assertAiAdapter($summaryRequest['payload']['response_format']['type'] === 'json_object', 'A resposta do provedor deve ser JSON.');
-assertAiAdapter($summaryRequest['payload']['thinking']['type'] === 'disabled', 'O modo econômico não foi configurado.');
-assertAiAdapter($summaryRequest['payload']['max_tokens'] === 300, 'Limite de saída do provedor inválido.');
-assertAiAdapter($summaryResult->summary === 'Síntese neutra e rastreável.', 'Resumo do provedor inválido.');
-assertAiAdapter($summaryResult->inputTokens === 70 && $summaryResult->outputTokens === 12, 'Uso de tokens do provedor inválido.');
-
-$controlCharacterHttp = new CapturingJsonHttpClient([[
-    'choices' => [[
-        'message' => ['content' => "{\"summary\":\"Linha 1\nLinha 2\"}"],
-    ]],
-]]);
-$controlCharacterSummary = (new SummaryProvider(
-    $controlCharacterHttp,
-    'test-key',
-    'language-model-test',
-    'https://language-provider.test/v1/chat/completions'
-))->summarize($summaryUnit);
-assertAiAdapter(
-    $controlCharacterSummary->summary === "Linha 1\nLinha 2",
-    'Caracteres de controle em strings JSON devem ser escapados sem alterar o resumo.'
-);
-
-$malformedEnvelopeHttp = new CapturingJsonHttpClient([[
-    'choices' => [[
-        'message' => ['content' => "{\"summary\":\"Linha com \"termo citado\"\nLinha final\"}"],
-    ]],
-]]);
-$recoveredEnvelopeSummary = (new SummaryProvider(
-    $malformedEnvelopeHttp,
-    'test-key',
-    'language-model-test',
-    'https://language-provider.test/v1/chat/completions'
-))->summarize($summaryUnit);
-assertAiAdapter(
-    $recoveredEnvelopeSummary->summary === "Linha com \"termo citado\"\nLinha final",
-    'O envelope de resumo deve recuperar aspas internas sem alterar seu conteúdo.'
-);
-
-$fencedEnvelopeHttp = new CapturingJsonHttpClient([[
-    'choices' => [[
-        'message' => ['content' => "```json\n{\"summary\":\"Síntese cercada por Markdown.\"}\n```"],
-    ]],
-]]);
-$fencedEnvelopeSummary = (new SummaryProvider(
-    $fencedEnvelopeHttp,
-    'test-key',
-    'language-model-test',
-    'https://language-provider.test/v1/chat/completions'
-))->summarize($summaryUnit);
-assertAiAdapter(
-    $fencedEnvelopeSummary->summary === 'Síntese cercada por Markdown.',
-    'O envelope JSON cercado por Markdown deve ser normalizado.'
-);
-
-$commentedEnvelopeHttp = new CapturingJsonHttpClient([[
-    'choices' => [[
-        'message' => ['content' => "Resposta solicitada:\n{\"summary\":\"Síntese com texto externo.\"}\nFim."],
-    ]],
-]]);
-$commentedEnvelopeSummary = (new SummaryProvider(
-    $commentedEnvelopeHttp,
-    'test-key',
-    'language-model-test',
-    'https://language-provider.test/v1/chat/completions'
-))->summarize($summaryUnit);
-assertAiAdapter(
-    $commentedEnvelopeSummary->summary === 'Síntese com texto externo.',
-    'O objeto JSON deve ser extraído sem aceitar o texto externo como síntese.'
-);
-
-$plainTextHttp = new CapturingJsonHttpClient([[
-    'choices' => [[
-        'message' => ['content' => 'Síntese sem qualquer envelope estruturado.'],
-    ]],
-]]);
-$plainTextRejected = false;
-
-try {
-    (new SummaryProvider(
-        $plainTextHttp,
-        'test-key',
-        'language-model-test',
-        'https://language-provider.test/v1/chat/completions'
-    ))->summarize($summaryUnit);
-} catch (AiProviderException $exception) {
-    $plainTextRejected = str_contains($exception->getMessage(), 'fora do JSON exigido');
-}
-
-assertAiAdapter($plainTextRejected, 'Texto livre sem envelope JSON deve continuar rejeitado.');
-
-$truncatedEnvelopeHttp = new CapturingJsonHttpClient([[
-    'choices' => [[
-        'finish_reason' => 'length',
-        'message' => ['content' => '{"summary":"Síntese interrompida'],
-    ]],
-]]);
-$truncatedEnvelopeRejected = false;
-
-try {
-    (new SummaryProvider(
-        $truncatedEnvelopeHttp,
-        'test-key',
-        'language-model-test',
-        'https://language-provider.test/v1/chat/completions'
-    ))->summarize($summaryUnit);
-} catch (AiProviderException $exception) {
-    $truncatedEnvelopeRejected = str_contains($exception->getMessage(), 'truncou o resumo');
-}
-
-assertAiAdapter($truncatedEnvelopeRejected, 'Resumos truncados pelo limite de saída devem ser identificados.');
 
 $leftContent = 'O conceito A interage explicitamente com o conceito B.';
 $rightContent = 'O conceito B interage explicitamente com o conceito A.';

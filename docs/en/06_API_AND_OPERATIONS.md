@@ -39,7 +39,7 @@ The table reflects the implemented dispatcher. Request and response bodies are J
 | Superadmin | `GET` | `/api/documents` | List works and descriptive counts |
 | Superadmin | `POST` | `/api/documents` | Ingest one Markdown, JSON, or XML multipart upload |
 | Superadmin | `DELETE` | `/api/documents/{id}` | Delete a work and its dependent state |
-| Superadmin | `POST` | `/api/documents/{id}/process` | Idempotently enqueue summaries and embeddings |
+| Superadmin | `POST` | `/api/documents/{id}/process` | Idempotently enqueue primary-evidence embeddings |
 | Superadmin | `GET` | `/api/jobs` | List current processing jobs |
 | Superadmin | `POST` | `/api/jobs/{EVA-J...}/retry` | Explicitly retry an eligible failed job |
 | Superadmin | `GET` | `/api/metrics` | Return descriptive operational counts |
@@ -124,7 +124,7 @@ Only PNG, JPEG, and WebP are accepted. The server verifies the real MIME type, r
 
 ## Queue
 
-Processing jobs are idempotent by document, stage, and capability version. The normal worker claims one job. Summary work interrupted by the configured safe limit returns to the queue with progress preserved. Failed jobs require an explicit allowed retry and remain subject to `QUEUE_MAX_FAILURES`.
+Processing jobs are idempotent by document, embedding stage, and capability version. The normal worker claims one job. Failed jobs require an explicit allowed retry and remain subject to `QUEUE_MAX_FAILURES`.
 
 ```bash
 php bin/queue-worker.php --live
@@ -135,11 +135,11 @@ Both commands still require `AI_LIVE_ENABLED=true`. `--drain` can consume many r
 
 The superadmin interface offers the same deliberate drain flow without shell access. `POST /api/admin/queue/run` executes one worker pass and requires both `AI_LIVE_ENABLED=true` and a JSON body containing `{"confirm_live": true}`. The browser repeats that request until the returned worker status is `idle`; the tab must remain open during processing. The endpoint invokes `CognitiveQueueWorker` directly and never exposes arbitrary command execution.
 
-The interface polls queue state every three seconds while work is `queued` or `running`. Summary progress follows persisted hierarchical units; embedding batches are persisted incrementally so their progress can advance during processing.
+The interface polls queue state every three seconds while work is `queued` or `running`. Embedding batches are persisted incrementally so progress can advance during processing.
 
 ## White-label and provider neutrality
 
-Capabilities are named through neutral boundaries such as `EmbeddingProvider`, `SummaryProvider`, and `QueryAnswerProvider`; `CognitiveProviderFactory` builds them from neutral configuration. The local `.env` is the operational binding point between each capability, provider, endpoint, model, and credential-variable name. Provider identities do not enter domain contracts, routes, or public responses.
+Capabilities are named through neutral boundaries such as `EmbeddingProvider` and `QueryAnswerProvider`; `CognitiveProviderFactory` builds them from neutral configuration. The local `.env` is the operational binding point between each capability, provider, endpoint, model, and credential-variable name. Provider identities do not enter domain contracts, routes, or public responses.
 
 Brand name, description, colors, and logo are configured through `BRAND_*`. Colors accept only six-digit hexadecimal values. The logo accepts a path beginning with `/` or an HTTPS URL; when `BRAND_LOGO_URL` is empty, the interface uses its typographic fallback without requesting a nonexistent asset.
 

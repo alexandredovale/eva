@@ -19,7 +19,7 @@ This execution does not demonstrate statistical superiority. It measures five pr
 |---|---:|
 | Document nodes | 472 |
 | Primary evidence | 371 |
-| Derived evidence | 472 |
+| Derived evidence (historical record; removed in 6.0.0) | 472 |
 | Persistent embeddings | 843 |
 | Evidence limit in this historical execution | 8 |
 | Interaction limit per query | 4 |
@@ -263,7 +263,7 @@ Invariance must compare counts and hashes of documents, nodes, evidence, derivat
 The July 20 executions predate CIE and do not demonstrate its effects. Repeat conceptual and relational queries under the same corpus, models, prompts, and operational conditions, comparing:
 
 1. direct vector Top-k, explicitly identified as a legacy baseline;
-2. current 4.0.2 primary-population flow with κq, first source CIE, κe, primary CIE, and global CIE;
+2. current 6.0.0 primary-only flow with the complete population, κq, first source CIE, κe, primary CIE, and global CIE;
 3. a reference reranker under a comparable budget.
 
 Record total initial primary population, κq, every κe, `μ`, `σ`, `CV`, stage-level discard/convergence/core counts, sources after each cutoff, `|Gq|`, final `K(q)`, precision/recall, context tokens, local latency, and paraphrase stability. Legacy Top-k is an experimental variable, never current-flow configuration.

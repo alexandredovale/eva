@@ -167,7 +167,7 @@ O superadmin também pode usar **Processar fila no navegador**. A interface conf
 
 ## White label
 
-As classes são nomeadas por capacidade: `EmbeddingProvider`, `SummaryProvider` e `QueryAnswerProvider`. `CognitiveProviderFactory` usa a leitura neutra da configuração para construir cada uma.
+As classes são nomeadas por capacidade: `EmbeddingProvider` e `QueryAnswerProvider`. `CognitiveProviderFactory` usa a leitura neutra da configuração para construir cada uma.
 
 O `.env` é o único ponto operacional de vínculo gerencial entre capacidade, fornecedor, endpoint, modelo e nome da variável de credencial. `config/ai.php` contém apenas nomes genéricos e leitura dessas variáveis. Os vínculos não aparecem em nomes de classes, rotas, comandos, contratos de domínio ou respostas do produto.
 

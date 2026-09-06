@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Eva\Infrastructure\Ai;
 
 use Eva\Application\Cognitive\EmbeddingProviderInterface;
-use Eva\Application\Cognitive\SummaryProviderInterface;
 use Eva\Application\Query\QueryAnswerProviderInterface;
 use Eva\Support\Env;
 
@@ -29,22 +28,6 @@ final readonly class CognitiveProviderFactory
             (string) ($config['endpoint'] ?? ''),
             (int) ($this->config['request_timeout_seconds'] ?? 30),
             (int) ($config['max_units_per_request'] ?? 64)
-        );
-    }
-
-    public function summaries(?JsonHttpClientInterface $http = null): SummaryProviderInterface
-    {
-        $this->ensureLiveEnabled();
-        $config = $this->providerConfig('summaries');
-        $keyName = (string) ($config['api_key_environment'] ?? '');
-
-        return new SummaryProvider(
-            $http ?? new CurlJsonHttpClient(),
-            (string) Env::get($keyName, ''),
-            (string) ($config['model'] ?? ''),
-            (string) ($config['endpoint'] ?? ''),
-            (int) ($config['max_output_tokens'] ?? 500),
-            (int) ($this->config['request_timeout_seconds'] ?? 30)
         );
     }
 

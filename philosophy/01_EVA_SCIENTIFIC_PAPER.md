@@ -1,13 +1,13 @@
 # EVA (Evidence Algorithm): memória documental hierárquica e interação cognitiva transitória para respostas verificáveis
 
-**Versão:** 2.4
+**Versão:** 6.0.0
 **Data:** 2 de agosto de 2026
 **Autoria:** Projeto EVA
 **English:** [Full scientific paper](en/01_EVA_SCIENTIFIC_PAPER.md)
 
 ## Resumo
 
-Este artigo apresenta o EVA (Evidence Algorithm), uma arquitetura para consulta documental assistida por modelos de linguagem cuja memória persistente é organizada em evidências rastreáveis, e não em respostas, relações cognitivas ou grafos inferidos. O sistema transforma documentos estruturados em uma árvore normalizada, preserva seus conteúdos literais como evidências primárias e produz sínteses hierárquicas como evidências derivadas com linhagem explícita. Embeddings são gerados para essas unidades semânticas completas, respeitando a organização do documento em vez de fragmentá-lo por limites arbitrários de caracteres ou tokens.
+Este artigo apresenta o EVA (Evidence Algorithm), uma arquitetura para consulta documental assistida por modelos de linguagem cuja memória persistente é organizada em evidências rastreáveis, e não em respostas, relações cognitivas ou grafos inferidos. O sistema transforma documentos estruturados em uma árvore normalizada, preserva seus conteúdos literais como evidências primárias e gera embeddings para essas unidades semânticas completas, respeitando a organização do documento em vez de fragmentá-lo por limites arbitrários de caracteres ou tokens.
 
 Na consulta, o EVA seleciona uma rota de recuperação compatível com o tipo de input. Perguntas diretas, estruturais e amplas podem navegar pela hierarquia; perguntas conceituais e relacionais usam uma representação vetorial transitória. Nessas rotas, κq emerge da população primária completa antes do primeiro Context Intelligence Engine (CIE). Esse estágio encaminha somente seu núcleo `s ≥ μ + σ`, com convergência como fallback; as fontes sobreviventes passam por κe e CIE primário, e a união dos núcleos locais recebe um CIE global. O núcleo global — ou sua convergência quando vazio — forma o contexto semântico sem Top-k ou quantidade configurada. Somente fontes incorporadas à prosa com citações visíveis integram a base final. Se nenhuma evidência primária suficiente for encontrada, o fluxo é interrompido sem chamada ao provedor de resposta.
 
@@ -19,11 +19,11 @@ Relações cognitivas são tratadas como interações transitórias de **simetry
 
 ## 1. Introdução
 
-Modelos de linguagem podem formular respostas coerentes mesmo quando a informação necessária está ausente, incompleta ou equivocadamente recuperada. Em aplicações documentais, essa característica cria um problema epistemológico e operacional: fluência não demonstra correspondência com a fonte. Sistemas de Retrieval-Augmented Generation (RAG) reduzem esse risco ao fornecer contexto externo ao modelo [1], mas o simples acréscimo de busca vetorial não garante preservação estrutural, linhagem de sínteses, citações válidas ou recusa adequada.
+Modelos de linguagem podem formular respostas coerentes mesmo quando a informação necessária está ausente, incompleta ou equivocadamente recuperada. Em aplicações documentais, essa característica cria um problema epistemológico e operacional: fluência não demonstra correspondência com a fonte. Sistemas de Retrieval-Augmented Generation (RAG) reduzem esse risco ao fornecer contexto externo ao modelo [1], mas o simples acréscimo de busca vetorial não garante preservação estrutural, citações válidas ou recusa adequada.
 
-Uma implementação convencional costuma dividir o texto em blocos por tamanho, gerar embeddings desses fragmentos e selecionar os vizinhos mais próximos da pergunta. Essa estratégia é útil e escalável, porém pode separar definições de seus títulos, listas de suas introduções e parágrafos de sua posição argumentativa. Também pode tornar difícil explicar por que um resumo apareceu no resultado e a quais trechos literais ele corresponde.
+Uma implementação convencional costuma dividir o texto em blocos por tamanho, gerar embeddings desses fragmentos e selecionar os vizinhos mais próximos da pergunta. Essa estratégia é útil e escalável, porém pode separar definições de seus títulos, listas de suas introduções e parágrafos de sua posição argumentativa.
 
-O EVA parte de uma decisão distinta: a memória deve refletir a organização semântica já presente no documento. Títulos, seções, parágrafos, itens, propriedades e elementos formam uma árvore. Conteúdos literais dessa árvore são evidências primárias. Sínteses produzidas de baixo para cima são evidências derivadas, ligadas explicitamente às evidências que as sustentam. As duas classes podem receber embeddings, mas somente as fontes primárias fundamentam a resposta final.
+O EVA parte de uma decisão distinta: a memória deve refletir a organização semântica já presente no documento. Títulos, seções, parágrafos, itens, propriedades e elementos formam uma árvore. Conteúdos literais dessa árvore são evidências primárias, e somente essas fontes recebem embeddings e fundamentam a resposta final.
 
 A segunda decisão é separar memória de interação. Relações identificadas entre o input e as evidências não se tornam fatos permanentes. Elas descrevem a configuração cognitiva daquela consulta e são descartadas ao final. Essa fronteira evita que uma interpretação contingente, produzida por um modelo e condicionada por um contexto limitado, adquira o mesmo estatuto da fonte documental.
 
@@ -93,7 +93,7 @@ O EVA utiliza ideias compatíveis com esse campo, mas adota uma fronteira espec�
 
 - não assume que todo input deva percorrer a mesma busca vetorial;
 - não usa um grafo persistente de relações cognitivas;
-- não trata resumos como equivalentes às fontes literais;
+- não cria representações textuais intermediárias como substitutas das fontes literais;
 - não persiste relações produzidas durante a consulta;
 - não permite geração documental sem evidência primária recuperada;
 - não usa um reranker por IA para decidir o contexto semântico final;
@@ -132,37 +132,13 @@ E_P(D) = \{e(n) \mid n \in N(D),\; content(n) \neq \varnothing\}
 
 Cada (e(n)) conserva a referência estrutural de (n). Uma evidência primária não é uma opinião sobre o texto; é uma unidade rastreável do próprio texto.
 
-### 5.3 Evidências derivadas
+### 5.3 Embeddings estruturais
 
-Nós internos ou regiões hierárquicas podem receber sínteses produzidas de baixo para cima. Essas sínteses formam evidências derivadas do tipo `node_summary`.
-
-Se (S(n)) é a síntese associada ao nó (n), sua base inclui evidências do próprio nó e de seus descendentes pertinentes:
-
-\[
-S(n) = f(E(n), S(c_1), S(c_2), \ldots, S(c_k))
-\]
-
-onde (c_1,\ldots,c_k) são filhos de (n) e (f) é o processo de síntese configurado. A equação descreve dependência, não equivalência: (S(n)) continua sendo uma interpretação derivada.
-
-### 5.4 Linhagem de derivação
-
-Cada evidência derivada é conectada às evidências que a sustentam. Essa linhagem permite percorrer uma síntese até fontes primárias e impede que um resumo se torne uma afirmação sem origem.
-
-Uma derivação é representada como:
-
-\[
-e_d \rightarrow \{e_1, e_2, \ldots, e_m\}
-\]
-
-em que (e_d) é derivada e cada (e_i) é uma evidência fonte, primária ou derivada. A resolução é recursiva até que o conjunto resultante contenha evidências primárias utilizáveis.
-
-### 5.5 Embeddings estruturais
-
-Embeddings persistentes são produzidos para evidências primárias e derivadas. A unidade enviada ao provedor já é semanticamente organizada pelo documento ou por sua síntese hierárquica. O algoritmo não cria segmentos apenas para satisfazer um limite arbitrário de tamanho.
+Embeddings persistentes são produzidos exclusivamente para evidências primárias. A unidade enviada ao provedor já é semanticamente organizada pelo documento. O algoritmo não cria segmentos apenas para satisfazer um limite arbitrário de tamanho.
 
 Cada embedding é associado à evidência, à configuração do modelo, à dimensão e ao hash do conteúdo. Isso permite detectar obsolescência e reconstruir representações quando o conteúdo ou a configuração mudam.
 
-### 5.6 Fronteira persistente
+### 5.4 Fronteira persistente
 
 O núcleo persistente vigente contém:
 
@@ -170,13 +146,12 @@ O núcleo persistente vigente contém:
 |---|---|
 | `documents` | identidade, formato, hash e estado do documento |
 | `document_nodes` | árvore normalizada e referências à fonte |
-| `evidences` | evidências primárias e derivadas |
-| `evidence_derivations` | linhagem entre sínteses e fontes |
+| `evidences` | evidências primárias literais |
 | `evidence_embeddings` | representações vetoriais versionadas |
-| `processing_jobs` | execução das etapas de síntese e embeddings |
+| `processing_jobs` | execução da etapa de embeddings |
 | `audit_events` | eventos operacionais sanitizados |
 
-Não fazem parte do modelo vigente tabelas de nós cognitivos, relações cognitivas, embeddings de relações, análises de interação ou caches de consulta. Também não existe uma etapa de construção de grafo relacional. As etapas assistidas por modelo são sínteses e embeddings.
+Não fazem parte do modelo vigente tabelas de nós cognitivos, relações cognitivas, embeddings de relações, análises de interação ou caches de consulta. Também não existe uma etapa de construção de grafo relacional. A etapa persistente assistida por modelo produz embeddings primários.
 
 ## 6. Processamento de ingestão
 
@@ -187,12 +162,10 @@ O fluxo de construção segue a sequência:
 3. parsing integral para árvore normalizada;
 4. persistência do documento e dos nós;
 5. geração determinística das evidências primárias;
-6. síntese hierárquica e persistência das evidências derivadas;
-7. registro da linhagem de cada derivação;
-8. geração de embeddings para as evidências elegíveis;
-9. atualização dos estados de processamento e auditoria.
+6. geração de embeddings para as evidências primárias elegíveis;
+7. atualização dos estados de processamento e auditoria.
 
-A aplicação controla transações, validações e persistência. O provedor de síntese retorna uma transformação candidata; não possui acesso direto à memória. Falhas podem ser retomadas por estágio, e embeddings existentes podem ser reutilizados quando modelo e hash continuam compatíveis.
+A aplicação controla transações, validações e persistência. Falhas podem ser retomadas na etapa de embeddings, e vetores existentes podem ser reutilizados quando modelo e hash continuam compatíveis.
 
 ## 7. Fluxo de consulta
 
@@ -240,11 +213,11 @@ Para `N` candidatos com similaridades `sᵢ`, o CIE calcula as estatísticas pop
 CV = \frac{\sigma}{\mu}
 \]
 
-Quando `μ = 0`, o CV é indefinido e representado como `null`. Candidatos com `s < μ` são descartados; `μ ≤ s < μ + σ` define a faixa de convergência; e `s ≥ μ + σ` define o núcleo. Em qualquer CIE, o núcleo é eleito e a convergência assume esse papel somente quando ele estiver vazio. No estágio hierárquico, porém, ambas as regiões são preservadas para resolução e análise primária separadas. Uma tolerância numérica mínima protege as comparações de fronteira sem alterar os valores calculados.
+Quando `μ = 0`, o CV é indefinido e representado como `null`. Candidatos com `s < μ` são descartados; `μ ≤ s < μ + σ` define a faixa de convergência; e `s ≥ μ + σ` define o núcleo. Em qualquer CIE, o núcleo é eleito e a convergência assume esse papel somente quando ele estiver vazio. Uma tolerância numérica mínima protege as comparações de fronteira sem alterar os valores calculados.
 
-Essa transformação é determinística e preserva a ordem original do Retriever dentro de cada região. Ela não cria peso, nota ou ranking adicional. A saída da consulta pode expor as regiões e estatísticas para auditoria, mas o provedor de resposta recebe apenas o contexto primário resolvido.
+Essa transformação é determinística e preserva a ordem original do Retriever dentro de cada região. Ela não cria peso, nota ou ranking adicional. A saída da consulta pode expor as regiões e estatísticas para auditoria, mas o provedor de resposta recebe apenas o contexto primário selecionado.
 
-O primeiro CIE atua diretamente sobre as evidências primárias. Seu núcleo superior, ou sua convergência quando o núcleo está vazio, passa por κe e CIE primário com cosine próprio contra a mesma consulta. As sínteses derivadas preservam organização e linhagem na memória construída, mas não substituem as fontes nessa primeira recuperação.
+O primeiro CIE atua diretamente sobre as evidências primárias. Seu núcleo superior, ou sua convergência quando o núcleo está vazio, passa por κe e CIE primário com cosine próprio contra a mesma consulta.
 
 ### 7.4 Consulta multidocumental e seleção transitória
 
@@ -362,12 +335,11 @@ Eventos operacionais são registrados de forma sanitizada, sem transformar a con
 
 O modelo de segurança vigente deve ser descrito sem extrapolações: o superadmin pode usar a credencial administrativa da instalação, usuários autenticados possuem sessões revogáveis e permissões explícitas por projeto ou documento, e projetos agrupam obras para consulta multidocumental. Esse controle não constitui identidade global, colaboração entre organizações nem isolamento multitenant. Tais capacidades exigiriam fronteiras adicionais de autorização e testes próprios.
 
-A auditabilidade deriva principalmente de quatro propriedades:
+A auditabilidade deriva principalmente de três propriedades:
 
 1. referência de cada evidência primária à árvore e à fonte;
-2. linhagem de evidências derivadas;
-3. versionamento de conteúdo e embeddings;
-4. validação das evidências citadas na resposta.
+2. versionamento de conteúdo e embeddings;
+3. validação das evidências citadas na resposta.
 
 ## 10. Comparação arquitetural
 
@@ -375,10 +347,10 @@ A auditabilidade deriva principalmente de quatro propriedades:
 |---|---|---|---|---|
 | Unidade principal | bloco por janela | documento ou grande trecho | entidade, relação e comunidade | nó documental e evidência |
 | Estrutura original | frequentemente parcial | preservada no input, limitada pela seleção | convertida em grafo | persistida como árvore |
-| Resumos | opcionais | opcionais | centrais em comunidades | evidências derivadas com linhagem |
+| Resumos | opcionais | opcionais | centrais em comunidades | ausentes do fluxo operacional |
 | Relações persistentes | geralmente não | não | sim | não para interação cognitiva |
 | Busca vetorial | rota dominante | opcional | combinada ao grafo | somente quando o tipo exige |
-| Fonte final | bloco recuperado | contexto fornecido | nós, relações ou relatórios | evidência primária resolvida |
+| Fonte final | bloco recuperado | contexto fornecido | nós, relações ou relatórios | evidência primária selecionada |
 | Ausência de evidência | depende do prompt | depende do modelo | depende da implementação | bloqueio antes da resposta |
 | Interação cognitiva | não padronizada | não padronizada | relação do grafo | simetry/assimetry transitórias |
 | Memória após consulta | varia | varia | grafo pode ser enriquecido | invariavelmente inalterada |
@@ -391,7 +363,7 @@ As seguintes afirmações devem ser entendidas como hipóteses testáveis:
 
 ### H1 — Rastreabilidade
 
-Respostas do EVA devem permitir maior taxa de localização da fonte primária do que uma configuração na qual resumos não possuam linhagem.
+Respostas do EVA devem permitir alta taxa de localização da fonte primária porque a recuperação atua diretamente sobre ela.
 
 ### H2 — Organização semântica
 
@@ -514,7 +486,6 @@ As perguntas devem ser anotadas por avaliadores independentes e separadas em:
 - número de chamadas externas por consulta;
 - tokens de entrada e saída;
 - custo por documento e por pergunta;
-- tempo de construção das sínteses;
 - tempo e espaço de indexação;
 - taxa de falhas e retentativas.
 
@@ -522,8 +493,6 @@ As perguntas devem ser anotadas por avaliadores independentes e separadas em:
 
 Para identificar a contribuição de cada mecanismo, devem ser executadas ablações removendo individualmente:
 
-- sínteses derivadas;
-- linhagem de derivação;
 - roteamento por tipo;
 - barreira de evidência;
 - validação local de citações;
@@ -550,53 +519,49 @@ Essas observações servem como verificação funcional, não como resultado cie
 
 Na rota semântica, conceitos relevantes podem receber baixa similaridade e não entrar no conjunto candidato. Embeddings também podem aproximar passagens apenas superficialmente semelhantes.
 
-κq observa toda a população hierárquica elegível, mas ainda depende da qualidade dos embeddings, do corpus e da capacidade do detector de reconhecer uma ruptura real; uma ruptura inexistente ou ambígua mantém a população completa. κe e os três estágios do CIE também não corrigem unidades ausentes do índice ou linhagens incompletas. A média como ponto de corte pressupõe que o centro aritmético seja uma fronteira útil. Distribuições assimétricas, muito concentradas ou com médias próximas de zero podem exigir medidas robustas em versões futuras. Essa possibilidade não invalida a separação arquitetural, mas impede tratar o corte atual como universalmente ótimo.
+κq observa toda a população primária elegível, mas ainda depende da qualidade dos embeddings, do corpus e da capacidade do detector de reconhecer uma ruptura real; uma ruptura inexistente ou ambígua mantém a população completa. κe e os três estágios do CIE também não corrigem unidades ausentes do índice. A média como ponto de corte pressupõe que o centro aritmético seja uma fronteira útil. Distribuições assimétricas, muito concentradas ou com médias próximas de zero podem exigir medidas robustas em versões futuras. Essa possibilidade não invalida a separação arquitetural, mas impede tratar o corte atual como universalmente ótimo.
 
-### 14.2 Perda em sínteses
-
-Evidências derivadas podem omitir exceções ou nuances. A resolução para fontes primárias reduz o impacto, mas não garante que todas as fontes necessárias sejam selecionadas.
-
-### 14.3 Classificação do input
+### 14.2 Classificação do input
 
 Uma detecção operacional incorreta pode escolher uma rota inferior. Perguntas híbridas, ambíguas ou muito curtas são especialmente desafiadoras.
 
-### 14.4 Limites da validação local
+### 14.3 Limites da validação local
 
 Validar IDs e participantes impede referências inexistentes, mas não prova entailment. Uma frase pode citar a evidência correta e ainda interpretá-la inadequadamente. Avaliação semântica continua necessária.
 
-### 14.5 Dependência do provedor de resposta
+### 14.4 Dependência do provedor de resposta
 
 Mesmo com contexto válido, o provedor pode omitir aspectos, produzir estrutura inválida ou formular uma explicação imprecisa. O backend contém erros estruturais, não todos os erros de raciocínio.
 
-### 14.6 Escopo de formatos
+### 14.5 Escopo de formatos
 
 A implementação documentada cobre Markdown, JSON e XML. Outros formatos exigem parsers capazes de preservar estrutura e referências equivalentes.
 
-### 14.7 Contexto conversacional curto e não persistente
+### 14.6 Contexto conversacional curto e não persistente
 
 O EVA vigente resolve perguntas anafóricas por meio de até três rodadas anteriores anexadas ao input. Esse mecanismo depende da capacidade do modelo de distinguir continuidade de mudança de assunto e não executa resolução linguística adicional. Como o input composto também participa da rota de recuperação, termos anteriores podem influenciar os candidatos; o limite curto e o descarte integral das rodadas mais antigas reduzem, mas não eliminam, essa possibilidade.
 
 O transcript completo existe somente na memória da interface aberta. Não há continuidade entre dispositivos, abas, recarregamentos ou novas sessões, nem identidade persistente de conversa. Essa limitação preserva a distinção entre contexto de diálogo e memória documental.
 
-### 14.8 Sem ontologia persistente
+### 14.7 Sem ontologia persistente
 
 A ausência de grafo relacional reduz complexidade e contaminação por inferências, mas não atende diretamente casos que exigem travessias ontológicas persistentes ou análise global de redes.
 
-### 14.9 Escopo de autorização
+### 14.8 Escopo de autorização
 
 A instalação atual possui superadmin, usuários, sessões e autorização granular por projeto ou documento, mas não deve ser confundida com isolamento multitenant entre organizações. Ambientes compartilhados entre instituições exigirão fronteiras adicionais de tenant, administração delegada e testes de isolamento.
 
-### 14.10 Cobertura multidisciplinar limitada pelo contexto
+### 14.9 Cobertura multidisciplinar limitada pelo contexto
 
 Um projeto pode conter muitas obras, mas o CIE global não garante que todas as disciplinas pertinentes apareçam em seu núcleo. Uma distribuição numerosa de uma área pode alterar μ e σ globais, e nenhuma fronteira estatística prova cobertura temática completa. Uma síntese multidisciplinar pode ser incompleta mesmo quando cada afirmação apresentada possui citação válida.
 
 ## 15. Discussão
 
-O principal compromisso do EVA é tornar explícita a fronteira entre documento e interpretação. Árvores, evidências primárias, evidências derivadas e linhagens pertencem à memória. Similaridade, contexto montado, resposta e interação pertencem ao evento de consulta.
+O principal compromisso do EVA é tornar explícita a fronteira entre documento e interpretação. Árvores, evidências primárias e seus embeddings pertencem à memória. Similaridade, contexto montado, resposta e interação pertencem ao evento de consulta.
 
 Essa separação reduz a tentação de tratar toda saída de modelo como conhecimento. Ela também simplifica a evolução do sistema: novas estratégias de recuperação podem ser testadas sem migrar uma rede de relações inferidas, e novos provedores podem substituir os anteriores sem alterar a identidade das fontes.
 
-O papel das evidências derivadas é particularmente importante. Elas oferecem abstração sem reivindicar autoridade literal. Em vez de escolher entre “somente trechos” e “somente resumos”, o EVA permite que o resumo localize e que o trecho fundamente.
+A versão 6.0.0 elimina a representação intermediária: a mesma evidência primária literal participa da localização e fundamenta a resposta.
 
 O modelo de interação segue a mesma disciplina. Simetry e assimetry oferecem estrutura suficiente para indicar reciprocidade ou direção sem converter o encontro contextual em uma ontologia. A ausência de pesos não é ausência de análise; é uma recusa em apresentar uma estimativa implícita como força objetiva.
 
@@ -606,35 +571,34 @@ O custo dessa prudência é real. O sistema pode recusar perguntas que um modelo
 
 ### 15.1 Fluxo compacto e separação de responsabilidades
 
-Embora o EVA contenha ingestão, síntese, embeddings, recuperação e geração, sua cadeia epistemológica pode ser reduzida a sete operações:
+Embora o EVA contenha ingestão, embeddings, recuperação e geração, sua cadeia epistemológica pode ser reduzida a sete operações:
 
 ```text
 DOCUMENTO → EVIDÊNCIAS → LOCALIZAÇÃO → CONTEXTO DISPONÍVEL
           → GERAÇÃO + INTERAÇÕES → VALIDAÇÃO LOCAL → RESPOSTA
 ```
 
-Essa compactação não elimina as etapas técnicas; explicita a responsabilidade dominante de cada uma. O documento estabelece a origem, as evidências preservam conteúdo e linhagem, a recuperação localiza candidatos, a aplicação compõe o contexto autorizado, o modelo formula a resposta e propõe interações, e a validação local mantém somente citações e relações reconstruíveis. Em termos funcionais:
+Essa compactação não elimina as etapas técnicas; explicita a responsabilidade dominante de cada uma. O documento estabelece a origem, as evidências preservam conteúdo literal, a recuperação localiza candidatos, a aplicação compõe o contexto autorizado, o modelo formula a resposta e propõe interações, e a validação local mantém somente citações e relações reconstruíveis. Em termos funcionais:
 
 ```text
-síntese localiza
-fonte fundamenta
+fonte localiza e fundamenta
 aplicação valida
 modelo comunica
 ```
 
-Consequentemente, o modelo de síntese não cria a fonte, o modelo de embedding não determina verdade e o modelo de resposta não decide o que pode ser persistido. Essa separação permite empregar capacidades probabilísticas sem transferir ao provedor a autoridade sobre a memória documental.
+Consequentemente, o modelo de embedding não determina verdade e o modelo de resposta não decide o que pode ser persistido. Essa separação permite empregar capacidades probabilísticas sem transferir ao provedor a autoridade sobre a memória documental.
 
-A simplicidade do fluxo é uma propriedade de projeto, não uma evidência de superioridade. Seu valor deve ser avaliado experimentalmente: menos entidades persistentes podem reduzir contaminação e facilitar auditoria, mas a arquitetura ainda depende da qualidade da recuperação, da fidelidade das sínteses e da interpretação produzida na resposta. Testes futuros devem verificar se essa separação preserva significado, mantém estabilidade diante de variações estilísticas e contraditórias do input e declara limitações sem evasão.
+A simplicidade do fluxo é uma propriedade de projeto, não uma evidência de superioridade. Seu valor deve ser avaliado experimentalmente: menos entidades persistentes podem reduzir contaminação e facilitar auditoria, mas a arquitetura ainda depende da qualidade da recuperação e da interpretação produzida na resposta. Testes futuros devem verificar se essa separação preserva significado, mantém estabilidade diante de variações estilísticas e contraditórias do input e declara limitações sem evasão.
 
 ## 16. Conclusão
 
-O EVA organiza memória documental como um conjunto verificável de evidências primárias e derivadas sobre uma árvore estrutural preservada. Sínteses possuem linhagem, embeddings representam unidades semanticamente organizadas e consultas escolhem rotas hierárquicas ou semânticas conforme sua forma operacional. Nas rotas vetoriais, κq, κe e os CIEs inicial sobre fontes, primário e global estabelecem fronteiras matemáticas entre recuperação e interpretação, fazendo a quantidade final emergir da geometria da própria consulta.
+O EVA organiza memória documental como um conjunto verificável de evidências primárias sobre uma árvore estrutural preservada. Embeddings representam essas unidades semanticamente organizadas e consultas escolhem rotas estruturais ou semânticas conforme sua forma operacional. Nas rotas vetoriais, κq, κe e os CIEs inicial sobre fontes, primário e global estabelecem fronteiras matemáticas entre recuperação e interpretação, fazendo a quantidade final emergir da geometria da própria consulta.
 
 O sistema impede geração documental quando não há evidência primária recuperada, valida localmente citações e participantes e trata relações cognitivas como interações transitórias de simetry ou assimetry. O antigo conceito de Cnode deixa de ser uma entidade persistente e passa a designar, quando necessário, apenas o fenômeno contextual da interação.
 
 Em escopos multidisciplinares, essa transitoriedade permite articular evidências especializadas de documentos diferentes sem criar contaminação cumulativa no banco. O resultado pode revelar uma síntese conceitual nova para a consulta, mas permanece interpretação rastreável e limitada, nunca evidência automática ou verdade incorporada ao acervo.
 
-Essa arquitetura não elimina os riscos de recuperação e geração. Ela os torna mais observáveis e auditáveis. Sua contribuição proposta é uma disciplina de memória e contexto: preservar a fonte, registrar toda derivação, estabilizar a recuperação sem julgamento subjetivo, restringir o que pode persistir e declarar com clareza quando o documento não sustenta uma resposta. A superioridade do corte estatístico atual permanece uma hipótese a ser testada comparativamente.
+Essa arquitetura não elimina os riscos de recuperação e geração. Ela os torna mais observáveis e auditáveis. Sua contribuição proposta é uma disciplina de memória e contexto: preservar a fonte, estabilizar a recuperação sem julgamento subjetivo, restringir o que pode persistir e declarar com clareza quando o documento não sustenta uma resposta. A superioridade do corte estatístico atual permanece uma hipótese a ser testada comparativamente.
 
 ## Referências
 

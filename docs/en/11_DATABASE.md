@@ -4,7 +4,7 @@
 
 The database persists documentary memory with integrity and traceability without duplicating transient relationships or storing judgments and weights.
 
-The consolidated empty schema is in [`database/schema.sql`](../../database/schema.sql) and creates all 14 current main-database tables, including `module_events`. Fresh installations import only that file. Existing installations evolve through every outstanding ordered migration in [`database/migrations/`](../../database/migrations/); migration `010` remains the upgrade path for pre-consolidation databases.
+The consolidated empty schema is in [`database/schema.sql`](../../database/schema.sql) and creates all 13 current main-database tables, including `module_events`. Fresh installations import only that file. Version 4.x installations manually apply `database/migrations/20260906_011_remove_derived_summaries.sql` after a full backup and with workers stopped.
 
 For the complete foreign-key map, logical relationships, access paths, and deletion behavior, see [Database relationships](18_DATABASE_RELATIONSHIPS.md).
 
@@ -12,10 +12,9 @@ For the complete foreign-key map, logical relationships, access paths, and delet
 
 - **`documents`:** source metadata, format, hash, private storage path, and processing state.
 - **`document_nodes`:** normalized hierarchy, direct content, format metadata, structural path, documentary order, and exact source reference.
-- **`evidences`:** persistent `primary` or `derived` units, additionally classified by `evidence_type`.
-- **`evidence_derivations`:** lineage from derived evidence to the identified evidence used to generate it.
+- **`evidences`:** persistent literal `primary` units, additionally classified by `evidence_type`.
 - **`evidence_embeddings`:** versioned vectors used only for semantic location.
-- **`processing_jobs`:** queue records for the `summaries` and `embeddings` stages.
+- **`processing_jobs`:** queue records for the `embeddings` stage.
 - **`audit_events`:** sanitized administrative and operational events.
 - **`users`:** normal-user identities and password/recovery hashes.
 - **`user_sessions`:** hashed, expiring authenticated sessions.
@@ -37,9 +36,7 @@ Each module owns `modules/.runtime/data/<module-id>/module.sqlite`. These SQLite
 
 Nodes with usable direct content produce `primary` evidence of type `node_content`. The evidence keeps content and source hash identical to its origin and receives a stable public identifier beginning with `EVA-E`.
 
-Hierarchical summaries produce `derived` evidence of type `node_summary`. `generation_model` and `generation_input_hash` technically version generated content. `evidence_derivations` connects each summary to its own direct evidence and the child summaries or evidence from which it was generated.
-
-Original content is never overwritten by a summary. `validated` on a primary evidence record confirms extraction traceability, not the universal truth of the statement.
+Version 6.0.0 removed derived summaries and their lineage table from the operational schema. `validated` on a primary evidence record confirms extraction traceability, not the universal truth of the statement.
 
 ## Embeddings
 
@@ -71,7 +68,7 @@ The schema does not store cognitive confidence, relevance scores, intensity, pri
 
 ## Deletion semantics
 
-Deleting a work cascades through nodes, evidence, derivations, embeddings, processing jobs, permissions, and project links, then removes its private source file.
+Deleting a work cascades through nodes, evidence, embeddings, processing jobs, permissions, and project links, then removes its private source file.
 
 Deleting a project removes every work still attached to it, including a work shared with another project. A shared work that must survive must be detached and saved before the project is deleted.
 

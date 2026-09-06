@@ -66,7 +66,6 @@ For each capability, configure provider identifier, endpoint, model, and credent
 Real calls require `AI_LIVE_ENABLED=true`; CLI build and query commands additionally require `--live`. This double confirmation prevents accidental external consumption.
 
 ```powershell
-php bin\build-cognitive.php <document-id> --stage=summaries --live
 php bin\build-cognitive.php <document-id> --stage=embeddings --live
 php bin\query-document.php <document-id> --live "your question"
 ```

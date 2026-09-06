@@ -4,7 +4,7 @@
 
 This document explains how EVA's MySQL/MariaDB tables cooperate. It complements [Database](11_DATABASE.md), which defines what is persisted, with cardinalities, foreign keys, application-level relationships, and actual lifecycle effects.
 
-The structural sources are [`database/schema.sql`](../../database/schema.sql) and the ordered [`database/migrations/`](../../database/migrations/). Runtime behavior is defined by the services that write, query, and delete these records. The current main database has 14 tables and 15 foreign keys.
+The structural sources are [`database/schema.sql`](../../database/schema.sql) and the ordered [`database/migrations/`](../../database/migrations/). Runtime behavior is defined by the services that write, query, and delete these records. The current main database has 13 tables and 13 foreign keys.
 
 ## Relationship overview
 
@@ -14,8 +14,6 @@ erDiagram
     DOCUMENT_NODES o|--o{ DOCUMENT_NODES : "parent_id; CASCADE"
     DOCUMENTS ||--o{ EVIDENCES : "document_id; CASCADE"
     DOCUMENT_NODES o|--o{ EVIDENCES : "node_id; SET NULL"
-    EVIDENCES ||--o{ EVIDENCE_DERIVATIONS : "evidence_id; CASCADE"
-    EVIDENCES ||--o{ EVIDENCE_DERIVATIONS : "source_evidence_id; CASCADE"
     EVIDENCES ||--o{ EVIDENCE_EMBEDDINGS : "evidence_id; CASCADE"
     DOCUMENTS ||--o{ PROCESSING_JOBS : "document_id; CASCADE"
     PROJECTS ||--o{ PROJECT_DOCUMENTS : "project_id; CASCADE"
@@ -36,9 +34,7 @@ erDiagram
 | `document_nodes.document_id` | `documents.id` | one document to zero or many nodes | `CASCADE` | Keeps the normalized tree inside one work. |
 | `document_nodes.parent_id` | `document_nodes.id` | optional parent to zero or many children | `CASCADE` | Builds the tree; the root uses `NULL`. |
 | `evidences.document_id` | `documents.id` | one document to zero or many evidence records | `CASCADE` | Supports document-scoped build, retrieval, and deletion. |
-| `evidences.node_id` | `document_nodes.id` | optional node to zero or many evidence records | `SET NULL` | Anchors content and summaries to their structural origin. |
-| `evidence_derivations.evidence_id` | `evidences.id` | one derived evidence to zero or many sources | `CASCADE` | Identifies the generated summary. |
-| `evidence_derivations.source_evidence_id` | `evidences.id` | one source to zero or many derived records | `CASCADE` | Identifies every primary or derived input used. |
+| `evidences.node_id` | `document_nodes.id` | optional node to zero or many evidence records | `SET NULL` | Anchors primary content to its structural origin. |
 | `evidence_embeddings.evidence_id` | `evidences.id` | one evidence to zero or many vector versions | `CASCADE` | Subordinates retrieval vectors to persisted content. |
 | `processing_jobs.document_id` | `documents.id` | one document to zero or many jobs | `CASCADE` | Associates the build queue with the work. |
 | `project_documents.project_id` | `projects.id` | projects to documents, many-to-many | `CASCADE` | Defines project membership. |
@@ -61,22 +57,15 @@ If source storage succeeds but the tree transaction fails, the document remains 
 
 `document_nodes` is a self-referencing tree. The application creates one `NULL` parent root and recursively inserts descendants with the same `document_id`. `structural_path` is unique per document. The database validates the referenced rows, while the ingestion service guarantees that parent and child belong to the same document.
 
-### Evidence and derivation lineage
+### Primary evidence
 
 Every evidence belongs to a document and normally to its source node:
 
-- `primary/node_content` records preserve direct node content and are created as `validated`;
-- `derived/node_summary` records preserve hierarchical summaries and are created as `generated`.
+- `primary/node_content` records preserve direct node content and are created as `validated`.
 
 The direct `document_id` is intentional even though the document is also reachable through the node. Current application writes always provide `node_id`; its nullable `SET NULL` contract protects an evidence row if an isolated node is directly removed.
 
-`evidence_derivations` is a directed evidence-to-evidence association:
-
-```text
-evidence_id (produced summary) -> source_evidence_id (input evidence)
-```
-
-Its composite key prevents duplicate edges. Leaf summaries can derive from their own primary content; upper summaries can derive from their own content and child summaries. The application guarantees that the target is derived, sources belong to the same document, and no cycle is introduced. Semantic retrieval follows this graph recursively until it reaches primary evidence, because only primary records may enter the citable answer context.
+Version 6.0.0 removed derived summaries and their lineage table from the operational schema.
 
 ### Versioned embeddings
 
@@ -84,11 +73,9 @@ Its composite key prevents duplicate edges. Leaf summaries can derive from their
 
 ## Cognitive processing queue
 
-`processing_jobs` belongs to a ready document and uses only `summaries` or `embeddings`. The unique `job_key` hashes document, stage, and version key, making repeated scheduling idempotent.
+`processing_jobs` belongs to a ready document and uses only `embeddings`. The unique `job_key` hashes document, stage, and version key, making repeated scheduling idempotent.
 
-There is no foreign key between the two stages. The queue enforces the dependency logically: an embedding job can be claimed only after the document's latest summary job is complete. Retrying a failed summary can requeue its paired completed embedding job so the derived representation remains coherent.
-
-The serialized `result` is operational progress. Evidence, derivations, and embeddings remain the durable documentary memory.
+The serialized `result` is operational progress. Primary evidence and embeddings remain the durable documentary memory.
 
 ## Projects, users, and access resolution
 
@@ -135,22 +122,13 @@ documents -> recursive document_nodes -> primary/node_content evidences
 
 The document is registered first to obtain its ID and storage path. Nodes and primary evidence are inserted together in one transaction.
 
-### Hierarchical summaries
-
-```text
-nodes + existing evidence -> derived/node_summary evidence
-                          -> evidence_derivations for every input
-```
-
-Bottom-up processing creates a lineage that can be followed through child summaries to original primary content.
-
 ### Embeddings
 
 ```text
-documents + nodes + eligible evidence -> structured input -> evidence_embeddings
+documents + nodes + validated primary evidence -> structured input -> evidence_embeddings
 ```
 
-An oversized primary unit may be represented by a compatible derived summary only when `evidence_derivations` proves that lineage.
+An oversized primary unit stops processing and requires real structural subdivision.
 
 ### Query
 
@@ -158,7 +136,6 @@ An oversized primary unit may be represented by a compatible derived summary onl
 grants -> ready documents
 documents + nodes + evidence -> literal/structural retrieval
 evidence + embeddings -> semantic selection and CIE
-derived evidence + derivations -> primary sources
 primary evidence -> answer and citations
 ```
 
@@ -177,10 +154,10 @@ These operational writes never mutate the documentary aggregate.
 
 | Deleted entity | Automatic FK effect | Additional application effect | Preserved records |
 |---|---|---|---|
-| Document | nodes, evidence, connected derivation edges, embeddings, jobs, project links, direct grants | stored source removal after commit | audit and module events |
+| Document | nodes, evidence, embeddings, jobs, project links, direct grants | stored source removal after commit | audit and module events |
 | Project through the product | project links and user grants | first deletes every attached work, including shared works, and their sources | audit and module events |
 | User | sessions and both grant tables | none on documentary data | audit and module events |
-| Evidence | embeddings and every derivation edge where it is target or source | not a normal standalone admin operation | document and node |
+| Evidence | embeddings | not a normal standalone admin operation | document and node |
 | Isolated node | descendants; directly linked evidence receives `node_id = NULL` | not a normal admin operation | evidence and document |
 
 A raw SQL deletion of `projects` would cascade only to `project_documents` and `user_projects`. The product service deliberately performs the broader work deletion first. Administrative operations must use the application contract.
@@ -190,10 +167,8 @@ A raw SQL deletion of `projects` would cascade only to `project_documents` and `
 Foreign keys guarantee referenced existence, uniqueness, and declared cascades. Application services additionally guarantee:
 
 - parent, child, node, and evidence document consistency;
-- same-document, acyclic derivation lineage with a derived target;
 - ready-only queueing and querying;
 - active-model and compatible-dimension embedding use;
-- summary-before-embedding ordering;
 - active-project and ready-document authorization;
 - explicit project selection before applying response profiles;
 - audit and module payload sanitization.
@@ -206,7 +181,7 @@ There are no tables for CNodes, `simetry`/`assimetry` pairs, chat messages, simi
 
 ## Installation verification
 
-In the current versioned state, `database/schema.sql` creates all 14 main-database tables, including `module_events`. A fresh installation imports only that file. An existing installation applies every outstanding migration in filename order; `20260803_010_module_events.sql` remains idempotent and upgrades databases created before the mailbox entered the consolidated schema.
+In the current versioned state, `database/schema.sql` creates all 13 main-database tables, including `module_events`. A fresh installation imports only that file. Version 4.x installations manually apply `20260906_011_remove_derived_summaries.sql` after a complete backup and with workers stopped.
 
 ```sql
 SHOW TABLES LIKE 'module_events';
@@ -216,4 +191,4 @@ FROM information_schema.referential_constraints
 WHERE constraint_schema = DATABASE();
 ```
 
-For the version documented here, the first query returns `module_events` and the second returns `15`.
+For the version documented here, the first query returns `module_events` and the second returns `13`.

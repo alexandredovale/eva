@@ -74,10 +74,10 @@ final class DocumentIngestionService
             $evidenceStatement = $this->database->prepare(
                 'INSERT INTO evidences
                     (public_id, document_id, node_id, evidence_class, evidence_type, content,
-                     summary, source_hash, status)
+                     source_hash, status)
                  VALUES
                     (:public_id, :document_id, :node_id, :evidence_class, :evidence_type, :content,
-                     NULL, :source_hash, :status)'
+                     :source_hash, :status)'
             );
             $evidenceIdStatement = $this->database->prepare(
                 'UPDATE evidences SET public_id = :public_id WHERE id = :id'
@@ -281,4 +281,3 @@ final class DocumentIngestionService
         return sprintf('EVA-E%06d', $evidenceId);
     }
 }
-

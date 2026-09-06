@@ -19,7 +19,7 @@ final readonly class ProcessingQueueService
 
     public function enqueue(int $documentId, string $stage, string $versionKey): ProcessingJob
     {
-        if ($documentId < 1 || !in_array($stage, ['summaries', 'embeddings'], true)
+        if ($documentId < 1 || $stage !== 'embeddings'
             || trim($versionKey) === '') {
             throw new QueueException('Os dados do trabalho cognitivo são inválidos.');
         }
@@ -80,17 +80,6 @@ final readonly class ProcessingQueueService
                    FROM processing_jobs candidate
                   WHERE candidate.status = 'queued'
                     AND candidate.available_at <= NOW()
-                    AND (
-                        candidate.stage <> 'embeddings'
-                        OR (
-                            SELECT summary_job.status
-                              FROM processing_jobs summary_job
-                             WHERE summary_job.document_id = candidate.document_id
-                               AND summary_job.stage = 'summaries'
-                             ORDER BY summary_job.id DESC
-                             LIMIT 1
-                        ) = 'completed'
-                    )
                   ORDER BY candidate.id ASC
                   LIMIT 1
                   FOR UPDATE"
@@ -183,34 +172,6 @@ final readonly class ProcessingQueueService
 
             if ($statement->rowCount() !== 1) {
                 throw new QueueException('O trabalho não pôde ser retomado.');
-            }
-
-            if ($job->stage === 'summaries') {
-                $pairedStatement = $this->database->prepare(
-                    "SELECT id, stage, status
-                       FROM processing_jobs
-                      WHERE document_id = :document_id AND id > :job_id
-                      ORDER BY id ASC
-                      LIMIT 1
-                      FOR UPDATE"
-                );
-                $pairedStatement->execute([
-                    'document_id' => $job->documentId,
-                    'job_id' => $job->id,
-                ]);
-                $pairedJob = $pairedStatement->fetch();
-
-                if (is_array($pairedJob)
-                    && ($pairedJob['stage'] ?? null) === 'embeddings'
-                    && ($pairedJob['status'] ?? null) === 'completed') {
-                    $resetEmbedding = $this->database->prepare(
-                        "UPDATE processing_jobs
-                            SET status = 'queued', result = NULL, locked_by = NULL, last_error = NULL,
-                                available_at = NOW(), started_at = NULL, finished_at = NULL
-                          WHERE id = :id AND status = 'completed'"
-                    );
-                    $resetEmbedding->execute(['id' => (int) $pairedJob['id']]);
-                }
             }
 
             $this->database->commit();

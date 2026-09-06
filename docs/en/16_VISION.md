@@ -8,7 +8,7 @@ The central question is:
 
 > What real utility does EVA have today for progress in the world?
 
-The assessment explicitly distinguishes implemented capabilities, observed internal results, current limitations, and conditional future impact. The objective is not to describe EVA as a bias-free system—no architecture based on embeddings, generated summaries, and language models can sustain that claim—but to evaluate the product without promotional bias.
+The assessment explicitly distinguishes implemented capabilities, observed internal results, current limitations, and conditional future impact. The objective is not to describe EVA as a bias-free system—no architecture based on embeddings and language models can sustain that claim—but to evaluate the product without promotional bias.
 
 ## Executive Assessment
 
@@ -40,7 +40,7 @@ The implemented flow is:
 1. The system receives Markdown, JSON, or XML documents.
 2. Content is converted into a common documentary tree while preserving order, hierarchy, and source references.
 3. Literal primary evidence is created for nodes with direct documentary content.
-4. Versioned bottom-up summaries may be produced while preserving lineage between each summary and its sources.
+4. Versioned embeddings are produced exclusively from complete primary evidence.
 5. Embeddings are generated for complete, previously structured documentary units.
 6. At query time, the input is routed through direct, structural, broad, or semantic paths.
 7. On semantic routes, κq and the first CIE operate directly over the complete primary population; only the upper core, or convergence as fallback, continues.
@@ -94,7 +94,7 @@ Its cost is approximately proportional to the number of embeddings multiplied by
 
 #### Statistical boundary rather than token budget
 
-On semantic routes, global CIE replaces the former configured evidence count. A single long evidence unit can still create an expensive prompt, so primary-source atomicity remains a structural requirement. Hierarchical summary construction also lacks a guard equivalent to the protection applied to embedding units.
+On semantic routes, global CIE replaces the former configured evidence count. A single long evidence unit can still create an expensive prompt, so primary-source atomicity remains a structural requirement.
 
 #### No absolute relevance threshold
 
@@ -115,8 +115,8 @@ Local validation may request up to three complete generations with the same cont
 ### Strengths
 
 - Original hierarchy is preserved instead of being replaced by arbitrary chunks.
-- Primary evidence and generated summaries remain distinguishable.
-- Derivations make it possible to return from a summary to its source evidence.
+- Operational evidence remains literal and primary.
+- Primary evidence remains directly linked to its document node and source reference.
 - Embeddings are versioned by model and hash.
 - Projects group works without changing their cognitive structure.
 - User scopes restrict which works may participate in a query.
@@ -191,7 +191,7 @@ EVA deliberately takes the opposite path: it does not materialize Cnode because 
 
 ### Provider neutrality
 
-The domain provides separate interfaces for embeddings, summaries, and answers. This is a sound architectural separation. However, [`CognitiveProviderFactory.php`](../../app/Infrastructure/Ai/CognitiveProviderFactory.php) always instantiates the same adapters, whose payloads use fields such as `messages`, `response_format`, `thinking`, and `max_tokens`.
+The domain provides separate interfaces for embeddings and answers. This is a sound architectural separation. However, [`CognitiveProviderFactory.php`](../../app/Infrastructure/Ai/CognitiveProviderFactory.php) always instantiates the same adapters, whose payloads use fields such as `messages`, `response_format`, `thinking`, and `max_tokens`.
 
 In practice, current portability means compatibility with similarly shaped APIs, not universal provider neutrality.
 
@@ -199,7 +199,7 @@ In practice, current portability means compatibility with similarly shaped APIs,
 
 EVA contains relevant containment mechanisms:
 
-- reuse of summaries and embeddings;
+- reuse of embeddings;
 - no query embedding on non-semantic routes;
 - termination without a generative call when no evidence is retrieved;
 - no precomputation of relational pairs;
@@ -236,7 +236,7 @@ It can support progress when it:
 - makes specialized knowledge more accessible without erasing its origin;
 - reduces the risk of decisions based on unsupported claims;
 - enables auditing of answers in education, science, industry, and public administration;
-- preserves the distinction between original document, summary, and interpretation;
+- preserves the distinction between original document and interpretation;
 - prevents every conversation from silently rewriting institutional memory;
 - provides an open architecture for verifiable RAG experimentation;
 - allows models to be replaced without rebuilding all documentary logic;
@@ -256,7 +256,7 @@ The `validated` state of primary evidence proves that content was extracted lite
 
 ### Determinism does not mean absence of bias
 
-CIE is deterministic for the same set of similarities, but embeddings are produced by models, summaries are generated interpretations, and local rules reflect design decisions. The system reduces arbitrariness at specific stages; it does not eliminate linguistic, documentary, or model bias.
+CIE is deterministic for the same set of similarities, but embeddings are produced by models and local rules reflect design decisions. The system reduces arbitrariness at specific stages; it does not eliminate linguistic, documentary, or model bias.
 
 ### Citation does not mean semantic implication
 
@@ -270,8 +270,8 @@ Blocking an answer with no valid documentary citation or with an out-of-context 
 
 1. Run independent, multidisciplinary benchmarks against chunk-based RAG, long context, GraphRAG, and reranked RAG.
 2. Introduce and calibrate an absolute non-relevance threshold while measuring precision, recall, and correct refusal.
-3. Move search to a vector or ANN index while preserving documentary identity and lineage in MySQL.
-4. Apply a real token budget to final context and summary units.
+3. Move search to a vector or ANN index while preserving documentary identity in MySQL.
+4. Apply a real token budget to final context and primary evidence units.
 5. Build a documentary lifecycle with versioning, validity, approval, deduplication, updates, and metadata.
 6. Add PDF, DOCX, HTML, OCR, and multimodal content with page- or region-level provenance.
 7. Implement defenses against documentary prompt injection, rate limiting, MFA, and abandoned-job recovery.

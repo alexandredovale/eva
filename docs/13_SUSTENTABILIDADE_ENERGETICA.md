@@ -32,7 +32,7 @@ Esses limites não garantem, isoladamente, menor consumo energético, mas impede
 
 ### Reutilização da construção cognitiva
 
-Sínteses hierárquicas e embeddings persistentes são versionados por modelo e hash de conteúdo. Unidades idênticas podem ser reutilizadas, e o processamento se concentra nas versões ausentes ou alteradas.
+Embeddings persistentes de evidências primárias são versionados por modelo e hash de conteúdo. Unidades idênticas podem ser reutilizadas, e o processamento se concentra nas versões ausentes ou alteradas.
 
 O custo inicial de construção pode, portanto, ser amortizado por consultas posteriores ao mesmo acervo. Essa característica é especialmente importante quando documentos relativamente estáveis atendem grande volume de perguntas.
 

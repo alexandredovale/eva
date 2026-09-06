@@ -5,7 +5,7 @@ type: software
 authors:
   - given-names: "Alexandre"
     family-names: "do Vale Brostel"
-version: 4.0.2
+version: 6.0.0
 doi: "10.5281/zenodo.21500611"
 date-released: 2026-09-06
 license: Apache-2.0

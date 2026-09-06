@@ -2,50 +2,38 @@
 
 ## Objetivo
 
-Construir a memória documental a partir de unidades organizadas, preservando origem e hierarquia sem materializar combinações relacionais.
+Construir a memória documental a partir de evidências primárias completas, preservando origem e hierarquia sem materializar combinações relacionais.
 
-## Movimento ascendente
-
-```text
-trechos → subtítulos → capítulos → seções → partes → obra
-```
-
-O resumo de um nó pai deriva de seu conteúdo próprio e das sínteses filhas. Cada evidência derivada registra em `evidence_derivations` as evidências que a originaram.
-
-## Classes e tipos
+## Classe e tipo operacional
 
 - `primary` + `node_content`: conteúdo literal extraído do nó.
-- `derived` + `node_summary`: síntese hierárquica gerada a partir de evidências identificadas.
 
-Esses campos são o contrato semântico persistente do Evidence Algorithm. Conteúdo original e conteúdo gerado permanecem distinguíveis.
+Na versão 6.0.0, essa é a única combinação operacional persistida pelo Evidence Algorithm. Resumos derivados e linhagens de síntese não integram mais a captura, a construção ou a consulta.
 
 ## Embeddings
 
-Cada embedding representa uma evidência completa já organizada pelo documento. O texto vetorizado inclui contexto estrutural, como título, caminho, classe, tipo e conteúdo da unidade.
+Cada embedding representa uma evidência primária completa já organizada pelo documento. O texto vetorizado inclui contexto estrutural, como título, caminho, classe, tipo e conteúdo literal da unidade.
 
-Embeddings nunca são formados por cortes arbitrários de caracteres ou tokens. Quando uma unidade excede a capacidade técnica, o sistema utiliza sua subdivisão documental e as sínteses correspondentes; não inventa fragmentos por tamanho.
+Embeddings nunca são formados por cortes arbitrários de caracteres ou tokens. Quando uma unidade excede a capacidade técnica, o documento exige subdivisão estrutural real; o sistema não inventa fragmentos por tamanho.
 
 Antes de qualquer lote ser enviado ao provedor, `EmbeddingInputGuard` estima de forma conservadora o tamanho de todas as unidades pendentes. O limite nominal é definido por `AI_EMBEDDING_MAX_INPUT_TOKENS`; a aplicação utiliza 90% desse valor como margem preventiva contra diferenças entre tokenizadores.
 
-Uma evidência primária incompatível não é truncada nem enviada ao provedor. Sínteses `derived` + `node_summary` válidas continuam sendo construídas, vetorizadas e ligadas às fontes por `evidence_derivations`, mas a recuperação orientada às fontes da versão 4.0.2 consulta diretamente apenas embeddings primários. Para que uma unidade primária incompatível participe dessa população, ela precisa de subdivisão estrutural real.
-
-Se a evidência primária incompatível não possuir essa síntese derivada válida, a etapa é interrompida antes da primeira requisição ao provedor. O diagnóstico informa o identificador público da evidência e exige uma subdivisão estrutural real da fonte. Aumentar o lote, cortar texto ou criar fragmentos artificiais não é uma correção permitida.
+Uma evidência primária incompatível não é truncada nem enviada ao provedor. A etapa é interrompida antes da primeira requisição, informa o identificador público da evidência e exige subdivisão estrutural real da fonte. Aumentar o lote, cortar texto ou criar fragmentos artificiais não é uma correção permitida.
 
 Modelo, dimensão e hash identificam a versão vetorial. Similaridades são usadas apenas durante a recuperação e descartadas após a ordenação.
 
 ## Limite da construção persistente
 
-A construção termina em sínteses, derivações e embeddings. Ela não materializa Cnode: essa derivação conceitual do EVA existe somente durante uma consulta. Também não existe análise antecipada de pares, cache de interação ou vetor relacional.
+A construção termina nos embeddings das evidências primárias. Ela não materializa Cnode: essa derivação conceitual do EVA existe somente durante uma consulta. Também não existe análise antecipada de pares, cache de interação ou vetor relacional.
 
 Esse limite evita explosão combinatória, chamadas externas sem demanda e duplicação da informação já presente nas evidências.
 
 ## Implementação
 
-`HierarchicalSummaryService` percorre a árvore de baixo para cima e reutiliza versões idênticas por modelo e hash. `EvidenceEmbeddingService` valida a compatibilidade de todas as unidades pendentes e vetoriza evidências primárias e derivadas em lotes técnicos que preservam cada unidade completa. O resultado da etapa expõe `represented_by_derived`, permitindo auditar quantas primárias excedentes foram representadas semanticamente por sínteses rastreáveis.
+`EvidenceEmbeddingService` valida a compatibilidade de todas as unidades pendentes e vetoriza exclusivamente evidências primárias em lotes técnicos que preservam cada unidade completa. Versões idênticas por modelo e hash são reutilizadas.
 
-A CLI possui somente as etapas:
+A CLI possui somente a etapa:
 
 ```powershell
-php bin/build-cognitive.php <document-id> --stage=summaries --live
 php bin/build-cognitive.php <document-id> --stage=embeddings --live
 ```

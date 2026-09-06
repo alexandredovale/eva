@@ -6,11 +6,7 @@ use Eva\Application\Cognitive\EmbeddingBatchResult;
 use Eva\Application\Cognitive\EmbeddingProviderInterface;
 use Eva\Application\Cognitive\EmbeddingVector;
 use Eva\Application\Cognitive\EvidenceEmbeddingService;
-use Eva\Application\Cognitive\HierarchicalSummaryService;
 use Eva\Application\Cognitive\StructuredEmbeddingUnit;
-use Eva\Application\Cognitive\StructuredSummaryUnit;
-use Eva\Application\Cognitive\SummaryProviderInterface;
-use Eva\Application\Cognitive\SummaryResult;
 use Eva\Application\Ingestion\DocumentIngestionService;
 use Eva\Application\Query\DocumentContextRetriever;
 use Eva\Application\Query\DocumentQueryService;
@@ -60,7 +56,7 @@ function assertQuery(bool $condition, string $message): void
 /** @return array<string, int> */
 function queryTableCounts(PDO $database): array
 {
-    $tables = ['documents', 'document_nodes', 'evidences', 'evidence_derivations', 'evidence_embeddings'];
+    $tables = ['documents', 'document_nodes', 'evidences', 'evidence_embeddings'];
     $counts = [];
 
     foreach ($tables as $table) {
@@ -110,25 +106,6 @@ final class SemanticFakeEmbeddingProvider implements EmbeddingProviderInterface
         }
 
         return new EmbeddingBatchResult($vectors, count($units));
-    }
-}
-
-final class QueryHierarchySummaryProvider implements SummaryProviderInterface
-{
-    public function model(): string
-    {
-        return 'fake-query-summary-v1';
-    }
-
-    public function summarize(StructuredSummaryUnit $unit): SummaryResult
-    {
-        $content = trim($unit->ownContent);
-
-        if ($content === '') {
-            $content = implode(' ', array_column($unit->childSummaries, 'summary'));
-        }
-
-        return new SummaryResult($unit->structuralPath . ' ' . $content, $this->model());
     }
 }
 
@@ -342,11 +319,8 @@ try {
     assertQuery($ingested->nodeCount === 99 && $ingested->primaryEvidenceCount === 77, 'O documento real perdeu sua estrutura.');
 
     $embeddingProvider = new SemanticFakeEmbeddingProvider();
-    $summaryBuild = (new HierarchicalSummaryService($database, new QueryHierarchySummaryProvider()))
-        ->buildForDocument($documentId);
-    assertQuery($summaryBuild->createdSummaries === 98, 'A consulta deve possuir a população hierárquica completa.');
     $embeddingBuild = (new EvidenceEmbeddingService($database, $embeddingProvider))->buildForDocument($documentId);
-    assertQuery($embeddingBuild->createdEmbeddings === 175, 'As unidades primárias e hierárquicas não foram vetorizadas para consulta.');
+    assertQuery($embeddingBuild->createdEmbeddings === 77, 'As evidências primárias não foram vetorizadas para consulta.');
     assertQuery(count($embeddingProvider->batches) === 1, 'A vetorização documental deve usar um lote.');
     assertQuery(
         max(array_map(static fn (StructuredEmbeddingUnit $unit): int => strlen($unit->text), $embeddingProvider->batches[0])) > 5_000,
@@ -513,12 +487,10 @@ try {
     );
     $secondDocumentId = $secondIngested->documentId;
     $secondStoragePath = $secondIngested->storagePath;
-    (new HierarchicalSummaryService($database, new QueryHierarchySummaryProvider()))
-        ->buildForDocument($secondDocumentId);
     $secondEmbeddingBuild = (new EvidenceEmbeddingService($database, $embeddingProvider))
         ->buildForDocument($secondDocumentId);
     assertQuery(
-        $secondEmbeddingBuild->createdEmbeddings === 175,
+        $secondEmbeddingBuild->createdEmbeddings === 77,
         'A segunda obra sintética não foi vetorizada para a regressão multiobra.'
     );
 

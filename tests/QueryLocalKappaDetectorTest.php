@@ -26,8 +26,8 @@ function kappaCandidates(array $scores): array
         static fn (float $score, int $index): ContextCandidate => new ContextCandidate(
             $index + 1,
             sprintf('EVA-E%06d', $index + 1),
-            'derived',
-            'node_summary',
+            'primary',
+            'node_content',
             $score
         ),
         $scores,
@@ -41,7 +41,7 @@ $clearBreak = $detector->analyze(kappaCandidates([.95, .93, .91, .89, .87, .65, 
 assertKappa($clearBreak->status === 'identified', 'A ruptura clara não foi identificada.');
 assertKappa($clearBreak->kappa === 5, 'A fronteira clara deveria terminar antes da queda para 0,65.');
 assertKappa(count($clearBreak->selectedCandidates) === 5, 'A população legitimada pela ruptura está incorreta.');
-assertKappa(count($clearBreak->scores) === 9, 'A análise não examinou a população hierárquica completa.');
+assertKappa(count($clearBreak->scores) === 9, 'A análise não examinou a população primária completa.');
 
 $smooth = $detector->analyze(kappaCandidates([.90, .88, .86, .84, .82, .80, .78, .76]));
 assertKappa($smooth->status === 'no_structural_break', 'Uma queda linear não deveria fabricar ruptura.');

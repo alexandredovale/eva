@@ -41,14 +41,13 @@ function assertRealDocument(bool $condition, string $message): void
     }
 }
 
-/** @return array{documents: int, nodes: int, evidences: int, derivations: int} */
+/** @return array{documents: int, nodes: int, evidences: int} */
 function realDocumentCounts(PDO $database): array
 {
     return [
         'documents' => (int) $database->query('SELECT COUNT(*) FROM documents')->fetchColumn(),
         'nodes' => (int) $database->query('SELECT COUNT(*) FROM document_nodes')->fetchColumn(),
         'evidences' => (int) $database->query('SELECT COUNT(*) FROM evidences')->fetchColumn(),
-        'derivations' => (int) $database->query('SELECT COUNT(*) FROM evidence_derivations')->fetchColumn(),
     ];
 }
 
@@ -131,7 +130,7 @@ try {
            FROM evidences e
            JOIN document_nodes n ON n.id = e.node_id
           WHERE e.document_id = :document_id
-            AND (e.content <> n.content OR e.source_hash <> n.source_hash OR e.summary IS NOT NULL)'
+            AND (e.content <> n.content OR e.source_hash <> n.source_hash)'
     );
     $statement->execute(['document_id' => $documentId]);
     assertRealDocument((int) $statement->fetchColumn() === 0, 'Evidências reais foram cortadas ou modificadas.');
@@ -145,10 +144,6 @@ try {
         'O conteúdo estrutural extenso não deve ser cortado por limite de caracteres.'
     );
 
-    assertRealDocument(
-        realDocumentCounts($database)['derivations'] === $baseline['derivations'],
-        'A ingestão real não deve antecipar derivações.'
-    );
 } finally {
     if ($documentId !== null) {
         $statement = $database->prepare('DELETE FROM documents WHERE id = :id');

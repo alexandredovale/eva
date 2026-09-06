@@ -21,10 +21,9 @@ final readonly class ProductReadService
             "SELECT d.id, d.public_id, d.title, d.format, d.status, d.created_at,
                     (SELECT COUNT(*) FROM document_nodes n WHERE n.document_id = d.id) AS node_count,
                     (SELECT COUNT(*) FROM evidences e WHERE e.document_id = d.id AND e.evidence_class = 'primary') AS primary_evidence_count,
-                    (SELECT COUNT(*) FROM evidences e WHERE e.document_id = d.id AND e.evidence_class = 'derived') AS derived_evidence_count,
                     (SELECT COUNT(*) FROM evidence_embeddings ee
                        JOIN evidences e ON e.id = ee.evidence_id
-                      WHERE e.document_id = d.id) AS embedding_count,
+                      WHERE e.document_id = d.id AND e.evidence_class = 'primary') AS embedding_count,
                     CASE
                         WHEN EXISTS (
                             SELECT 1 FROM processing_jobs running_job
@@ -38,8 +37,9 @@ final readonly class ProductReadService
                                WHERE primary_evidence.document_id = d.id
                                  AND primary_evidence.evidence_class = 'primary') > 0
                          AND (SELECT COUNT(*) FROM evidence_embeddings processed_embedding
-                               JOIN evidences processed_evidence ON processed_evidence.id = processed_embedding.evidence_id
-                              WHERE processed_evidence.document_id = d.id) >=
+                              JOIN evidences processed_evidence ON processed_evidence.id = processed_embedding.evidence_id
+                              WHERE processed_evidence.document_id = d.id
+                                AND processed_evidence.evidence_class = 'primary') >=
                              (SELECT COUNT(*) FROM evidences expected_primary
                                WHERE expected_primary.document_id = d.id
                                  AND expected_primary.evidence_class = 'primary') THEN 'completed'
@@ -65,7 +65,6 @@ final readonly class ProductReadService
             'evidences' => $this->groupedCount('evidences', 'evidence_class'),
             'evidence_types' => $this->groupedCount('evidences', 'evidence_type'),
             'embeddings' => (int) $this->database->query('SELECT COUNT(*) FROM evidence_embeddings')->fetchColumn(),
-            'derivations' => (int) $this->database->query('SELECT COUNT(*) FROM evidence_derivations')->fetchColumn(),
             'jobs' => $this->groupedCount('processing_jobs', 'status'),
             'audit_events' => (int) $this->database->query('SELECT COUNT(*) FROM audit_events')->fetchColumn(),
         ];
@@ -172,27 +171,22 @@ final readonly class ProductReadService
         $versionParts = explode(':', $versionKey, 3);
         $model = $versionParts[2] ?? '';
 
-        if ($stage === 'summaries') {
-            return [
-                'current' => $this->summaryProgress($documentId, $model),
-                'total' => $this->eligibleSummaryNodes($documentId),
-            ];
-        }
-
         $totalStatement = $this->database->prepare(
             "SELECT COUNT(*)
                FROM evidences
               WHERE document_id = :document_id
-                AND evidence_class IN ('primary', 'derived')
-                AND status IN ('generated', 'validated')"
+                AND evidence_class = 'primary'
+                AND evidence_type = 'node_content'
+                AND status = 'validated'"
         );
         $totalStatement->execute(['document_id' => $documentId]);
         $currentStatement = $this->database->prepare(
-            'SELECT COUNT(*)
+            "SELECT COUNT(*)
                FROM evidence_embeddings ee
                JOIN evidences e ON e.id = ee.evidence_id
               WHERE e.document_id = :document_id
-                AND ee.model = :model'
+                AND e.evidence_class = 'primary'
+                AND ee.model = :model"
         );
         $currentStatement->execute(['document_id' => $documentId, 'model' => $model]);
 
@@ -202,52 +196,4 @@ final readonly class ProductReadService
         ];
     }
 
-    private function summaryProgress(int $documentId, string $model): int
-    {
-        $statement = $this->database->prepare(
-            "SELECT COUNT(*)
-               FROM evidences
-              WHERE document_id = :document_id
-                AND evidence_class = 'derived'
-                AND evidence_type = 'node_summary'
-                AND generation_model = :model
-                AND status IN ('generated', 'validated')"
-        );
-        $statement->execute(['document_id' => $documentId, 'model' => $model]);
-
-        return (int) $statement->fetchColumn();
-    }
-
-    private function eligibleSummaryNodes(int $documentId): int
-    {
-        $statement = $this->database->prepare(
-            'SELECT id, parent_id, content
-               FROM document_nodes
-              WHERE document_id = :document_id'
-        );
-        $statement->execute(['document_id' => $documentId]);
-        $parents = [];
-        $contentNodes = [];
-
-        foreach ($statement->fetchAll() as $node) {
-            $nodeId = (int) $node['id'];
-            $parents[$nodeId] = $node['parent_id'] === null ? null : (int) $node['parent_id'];
-            $content = trim((string) $node['content']);
-
-            if (!in_array($content, ['', '{}', '[]'], true)) {
-                $contentNodes[] = $nodeId;
-            }
-        }
-
-        $eligible = [];
-
-        foreach ($contentNodes as $nodeId) {
-            while ($nodeId !== null && !isset($eligible[$nodeId])) {
-                $eligible[$nodeId] = true;
-                $nodeId = $parents[$nodeId] ?? null;
-            }
-        }
-
-        return count($eligible);
-    }
 }

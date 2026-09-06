@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project uses [Semantic Versioning](https://semver.org/).
 
+## [6.0.0] - 2026-09-06
+
+### Removed
+
+- Hierarchical-summary generation, providers, queue stages, embeddings, lineage resolution, metrics, and configuration were removed from the operational pipeline.
+- Derived `node_summary` evidence and `evidence_derivations` are no longer part of the current database schema. A manual migration removes the historical data and narrows the processing queue to primary-evidence embeddings.
+
+### Changed
+
+- Cognitive construction now consists only of validated `primary:node_content` evidence and its embeddings; oversized evidence requires real structural subdivision.
+- Semantic retrieval remains source-first with κq curve-break detection, upper-core CIE selection, convergence fallback, and all later primary calculations preserved.
+
 ## [4.0.2] - 2026-09-06
 
 ### Changed

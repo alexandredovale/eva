@@ -78,38 +78,17 @@ try {
     );
     $primaryStatement->execute(['document_id' => $documentIds[0]]);
     $primaryId = (int) $primaryStatement->fetchColumn();
-    $derivedPublicId = 'DEL-' . strtoupper(bin2hex(random_bytes(8)));
-    $derivedInsert = $database->prepare(
-        "INSERT INTO evidences
-            (public_id, document_id, node_id, evidence_class, evidence_type, content, summary,
-             generation_model, generation_input_hash, status)
-         VALUES
-            (:public_id, :document_id, NULL, 'derived', 'summary', :content, :summary,
-             'deletion-test', :input_hash, 'generated')"
-    );
-    $derivedInsert->execute([
-        'public_id' => $derivedPublicId,
-        'document_id' => $documentIds[0],
-        'content' => 'Síntese temporária para exclusão.',
-        'summary' => 'Síntese temporária para exclusão.',
-        'input_hash' => hash('sha256', $suffix),
-    ]);
-    $derivedId = (int) $database->lastInsertId();
-    $derivation = $database->prepare(
-        'INSERT INTO evidence_derivations (evidence_id, source_evidence_id) VALUES (:evidence_id, :source_id)'
-    );
-    $derivation->execute(['evidence_id' => $derivedId, 'source_id' => $primaryId]);
     $embedding = $database->prepare(
         'INSERT INTO evidence_embeddings (evidence_id, model, dimensions, vector_data, content_hash)
          VALUES (:evidence_id, :model, 3, :vector_data, :content_hash)'
     );
     $embedding->execute([
-        'evidence_id' => $derivedId,
+        'evidence_id' => $primaryId,
         'model' => 'deletion-test',
         'vector_data' => '[1,0,0]',
         'content_hash' => hash('sha256', 'deletion-vector-' . $suffix),
     ]);
-    (new ProcessingQueueService($database))->enqueue($documentIds[0], 'summaries', 'deletion-test-' . $suffix);
+    (new ProcessingQueueService($database))->enqueue($documentIds[0], 'embeddings', 'deletion-test-' . $suffix);
 
     foreach ($documentResults as $result) {
         assertDeletion(is_file($storage->absolutePath($result->storagePath)), 'A fonte temporária não foi armazenada.');
@@ -124,17 +103,15 @@ try {
     $deleted = $deletion->deleteProject($projectIds[0]);
     assertDeletion($deleted['documents_deleted'] === 2, 'A exclusão do projeto não removeu todas as obras.');
     assertDeletion($deleted['nodes_deleted'] >= 2, 'Os nós não foram contabilizados na exclusão.');
-    assertDeletion($deleted['evidences_deleted'] >= 3, 'As evidências não foram contabilizadas na exclusão.');
-    assertDeletion($deleted['embeddings_deleted'] === 1, 'O embedding derivado não foi contabilizado.');
-    assertDeletion($deleted['derivations_deleted'] === 1, 'A derivação não foi contabilizada.');
+    assertDeletion($deleted['evidences_deleted'] >= 2, 'As evidências não foram contabilizadas na exclusão.');
+    assertDeletion($deleted['embeddings_deleted'] === 1, 'O embedding primário não foi contabilizado.');
     assertDeletion($deleted['jobs_deleted'] === 1, 'O trabalho de processamento não foi contabilizado.');
     assertDeletion($deleted['storage_cleanup_failures'] === 0, 'A limpeza das fontes apresentou falha.');
     assertDeletion(countForDocuments($database, 'documents', $documentIds) === 0, 'As obras permaneceram no banco.');
     assertDeletion(countForDocuments($database, 'document_nodes', $documentIds) === 0, 'Os nós permaneceram no banco.');
     assertDeletion(countForDocuments($database, 'evidences', $documentIds) === 0, 'As evidências permaneceram no banco.');
     assertDeletion(countForDocuments($database, 'processing_jobs', $documentIds) === 0, 'Os trabalhos permaneceram no banco.');
-    assertDeletion((int) $database->query("SELECT COUNT(*) FROM evidence_embeddings WHERE evidence_id = {$derivedId}")->fetchColumn() === 0, 'O embedding permaneceu no banco.');
-    assertDeletion((int) $database->query("SELECT COUNT(*) FROM evidence_derivations WHERE evidence_id = {$derivedId}")->fetchColumn() === 0, 'A derivação permaneceu no banco.');
+    assertDeletion((int) $database->query("SELECT COUNT(*) FROM evidence_embeddings WHERE evidence_id = {$primaryId}")->fetchColumn() === 0, 'O embedding permaneceu no banco.');
     assertDeletion((int) $database->query("SELECT COUNT(*) FROM projects WHERE id = {$projectIds[0]}")->fetchColumn() === 0, 'O projeto principal permaneceu no banco.');
     assertDeletion((int) $database->query("SELECT COUNT(*) FROM projects WHERE id = {$projectIds[1]}")->fetchColumn() === 1, 'O outro projeto foi removido indevidamente.');
     assertDeletion((int) $database->query("SELECT COUNT(*) FROM project_documents WHERE project_id = {$projectIds[1]}")->fetchColumn() === 0, 'O vínculo compartilhado da obra permaneceu no outro projeto.');

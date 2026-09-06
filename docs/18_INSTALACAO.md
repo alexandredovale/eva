@@ -66,7 +66,6 @@ Para cada capacidade, configure identificador do provedor, endpoint, modelo e no
 Chamadas reais exigem `AI_LIVE_ENABLED=true`; comandos CLI de construção e consulta exigem adicionalmente `--live`. Essa dupla confirmação evita consumo externo acidental.
 
 ```powershell
-php bin\build-cognitive.php <document-id> --stage=summaries --live
 php bin\build-cognitive.php <document-id> --stage=embeddings --live
 php bin\query-document.php <document-id> --live "sua pergunta"
 ```

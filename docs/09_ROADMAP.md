@@ -15,15 +15,13 @@ A arquitetura trabalha em camadas:
 ```text
 Pergunta
 ↓
-recuperação hierárquica
+recuperação primária
 ↓
 κq
 ↓
 CIE inicial sobre fontes
 ↓
-resolução da linhagem
-↓
-evidências primárias
+fontes primárias selecionadas
 ↓
 κe
 ↓
@@ -164,9 +162,9 @@ Nesta etapa inicial, somente o núcleo `s ≥ μ + σ` é encaminhado. A converg
 
 # 3. Da primeira seleção ao refinamento primário
 
-Desde o primeiro cálculo, o EVA 4.0.2 trabalha diretamente com **evidências primárias**.
+Desde o primeiro cálculo, o EVA 6.0.0 trabalha exclusivamente com **evidências primárias**.
 
-O primeiro CIE encaminha seu núcleo superior ou, quando esse núcleo está vazio, sua convergência. A rastreabilidade das sínteses derivadas permanece na memória construída, mas não participa dessa primeira seleção.
+O primeiro CIE encaminha seu núcleo superior ou, quando esse núcleo está vazio, sua convergência. Não existe etapa intermediária de síntese ou resolução de linhagem.
 
 O fluxo encaminhado é:
 
@@ -729,8 +727,7 @@ Esta explicação corresponde à arquitetura documentada principalmente em:
 
 ## Fase 3 — Evidence Algorithm
 
-- sínteses ascendentes rastreáveis — concluído;
-- evidências `primary`/`derived` e tipos semânticos — concluído;
+- evidências `primary:node_content` literais — concluído;
 - derivações de origem — concluído;
 - embeddings contextuais de unidades completas — concluído;
 - versionamento e retomada sem chamadas duplicadas — concluído.
@@ -739,7 +736,6 @@ Esta explicação corresponde à arquitetura documentada principalmente em:
 
 - detecção de input direto, estrutural, conceitual, relacional ou amplo — concluído;
 - busca adaptativa em evidências primárias e derivadas — concluído;
-- resolução de sínteses até fontes primárias — concluído;
 - Cnode definido como derivação conceitual interna e transitória do EVA, sem hierarquia ou persistência — concluído;
 - `simetry`/`assimetry` na mesma chamada de resposta — concluído;
 - validação de participantes, orientação, citações e fragmentos literais — concluído;
@@ -748,7 +744,7 @@ Esta explicação corresponde à arquitetura documentada principalmente em:
 ## Fase 5 — Produto
 
 - interface administrativa e de consulta — concluído;
-- fila limitada a sínteses e embeddings — concluído;
+- fila limitada a embeddings primários — concluído;
 - configuração white label — concluído;
 - auditoria, métricas e controles de acesso — concluído;
 - testes sem consumo externo — concluído.
@@ -757,7 +753,7 @@ Esta explicação corresponde à arquitetura documentada principalmente em:
 
 - remoção de `cnodes`, `cnode_evidences`, `cnode_embeddings` e `interaction_analyses` — concluído;
 - remoção da etapa persistente `cnodes` — concluído;
-- recuperação semântica usando classe, tipo e linhagem das evidências — concluído;
+- recuperação semântica usando evidências primárias validadas — concluído;
 - interações exclusivamente contextuais e não persistentes — concluído;
 - documentação, produto e testes atualizados — concluído.
 
@@ -769,7 +765,7 @@ As cinco fases e o primeiro upgrade arquitetural estão concluídos. Novas fases
 - média, desvio padrão populacional e coeficiente de variação — concluído;
 - regiões de descarte, convergência e núcleo — concluído;
 - fallback determinístico para convergência quando não houver núcleo — concluído;
-- resolução integral de linhagem somente após a seleção estatística, preservando a região herdada — concluído;
+- encaminhamento direto das fontes após a seleção estatística, preservando a região herdada — concluído;
 - κe e CIE primário preservados para as fontes encaminhadas pelo núcleo inicial ou por seu fallback de convergência — concluído;
 - união deduplicada dos núcleos primários locais e CIE global de consolidação — concluído;
 - remoção de `QUERY_MAX_EVIDENCE` das rotas semânticas e isolamento de `QUERY_NON_SEMANTIC_MAX_EVIDENCE` — concluído;

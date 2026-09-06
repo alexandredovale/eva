@@ -78,35 +78,35 @@
     <rect width="190" height="88" rx="14" class="node"/>
     <text x="95" y="28" class="label">Processar</text>
     <text x="95" y="51" class="tiny">POST /api/documents/{id}/process</text>
-    <text x="95" y="70" class="tiny">enfileira 2 estágios</text>
+    <text x="95" y="70" class="tiny">enfileira embeddings</text>
   </g>
   <path d="M994 210 H1027" class="arrow"/>
   <g transform="translate(1027 166)">
     <rect width="205" height="88" rx="14" class="node-ai"/>
-    <text x="102.5" y="28" class="label">summaries</text>
-    <text x="102.5" y="51" class="small">sínteses bottom-up</text>
-    <text x="102.5" y="70" class="tiny">N chamadas externas</text>
+    <text x="102.5" y="28" class="label">fila cognitiva</text>
+    <text x="102.5" y="51" class="small">somente embeddings</text>
+    <text x="102.5" y="70" class="tiny">estado rastreável</text>
   </g>
   <path d="M1232 210 H1265" class="arrow"/>
   <g transform="translate(1265 158)">
     <rect width="260" height="104" rx="14" class="node-ai"/>
     <text x="130" y="27" class="label">embeddings</text>
-    <text x="130" y="50" class="small">aguarda summaries concluído</text>
-    <text x="130" y="70" class="small">primary + derived em lotes</text>
+    <text x="130" y="50" class="small">evidências primárias em lotes</text>
+    <text x="130" y="70" class="small">unidades-fonte completas</text>
     <text x="130" y="89" class="tiny">M chamadas externas</text>
   </g>
 
   <path d="M1129 254 V306 H684" class="arrow-green"/>
   <g transform="translate(455 302)">
     <rect width="458" height="70" rx="14" class="node-db"/>
-    <text x="229" y="27" class="label">Sínteses derivadas + evidence_derivations</text>
-    <text x="229" y="50" class="small">linhagem persistida até as fontes primárias</text>
+    <text x="229" y="27" class="label">Evidências primárias literais</text>
+    <text x="229" y="50" class="small">vinculadas diretamente aos nós e às fontes</text>
   </g>
   <path d="M1395 262 V337 H946" class="arrow-green"/>
   <g transform="translate(946 302)">
     <rect width="400" height="70" rx="14" class="node-db"/>
     <text x="200" y="27" class="label">Memória semanticamente consultável</text>
-    <text x="200" y="50" class="small">documentos · nós · evidências · derivações · vetores</text>
+    <text x="200" y="50" class="small">documentos · nós · evidências primárias · vetores</text>
   </g>
 
   <!-- 2. Consulta -->
@@ -161,7 +161,7 @@
   <path d="M965 660 H1000" class="arrow"/>
   <g transform="translate(1000 600)">
     <rect width="240" height="120" rx="16" class="node-cie"/>
-    <text x="120" y="28" class="label">CIE hierárquico</text>
+    <text x="120" y="28" class="label">Primeiro CIE sobre fontes</text>
     <text x="120" y="52" class="accent">μ · σ · CV</text>
     <text x="120" y="75" class="small">descarte · convergence · core</text>
     <text x="120" y="97" class="tiny">core precede; convergence complementa</text>
@@ -170,8 +170,8 @@
   <path d="M1240 660 H1275" class="arrow"/>
   <g transform="translate(1275 610)">
     <rect width="270" height="100" rx="15" class="node-db"/>
-    <text x="135" y="27" class="label">Resolver para primárias</text>
-    <text x="135" y="51" class="small">evidence_derivations até primary</text>
+    <text x="135" y="27" class="label">Fontes primárias selecionadas</text>
+    <text x="135" y="51" class="small">seleção direta, sem resolução derivada</text>
     <text x="135" y="73" class="small">conteúdo literal completo</text>
     <text x="135" y="91" class="tiny">papel core ou convergence</text>
   </g>

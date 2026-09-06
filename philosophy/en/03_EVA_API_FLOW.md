@@ -52,55 +52,20 @@ POST /api/documents/{id}/process            <- EVA internal API
            v
 [PROCESSING QUEUE]
            |
-           +--> job: summaries
-           |
            +--> job: embeddings
 
        STILL NO EXTERNAL CALL
 ```
 
-## 2. Hierarchical summaries
-
-```text
-[COGNITIVE WORKER]
-        |
-        v
-+-------------------------------------------------------------+
-| STAGE A — HIERARCHICAL SUMMARIES                            |
-+-------------------------------------------------------------+
-        |
-        v
-[SELECT ONE COMPLETE HIERARCHICAL UNIT]
-        |
-        v
-+-------------------------------------------------------------+
-| EXTERNAL API 1 — SUMMARY PROVIDER                           |
-|                                                             |
-| One call for every new hierarchical unit.                   |
-| A large document may require many calls.                    |
-+-------------------------------------------------------------+
-        |
-        v
-[DERIVED EVIDENCE]
-        |
-        +--> summary
-        +--> model used
-        +--> input hash
-        +--> lineage to source evidence
-        |
-        v
-[DATABASE]
-```
-
-## 3. Collection embeddings
+## 2. Collection embeddings
 
 ```text
 +-------------------------------------------------------------+
-| STAGE B — COLLECTION EMBEDDINGS                             |
+| SINGLE STAGE — COLLECTION EMBEDDINGS                        |
 +-------------------------------------------------------------+
         |
         v
-[LOAD PRIMARY AND DERIVED EVIDENCE]
+[LOAD PRIMARY EVIDENCE]
         |
         v
 [ASSEMBLE STRUCTURED SEMANTIC UNITS]
@@ -108,11 +73,11 @@ POST /api/documents/{id}/process            <- EVA internal API
 - structural path
 - node type and title
 - source reference
-- content or summary
+- literal content
         |
         v
 +-------------------------------------------------------------+
-| EXTERNAL API 2 — EMBEDDING PROVIDER                         |
+| EXTERNAL API 1 — EMBEDDING PROVIDER                         |
 |                                                             |
 | Batched submission. Current default: up to 64 units/call.   |
 | Larger documents may require multiple calls.                |
@@ -125,7 +90,7 @@ POST /api/documents/{id}/process            <- EVA internal API
 [DOCUMENT READY FOR SEMANTIC QUERY]
 ```
 
-## 4. User input and answer
+## 3. User input and answer
 
 ```text
 ===============================================================================
@@ -234,7 +199,7 @@ POST /api/query                              <- EVA internal API
                      - never becomes documentary memory
 ```
 
-## 5. Multidisciplinary project query
+## 4. Multidisciplinary project query
 
 ```text
 [PROJECT WITH SPECIALIZED DOCUMENTS]
@@ -295,15 +260,14 @@ Reliability is not a truth estimate. It comes from source integrity, observable 
 
 Adding documents expands candidates and local nuclei. Global CIE consolidates them without a configured numerical limit; nevertheless, a statistical boundary neither guarantees every discipline's coverage nor creates persistent connections among works.
 
-## 6. Calls by route
+## 5. Calls by route
 
 ```text
 UPLOAD
   └── 0 external calls
 
 DOCUMENT PROCESSING
-  ├── N summary calls
-  └── M batched collection-embedding calls
+  └── M batched primary-evidence embedding calls
 
 DIRECT / STRUCTURAL / BROAD QUERY
   ├── 0 embedding calls
@@ -321,7 +285,7 @@ QUERY WITHOUT EVIDENCE
 
 These are nominal counts. A `QueryAnswerProvider` attempt permits at most one compact regeneration after `finish_reason=length`. Separately, `DocumentQueryService` permits at most three total validated-answer attempts with the same available context. Rejected output is fully discarded and never reaches the transcript.
 
-## 7. Summary flow
+## 6. Compact flow
 
 ```text
 DOCUMENT
@@ -331,8 +295,6 @@ LOCAL PARSER
    |
    v
 PRIMARY EVIDENCE
-   |
-   +--> SUMMARY API --> DERIVED EVIDENCE
    |
    +--> EMBEDDING API --> PERSISTENT VECTORS
                                   |
@@ -363,7 +325,7 @@ USER INPUT                        |
                        ANSWER
 ```
 
-## 8. Query persistence rule
+## 7. Query persistence rule
 
 ```text
 NOT PERSISTED AS DOCUMENTARY MEMORY:
@@ -377,7 +339,7 @@ NOT PERSISTED AS DOCUMENTARY MEMORY:
 - conversational history.
 ```
 
-This does not mean zero observability. `audit_events` retains sanitized completed-query metadata, including `simetry_count` and `assimetry_count`, without pairs or excerpts. When a module subscribes, consolidated-schema `module_events` may receive the permitted `interaction.completed` envelope with current input, contextual input, validated answer, public evidence references, and limitations; each module governs private state. Legacy databases use migration `20260803_010_module_events.sql`. A missing table in an incomplete installation or module failure yields safe diagnostics but does not invalidate an already validated answer. None of these records changes documents, evidence, derivations, or embeddings.
+This does not mean zero observability. `audit_events` retains sanitized completed-query metadata, including `simetry_count` and `assimetry_count`, without pairs or excerpts. When a module subscribes, consolidated-schema `module_events` may receive the permitted `interaction.completed` envelope with current input, contextual input, validated answer, public evidence references, and limitations; each module governs private state. Legacy databases use migration `20260803_010_module_events.sql`. A missing table in an incomplete installation or module failure yields safe diagnostics but does not invalidate an already validated answer. None of these records changes documents, primary evidence, or embeddings.
 
 Physical and logical relationships are mapped in [Database relationships](../../docs/en/18_DATABASE_RELATIONSHIPS.md).
 

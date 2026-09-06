@@ -4,7 +4,7 @@
 
 Este documento explica como as tabelas MySQL/MariaDB do EVA atuam em conjunto. Ele complementa [`07_BANCO_DE_DADOS.md`](07_BANCO_DE_DADOS.md), que descreve o que é persistido, com as cardinalidades, as chaves estrangeiras, os vínculos lógicos usados pela aplicação e os efeitos reais de cada ciclo de vida.
 
-A fonte estrutural é [`database/schema.sql`](../database/schema.sql), complementada pelas migrações versionadas em [`database/migrations/`](../database/migrations/). A fonte comportamental são os serviços que gravam, consultam e excluem esses registros. No estado atual, o banco principal possui 14 tabelas e 15 chaves estrangeiras.
+A fonte estrutural é [`database/schema.sql`](../database/schema.sql), complementada pelas migrações versionadas em [`database/migrations/`](../database/migrations/). A fonte comportamental são os serviços que gravam, consultam e excluem esses registros. No estado atual, o banco principal possui 13 tabelas e 13 chaves estrangeiras.
 
 ## Visão relacional
 
@@ -14,8 +14,6 @@ erDiagram
     DOCUMENT_NODES o|--o{ DOCUMENT_NODES : "parent_id; CASCADE"
     DOCUMENTS ||--o{ EVIDENCES : "document_id; CASCADE"
     DOCUMENT_NODES o|--o{ EVIDENCES : "node_id; SET NULL"
-    EVIDENCES ||--o{ EVIDENCE_DERIVATIONS : "evidence_id; CASCADE"
-    EVIDENCES ||--o{ EVIDENCE_DERIVATIONS : "source_evidence_id; CASCADE"
     EVIDENCES ||--o{ EVIDENCE_EMBEDDINGS : "evidence_id; CASCADE"
     DOCUMENTS ||--o{ PROCESSING_JOBS : "document_id; CASCADE"
 
@@ -45,10 +43,6 @@ erDiagram
         bigint document_id FK
         bigint node_id FK
         enum evidence_class
-    }
-    EVIDENCE_DERIVATIONS {
-        bigint evidence_id PK,FK
-        bigint source_evidence_id PK,FK
     }
     EVIDENCE_EMBEDDINGS {
         bigint id PK
@@ -101,9 +95,7 @@ erDiagram
 | `document_nodes` | `document_id` | `documents.id` | um documento → zero ou muitos nós | `CASCADE` | Mantém toda a árvore dentro de uma única obra. |
 | `document_nodes` | `parent_id` | `document_nodes.id` | um nó pai → zero ou muitos filhos; a raiz usa `NULL` | `CASCADE` | Forma a hierarquia documental normalizada. |
 | `evidences` | `document_id` | `documents.id` | um documento → zero ou muitas evidências | `CASCADE` | Permite filtrar e excluir a memória da obra sem reconstruir a árvore. |
-| `evidences` | `node_id` | `document_nodes.id` | um nó → zero ou muitas evidências; a coluna aceita `NULL` | `SET NULL` | Ancora conteúdo primário e sínteses ao ponto estrutural que os originou. |
-| `evidence_derivations` | `evidence_id` | `evidences.id` | uma evidência derivada → zero ou muitas fontes | `CASCADE` | Identifica a síntese cuja linhagem está sendo declarada. |
-| `evidence_derivations` | `source_evidence_id` | `evidences.id` | uma evidência fonte → zero ou muitas derivações | `CASCADE` | Identifica cada evidência primária ou derivada que alimentou a síntese. |
+| `evidences` | `node_id` | `document_nodes.id` | um nó → zero ou muitas evidências; a coluna aceita `NULL` | `SET NULL` | Ancora conteúdo primário ao ponto estrutural que o originou. |
 | `evidence_embeddings` | `evidence_id` | `evidences.id` | uma evidência → zero ou muitas versões vetoriais | `CASCADE` | Mantém vetores subordinados ao conteúdo persistido. |
 | `processing_jobs` | `document_id` | `documents.id` | um documento → zero ou muitos trabalhos versionados | `CASCADE` | Vincula fila e resultado operacional à obra processada. |
 | `project_documents` | `project_id` | `projects.id` | projeto ↔ documento, muitos para muitos | `CASCADE` | Define as obras que compõem cada projeto. |
@@ -140,28 +132,15 @@ Cada nó pertence obrigatoriamente a um documento. `parent_id` aponta para a pr�
 
 O banco garante que pai e filho sejam linhas válidas, mas não garante por FK que ambos tenham o mesmo `document_id`. Essa coerência é uma invariável do parser e do `DocumentIngestionService`, que persiste recursivamente todos os filhos com o mesmo documento.
 
-### `evidences` como unidade citável ou localizadora
+### `evidences` como unidade citável e localizadora
 
 Uma evidência pertence obrigatoriamente a um documento e normalmente ao nó que a originou:
 
-- `primary` + `node_content`: cópia rastreável do conteúdo direto do nó, criada como `validated` durante a ingestão;
-- `derived` + `node_summary`: síntese hierárquica, criada como `generated` para localização e navegação semântica.
+- `primary` + `node_content`: cópia rastreável do conteúdo direto do nó, criada como `validated` durante a ingestão.
 
 O vínculo direto `evidences.document_id` é intencional, embora o documento também possa ser alcançado por `node_id`. Ele é usado nas consultas de escopo, construção, recuperação e exclusão. A aplicação cria as evidências atuais com `node_id`; a nulabilidade e o `SET NULL` preservam a linha caso um nó isolado seja removido diretamente.
 
-`public_id` (`EVA-E...`) é a referência visível nas citações. Para sínteses, a combinação `node_id + evidence_type + generation_model + generation_input_hash` evita recriar a mesma versão gerencial.
-
-### `evidence_derivations` como grafo de proveniência
-
-Esta tabela é uma associação dirigida entre duas linhas de `evidences`:
-
-```text
-evidence_id (síntese produzida) → source_evidence_id (entrada usada)
-```
-
-A chave primária composta impede repetir o mesmo arco. Uma síntese de folha pode apontar para a evidência primária do próprio nó. Uma síntese de nível superior pode apontar para o conteúdo primário próprio e para sínteses dos filhos, formando um grafo hierárquico derivado.
-
-As duas FKs garantem existência e cascata, mas a aplicação é quem garante que `evidence_id` seja `derived`, que as fontes pertençam ao mesmo documento e que a construção não crie ciclo. Na consulta semântica, uma síntese selecionada é percorrida recursivamente por essa tabela até chegar às evidências primárias; somente estas podem compor a resposta citável.
+`public_id` (`EVA-E...`) é a referência visível nas citações. A versão 6.0.0 removeu os campos e a tabela antes usados para resumos derivados.
 
 ### `evidence_embeddings` como índice vetorial versionado
 
@@ -173,11 +152,9 @@ O build lê `evidences`, `documents` e `document_nodes` para montar o texto estr
 
 ### `processing_jobs`
 
-Cada trabalho pertence a um documento pronto e representa apenas uma das etapas `summaries` ou `embeddings`. `job_key` é o hash de `document_id + stage + version_key`; sua unicidade torna o agendamento idempotente para a mesma configuração.
+Cada trabalho pertence a um documento pronto e representa a etapa `embeddings`. `job_key` é o hash de `document_id + stage + version_key`; sua unicidade torna o agendamento idempotente para a mesma configuração.
 
-Não existe FK entre um trabalho de síntese e um trabalho de embedding. A dependência é lógica e implementada na reivindicação da fila: um job de `embeddings` somente pode entrar em `running` quando o job de `summaries` mais recente daquele documento estiver `completed`. Ao retomar uma síntese com falha, um embedding pareado já concluído pode voltar para `queued` para refletir a nova versão derivada.
-
-O campo `result` registra o resultado operacional serializado. Ele não substitui `evidences`, `evidence_derivations` ou `evidence_embeddings`, que são a memória documental efetiva.
+O campo `result` registra o resultado operacional serializado. Ele não substitui `evidences` ou `evidence_embeddings`, que são a memória documental efetiva.
 
 ## Projetos, usuários e autorização
 
@@ -247,39 +224,28 @@ documents
 
 O documento nasce antes da árvore para receber ID e caminho de armazenamento. Nós e evidências primárias são inseridos na mesma transação. Cada evidência primária repete `document_id` e aponta para o `node_id` correspondente.
 
-### 2. Síntese hierárquica
+### 2. Embeddings
 
 ```text
-document_nodes + evidences primárias/derivadas
-  → nova evidences derived/node_summary
-  → evidence_derivations para cada fonte usada
-```
-
-O processamento ocorre de baixo para cima. A linhagem permite que uma síntese superior seja rastreada por outras sínteses até o conteúdo primário original.
-
-### 3. Embeddings
-
-```text
-documents + document_nodes + evidences elegíveis
+documents + document_nodes + evidences primárias validadas
   → texto estruturado versionado
   → evidence_embeddings
 ```
 
-Se uma evidência primária exceder o orçamento seguro, ela só deixa de receber vetor próprio quando existir uma síntese derivada compatível que a represente por `evidence_derivations`.
+Se uma evidência primária exceder o orçamento seguro, o processamento para e exige subdivisão estrutural real.
 
-### 4. Consulta
+### 3. Consulta
 
 ```text
 permissões → documents prontos
 documents + document_nodes + evidences
 evidences + evidence_embeddings → seleção semântica/CIE
-evidences derived + evidence_derivations → fontes primary
 primary evidences → resposta e citações
 ```
 
-Rotas diretas, estruturais e amplas leem primárias por conteúdo e posição. Rotas conceituais e relacionais também usam embeddings; qualquer candidata derivada é resolvida para primárias antes da geração. O banco não recebe CNodes, similaridades ou contexto conversacional.
+Rotas diretas, estruturais e amplas leem primárias por conteúdo e posição. Rotas conceituais e relacionais usam exclusivamente embeddings primários. O banco não recebe CNodes, similaridades ou contexto conversacional.
 
-### 5. Resposta concluída
+### 4. Resposta concluída
 
 ```text
 resposta validada
@@ -287,20 +253,20 @@ resposta validada
   └─ module_events: envelope modular permitido e idempotente
 ```
 
-Essas duas gravações são operacionais e não alteram `documents`, `document_nodes`, `evidences`, derivações ou embeddings.
+Essas duas gravações são operacionais e não alteram `documents`, `document_nodes`, `evidences` ou embeddings.
 
-### 6. Exclusão
+### 5. Exclusão
 
-Excluir uma obra pela aplicação remove a linha de `documents`; as FKs eliminam nós, evidências, vetores, derivações, jobs, vínculos de projeto e permissões diretas. Depois do commit, o serviço trata o arquivo armazenado.
+Excluir uma obra pela aplicação remove a linha de `documents`; as FKs eliminam nós, evidências, vetores, jobs, vínculos de projeto e permissões diretas. Depois do commit, o serviço trata o arquivo armazenado.
 
 Excluir um projeto pela aplicação possui uma regra adicional que não vem das FKs: o serviço primeiro exclui todas as obras vinculadas, inclusive obras compartilhadas com outro projeto, e depois exclui o projeto. Um `DELETE` SQL isolado em `projects`, por outro lado, eliminaria apenas `project_documents` e `user_projects`. Operações administrativas devem usar o serviço do produto.
 
 | Entidade excluída | Efeito relacional automático | Efeito adicional da aplicação | Registros preservados |
 |---|---|---|---|
-| Documento | nós, evidências, derivações ligadas, embeddings, jobs, `project_documents`, `user_documents` | remoção do arquivo-fonte | auditoria e eventos modulares |
+| Documento | nós, evidências, embeddings, jobs, `project_documents`, `user_documents` | remoção do arquivo-fonte | auditoria e eventos modulares |
 | Projeto via produto | `project_documents` e `user_projects` | exclusão prévia de todas as obras vinculadas e suas fontes | auditoria e eventos modulares |
 | Usuário | sessões, `user_projects`, `user_documents` | nenhum arquivo associado | auditoria e eventos modulares |
-| Evidência | embeddings e todos os arcos em que ela é destino ou fonte | não é uma operação administrativa isolada normal | documento e nó |
+| Evidência | embeddings | não é uma operação administrativa isolada normal | documento e nó |
 | Nó isolado | descendentes; `node_id` das evidências diretamente ligadas vira `NULL` | não é uma operação administrativa normal | evidências e documento |
 
 ## Invariantes divididas entre banco e aplicação
@@ -309,10 +275,8 @@ O banco garante existência referenciada, unicidade e cascatas declaradas. A apl
 
 - pai e filho pertencem ao mesmo documento;
 - evidência e nó pertencem ao mesmo documento;
-- uma derivação aponta de uma evidência `derived` para fontes do mesmo documento e não forma ciclos;
 - somente documentos `ready` entram em fila ou consulta;
 - embeddings usam o modelo ativo e dimensões compatíveis;
-- a etapa `embeddings` espera a síntese mais recente;
 - concessões somente expõem documentos prontos e projetos ativos;
 - perfis de resposta somente acompanham projetos explicitamente selecionados;
 - payloads de auditoria e módulos são sanitizados antes da persistência.

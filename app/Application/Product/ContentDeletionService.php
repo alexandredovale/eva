@@ -145,7 +145,6 @@ final readonly class ContentDeletionService
             'nodes_deleted' => 0,
             'evidences_deleted' => 0,
             'embeddings_deleted' => 0,
-            'derivations_deleted' => 0,
             'jobs_deleted' => 0,
         ];
 
@@ -158,7 +157,6 @@ final readonly class ContentDeletionService
             'nodes_deleted' => "SELECT COUNT(*) FROM document_nodes WHERE document_id IN ({$placeholders})",
             'evidences_deleted' => "SELECT COUNT(*) FROM evidences WHERE document_id IN ({$placeholders})",
             'embeddings_deleted' => "SELECT COUNT(*) FROM evidence_embeddings ee JOIN evidences e ON e.id = ee.evidence_id WHERE e.document_id IN ({$placeholders})",
-            'derivations_deleted' => "SELECT COUNT(*) FROM evidence_derivations ed JOIN evidences e ON e.id = ed.evidence_id WHERE e.document_id IN ({$placeholders})",
             'jobs_deleted' => "SELECT COUNT(*) FROM processing_jobs WHERE document_id IN ({$placeholders})",
         ];
 

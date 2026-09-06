@@ -136,7 +136,8 @@ try {
     $processPath = '/api/documents/' . $result->documentId . '/process';
     $firstPlan = $api->handle('POST', $processPath, $authorized, [], [], '');
     $secondPlan = $api->handle('POST', $processPath, $authorized, [], [], '');
-    assertProduct($firstPlan->status === 202 && count($firstPlan->payload['jobs']) === 2, 'O plano cognitivo deve criar sínteses e embeddings.');
+    assertProduct($firstPlan->status === 202 && count($firstPlan->payload['jobs']) === 1, 'O plano cognitivo deve criar somente embeddings.');
+    assertProduct($firstPlan->payload['jobs'][0]['stage'] === 'embeddings', 'A fila não deve criar estágio de sínteses.');
     assertProduct(
         array_column($firstPlan->payload['jobs'], 'id') === array_column($secondPlan->payload['jobs'], 'id'),
         'O agendamento deve ser idempotente para a mesma configuração.'
@@ -175,7 +176,7 @@ try {
 
     $metrics = $api->handle('GET', '/api/metrics', $authorized, [], [], '');
     assertProduct($metrics->status === 200, 'As métricas não foram retornadas.');
-    assertProduct(($metrics->payload['metrics']['jobs']['queued'] ?? 0) >= 2, 'As métricas não contabilizaram a fila.');
+    assertProduct(($metrics->payload['metrics']['jobs']['queued'] ?? 0) >= 1, 'As métricas não contabilizaram a fila.');
 
     $jobs = $api->handle('GET', '/api/jobs', $authorized, [], [], '');
     assertProduct($jobs->status === 200, 'A listagem de trabalhos falhou.');
@@ -184,7 +185,7 @@ try {
         static fn (array $job): bool => (int) $job['document_id'] === $result->documentId
     ));
     assertProduct(
-        count($documentJobs) === 2
+        count($documentJobs) === 1
         && array_key_exists('progress_current', $documentJobs[0])
         && array_key_exists('progress_total', $documentJobs[0])
         && array_key_exists('progress_percent', $documentJobs[0]),
@@ -242,7 +243,8 @@ try {
     $read = new ProductReadService($database);
     $readMetrics = $read->metrics();
     assertProduct(isset($readMetrics['evidence_types']), 'As métricas perderam os tipos de evidência.');
-    assertProduct(isset($readMetrics['embeddings'], $readMetrics['derivations']), 'As métricas perderam a arquitetura semântica persistente.');
+    assertProduct(isset($readMetrics['embeddings']), 'As métricas perderam os embeddings persistentes.');
+    assertProduct(!isset($readMetrics['derivations']), 'Derivações removidas não devem aparecer nas métricas.');
     assertProduct(!isset($readMetrics['cnodes']), 'Cnodes não devem permanecer como métrica persistente.');
 } finally {
     if ($result !== null) {

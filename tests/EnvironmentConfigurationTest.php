@@ -56,7 +56,7 @@ foreach (glob($root . '/config/*.php') ?: [] as $configPath) {
     $requiredNames = array_merge($requiredNames, $configMatches[1] ?? []);
 }
 
-foreach (['AI_EMBEDDING_API_KEY_ENV', 'AI_LANGUAGE_API_KEY_ENV', 'AI_SUMMARY_API_KEY_ENV', 'AI_QUERY_API_KEY_ENV'] as $referenceName) {
+foreach (['AI_EMBEDDING_API_KEY_ENV', 'AI_LANGUAGE_API_KEY_ENV', 'AI_QUERY_API_KEY_ENV'] as $referenceName) {
     $credentialName = $configuredValues[$referenceName] ?? '';
 
     if (preg_match('/^[A-Z][A-Z0-9_]*$/', $credentialName) === 1) {

@@ -11,7 +11,7 @@ The proposed effect is efficiency: small reductions per query may accumulate int
 EVA proposes an evidence-centered alternative to architectures that begin with arbitrary chunks or persist precomputed relations. Its hypotheses include:
 
 - structural units can improve documentary provenance;
-- separating primary and derived evidence can improve auditability;
+- keeping operational evidence literal and primary can improve auditability;
 - resolving derived retrieval back to primary sources can constrain generated answers;
 - distribution-based context stabilization can reduce semantic-retrieval noise without an AI reranker;
 - transient evidence interactions can avoid persistent graph expansion;
@@ -31,7 +31,7 @@ EVA can potentially reduce avoidable computation by:
 
 - skipping answer generation when no primary evidence is recovered;
 - skipping transient query embeddings for direct, structural, and broad routes;
-- reusing summaries and embeddings by model and content hash;
+- reusing embeddings by model and content hash;
 - producing the answer and transient interactions in one bounded call;
 - statistically consolidating semantic evidence context while bounding non-semantic context, chat history, output, and retries;
 - discarding recovered but uncited evidence instead of requiring another generation;
@@ -70,7 +70,7 @@ During a crisis, traceable retrieval may reduce the time needed to locate proced
 
 ## Scientific limit
 
-Net energy savings have not yet been experimentally demonstrated. Initial summaries, embeddings, storage, and inference also consume energy. The result depends on workload composition, corpus reuse, model, hardware, output length, data-center efficiency, and electricity supply.
+Net energy savings have not yet been experimentally demonstrated. Initial embeddings, storage, and inference also consume energy. The result depends on workload composition, corpus reuse, model, hardware, output length, data-center efficiency, and electricity supply.
 
 The official claim is therefore limited: **EVA implements verifiable computational-containment mechanisms with the potential to reduce energy demand at scale; the magnitude and net benefit remain to be measured.**
 
@@ -84,7 +84,7 @@ At minimum, report:
 - κq and κe sizes, hierarchical/primary/global discard ratios, local-nucleus union, final global nucleus, and context tokens at every stage;
 - input and output tokens;
 - GPU time and p50, p95, and p99 latency;
-- summary and embedding reuse rates;
+- embedding reuse rate;
 - the fraction of queries stopped without generation;
 - precision, recall, citation validity, and correct-refusal rate;
 - energy adjusted by infrastructure PUE when available.

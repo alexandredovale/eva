@@ -58,7 +58,7 @@ Dado o mesmo conjunto ordenado de candidatos e similaridades, o CIE sempre produ
 
 O provedor de resposta recebe somente o núcleo do CIE global — ou sua convergência quando o núcleo estiver vazio — e eventuais âncoras literais protegidas. Cada evidência conserva o papel hierárquico herdado `core` ou `convergence`; esse papel não significa que a convergência global também foi enviada. O provedor não recebe as similaridades nem as usa como autoridade documental. Somente as fontes efetivamente citadas integram o resultado.
 
-## Evidências derivadas e múltiplos documentos
+## Evidências primárias e múltiplos documentos
 
 O primeiro CIE classifica candidatos primários e encaminha somente seu núcleo superior, ou sua convergência quando o núcleo estiver vazio. κe e um CIE primário elegem núcleos locais por obra e região. A união desses núcleos recebe um CIE global de consolidação. Somente seu núcleo, ou sua convergência quando o núcleo estiver vazio, chega ao provedor.
 

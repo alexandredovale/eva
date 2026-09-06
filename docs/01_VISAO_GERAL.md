@@ -12,9 +12,7 @@ O núcleo persistente é composto por:
 
 - documentos e sua árvore normalizada;
 - evidências primárias literais;
-- evidências derivadas hierárquicas;
-- derivações que registram a linhagem;
-- embeddings de unidades previamente organizadas.
+- embeddings das evidências primárias previamente organizadas.
 
 `evidence_class` distingue a natureza da unidade persistida. `evidence_type` identifica sua função semântica e estrutural. Essa combinação permite recuperar a região adequada do documento sem duplicar a memória em tabelas relacionais.
 
@@ -27,7 +25,7 @@ Cnode é uma derivação conceitual interna do EVA: a compreensão contextual de
 ## Princípio fundamental
 
 ```text
-Construção: fonte → árvore → evidência primária → síntese derivada → embedding
+Construção: fonte → árvore → evidência primária → embedding
 Consulta semântica: pergunta → evidências primárias completas → κq → primeiro CIE
                     → núcleo superior/fallback → κe/CIE primário → CIE global
 Interação: fontes recuperadas → simetry/assimetry transitória → validação literal

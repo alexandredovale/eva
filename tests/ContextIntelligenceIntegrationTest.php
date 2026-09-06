@@ -108,30 +108,16 @@ try {
          VALUES
             (:public_id, :document_id, :node_id, 'primary', 'node_content', :content, :source_hash, 'validated')"
     );
-    $summaryStatement = $database->prepare(
-        "INSERT INTO evidences
-            (public_id, document_id, node_id, evidence_class, evidence_type, content, summary,
-             source_hash, generation_model, generation_input_hash, status)
-         VALUES
-            (:public_id, :document_id, :node_id, 'derived', 'node_summary', :content, :summary,
-             :source_hash, 'fake-summary-v1', :generation_input_hash, 'generated')"
-    );
-    $derivationStatement = $database->prepare(
-        'INSERT INTO evidence_derivations (evidence_id, source_evidence_id)
-         VALUES (:evidence_id, :source_evidence_id)'
-    );
     $embeddingStatement = $database->prepare(
         'INSERT INTO evidence_embeddings
             (evidence_id, model, dimensions, vector_data, content_hash)
          VALUES
             (:evidence_id, :model, 2, :vector_data, :content_hash)'
     );
-    $similarities = [1.0, 0.6, 0.6, 0.6, 0.2];
     $primarySimilarities = [0.4, 0.9, 0.6, 0.3, 0.1];
     $evidenceIds = [];
-    $summaryIds = [];
 
-    foreach ($similarities as $index => $similarity) {
+    foreach ($primarySimilarities as $index => $primarySimilarity) {
         $content = sprintf('Unidade simples %d para validar a distribuição do contexto.', $index + 1);
         $nodeHash = hash('sha256', $content);
         $nodeStatement->execute([
@@ -156,7 +142,6 @@ try {
         $evidencePublicId = sprintf('EVA-E%06d', $evidenceId);
         $database->prepare('UPDATE evidences SET public_id = :public_id WHERE id = :id')
             ->execute(['public_id' => $evidencePublicId, 'id' => $evidenceId]);
-        $primarySimilarity = $primarySimilarities[$index];
         $embeddingStatement->execute([
             'evidence_id' => $evidenceId,
             'model' => 'fake-cie-integration-v1',
@@ -166,32 +151,7 @@ try {
             ], JSON_THROW_ON_ERROR),
             'content_hash' => $nodeHash,
         ]);
-        $summaryStatement->execute([
-            'public_id' => 'pending-' . bin2hex(random_bytes(6)),
-            'document_id' => $documentId,
-            'node_id' => $nodeId,
-            'content' => 'Resumo hierárquico de ' . $content,
-            'summary' => 'Resumo hierárquico de ' . $content,
-            'source_hash' => hash('sha256', 'summary-' . $content),
-            'generation_input_hash' => hash('sha256', 'input-' . $content),
-        ]);
-        $summaryId = (int) $database->lastInsertId();
-        $summaryPublicId = sprintf('EVA-E%06d', $summaryId);
-        $database->prepare('UPDATE evidences SET public_id = :public_id WHERE id = :id')
-            ->execute(['public_id' => $summaryPublicId, 'id' => $summaryId]);
-        $derivationStatement->execute([
-            'evidence_id' => $summaryId,
-            'source_evidence_id' => $evidenceId,
-        ]);
-        $vector = [$similarity, sqrt(1 - ($similarity * $similarity))];
-        $embeddingStatement->execute([
-            'evidence_id' => $summaryId,
-            'model' => 'fake-cie-integration-v1',
-            'vector_data' => json_encode($vector, JSON_THROW_ON_ERROR),
-            'content_hash' => $nodeHash,
-        ]);
         $evidenceIds[] = $evidenceId;
-        $summaryIds[] = $summaryId;
     }
 
     $embeddingProvider = new ContextIntegrationEmbeddingProvider();

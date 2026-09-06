@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cascadia+Mono:wght@400;500;600;700&family=Share+Tech&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/app.css?v=4.0.2">
+    <link rel="stylesheet" href="assets/app.css?v=6.0.0">
     <link rel="icon" type="image/png" href="logo/icone.png">
     <link rel="apple-touch-icon" href="logo/icone.png">
     <link rel="shortcut icon" href="logo/icone.png">
@@ -58,7 +58,7 @@
                 <button type="submit" class="button button-primary">Anexar documento</button>
                 <div class="upload-progress" id="upload-progress" hidden><div class="progress-copy"><span id="upload-progress-label">Preparando envio…</span><strong id="upload-progress-value">0%</strong></div><progress id="upload-progress-bar" max="100" value="0">0%</progress><small id="upload-progress-meta"></small></div>
             </form>
-            <div class="card table-card"><div class="card-heading"><h2>Acervo</h2><span id="document-count">0 documentos</span></div><div class="table-wrap"><table><thead><tr><th>Documento</th><th>Formato</th><th>Nós</th><th>Primárias</th><th>Sínteses</th><th>Embeddings</th><th>Ação</th></tr></thead><tbody id="documents-body"></tbody></table></div></div>
+            <div class="card table-card"><div class="card-heading"><h2>Acervo</h2><span id="document-count">0 documentos</span></div><div class="table-wrap"><table><thead><tr><th>Documento</th><th>Formato</th><th>Nós</th><th>Primárias</th><th>Embeddings</th><th>Ação</th></tr></thead><tbody id="documents-body"></tbody></table></div></div>
         </section>
 
         <section class="view view-query" id="view-query" data-view-panel="query" hidden>
@@ -83,7 +83,7 @@
         </section>
 
         <section class="view" id="view-jobs" data-view-panel="jobs" data-admin-only hidden>
-            <div class="page-heading"><div><p class="eyebrow">Fila operacional</p><h1>Processamento<span>.</span></h1><p>Estado das sínteses e embeddings do Evidence Algorithm.</p></div></div>
+            <div class="page-heading"><div><p class="eyebrow">Fila operacional</p><h1>Processamento<span>.</span></h1><p>Estado dos embeddings das evidências primárias.</p></div></div>
             <div class="card worker-monitor" id="worker-monitor" data-state="idle" aria-live="polite"><span class="worker-indicator" aria-hidden="true"></span><div><p class="eyebrow">Worker cognitivo</p><strong id="worker-state-label">Sem trabalhos ativos.</strong><small id="worker-state-detail">A tela é atualizada automaticamente durante o processamento.</small></div><button type="button" class="button button-primary worker-run-button" data-run-worker disabled>Processar fila no navegador</button></div>
             <div class="card table-card"><div class="table-wrap"><table><thead><tr><th>Trabalho</th><th>Documento</th><th>Etapa</th><th>Estado</th><th>Progresso</th><th>Execuções</th><th>Falhas</th><th>Ação</th></tr></thead><tbody id="jobs-body"></tbody></table></div></div>
         </section>
@@ -169,6 +169,6 @@
         </form>
     </div>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-    <script src="assets/app.js?v=4.0.2" defer></script>
+    <script src="assets/app.js?v=6.0.0" defer></script>
 </body>
 </html>

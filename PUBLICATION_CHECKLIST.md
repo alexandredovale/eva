@@ -2,7 +2,15 @@
 
 Use this checklist for every public release. Always start from a fresh clone of the canonical GitHub repository in an exclusive local analysis directory, inspect the remote state, and copy only an explicit source allowlist.
 
-## Release v4.0.2
+## Release v6.0.0
+
+- [x] Remove summaries and derivation lineage from ingestion, cognitive build, queueing, retrieval, metrics, and the consolidated schema.
+- [x] Add and validate the manual 4.x-to-6.0.0 database migration and apply it to the authorized local database after a complete backup.
+- [x] Preserve κq, κe, and source/primary/global CIE selection, including the commented core-plus-convergence alternative.
+- [x] Update public version metadata, bilingual documentation, diagrams, and offline regression tests.
+- [x] Commit and push `main`, create annotated tag `v6.0.0`, and publish the GitHub release after explicit authorization.
+
+## Historical release v4.0.2
 
 - [x] Start from a fresh clone of canonical `main` without creating a release branch.
 - [x] Copy only the two authorized source changes: source-first retrieval in `DocumentContextRetriever` and paragraph-separated analytical perspectives in `QueryAnswerProvider`.

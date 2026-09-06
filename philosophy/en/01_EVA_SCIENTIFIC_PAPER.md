@@ -1,13 +1,13 @@
 # EVA (Evidence Algorithm): hierarchical documentary memory and transient cognitive interaction for verifiable answers
 
-**Version:** 2.4
+**Version:** 6.0.0
 **Date:** August 2, 2026
 **Author:** EVA Project
 **Português:** [Artigo científico integral](../01_EVA_SCIENTIFIC_PAPER.md)
 
 ## Abstract
 
-This paper presents EVA (Evidence Algorithm), an architecture for language-model-assisted documentary queries whose persistent memory is organized as traceable evidence rather than answers, cognitive relationships, or inferred graphs. The system transforms structured documents into a normalized tree, preserves literal content as primary evidence, and produces hierarchical summaries as derived evidence with explicit lineage. Embeddings represent these complete semantic units and respect document organization instead of fragmenting it by arbitrary character or token limits.
+This paper presents EVA (Evidence Algorithm), an architecture for language-model-assisted documentary queries whose persistent memory is organized as traceable evidence rather than answers, cognitive relationships, or inferred graphs. The system transforms structured documents into a normalized tree, preserves literal content as primary evidence, and generates embeddings for these complete semantic units. The representation respects document organization instead of fragmenting it by arbitrary character or token limits.
 
 At query time, EVA selects a retrieval route compatible with input type. Direct, structural, and broad questions may navigate hierarchy; conceptual and relational questions use a transient vector representation. On semantic routes, κq emerges from the complete primary population before the first Context Intelligence Engine (CIE). That stage forwards only its `s ≥ μ + σ` core, with convergence as fallback; surviving sources pass through κe and primary CIE, and the union of local nuclei receives global CIE. The global nucleus—or convergence when that nucleus is empty—forms semantic context without a configured Top-k or evidence count. Only sources incorporated into prose with visible citations enter the final basis. If no sufficient primary evidence is found, the flow stops without calling the answer provider.
 
@@ -19,11 +19,11 @@ Cognitive relationships are transient **simetry** or **assimetry** interactions 
 
 ## 1. Introduction
 
-Language models can formulate coherent answers even when required information is absent, incomplete, or incorrectly recovered. In documentary applications, fluency does not demonstrate correspondence with a source. Retrieval-Augmented Generation (RAG) reduces this risk by supplying external context [1], but vector search alone does not guarantee structural preservation, summary lineage, valid citations, or appropriate refusal.
+Language models can formulate coherent answers even when required information is absent, incomplete, or incorrectly recovered. In documentary applications, fluency does not demonstrate correspondence with a source. Retrieval-Augmented Generation (RAG) reduces this risk by supplying external context [1], but vector search alone does not guarantee structural preservation, source identity, valid citations, or appropriate refusal.
 
-A conventional implementation often splits text by size, embeds the fragments, and selects nearest neighbors. This strategy is useful and scalable, but it can separate definitions from titles, lists from introductions, and paragraphs from their argumentative position. It may also become difficult to explain why a summary appeared and which literal passages it represents.
+A conventional implementation often splits text by size, embeds the fragments, and selects nearest neighbors. This strategy is useful and scalable, but it can separate definitions from titles, lists from introductions, and paragraphs from their argumentative position. It may also become difficult to reconstruct the documentary role of each fragment.
 
-EVA makes a different decision: memory should reflect semantic organization already present in the document. Titles, sections, paragraphs, items, properties, and elements form a tree. Literal tree content becomes primary evidence. Bottom-up summaries become derived evidence explicitly linked to their supporting evidence. Both classes may receive embeddings, but only primary sources support the final answer.
+EVA makes a different decision: memory should reflect semantic organization already present in the document. Titles, sections, paragraphs, items, properties, and elements form a tree. Literal tree content becomes primary evidence, and only those sources receive embeddings and support the final answer.
 
 The second decision separates memory from interaction. Relationships identified between input and evidence do not become permanent facts. They describe the cognitive configuration of that query and are discarded afterward. This boundary prevents a contingent, model-produced interpretation conditioned by limited context from acquiring the status of documentary source.
 
@@ -38,7 +38,7 @@ The central question is:
 This question contains seven interdependent problems:
 
 1. **semantic segmentation:** represent documents without arbitrary cuts;
-2. **provenance:** distinguish literal content from summaries and record derivations;
+2. **provenance:** preserve the source and structural origin of literal evidence;
 3. **adaptive retrieval:** avoid forcing vector search on structurally answerable questions;
 4. **grounding:** prevent documentary answers when no primary evidence is recovered;
 5. **epistemological boundary:** prevent similarities, answers, and inferred relationships from automatically becoming memory;
@@ -49,9 +49,9 @@ EVA treats these problems as one chain. Final quality depends not only on the ge
 
 ## 3. Design principles
 
-### 3.1 Source before summary
+### 3.1 Source before interpretation
 
-Literal content remains distinguishable from every model-produced transformation. A summary assists navigation without replacing its source.
+Literal content remains distinguishable from every model-produced transformation. Retrieval operates directly over the indexed source rather than an intermediate summary.
 
 ### 3.2 Structure before size
 
@@ -93,7 +93,7 @@ EVA is compatible with this field but adopts a specific boundary:
 
 - not every input follows the same vector search;
 - cognitive relationships do not form a persistent graph;
-- summaries are not equivalent to literal sources;
+- no intermediate generated text substitutes literal sources;
 - query-produced relationships do not persist;
 - documentary generation requires recovered primary evidence;
 - no AI reranker chooses final semantic context;
@@ -123,47 +123,24 @@ E_P(D) = \{e(n) \mid n \in N(D),\; content(n) \neq \varnothing\}
 
 Each `e(n)` retains `n`'s structural reference. Primary evidence is not an opinion about text; it is a traceable unit of that text.
 
-### 5.3 Derived evidence
+### 5.3 Structural embeddings
 
-Internal nodes or hierarchical regions may receive bottom-up summaries. These form derived `node_summary` evidence.
-
-If `S(n)` is the summary for node `n`, its basis includes evidence from that node and relevant descendants:
-
-\[
-S(n) = f(E(n), S(c_1), S(c_2), \ldots, S(c_k))
-\]
-
-where `c₁…cₖ` are children and `f` is the configured summarization process. The equation describes dependency, not equivalence: `S(n)` remains derived interpretation.
-
-### 5.4 Derivation lineage
-
-Every derived evidence record connects to its supporting evidence. This permits traversal from summary to primary sources and prevents an originless summary claim:
-
-\[
-e_d \rightarrow \{e_1, e_2, \ldots, e_m\}
-\]
-
-Here `e_d` is derived and each `eᵢ` is primary or derived source evidence. Resolution is recursive until the result contains usable primary evidence.
-
-### 5.5 Structural embeddings
-
-Persistent embeddings are produced for primary and derived evidence. The provider receives a unit already organized semantically by the document or its hierarchical summary. The algorithm does not create segments merely to satisfy arbitrary size.
+Persistent embeddings are produced exclusively for primary evidence. The provider receives a unit already organized semantically by the document. The algorithm does not create segments merely to satisfy arbitrary size.
 
 Each embedding is associated with evidence, model configuration, dimension, and content hash. Obsolescence can therefore be detected and representations rebuilt when content or configuration changes.
 
-### 5.6 Persistent boundary
+### 5.4 Persistent boundary
 
 | Structure | Function |
 |---|---|
 | `documents` | document identity, format, hash, and state |
 | `document_nodes` | normalized tree and source references |
-| `evidences` | primary and derived evidence |
-| `evidence_derivations` | lineage between summaries and sources |
+| `evidences` | literal primary evidence |
 | `evidence_embeddings` | versioned vector representations |
-| `processing_jobs` | summary and embedding stages |
+| `processing_jobs` | embedding stage |
 | `audit_events` | sanitized operational events |
 
-Current memory has no cognitive-node, cognitive-relationship, relationship-embedding, interaction-analysis, or query-cache tables. It has no relational-graph build stage. Model-assisted build stages are summaries and embeddings.
+Current memory has no cognitive-node, cognitive-relationship, relationship-embedding, interaction-analysis, or query-cache tables. It has no relational-graph build stage. The model-assisted persistent build stage produces primary embeddings.
 
 ## 6. Ingestion processing
 
@@ -174,12 +151,10 @@ The build flow is:
 3. parse the complete source into a normalized tree;
 4. persist document and nodes;
 5. deterministically create primary evidence;
-6. create hierarchical summaries and derived evidence;
-7. record derivation lineage;
-8. create embeddings for eligible evidence;
-9. update processing and audit states.
+6. create embeddings for eligible primary evidence;
+7. update processing and audit states.
 
-The application controls transactions, validation, and persistence. A summary provider returns a candidate transformation and has no direct memory access. Failures can resume by stage, and existing embeddings are reused while model and hash remain compatible.
+The application controls transactions, validation, and persistence. Failures can resume at the embedding stage, and existing vectors are reused while model and hash remain compatible.
 
 ## 7. Query flow
 
@@ -227,11 +202,11 @@ For `N` similarities `sᵢ`, CIE calculates:
 CV = \frac{\sigma}{\mu}
 \]
 
-When `μ = 0`, CV is `null`. `s < μ` is discard; `μ ≤ s < μ + σ` is convergence; `s ≥ μ + σ` is core. At every CIE stage, core is elected and convergence takes its place only when core is empty. At the hierarchical stage, however, both regions are retained for separate lineage resolution and primary analysis. Minimal numerical tolerance protects threshold comparisons without changing values.
+When `μ = 0`, CV is `null`. `s < μ` is discard; `μ ≤ s < μ + σ` is convergence; `s ≥ μ + σ` is core. At every CIE stage, core is elected and convergence takes its place only when core is empty. Minimal numerical tolerance protects threshold comparisons without changing values.
 
 The transformation is deterministic, preserves Retriever order within regions, and creates no additional grade, weight, or rank. Query output may expose regions and statistics for audit, but the answer provider receives only resolved final primary context.
 
-The first CIE operates directly over primary evidence. Its upper core, or its convergence when the core is empty, passes through κe and primary CIE using its own cosine against the same query. Derived summaries preserve organization and lineage in built memory but do not replace sources in this initial retrieval.
+The first CIE operates directly over primary evidence. Its upper core, or its convergence when the core is empty, passes through κe and primary CIE using its own cosine against the same query.
 
 ### 7.4 Multi-document query and transient selection
 
@@ -307,7 +282,7 @@ Earlier versions treated Cnode as a persistent entity with identity, relationshi
 
 ### 8.4 Multidisciplinary reliability and anti-evasion
 
-EVA reliability is a property of a verifiable process, not a probability-of-truth score. In multidisciplinary queries it preserves five boundaries: source identity, primary/derived distinction, transient context selection, local output validation, and declared limitations.
+EVA reliability is a property of a verifiable process, not a probability-of-truth score. In multidisciplinary queries it preserves five boundaries: source identity, primary-evidence integrity, transient context selection, local output validation, and declared limitations.
 
 The system prevents fluency from replacing support. If one requested discipline lacks evidence, synthesis must be restricted to the supported subset and name the absence. If no area has support, documentary generation is blocked. An emergent synthesis is reliable only in the sense that it is auditable to documentary participants; retrieval and interpretation errors remain possible and must be measured.
 
@@ -319,7 +294,7 @@ Operational events are sanitized. Core records `simetry` and `assimetry` counts 
 
 The current security model must not be overstated: superadmin may use the installation credential; authenticated users have revocable sessions and explicit project/document permissions; projects group works for multi-document query. This is not global identity, inter-organization collaboration, or multitenant isolation.
 
-Auditability derives chiefly from primary evidence references to tree/source, derived-evidence lineage, content and embedding versioning, and validation of answer citations.
+Auditability derives chiefly from primary evidence references to tree/source, content and embedding versioning, and validation of answer citations.
 
 ## 10. Architectural comparison
 
@@ -327,7 +302,7 @@ Auditability derives chiefly from primary evidence references to tree/source, de
 |---|---|---|---|---|
 | Primary unit | windowed block | document or large passage | entity, relationship, community | document node and evidence |
 | Original structure | often partial | present in input, selection-limited | converted to graph | persisted as tree |
-| Summaries | optional | optional | central to communities | derived evidence with lineage |
+| Summaries | optional | optional | central to communities | absent from the operational flow |
 | Persistent relationships | usually no | no | yes | no cognitive interactions |
 | Vector search | dominant route | optional | graph-combined | only when type requires |
 | Final source | recovered block | supplied context | nodes, relations, reports | resolved primary evidence |
@@ -341,7 +316,7 @@ This table describes design choices, not a quality ranking.
 
 ### H1 — Traceability
 
-EVA answers should permit a higher primary-source location rate than configurations whose summaries lack lineage.
+EVA answers should permit a high primary-source location rate because retrieval operates directly over the indexed sources.
 
 ### H2 — Semantic organization
 
@@ -355,9 +330,9 @@ The evidence gate should reduce answers to unsupported questions while preservin
 
 Hierarchical navigation for direct and structural questions should reduce embedding calls and latency compared with mandatory vector routing.
 
-### H5 — Derived resolution
+### H5 — Direct primary retrieval
 
-Indexing summaries but answering with their primary sources should improve conceptual recall without losing literal verifiability.
+Indexing and retrieving primary evidence directly should reduce information loss introduced by an intermediate summarization stage while preserving literal verifiability.
 
 ### H6 — Relational neutrality
 
@@ -379,11 +354,11 @@ For the same Retriever, corpus, and final budget, CIE should reduce noise and in
 
 ### 12.1 Baselines
 
-Compare fixed-size block RAG; overlapping-block RAG; primary-only retrieval; primary-plus-derived retrieval without lineage resolution; EVA routing, lineage, and evidence gate without CIE; complete EVA with CIE; a reference reranker over a declared candidate budget; and long context when technically and economically comparable. Use the same documents, embedding provider, answer provider, and context budget wherever possible.
+Compare fixed-size block RAG; overlapping-block RAG; primary-only retrieval without EVA routing; EVA routing and evidence gate without CIE; complete EVA with CIE; a reference reranker over a declared candidate budget; and long context when technically and economically comparable. Use the same documents, embedding provider, answer provider, and context budget wherever possible.
 
 ### 12.2 Corpora
 
-Include long hierarchical Markdown; JSON with objects, lists, and depths; XML with attributes, repeated elements, and supported namespaces; short documents producing few summaries; modified versions for hash/rebuild testing; and multidisciplinary projects containing explicit convergence, conceptual tension, different vocabularies, and genuine absence of relationship.
+Include long hierarchical Markdown; JSON with objects, lists, and depths; XML with attributes, repeated elements, and supported namespaces; short documents with few primary units; modified versions for hash/rebuild testing; and multidisciplinary projects containing explicit convergence, conceptual tension, different vocabularies, and genuine absence of relationship.
 
 ### 12.3 Question set
 
@@ -393,7 +368,7 @@ Independent evaluators should annotate literal location, structural navigation, 
 
 - primary-evidence Recall@k and Precision@k;
 - Mean Reciprocal Rank and nDCG;
-- correct derived-to-primary resolution rate;
+- direct primary-source location rate;
 - structural coverage and context duplication;
 - balanced document coverage in multidisciplinary queries;
 - improper exclusion of a relevant discipline by κq, κe, or global nucleus;
@@ -411,11 +386,11 @@ Participant and excerpt validity, reciprocity precision in `simetry`, directiona
 
 ### 12.7 Operational metrics
 
-Latency by route, external calls per query, input/output tokens, cost per document and question, summary build time, index time and space, failure rate, and retries.
+Latency by route, external calls per query, input/output tokens, cost per document and question, primary-index build time and space, failure rate, and retries.
 
 ### 12.8 Ablations
 
-Individually remove derived summaries, derivation lineage, type routing, evidence gate, local citation validation, relational detection, and hierarchical-context preservation.
+Individually remove type routing, evidence gate, local citation validation, relational detection, hierarchical-context preservation, κq, κe, and each CIE stage.
 
 ### 12.9 Reproducibility
 
@@ -431,11 +406,11 @@ These are functional checks, not generalizable scientific results. There was no 
 
 ### 14.1 Embedding dependence
 
-Relevant concepts may receive low similarity; embeddings may also bring only superficially similar passages close together. κq observes the complete eligible population but depends on embeddings, corpus, and break detection. κe and all CIE stages do not repair missing index units or incomplete lineage. Mean as a cutoff assumes the arithmetic center is useful; skewed, concentrated, or near-zero-mean distributions may require robust measures. The current cutoff is not universally optimal.
+Relevant concepts may receive low similarity; embeddings may also bring only superficially similar passages close together. κq observes the complete eligible population but depends on embeddings, corpus, and break detection. κe and all CIE stages do not repair missing or structurally oversized index units. Mean as a cutoff assumes the arithmetic center is useful; skewed, concentrated, or near-zero-mean distributions may require robust measures. The current cutoff is not universally optimal.
 
-### 14.2 Summary loss
+### 14.2 Primary-only retrieval
 
-Derived evidence may omit exceptions or nuance. Primary resolution reduces impact but does not guarantee selection of every necessary source.
+Removing summaries avoids compression loss, but increases the indexed population and computational cost. Statistical selection still does not guarantee that every necessary source will be selected.
 
 ### 14.3 Input classification
 
@@ -471,11 +446,11 @@ Global CIE does not guarantee every relevant discipline appears in its nucleus. 
 
 ## 15. Discussion
 
-EVA's central commitment is to make the document/interpretation boundary explicit. Trees, primary evidence, derived evidence, and lineage belong to memory. Similarity, assembled context, answer, and interaction belong to the query event.
+EVA's central commitment is to make the document/interpretation boundary explicit. Trees and primary evidence belong to memory. Similarity, assembled context, answer, and interaction belong to the query event.
 
 This separation reduces the temptation to treat every model output as knowledge and makes evolution easier: retrieval strategies can change without migrating inferred relationships, and providers can change without altering source identity.
 
-Derived evidence supplies abstraction without claiming literal authority. Rather than choose “only passages” or “only summaries,” EVA lets the summary locate and the passage support. Simetry and assimetry follow the same discipline: enough structure for reciprocity or direction without turning an encounter into ontology. Absence of weights refuses to present an implicit estimate as objective force.
+Direct primary retrieval removes the abstraction layer between indexing and source selection. Simetry and assimetry follow the same discipline: enough structure for reciprocity or direction without turning an encounter into ontology. Absence of weights refuses to present an implicit estimate as objective force.
 
 In multidisciplinary projects, this discipline brings vocabularies and concepts together without dissolving sources. Reliability comes from auditing participants, accepted relationships, and declared gaps—not from completeness or persistence of emergent synthesis.
 
@@ -490,20 +465,20 @@ DOCUMENT → EVIDENCE → LOCATION → AVAILABLE CONTEXT
          → GENERATION + INTERACTIONS → LOCAL VALIDATION → ANSWER
 ```
 
-The document establishes origin; evidence preserves content and lineage; retrieval locates candidates; the application composes authorized context; the model writes and proposes interactions; local validation retains reconstructable citations and relationships:
+The document establishes origin; evidence preserves literal content and structural reference; retrieval locates candidates; the application composes authorized context; the model writes and proposes interactions; local validation retains reconstructable citations and relationships:
 
 ```text
-summary locates
+primary evidence is retrieved
 source supports
 application validates
 model communicates
 ```
 
-The summary model does not create the source, the embedding model does not determine truth, and the answer model does not decide persistence. This compactness is a design property, not evidence of superiority. Experiments must determine whether it preserves meaning, remains stable under stylistic and contradictory variations, and declares limits without evasion.
+The embedding model does not create or determine the truth of a source, and the answer model does not decide persistence. This compactness is a design property, not evidence of superiority. Experiments must determine whether it preserves meaning, remains stable under stylistic and contradictory variations, and declares limits without evasion.
 
 ## 16. Conclusion
 
-EVA organizes documentary memory as verifiable primary and derived evidence over a preserved structural tree. Summaries have lineage, embeddings represent semantically organized units, and queries choose hierarchical or semantic routes according to operational form. On vector routes, κq, κe, and first-source, primary, and global CIE establish mathematical boundaries between retrieval and interpretation, making final quantity emerge from query geometry.
+EVA organizes documentary memory as verifiable primary evidence over a preserved structural tree. Embeddings represent complete source units, and queries choose hierarchical or semantic routes according to operational form. On vector routes, κq, κe, and first-source, primary, and global CIE establish mathematical boundaries between retrieval and interpretation, making final quantity emerge from query geometry.
 
 The system blocks documentary generation without recovered primary evidence, locally validates citations and participants, and treats cognitive relationships as transient simetry or assimetry. Cnode no longer denotes a persistent entity, only the contextual interaction phenomenon when needed.
 

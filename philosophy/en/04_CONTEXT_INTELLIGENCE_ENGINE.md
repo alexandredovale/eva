@@ -121,7 +121,7 @@ Each item transiently reports population, `μ`, `σ`, `CV`, bounds, elected regi
 
 ## Scientific limit
 
-Determinism does not prove relevance. The flow still depends on corpus quality, document structure, summaries, embeddings, and κ's ability to identify useful breaks. CIE uses relative boundaries and has no absolute “no sufficiently related candidate” threshold. The global nucleus does not guarantee balanced coverage of every discipline.
+Determinism does not prove relevance. The flow still depends on corpus quality, document structure, primary-evidence granularity, embeddings, and κ's ability to identify useful breaks. CIE uses relative boundaries and has no absolute “no sufficiently related candidate” threshold. The global nucleus does not guarantee balanced coverage of every discipline.
 
 The falsifiable hypothesis is that, under the same corpus, models, and protocol, the current flow reduces noise, tokens, and paraphrase instability without unacceptable recall loss. This requires representative comparison with fixed Top-k, reranking, and long-context baselines; current functional tests do not demonstrate statistical superiority.
 

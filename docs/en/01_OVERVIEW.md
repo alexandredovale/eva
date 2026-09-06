@@ -15,16 +15,14 @@ The persistent cognitive core contains:
 
 - original document metadata and normalized nodes;
 - literal `primary` + `node_content` evidence;
-- generated `derived` + `node_summary` evidence;
-- derivations that record complete lineage;
-- contextual embeddings of already organized units.
+- contextual embeddings of organized primary evidence.
 
 It does not contain persistent relationships, cognitive scores, confidence, importance, interaction vectors, or Cnode records.
 
 ## Fundamental flow
 
 ```text
-Build: source → tree → primary evidence → derived summaries → embeddings
+Build: source → tree → primary evidence → embeddings
 Semantic query: input → complete primary evidence → κq → first-stage CIE
                 → upper core/fallback → κe/primary CIE → global CIE
 Interaction: recovered sources → transient simetry/assimetry → literal validation

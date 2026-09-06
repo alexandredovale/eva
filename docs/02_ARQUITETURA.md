@@ -9,9 +9,9 @@ Separar responsabilidades sem duplicar conceitos e sem permitir que a IA atribua
 1. **Entrada:** valida formato, tamanho, integridade e codificação.
 2. **Parser:** lê Markdown, JSON ou XML sem inferências.
 3. **Normalizador:** converte os formatos para uma árvore documental comum.
-4. **Evidências:** persiste conteúdo primário, sínteses derivadas e sua proveniência.
+4. **Evidências:** persiste exclusivamente conteúdo primário literal e sua origem estrutural.
 5. **Embeddings:** vetoriza unidades completas previamente organizadas.
-6. **Retriever:** roteia o input e recupera candidatos primários ou derivados.
+6. **Retriever:** roteia o input e recupera candidatos primários.
 7. **Fronteiras query-local + CIE:** κq legitima a população primária completa; o primeiro CIE encaminha seu núcleo superior ou a convergência como fallback; κe e o CIE primário refinam as fontes, e o CIE global consolida os núcleos locais.
 8. **Interação transitória:** deriva conceitualmente um Cnode por `simetry`/`assimetry` entre fontes citadas.
 9. **Validação:** mantém somente fontes analiticamente citadas e exige participantes conhecidos, citações visíveis e fragmentos literais.
@@ -21,7 +21,7 @@ Separar responsabilidades sem duplicar conceitos e sem permitir que a IA atribua
 ## Fluxo macro
 
 ```text
-Arquivo → parser → árvore → evidências primárias → sínteses → derivações → embeddings
+Arquivo → parser → árvore → evidências primárias → embeddings
 
 Pergunta → roteamento → população `primary:node_content` completa
          → cosine global → κq → primeiro CIE (μ, σ, CV)
@@ -36,13 +36,13 @@ Pergunta → roteamento → população `primary:node_content` completa
 
 Embeddings localizam evidências primárias semanticamente compatíveis. Nas rotas semânticas, toda a população primária elegível é ordenada e κq emerge da geometria query-local antes do primeiro CIE. Esse estágio encaminha somente seu núcleo (`s ≥ μ + σ`), com fallback para a convergência (`μ ≤ s < μ + σ`) quando o núcleo estiver vazio. As fontes sobreviventes passam pelos cálculos posteriores de κe e CIE primário sem alterações. A união deduplicada dos núcleos locais recebe o CIE global, cujo núcleo forma o contexto final, também com fallback de convergência. Correspondências literais exatas externas à população vetorial permanecem como âncoras protegidas.
 
-Depois da resolução para fontes primárias, o contexto disponível está concluído. A IA não pode introduzir fontes externas ou IDs fora desse conjunto. A base final da resposta contém somente as fontes efetivamente incorporadas à prosa com citações visíveis; uma fonte recuperada mas não citada é descartada, sem invalidar toda a resposta. Citação inexistente, fora do contexto ou apresentada apenas como inventário continua inválida, e a aplicação não completa marcadores omitidos.
+Depois da seleção das fontes primárias, o contexto disponível está concluído. A IA não pode introduzir fontes externas ou IDs fora desse conjunto. A base final da resposta contém somente as fontes efetivamente incorporadas à prosa com citações visíveis; uma fonte recuperada mas não citada é descartada, sem invalidar toda a resposta. Citação inexistente, fora do contexto ou apresentada apenas como inventário continua inválida, e a aplicação não completa marcadores omitidos.
 
 As interações são produzidas pela mesma capacidade linguística que responde à consulta. O Cnode resultante é uma derivação conceitual interna do EVA, não um sistema, módulo hierárquico superior, nó documental ou entidade persistente. Essas interações não recebem identidade permanente e não são analisadas antecipadamente por combinação massiva de pares. A camada local valida tipo, orientação, participantes citados e literalidade dos fragmentos.
 
 ## Neutralidade de fornecedores
 
-O domínio conhece capacidades, nunca marcas. As implementações são `EmbeddingProvider`, `SummaryProvider` e `QueryAnswerProvider`. `CognitiveProviderFactory` resolve essas capacidades pela configuração neutra do `.env`.
+O domínio conhece capacidades, nunca marcas. As implementações são `EmbeddingProvider` e `QueryAnswerProvider`. `CognitiveProviderFactory` resolve essas capacidades pela configuração neutra do `.env`.
 
 Fornecedor, endpoint, modelo e nome da variável de credencial ficam exclusivamente no `.env`. Trocar esses vínculos não exige renomear classes, comandos, serviços, rotas, testes ou contratos.
 

@@ -58,14 +58,13 @@ function assertIngestion(bool $condition, string $message): void
     }
 }
 
-/** @return array{documents: int, nodes: int, evidences: int, derivations: int} */
+/** @return array{documents: int, nodes: int, evidences: int} */
 function tableCounts(PDO $database): array
 {
     return [
         'documents' => (int) $database->query('SELECT COUNT(*) FROM documents')->fetchColumn(),
         'nodes' => (int) $database->query('SELECT COUNT(*) FROM document_nodes')->fetchColumn(),
         'evidences' => (int) $database->query('SELECT COUNT(*) FROM evidences')->fetchColumn(),
-        'derivations' => (int) $database->query('SELECT COUNT(*) FROM evidence_derivations')->fetchColumn(),
     ];
 }
 
@@ -114,8 +113,7 @@ try {
           WHERE document_id IN (' . $placeholders . ')
             AND evidence_class = ?
             AND evidence_type = ?
-            AND status = ?
-            AND summary IS NULL'
+            AND status = ?'
     );
     $statement->execute([...$documentIds, 'primary', 'node_content', 'validated']);
     assertIngestion((int) $statement->fetchColumn() === 5, 'Evidências primárias devem ser literais e validadas.');
@@ -136,10 +134,6 @@ try {
     $statement->execute($documentIds);
     assertIngestion((int) $statement->fetchColumn() === 0, 'A evidência primária deve reproduzir seu nó de origem.');
 
-    assertIngestion(
-        tableCounts($database)['derivations'] === $baseline['derivations'],
-        'A ingestão primária não deve antecipar derivações.'
-    );
 } finally {
     $findDocuments = $database->prepare(
         'SELECT id, storage_path FROM documents WHERE original_name = :original_name'

@@ -4,9 +4,9 @@
 2. Preservar conteúdo, ordem, hierarquia e referência da origem.
 3. Não confundir texto original com conteúdo gerado por IA.
 4. Persistir evidências com `evidence_class` e `evidence_type` explícitos.
-5. Construir sínteses superiores somente a partir de evidências inferiores identificadas.
+5. Persistir somente evidências primárias literais do tipo `node_content`.
 6. Gerar embeddings somente de unidades organizadas, nunca por cortes arbitrários de tamanho.
-7. Tratar EVA — Evidence Algorithm — como nome e arquitetura principal do sistema, mantendo evidências, derivações e embeddings como seu núcleo persistente.
+7. Tratar EVA — Evidence Algorithm — como nome e arquitetura principal do sistema, mantendo evidências primárias e embeddings como seu núcleo persistente.
 8. Tratar Cnode somente como derivação conceitual interna e transitória do EVA, nunca como sistema, camada hierárquica superior, nó documental ou entidade persistente; não persistir pares candidatos, análises de interação ou métricas relacionais como memória/ranking. `audit_events` pode manter apenas contagens sanitizadas por consulta, sem participantes, fragmentos ou reconstrução do par.
 9. Avaliar interações quando houver ao menos duas evidências recuperadas e produzir somente relações entre evidências efetivamente citadas, dentro do limite solicitado.
 10. Usar exclusivamente `simetry` e `assimetry` para descrever interações.
@@ -21,7 +21,7 @@
 19. Não responder como fato documental sem evidência primária suficiente.
 20. Informar quando o documento não sustenta uma conclusão.
 21. Exibir as evidências usadas e separar `simetry`, `assimetry` e limitações.
-22. Preservar histórico quando sínteses, modelos ou vetores mudarem.
+22. Preservar histórico quando modelos ou vetores mudarem.
 23. Manter provedores substituíveis e configuráveis por capacidade.
 24. Nunca gravar ou exibir chaves, senhas ou segredos.
 25. Manter arquivos enviados fora da pasta pública.
@@ -53,16 +53,16 @@
 51. Tratar `AI_QUERY_MAX_OUTPUT_TOKENS` como teto por tentativa e `QUERY_MAX_INTERACTIONS` como teto de interações, nunca como metas de preenchimento.
 52. Validar a compatibilidade de todas as unidades pendentes com o limite de entrada do provedor antes de enviar qualquer lote de embeddings.
 53. Nunca truncar, cortar ou fragmentar arbitrariamente uma evidência para produzir seu embedding.
-54. Representar uma primária excedente pelo embedding de uma síntese derivada válida somente quando a linhagem até a evidência primária integral estiver persistida.
+54. Exigir subdivisão estrutural real quando uma evidência primária exceder o orçamento seguro de embedding.
 55. Aplicar o CIE somente às distribuições vetoriais das rotas conceitual e relacional.
 56. Calcular cosine contra toda a população `primary:node_content` validada e vetorizada, ordenar globalmente e determinar κq sem Top-k, pesos ou thresholds semânticos humanos.
 57. Calcular média e desvio padrão populacionais sobre a população legitimada por κq — ou sobre a população completa quando não houver ruptura — e calcular `CV = σ / μ`, usando `null` quando `μ = 0`.
 58. Classificar como descarte `s < μ`, convergência `μ ≤ s < μ + σ` e núcleo `s ≥ μ + σ`.
-59. Em cada CIE, usar o núcleo como população eleita e promover a convergência somente quando o núcleo estiver vazio; no estágio hierárquico, preservar ambas as regiões para resolução e análise primária separadas.
+59. Em cada CIE, usar o núcleo como população eleita e promover a convergência somente quando o núcleo estiver vazio.
 60. Preservar a ordem do Retriever dentro das regiões; não criar nota, peso, heurística subjetiva ou reranking por IA.
-61. Resolver sem truncagem candidatos derivados de núcleo e convergência até suas fontes primárias, aplicar κe e CIE primário separadamente por região herdada e por obra, e submeter a união deduplicada dos núcleos locais ao CIE global antes de chamar o provedor.
+61. Aplicar κe e CIE primário às fontes encaminhadas por obra e submeter a união deduplicada dos núcleos locais ao CIE global antes de chamar o provedor.
 62. Não persistir candidatos, similaridades, estatísticas, regiões ou seleção do CIE como memória documental.
-63. Interromper a vetorização com o identificador da evidência quando uma primária excedente não possuir síntese derivada compatível, exigindo subdivisão estrutural real.
+63. Interromper a vetorização com o identificador da evidência quando uma primária exceder o limite, exigindo subdivisão estrutural real.
 64. Exigir que `used_evidence_ids` contenha somente evidências efetivamente citadas na resposta.
 65. Preservar `core` como precedência argumentativa e usar `convergence` somente quando contribuir como reforço, contexto, limite ou contraponto sustentado literalmente.
 66. Não inventar relações para acomodar uma evidência recuperada; candidatos sem contribuição citada devem ser descartados sem invalidar a resposta.

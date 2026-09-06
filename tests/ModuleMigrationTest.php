@@ -51,7 +51,7 @@ try {
 
     $temporary->exec($schema);
     $tables = $temporary->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
-    assertModuleMigration(count($tables) === 14, 'O schema consolidado deve criar exatamente 14 tabelas.');
+    assertModuleMigration(count($tables) === 13, 'O schema consolidado deve criar exatamente 13 tabelas.');
     assertModuleMigration(in_array('module_events', $tables, true), 'O schema consolidado não criou module_events.');
     assertModuleMigration(
         count($temporary->query('SHOW COLUMNS FROM module_events')->fetchAll()) === 6,
@@ -60,7 +60,7 @@ try {
 
     $temporary->exec($migration);
     assertModuleMigration(
-        count($temporary->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN)) === 14,
+        count($temporary->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN)) === 13,
         'Aplicar a migration 010 sobre o schema consolidado não pode criar estrutura adicional.'
     );
     unset($temporary);

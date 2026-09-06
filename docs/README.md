@@ -71,7 +71,7 @@ Ready-to-ingest Portuguese and English examples for Markdown, JSON, and XML are 
 | [`01_VISAO_GERAL.md`](01_VISAO_GERAL.md) | Project and Evidence Algorithm overview |
 | [`02_ARQUITETURA.md`](02_ARQUITETURA.md) | Modules, boundaries, and provider neutrality |
 | [`03_INGESTAO.md`](03_INGESTAO.md) | Parsing, normalization, upload, and persistence |
-| [`04_CONSTRUCAO_COGNITIVA.md`](04_CONSTRUCAO_COGNITIVA.md) | Summaries, embeddings, and lineage |
+| [`04_CONSTRUCAO_COGNITIVA.md`](04_CONSTRUCAO_COGNITIVA.md) | Primary-evidence embeddings and versioning |
 | [`05_CONSULTA.md`](05_CONSULTA.md) | Query routes, chat context, limits, and validation |
 | [`06_CNODE.md`](06_CNODE.md) | Cnode as a transient conceptual derivation of EVA, `simetry`, and `assimetry` |
 | [`07_BANCO_DE_DADOS.md`](07_BANCO_DE_DADOS.md) | Persistent data model |

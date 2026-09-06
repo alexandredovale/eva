@@ -240,14 +240,14 @@ function switchView(view, requestedModuleId = '') {
 }
 
 function renderMetrics(metrics) {
-    const cards = [['Documentos', total(metrics.documents)], ['Evidências', total(metrics.evidences)], ['Evidências primárias', Number(metrics.evidences?.primary || 0)], ['Sínteses derivadas', Number(metrics.evidences?.derived || 0)], ['Embeddings', Number(metrics.embeddings || 0)], ['Derivações', Number(metrics.derivations || 0)], ['Trabalhos na fila', Number(metrics.jobs?.queued || 0)], ['Trabalhos concluídos', Number(metrics.jobs?.completed || 0)], ['Falhas registradas', Number(metrics.jobs?.failed || 0)]];
+    const cards = [['Documentos', total(metrics.documents)], ['Evidências primárias', Number(metrics.evidences?.primary || 0)], ['Embeddings', Number(metrics.embeddings || 0)], ['Trabalhos na fila', Number(metrics.jobs?.queued || 0)], ['Trabalhos concluídos', Number(metrics.jobs?.completed || 0)], ['Falhas registradas', Number(metrics.jobs?.failed || 0)]];
     elements.metricGrid.innerHTML = cards.map(([label, value]) => `<article class="metric-card"><strong>${escapeHtml(value)}</strong><span>${escapeHtml(label)}</span></article>`).join('');
 }
 
 function renderDocuments(documents) {
     state.documents = documents;
     elements.documentCount.textContent = `${documents.length} documento${documents.length === 1 ? '' : 's'}`;
-    elements.documentsBody.innerHTML = documents.length ? documents.map(document => `<tr><td><strong>${escapeHtml(document.title)}</strong><br><small>${escapeHtml(document.public_id)}</small></td><td>${escapeHtml(document.format)}</td><td>${Number(document.node_count || 0)}</td><td>${Number(document.primary_evidence_count || 0)}</td><td>${Number(document.derived_evidence_count || 0)}</td><td>${Number(document.embedding_count || 0)}</td><td>${renderDocumentAction(document)}</td></tr>`).join('') : '<tr><td colspan="7" class="empty">Nenhum documento persistido.</td></tr>';
+    elements.documentsBody.innerHTML = documents.length ? documents.map(document => `<tr><td><strong>${escapeHtml(document.title)}</strong><br><small>${escapeHtml(document.public_id)}</small></td><td>${escapeHtml(document.format)}</td><td>${Number(document.node_count || 0)}</td><td>${Number(document.primary_evidence_count || 0)}</td><td>${Number(document.embedding_count || 0)}</td><td>${renderDocumentAction(document)}</td></tr>`).join('') : '<tr><td colspan="6" class="empty">Nenhum documento persistido.</td></tr>';
     renderProjectDocumentChoices();
 }
 
@@ -336,7 +336,7 @@ function updateQueryScopeSummary() {
 
 function renderJobs(jobs) {
     state.jobs = jobs;
-    const stageLabels = { summaries: 'Sínteses', embeddings: 'Embeddings' };
+    const stageLabels = { embeddings: 'Embeddings' };
     const statusLabels = { queued: 'Na fila', running: 'Processando', completed: 'Concluído', failed: 'Falha' };
     elements.jobsBody.innerHTML = jobs.length ? jobs.map(job => {
         const progress = Number(job.progress_percent || 0);

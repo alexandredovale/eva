@@ -1,25 +1,22 @@
 # Filosofia do EVA — Evidence Algorithm
 
-Versão: 3.3
+Versão: 6.0.0
 Estado conceitual: arquitetura vigente
 English: [EVA Philosophy](en/00_EVA_PHILOSOPHY.md)
 
 ## 1. Proposição central
 
-O EVA é um sistema de memória documental verificável. Sua unidade de confiança não é a resposta de um modelo, uma associação probabilística isolada nem um grafo autônomo: é a evidência preservada com origem, contexto estrutural e linhagem de derivação.
+O EVA é um sistema de memória documental verificável. Sua unidade de confiança não é a resposta de um modelo, uma associação probabilística isolada nem um grafo autônomo: é a evidência primária preservada com origem e contexto estrutural.
 
-A memória pertence ao conjunto documental persistido e às regras determinísticas que governam sua recuperação. Modelos podem auxiliar a sintetizar, representar semanticamente e formular respostas, mas não recebem autoridade para redefinir a fonte, criar evidências ou alterar a memória durante uma consulta.
+A memória pertence ao conjunto documental persistido e às regras determinísticas que governam sua recuperação. Modelos podem representar semanticamente e formular respostas, mas não recebem autoridade para redefinir a fonte, criar evidências ou alterar a memória durante uma consulta.
 
 O banco de dados é o meio de persistência dessa memória; não é, por si só, sua autoridade epistemológica. A autoridade vem da correspondência verificável entre cada evidência e o documento que a originou.
 
 ## 2. Evidência antes de interpretação
 
-O EVA distingue somente duas classes persistentes de evidência:
+O EVA persiste uma classe operacional de evidência:
 
-- **evidência primária**: conteúdo literal de um nó documental, preservado como unidade semântica completa;
-- **evidência derivada**: síntese hierárquica produzida a partir de evidências já conhecidas, sempre ligada às suas fontes por uma linhagem explícita.
-
-Evidências derivadas ampliam a capacidade de localização e compreensão do documento, mas não substituem evidências primárias como fundamento final de uma resposta. Quando uma síntese conduz a uma região relevante, o sistema retorna às fontes primárias que a sustentam.
+- **evidência primária**: conteúdo literal de um nó documental, preservado como unidade semântica completa.
 
 Essa distinção contém uma regra de prudência: uma interpretação pode orientar a busca, mas a afirmação apresentada ao usuário deve permanecer ancorada no texto documental recuperado.
 
@@ -27,7 +24,7 @@ Essa distinção contém uma regra de prudência: uma interpretação pode orien
 
 Documentos possuem organização própria: títulos, seções, parágrafos, listas, propriedades, elementos e relações hierárquicas. O EVA respeita essa organização.
 
-Embeddings não são gerados por cortes arbitrários de caracteres ou por janelas cegas de tokens. São gerados para conteúdos que já constituem unidades semânticas completas na árvore documental, incluindo evidências primárias e sínteses hierárquicas derivadas.
+Embeddings não são gerados por cortes arbitrários de caracteres ou por janelas cegas de tokens. São gerados exclusivamente para evidências primárias que já constituem unidades semânticas completas na árvore documental.
 
 Preservar a unidade organizada pelo autor é preservar parte essencial do significado. A estrutura não é decoração do texto; ela participa do contexto necessário à sua compreensão.
 
@@ -35,7 +32,7 @@ Preservar a unidade organizada pelo autor é preservar parte essencial do signif
 
 Toda consulta é primeiro compreendida quanto à sua forma operacional. Ela pode exigir localização direta, navegação estrutural, abrangência documental ou recuperação semântica conceitual e relacional.
 
-O EVA não reduz toda pergunta a uma única estratégia. Consultas diretas, estruturais e amplas podem ser resolvidas pela hierarquia documental. Consultas conceituais e relacionais podem usar uma representação vetorial transitória do input atual para localizar evidências primárias e derivadas semanticamente próximas.
+O EVA não reduz toda pergunta a uma única estratégia. Consultas diretas, estruturais e amplas podem ser resolvidas pela hierarquia documental. Consultas conceituais e relacionais podem usar uma representação vetorial transitória do input atual para localizar evidências primárias semanticamente próximas.
 
 Similaridade é um mecanismo de ordenação, não um juízo de verdade, importância ou força cognitiva. Nas rotas vetoriais, toda a população primária elegível manifesta sua geometria antes que κq estabeleça uma fronteira query-local. O primeiro Context Intelligence Engine observa, por média, desvio padrão e coeficiente de variação, essa população legitimada e encaminha somente o núcleo `s ≥ μ + σ`, usando convergência apenas quando o núcleo está vazio. κe e CIE primário preservam os cálculos posteriores sobre as fontes sobreviventes; por fim, o CIE global observa a união dos núcleos locais. O núcleo global — ou sua convergência quando o núcleo estiver vazio — determina o contexto semântico enviado ao modelo, sem Top-k ou quantidade humana configurada. Na base final permanecem somente as fontes que o modelo incorporou à resposta com citação visível. Valores e análises estatísticas são descartados após a consulta e nunca se tornam memória, peso ou relação permanente.
 
@@ -56,7 +53,7 @@ O conceito historicamente chamado de **Cnode** permanece apenas como uma maneira
 
 ## 6. Aplicação multidisciplinar e confiabilidade por restrição
 
-Um projeto do EVA pode reunir documentos especializados em disciplinas distintas sem fundir suas identidades, reescrever suas fontes ou construir antecipadamente uma ontologia entre elas. Cada evidência conserva o documento, a posição estrutural e a linhagem que a originaram. A reunião administrativa de obras amplia o espaço autorizado de consulta; não transforma proximidade temática em relação factual permanente.
+Um projeto do EVA pode reunir documentos especializados em disciplinas distintas sem fundir suas identidades, reescrever suas fontes ou construir antecipadamente uma ontologia entre elas. Cada evidência conserva o documento e a posição estrutural que a originaram. A reunião administrativa de obras amplia o espaço autorizado de consulta; não transforma proximidade temática em relação factual permanente.
 
 Quando um input conceitual ou relacional atravessa mais de uma disciplina, cada documento manifesta κq e seu primeiro CIE diretamente sobre evidências primárias. O núcleo superior, ou a convergência como fallback, segue para κe e CIE primário, que elegem núcleos locais cuja união deduplicada recebe o CIE global. Evidências de campos diferentes podem então participar da mesma resposta e de interações `simetry` ou `assimetry`, desde que pertençam ao núcleo global final ou às âncoras literais protegidas, sejam citadas e mantenham fragmentos verificáveis. A relação nasce no evento de consulta e termina com ele.
 
@@ -65,11 +62,10 @@ Esse comportamento permite formular uma **síntese conceitual emergente**: uma a
 Nesse contexto, confiabilidade não significa infalibilidade, probabilidade de verdade ou ausência de erro semântico. Significa que o sistema introduz condições verificáveis para confiar no processo:
 
 1. preservação da identidade e da integridade de cada fonte;
-2. separação entre evidência literal, síntese derivada e interpretação de consulta;
-3. resolução das sínteses até evidências primárias;
-4. validação local de citações, participantes e fragmentos;
-5. declaração explícita do que não possui fundamento suficiente;
-6. descarte das relações transitórias após a resposta.
+2. separação entre evidência literal e interpretação de consulta;
+3. validação local de citações, participantes e fragmentos;
+4. declaração explícita do que não possui fundamento suficiente;
+5. descarte das relações transitórias após a resposta.
 
 Adicionar documentos amplia o universo de candidatos, mas não altera evidências existentes nem cria conexões permanentes entre todas as obras. Essa propriedade preserva a saúde da memória e evita contaminação cumulativa: novas consultas podem revelar outros encontros multidisciplinares sem transformar interpretações anteriores em premissas silenciosas das consultas futuras.
 
@@ -97,7 +93,7 @@ Uma resposta verificável exige mais do que uma citação decorativa. O EVA vali
 
 A presença formal em `used_evidence_ids` não comprova uso. A aplicação não acrescenta marcadores omitidos e rejeita inventários isolados de citações, porque uma lista de IDs não substitui a incorporação analítica. O sistema nunca cria um identificador ausente nem aceita referências desconhecidas.
 
-Toda síntese persistente mantém sua derivação. Toda evidência primária conserva sua posição na árvore e sua referência à fonte. Assim, a cadeia de confiança pode ser percorrida da resposta até o conteúdo documental original.
+Toda evidência primária conserva sua posição na árvore e sua referência à fonte. Assim, a cadeia de confiança pode ser percorrida da resposta até o conteúdo documental original.
 
 ## 9. Fronteira da memória
 
@@ -105,18 +101,17 @@ O EVA persiste somente o que é necessário para reconstruir e auditar o conheci
 
 - documentos e sua identidade de conteúdo;
 - árvore estrutural normalizada;
-- evidências primárias e derivadas;
-- linhagens de derivação;
-- embeddings das unidades semânticas persistentes;
+- evidências primárias;
+- embeddings das evidências primárias persistentes;
 - estados de processamento e eventos de auditoria sanitizados.
 
-O EVA não persiste consultas brutas, contexto recuperado, similaridades, estatísticas ou regiões do CIE, respostas, interações cognitivas ou históricos conversacionais como memória documental. Para observabilidade, `audit_events` pode manter metadados sanitizados, inclusive as contagens de `simetry` e `assimetry`; se houver módulo assinante, a caixa postal `module_events` pode registrar o envelope permitido de `interaction.completed`, e cada módulo governa seu estado privado. Esses registros operacionais não reescrevem documentos, evidências, derivações ou embeddings. Consultar é um ato de leitura em relação ao acervo; não é autorização implícita para reescrever o conhecimento.
+O EVA não persiste consultas brutas, contexto recuperado, similaridades, estatísticas ou regiões do CIE, respostas, interações cognitivas ou históricos conversacionais como memória documental. Para observabilidade, `audit_events` pode manter metadados sanitizados, inclusive as contagens de `simetry` e `assimetry`; se houver módulo assinante, a caixa postal `module_events` pode registrar o envelope permitido de `interaction.completed`, e cada módulo governa seu estado privado. Esses registros operacionais não reescrevem documentos, evidências ou embeddings. Consultar é um ato de leitura em relação ao acervo; não é autorização implícita para reescrever o conhecimento.
 
 ## 10. Papel dos modelos
 
-Modelos são componentes substituíveis. Na construção da memória, podem produzir sínteses derivadas. Na consulta, podem gerar a representação vetorial transitória necessária à recuperação semântica e formular uma resposta com base nas evidências fornecidas.
+Modelos são componentes substituíveis. Na construção da memória, produzem embeddings das evidências primárias. Na consulta, podem gerar a representação vetorial transitória necessária à recuperação semântica e formular uma resposta com base nas evidências fornecidas.
 
-As decisões críticas permanecem sob controle da aplicação: quais registros podem ser persistidos, quais evidências entram no contexto disponível, como derivações são resolvidas, quais papéis de núcleo e convergência são preservados, quais citações são válidas e quando a ausência de evidência deve encerrar o fluxo. O modelo determina somente o subconjunto utilizado por meio das citações visíveis, sem poder sair do contexto autorizado.
+As decisões críticas permanecem sob controle da aplicação: quais registros podem ser persistidos, quais evidências entram no contexto disponível, quais papéis de núcleo e convergência são preservados, quais citações são válidas e quando a ausência de evidência deve encerrar o fluxo. O modelo determina somente o subconjunto utilizado por meio das citações visíveis, sem poder sair do contexto autorizado.
 
 Fornecedores, modelos, endpoints e credenciais são definidos por configuração externa e neutra. Esse compromisso white label impede que um componente conceitual do EVA dependa do nome de uma empresa ou de um modelo específico.
 
@@ -124,9 +119,9 @@ Fornecedores, modelos, endpoints e credenciais são definidos por configuração
 
 O EVA busca independência de fornecedor, reversibilidade de implementação e possibilidade de auditoria. Sua arquitetura deve continuar compreensível mesmo quando modelos, índices ou estratégias internas forem substituídos.
 
-O sistema não reivindica infalibilidade. Embeddings podem aproximar conceitos inadequados, sínteses podem perder nuances e respostas podem interpretar mal uma evidência. A validação local comprova identidade, cobertura analítica observável e literalidade dos fragmentos, mas a calibração semântica estrita de `simetry` e `assimetry` continua sendo uma fronteira de pesquisa: compatibilidade temática não deve ser confundida com reciprocidade ou direção. Por isso, a arquitetura privilegia rastreabilidade, validação local, retorno às fontes primárias e recusa explícita quando o fundamento é insuficiente.
+O sistema não reivindica infalibilidade. Embeddings podem aproximar conceitos inadequados e respostas podem interpretar mal uma evidência. A validação local comprova identidade, cobertura analítica observável e literalidade dos fragmentos, mas a calibração semântica estrita de `simetry` e `assimetry` continua sendo uma fronteira de pesquisa: compatibilidade temática não deve ser confundida com reciprocidade ou direção. Por isso, a arquitetura privilegia rastreabilidade, validação local, atuação direta sobre as fontes primárias e recusa explícita quando o fundamento é insuficiente.
 
-A finalidade do EVA não é produzir a aparência de conhecimento. É tornar observável a fronteira entre aquilo que o documento sustenta, aquilo que pode ser derivado com linhagem e aquilo que permanece desconhecido.
+A finalidade do EVA não é produzir a aparência de conhecimento. É tornar observável a fronteira entre aquilo que o documento sustenta, aquilo que a resposta interpreta e aquilo que permanece desconhecido.
 
 ## 12. Simplicidade operacional e separação de responsabilidades
 
@@ -139,7 +134,7 @@ EVIDÊNCIAS
    ↓
 LOCALIZAÇÃO / RETRIEVER
    ↓
-κq → CIE HIERÁRQUICO → LINHAGEM
+κq → CIE INICIAL SOBRE FONTES
    ↓
 κe → CIE PRIMÁRIO → CIE GLOBAL
    ↓
@@ -150,12 +145,11 @@ VALIDAÇÃO LOCAL
 RESPOSTA
 ```
 
-Cada etapa possui uma responsabilidade verificável. O documento fornece a origem; as evidências preservam conteúdo e linhagem; a recuperação calcula a população; κq e κe legitimam fronteiras query-local; os três estágios do CIE estabilizam e consolidam o conjunto vetorial; o modelo comunica a resposta e propõe interações dentro do contexto final; e a validação local mantém apenas citações e interações reconstruíveis.
+Cada etapa possui uma responsabilidade verificável. O documento fornece a origem; as evidências preservam o conteúdo literal; a recuperação calcula a população; κq e κe legitimam fronteiras query-local; os três estágios do CIE estabilizam e consolidam o conjunto vetorial; o modelo comunica a resposta e propõe interações dentro do contexto final; e a validação local mantém apenas citações e interações reconstruíveis.
 
 Essa divisão limita a autoridade dos modelos sem dispensar sua capacidade:
 
 ```text
-IA sintetiza    → não cria a fonte
 IA representa   → não determina a verdade
 IA responde     → não escolhe o que pode persistir
 ```
@@ -163,8 +157,7 @@ IA responde     → não escolhe o que pode persistir
 O compromisso operacional pode ser resumido em quatro funções:
 
 ```text
-síntese localiza
-fonte fundamenta
+fonte localiza e fundamenta
 aplicação valida
 modelo comunica
 ```

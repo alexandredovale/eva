@@ -63,49 +63,37 @@ Document: EVA-D000001
 Evidence: EVA-E000001
 ```
 
-Ingestion alone does not generate summaries, derived evidence, embeddings, `simetry`, or `assimetry`. Those operations belong to the later cognitive stages.
+Ingestion alone does not generate embeddings, `simetry`, or `assimetry`. Those operations belong to the later cognitive stage.
 
-## Hierarchical summaries
+The version 6.0.0 persistent semantic contract has one operational combination:
 
-`HierarchicalSummaryService` walks from leaves to the root. A parent summary receives its own content plus child summaries and records every originating evidence in `evidence_derivations`. Model and structural-input hash identify reusable versions.
-
-```text
-fragments → subtitles → chapters → sections → parts → work
-```
-
-The persistent semantic contract has only these implemented combinations:
-
-- `primary` + `node_content`: literal content extracted from one node;
-- `derived` + `node_summary`: a hierarchical summary generated from identified evidence.
-
-Generated and original content therefore remain distinguishable throughout retrieval and lineage resolution.
+- `primary` + `node_content`: literal content extracted from one node.
 
 ## Embeddings
 
 `EvidenceEmbeddingService` builds structured text containing document title, path, evidence class/type, and complete content. It batches complete units without dividing an individual unit.
 
-`EmbeddingInputGuard` reserves a safety margin under the configured provider limit. An incompatible primary unit is never truncated. A directly traceable compatible derived summary may still be built and embedded, but source-first retrieval in version 4.0.2 queries primary embeddings directly; the primary unit therefore requires real structural subdivision to enter that population.
+`EmbeddingInputGuard` reserves a safety margin under the configured provider limit. An incompatible primary unit is never truncated and requires real structural subdivision to enter the semantic population.
 
 The nominal limit is `AI_EMBEDDING_MAX_INPUT_TOKENS`; the guard uses 90% as a preventive margin for tokenizer differences. It validates all pending units before sending the first batch.
 
-Valid compatible `derived` + `node_summary` records remain linked through `evidence_derivations`, but they do not replace the source in the first query of the source-first mode. An oversized primary unit without its own embedding is outside that vector population until the document receives real structural subdivision. Increasing the batch, cutting text, or creating artificial fragments is not an allowed correction.
+An oversized primary unit without its own embedding is outside the vector population until the document receives real structural subdivision. Increasing the batch, cutting text, or creating artificial fragments is not an allowed correction.
 
 Model, dimension, and content hash identify the vector version. Similarity is used only during retrieval and is discarded after transient analysis.
 
 ## Persistent boundary
 
-The build ends with evidence, derivations, and embeddings. It does not materialize Cnode, because that EVA conceptual derivation exists only during a query. It never precomputes evidence pairs, interaction analyses, relationship embeddings, or interaction caches.
+The build ends with primary evidence embeddings. It does not materialize Cnode, because that EVA conceptual derivation exists only during a query. It never precomputes evidence pairs, interaction analyses, relationship embeddings, or interaction caches.
 
-`HierarchicalSummaryService` reuses an identical version by model and input hash. `EvidenceEmbeddingService` persists complete units in technical batches. Its result reports `represented_by_derived`, making the number of oversized primary units represented through traceable summaries auditable.
+`EvidenceEmbeddingService` persists complete primary units in technical batches and reuses identical model-and-hash versions.
 
-The CLI exposes only the persistent cognitive stages:
+The CLI exposes only the persistent cognitive stage:
 
 ```powershell
-php bin\build-cognitive.php <document-id> --stage=summaries --live
 php bin\build-cognitive.php <document-id> --stage=embeddings --live
 ```
 
-Both commands require `AI_LIVE_ENABLED=true` in addition to `--live`.
+The command requires `AI_LIVE_ENABLED=true` in addition to `--live`.
 
 ## Public regression fixture
 

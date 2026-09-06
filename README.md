@@ -2,11 +2,11 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Current version:** `4.0.2`
+**Current version:** `6.0.0`
 
-**Version highlight:** EVA 4.0.2 makes semantic retrieval source-first: the initial similarity distribution is calculated directly over primary evidence and forwards only the upper core, with convergence as fallback. Answer generation also places each analytical perspective in a separate paragraph.
+**Version highlight:** EVA 6.0.0 removes hierarchical summaries from construction, storage, embeddings, queues, and retrieval. The operational pipeline now works exclusively with literal primary evidence from ingestion through answer validation.
 
-EVA is a provider-neutral PHP system for building and querying **verifiable documentary memory**. It preserves document hierarchy, keeps literal source evidence separate from generated summaries, and validates every answer against the primary evidence recovered for the current query.
+EVA is a provider-neutral PHP system for building and querying **verifiable documentary memory**. It preserves document hierarchy, stores literal source evidence, and validates every answer against the primary evidence recovered for the current query.
 
 `Cnode` is the transient understanding of an explicit semantic interaction between recovered evidence. It is not a persistent entity, score, graph edge, or embedding.
 
@@ -17,8 +17,7 @@ EVA is a provider-neutral PHP system for building and querying **verifiable docu
 Many retrieval systems begin with arbitrary token chunks and later try to reconstruct context. EVA begins with documentary structure:
 
 ```text
-Source → normalized tree → literal primary evidence
-       → traceable hierarchical summaries → contextual embeddings
+Source → normalized tree → literal primary evidence → contextual embeddings
 
 Semantic query → local routing → complete primary evidence → κq → upper-core CIE → primary sources
       → one bounded answer → local citation and interaction validation
@@ -27,7 +26,7 @@ Semantic query → local routing → complete primary evidence → κq → upper
 Core properties:
 
 - Markdown, JSON, and XML converge into one normalized document tree.
-- Primary evidence is literal; derived evidence is generated and explicitly linked to its sources.
+- Every operational evidence item is literal and primary.
 - Embeddings represent complete, previously organized semantic units rather than arbitrary cuts.
 - Direct, structural, and broad queries can avoid a transient query embedding.
 - Conceptual and relational queries calculate their initial semantic distribution directly over validated primary-evidence embeddings.
@@ -101,7 +100,6 @@ For a complete setup and deployment sequence, see [`docs/en/03_INSTALLATION.md`]
 EVA names capabilities rather than vendors:
 
 - `EmbeddingProvider`
-- `SummaryProvider`
 - `QueryAnswerProvider`
 
 Configure each capability in `.env` with a provider identifier, endpoint, model, and the **name** of the environment variable containing its credential. Never place real credentials in code or documentation.
@@ -138,7 +136,6 @@ See [Connector modules](docs/en/17_MODULE_CONNECTORS.md) for contracts, installa
 Real cognitive build commands require both `AI_LIVE_ENABLED=true` and `--live`:
 
 ```bash
-php bin/build-cognitive.php <document-id> --stage=summaries --live
 php bin/build-cognitive.php <document-id> --stage=embeddings --live
 ```
 
@@ -177,7 +174,7 @@ Selected routes are shown below. The complete implemented route and access matri
 | `DELETE` | `/api/admin/modules/{id}` | Definitively remove a confirmed connector and its data (superadmin) |
 | `GET` | `/api/documents` | List works and counts (superadmin) |
 | `POST` | `/api/documents` | Ingest Markdown, JSON, or XML (superadmin) |
-| `POST` | `/api/documents/{id}/process` | Queue summaries and embeddings (superadmin) |
+| `POST` | `/api/documents/{id}/process` | Queue primary-evidence embeddings (superadmin) |
 | `POST` | `/api/admin/queue/run` | Run one explicitly confirmed worker pass (superadmin only) |
 | `GET` | `/api/jobs` | Inspect queue state (superadmin) |
 | `POST` | `/api/jobs/{id}/retry` | Explicitly retry an allowed failed job (superadmin) |

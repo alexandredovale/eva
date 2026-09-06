@@ -94,7 +94,7 @@ O custo é aproximadamente proporcional à quantidade de embeddings multiplicada
 
 #### Limite por quantidade, não por tokens
 
-Nas rotas semânticas, o CIE global substitui o antigo limite numérico de evidências. Uma única evidência extensa ainda pode produzir um prompt caro; a atomicidade das fontes primárias permanece requisito estrutural. A construção de sínteses hierárquicas também não possui atualmente uma guarda equivalente à proteção aplicada às unidades de embedding.
+Nas rotas semânticas, o CIE global substitui o antigo limite numérico de evidências. Uma única evidência extensa ainda pode produzir um prompt caro; a atomicidade das fontes primárias permanece requisito estrutural, e unidades acima do limite aceito pelo provedor exigem subdivisão documental preservando a fonte.
 
 #### Ausência de limiar absoluto de pertinência
 

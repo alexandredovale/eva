@@ -6,7 +6,7 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 2. Preserve source content, order, hierarchy, and origin reference.
 3. Never confuse original text with AI-generated content.
 4. Persist evidence with explicit `evidence_class` and `evidence_type` values.
-5. Build higher-level summaries only from identified lower-level evidence.
+5. Persist only literal primary evidence of type `node_content`.
 6. Generate embeddings only from organized units, never from arbitrary size-based cuts.
 7. Treat EVA — Evidence Algorithm — as the principal system name and architecture, keeping evidence, derivations, and embeddings as its persistent core.
 8. Treat Cnode only as an internal transient conceptual derivation of EVA, never as a system, superior hierarchical layer, documentary node, or persistent entity; do not persist candidate pairs, interaction analyses, or relational metrics as memory/ranking. `audit_events` may retain only sanitized per-query counts without participants, excerpts, or pair reconstruction.
@@ -23,7 +23,7 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 19. Do not answer a claim as documentary fact without sufficient primary evidence.
 20. State when the document does not support a conclusion.
 21. Expose the evidence used and separate `simetry`, `assimetry`, and limitations.
-22. Preserve history when summaries, models, or vectors change.
+22. Preserve history when models or vectors change.
 23. Keep providers replaceable and configurable by capability.
 24. Never store in logs or expose keys, passwords, or secrets.
 25. Keep uploaded files outside the public directory.
@@ -55,16 +55,16 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 51. Treat `AI_QUERY_MAX_OUTPUT_TOKENS` as a per-attempt ceiling and `QUERY_MAX_INTERACTIONS` as an interaction ceiling, never as fill targets.
 52. Validate every pending unit against the provider input limit before sending any embedding batch.
 53. Never truncate, cut, or arbitrarily fragment evidence to create its embedding.
-54. Represent an oversized primary unit through the embedding of a valid derived summary only when lineage to the complete primary evidence is persisted.
+54. Require real structural subdivision when primary evidence exceeds the safe embedding budget.
 55. Apply CIE only to vector distributions from conceptual and relational routes.
 56. Score the complete validated and embedded `primary:node_content` population, globally order it, and derive κq without a configured Top-k, semantic thresholds, or weights.
 57. Calculate population mean and population standard deviation over the κq-legitimized population — or the complete population when no break exists — and calculate `CV = σ / μ`, using `null` when `μ = 0`.
 58. Classify `s < μ` as discard, `μ ≤ s < μ + σ` as convergence, and `s ≥ μ + σ` as core.
-59. At each CIE stage, elect core and promote convergence only when core is empty; at the hierarchical stage, retain both regions for separate lineage resolution and primary analysis.
+59. At each CIE stage, elect core and promote convergence only when core is empty.
 60. Preserve Retriever order within regions; do not create a subjective score, weight, heuristic, or AI reranking stage.
-61. Resolve hierarchical core and convergence candidates to primary sources without truncation, apply κe and primary CIE separately by inherited region and work, and submit the deduplicated union of local nuclei to global CIE before calling the answer provider.
+61. Apply κe and primary CIE to the forwarded sources by work, then submit the deduplicated union of local nuclei to global CIE before calling the answer provider.
 62. Do not persist candidates, similarities, statistics, regions, or the CIE selection as documentary memory.
-63. Stop vectorization and report the evidence identifier when an oversized primary unit has no compatible derived summary; require a real structural subdivision.
+63. Stop vectorization and report the evidence identifier when a primary unit exceeds the limit; require real structural subdivision.
 64. Require `used_evidence_ids` to contain only evidence records that are effectively cited in the answer.
 65. Preserve `core` as argumentative precedence and use `convergence` only when it contributes literal support, context, limitation, or counterpoint.
 66. Do not invent relationships to accommodate recovered evidence; discard uncited candidates without invalidating the answer.
