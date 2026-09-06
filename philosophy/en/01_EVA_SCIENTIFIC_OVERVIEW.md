@@ -2,7 +2,7 @@
 
 ## Abstract
 
-The Evidence Algorithm (EVA) is a provider-neutral architecture for verifiable documentary memory. It parses structured sources into a normalized hierarchy, persists literal primary evidence, produces traceable hierarchical derived evidence, and embeds complete semantic units. During a semantic query, it scores the complete eligible hierarchical population, derives the query-local κq boundary, and applies hierarchical CIE. Complete lineage resolution produces primary populations inherited from core and convergence; each passes separately through κe and primary CIE. A global CIE consolidates the deduplicated union of local primary nuclei. Its global nucleus—or global convergence when that nucleus is empty—forms the semantic context without a configured Top-k or evidence count. Exact literal anchors remain protected. The final documentary basis retains only sources incorporated into the answer with visible citations.
+The Evidence Algorithm (EVA) is a provider-neutral architecture for verifiable documentary memory. It parses structured sources into a normalized hierarchy, persists literal primary evidence, produces traceable hierarchical derived evidence, and embeds complete semantic units. During a semantic query, it scores the complete eligible primary population, derives the query-local κq boundary, and applies a first source CIE. Only its upper core—or convergence when that core is empty—passes through κe and primary CIE. A global CIE consolidates the deduplicated union of local primary nuclei. Its global nucleus—or global convergence when that nucleus is empty—forms the semantic context without a configured Top-k or evidence count. Exact literal anchors remain protected. The final documentary basis retains only sources incorporated into the answer with visible citations.
 
 EVA treats a Cnode as the transient understanding of an explicit interaction between cited evidence. The interaction is never stored as a graph edge, score, vector, or permanent cognitive entity. Its two internal forms are `simetry`, for an explicit reciprocal interaction, and `assimetry`, for an explicit directed interaction. Neither form implies truth, importance, superiority, confidence, intensity, or inferred causality.
 
@@ -23,8 +23,8 @@ Structured source
 User query
   → deterministic route detection
   → structural or semantic candidate retrieval
-  → complete hierarchical scoring → κq → hierarchical CIE
-  → complete lineage resolution → κe → primary CIE
+  → complete primary scoring → κq → first source CIE
+  → upper core/convergence fallback → κe → primary CIE
   → union of local nuclei → global CIE
   → one bounded structured answer
   → local validation of citations and interactions

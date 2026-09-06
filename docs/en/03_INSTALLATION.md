@@ -10,7 +10,7 @@ The application has no Composer or Node.js runtime dependency. Apache with `mod_
 
 Copy `.env.example` to `.env`. Set application URL, database connection, branding, query limits, and queue identity. Generate a unique `ADMIN_API_TOKEN` with at least 24 characters.
 
-`QUERY_NON_SEMANTIC_MAX_EVIDENCE` applies only to routes without CIE. Semantic routes use κq, hierarchical CIE, κe, primary CIE, and global CIE without a configured evidence count.
+`QUERY_NON_SEMANTIC_MAX_EVIDENCE` applies only to routes without CIE. Semantic routes use κq and the first CIE directly over primary evidence, followed by κe, primary CIE, and global CIE without a configured evidence count.
 
 Leave provider fields empty and `AI_LIVE_ENABLED=false` until the local installation and offline tests are complete.
 

@@ -236,17 +236,17 @@ try {
     assertCognitiveBuild(
         array_filter(
             $semanticContext->routingPoints,
-            static fn (string $point): bool => str_contains($point, ':derived:node_summary')
+            static fn (string $point): bool => str_contains($point, ':primary:node_content')
         ) !== [],
-        'A recuperação conceitual deve usar evidências derivadas como pontos semânticos.'
+        'A recuperação conceitual deve usar evidências primárias como pontos semânticos.'
     );
-    assertCognitiveBuild($semanticContext->evidences !== [], 'A síntese recuperada deve resolver fontes primárias.');
+    assertCognitiveBuild($semanticContext->evidences !== [], 'A recuperação orientada às fontes deve retornar evidências primárias.');
     assertCognitiveBuild(
         array_filter(
             $semanticContext->evidences,
             static fn ($evidence): bool => !str_starts_with($evidence->publicId, 'EVA-E')
         ) === [],
-        'A resposta deve receber somente as fontes primárias resolvidas.'
+        'A resposta deve receber somente as fontes primárias recuperadas.'
     );
 
     $classStatement = $database->prepare(

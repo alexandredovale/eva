@@ -48,17 +48,17 @@ A ausência de um aspecto nunca autoriza conhecimento externo e não apaga os de
 
 ## Recuperação
 
-Consultas diretas, estruturais e amplas percorrem a árvore e suas evidências primárias. Consultas conceituais e relacionais geram um embedding transitório do input e pesquisam a população completa de resumos hierárquicos `derived:node_summary` elegíveis.
+Consultas diretas, estruturais e amplas percorrem a árvore e suas evidências primárias. Consultas conceituais e relacionais geram um embedding transitório do input e pesquisam diretamente a população completa de evidências `primary:node_content` validadas que possuem embedding compatível.
 
-Em consultas conceituais ou relacionais, uma correspondência textual exata não encerra a recuperação. A evidência literal permanece como âncora `core`; o mesmo input segue por κq e CIE hierárquico, resolução integral de linhagem, κe e CIE primário por região. A união dos núcleos primários locais recebe um CIE global, cujo núcleo forma o contexto sem limite numérico configurado. Consultas exclusivamente diretas, estruturais ou amplas continuam sem consumir embedding de consulta.
+Em consultas conceituais ou relacionais, uma correspondência textual exata não encerra a recuperação. A evidência literal permanece como âncora `core`; o mesmo input segue por κq e pelo primeiro CIE diretamente sobre fontes primárias. Somente o núcleo superior, ou a convergência quando esse núcleo estiver vazio, segue para κe e CIE primário por região. A união dos núcleos primários locais recebe um CIE global, cujo núcleo forma o contexto sem limite numérico configurado. Consultas exclusivamente diretas, estruturais ou amplas continuam sem consumir embedding de consulta.
 
 Resultados literais, lexicais e estruturais são candidatos, não conclusões. Nessas rotas não vetoriais, a aplicação forma o contexto disponível dentro do limite. O provedor mantém na base final somente as evidências incorporadas à resposta com citação visível, sem transformá-las em conclusões além de seu conteúdo literal; candidatas não citadas são descartadas.
 
 `simetry` e `assimetry` são operadores cognitivos internos e permanecem no contexto integral da consulta relacional. Eles orientam a compreensão da IA, mas não são tratados como expressões que a fonte documental precise conter.
 
-Na recuperação semântica, o Retriever calcula cosine para toda a população hierárquica elegível, ordena globalmente e determina κq pela geometria normalizada e pelos gaps query-locais. Quando não existe ruptura identificável, a população completa segue ao CIE. Só então o Context Intelligence Engine calcula média, desvio padrão populacional e coeficiente de variação. Candidatos abaixo da média são descartados. O núcleo acima ou igual a `μ + σ` lidera o contexto disponível; a faixa entre `μ` e `μ + σ` fornece contexto complementar. Se o núcleo estiver vazio, a convergência assume o papel principal.
+Na recuperação semântica, o Retriever calcula cosine para toda a população primária elegível, ordena globalmente e determina κq pela geometria normalizada e pelos gaps query-locais. Quando não existe ruptura identificável, a população completa segue ao primeiro CIE. Só então o Context Intelligence Engine calcula média, desvio padrão populacional e coeficiente de variação. Candidatos abaixo da média são descartados. Somente o núcleo acima ou igual a `μ + σ` segue normalmente para a próxima etapa; a faixa entre `μ` e `μ + σ` é usada apenas como fallback quando o núcleo está vazio.
 
-Quando uma evidência derivada é selecionada, `evidence_derivations` é percorrida sem truncagem até suas fontes primárias. O embedding transitório é reutilizado para κe e CIE primário, sem chamada externa adicional. O CIE global compara os núcleos locais pelo cosine primário e preserva em cada fonte final o papel hierárquico herdado `core` ou `convergence`.
+Como a primeira população já contém evidências primárias, não há expansão inicial de resumos selecionados. O embedding transitório é reutilizado para κe e CIE primário, sem chamada externa adicional. O CIE global compara os núcleos locais pelo cosine primário e preserva em cada fonte final o papel `core` ou `convergence` herdado do primeiro estágio.
 
 ## Governança de respostas por projeto
 
@@ -89,7 +89,7 @@ Define somente a quantidade máxima de evidências nas rotas diretas, estruturai
 - **Fallback do código:** `8` quando a variável não estiver definida.
 - **Intervalo efetivo:** de `1` a `50`; a configuração carregada é normalizada para esse intervalo.
 - **Escopo:** não participa de consultas conceituais ou relacionais e nunca define uma população estatística.
-- **Seleção semântica:** κq, CIE hierárquico, κe, CIE primário e CIE global substituem integralmente o antigo limite.
+- **Seleção semântica:** κq, primeiro CIE sobre evidências primárias, κe, CIE primário e CIE global substituem integralmente o antigo limite.
 - **Múltiplas obras:** `DocumentQueryService` consolida globalmente e deduplica os núcleos locais antes da resposta.
 - **Rastreabilidade:** as evidências finais são recuperadas deterministicamente e entregues como conjunto disponível. A IA usa o núcleo como referência principal, cita cada fonte efetivamente incorporada e pode omitir candidatos que não contribuam sem invalidar a resposta; inventários isolados de citações continuam rejeitados.
 - **Impacto operacional:** valores maiores ampliam cobertura e consumo de tokens. Valores menores reduzem contexto e custo, mas podem retirar evidências necessárias para cobrir todos os aspectos do input.
@@ -197,7 +197,7 @@ O adaptador descarta uma interação candidata e acrescenta limitação quando s
 
 Quando a recuperação não encontra evidência alguma, o sistema informa a limitação sem chamar o provedor de resposta. Quando há contexto, `used_evidence_ids` contém somente as evidências efetivamente citadas. Candidatos recuperados sem citação são descartados sem invalidar a resposta.
 
-Os identificadores citados são validados contra o contexto, mas sua presença formal não basta. Cada evidência mantida deve aparecer citada em uma frase ou parágrafo analítico que exponha sua contribuição. A aplicação não acrescenta citações ausentes e rejeita listas isoladas como `Evidências: [EVA-E000000]`, pois elas não demonstram incorporação analítica. Uma resposta com contexto recuperado e nenhuma citação documental também é rejeitada.
+Os identificadores citados são validados contra o contexto, mas sua presença formal não basta. Cada evidência mantida deve aparecer citada em uma frase ou parágrafo analítico que exponha sua contribuição, e cada viés de análise deve ser apresentado em novo parágrafo. A aplicação não acrescenta citações ausentes e rejeita listas isoladas como `Evidências: [EVA-E000000]`, pois elas não demonstram incorporação analítica. Uma resposta com contexto recuperado e nenhuma citação documental também é rejeitada.
 
 ## Saída
 

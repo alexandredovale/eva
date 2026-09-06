@@ -28,8 +28,8 @@ Cnode é uma derivação conceitual interna do EVA: a compreensão contextual de
 
 ```text
 Construção: fonte → árvore → evidência primária → síntese derivada → embedding
-Consulta semântica: pergunta → hierarquia completa → κq → CIE hierárquico
-                    → linhagem → κe/CIE primário → CIE global → fontes primárias
+Consulta semântica: pergunta → evidências primárias completas → κq → primeiro CIE
+                    → núcleo superior/fallback → κe/CIE primário → CIE global
 Interação: fontes recuperadas → simetry/assimetry transitória → validação literal
 Resposta: evidências citadas → resposta e limitações
 ```
@@ -38,7 +38,7 @@ Resposta: evidências citadas → resposta e limitações
 
 A IA apenas compreende e descreve relações semânticas explícitas. Ela não julga conteúdos, não atribui pesos, não classifica importância e não transforma proximidade semântica em conclusão documental.
 
-O Context Intelligence Engine (CIE) reforça essa neutralidade entre o Retriever e as camadas cognitivas. Média, desvio padrão e coeficiente de variação identificam descarte, convergência e núcleo em três estágios: hierárquico, primário estratificado e global. κq e κe fazem as fronteiras query-local sem quantidades configuradas; o núcleo global, ou sua convergência quando o núcleo estiver vazio, determina o contexto semântico enviado ao modelo. Âncoras literais exatas permanecem protegidas. Somente evidências efetivamente citadas são mantidas na resposta.
+O Context Intelligence Engine (CIE) reforça essa neutralidade entre o Retriever e as camadas cognitivas. Média, desvio padrão e coeficiente de variação identificam descarte, convergência e núcleo em três estágios: inicial sobre fontes primárias, primário estratificado e global. κq e κe fazem as fronteiras query-local sem quantidades configuradas; o primeiro estágio encaminha somente o núcleo `s ≥ μ + σ`, com convergência como fallback, e o núcleo global determina o contexto semântico enviado ao modelo. Âncoras literais exatas permanecem protegidas. Somente evidências efetivamente citadas são mantidas na resposta.
 
 ## White label
 

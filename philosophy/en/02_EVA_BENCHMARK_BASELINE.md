@@ -263,9 +263,9 @@ Invariance must compare counts and hashes of documents, nodes, evidence, derivat
 The July 20 executions predate CIE and do not demonstrate its effects. Repeat conceptual and relational queries under the same corpus, models, prompts, and operational conditions, comparing:
 
 1. direct vector Top-k, explicitly identified as a legacy baseline;
-2. current complete-population flow with κq, hierarchical CIE, κe, primary CIE, and global CIE;
+2. current 4.0.2 primary-population flow with κq, first source CIE, κe, primary CIE, and global CIE;
 3. a reference reranker under a comparable budget.
 
-Record total hierarchical population, κq, every κe, `μ`, `σ`, `CV`, stage-level discard/convergence/core counts, sources after resolution, `|Gq|`, final `K(q)`, precision/recall, context tokens, local latency, and paraphrase stability. Legacy Top-k is an experimental variable, never current-flow configuration.
+Record total initial primary population, κq, every κe, `μ`, `σ`, `CV`, stage-level discard/convergence/core counts, sources after each cutoff, `|Gq|`, final `K(q)`, precision/recall, context tokens, local latency, and paraphrase stability. Legacy Top-k is an experimental variable, never current-flow configuration.
 
 Offline mathematical tests prove deterministic formula and boundary execution; they do not replace empirical retrieval-quality evaluation.

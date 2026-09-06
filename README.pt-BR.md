@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Versão atual:** `4.0.1`
+**Versão atual:** `4.0.2`
 
-**Destaque da versão:** o EVA 4.0.1 remove referências a domínios específicos de instalação da documentação pública e adota `eva.your-domain.com` nos exemplos de deploy, preservando o contrato de distribuição white label.
+**Destaque da versão:** o EVA 4.0.2 torna a recuperação semântica orientada às fontes: a primeira distribuição de similaridade é calculada diretamente sobre evidências primárias e encaminha somente o núcleo superior, com convergência como fallback. A resposta também separa cada viés de análise em novo parágrafo.
 
 O EVA é uma plataforma para construir, organizar e consultar memória cognitiva documental verificável. O EVA (Evidence Algorithm) transforma documentos estruturados em evidências hierárquicas. Cnode é a compreensão transitória de uma interação explícita entre essas evidências durante a consulta, não uma entidade persistente.
 
@@ -21,7 +21,7 @@ A base atual contém:
 - persistência transacional da fonte, da árvore e das evidências primárias;
 - adaptadores substituíveis por capacidade: embeddings, sínteses e respostas;
 - resumos ascendentes rastreáveis e embeddings contextuais versionados;
-- recuperação vetorial transitória sobre evidências primárias e derivadas;
+- recuperação vetorial transitória orientada diretamente às evidências primárias;
 - Context Intelligence Engine determinístico entre o Retriever e as camadas cognitivas;
 - consulta adaptativa que produz interações `simetry`/`assimetry` validadas por fragmentos literais;
 - chat conversacional com transcript temporário completo e contexto limitado às três rodadas anteriores;
@@ -90,11 +90,11 @@ A ingestão não produz resumos ou embeddings. A construção cognitiva é uma e
 
 `HierarchicalSummaryService` percorre a árvore de baixo para cima. Cada resumo derivado registra modelo, hash da entrada estrutural e evidências de origem. Nós sem conteúdo próprio nem descendente permanecem sem síntese.
 
-`EvidenceEmbeddingService` vetoriza evidências primárias e resumos derivados com título do documento, caminho, nó e conteúdo organizado. Antes de chamar o provedor, todas as unidades pendentes são validadas contra `AI_EMBEDDING_MAX_INPUT_TOKENS`, com margem preventiva de 10%. Lotes técnicos agrupam unidades completas e nunca fragmentam nenhuma delas. Se uma primária exceder o limite, uma síntese derivada válida e rastreável assume sua rota semântica; sem essa síntese, a etapa para com o identificador da evidência e exige subdivisão estrutural real. Uma versão já existente para o mesmo modelo e hash é reutilizada antes de chamar o provedor.
+`EvidenceEmbeddingService` vetoriza evidências primárias e resumos derivados com título do documento, caminho, nó e conteúdo organizado. Antes de chamar o provedor, todas as unidades pendentes são validadas contra `AI_EMBEDDING_MAX_INPUT_TOKENS`, com margem preventiva de 10%. Lotes técnicos agrupam unidades completas e nunca fragmentam nenhuma delas. Na recuperação orientada às fontes da versão 4.0.2, somente primárias compatíveis e efetivamente vetorizadas participam da primeira consulta; unidades maiores exigem subdivisão estrutural real para ingressar nessa população. Uma versão já existente para o mesmo modelo e hash é reutilizada antes de chamar o provedor.
 
-Na consulta conceitual ou relacional, `DocumentContextRetriever` compara o embedding transitório do input com todos os resumos hierárquicos elegíveis. A distribuição global determina a fronteira query-local κq; quando não há ruptura identificável, a população completa segue ao CIE. O CIE calcula média, desvio padrão populacional e CV, identifica o núcleo principal e a convergência complementar e só então resolve sínteses por `evidence_derivations` até suas fontes primárias. Similaridades e estatísticas permanecem transitórias.
+Na consulta conceitual ou relacional, `DocumentContextRetriever` compara o embedding transitório do input com todas as evidências primárias `primary:node_content` elegíveis. A distribuição determina a fronteira query-local κq; quando não há ruptura identificável, a população completa segue ao primeiro CIE. Esse estágio calcula média, desvio padrão populacional e CV e encaminha somente o núcleo superior (`s ≥ μ + σ`), usando a convergência (`μ ≤ s < μ + σ`) apenas quando o núcleo estiver vazio. Os cálculos primários posteriores, a consolidação entre documentos e as validações permanecem intactos. Similaridades e estatísticas são transitórias.
 
-`QueryAnswerProvider` pode declarar interações `simetry` ou `assimetry` na mesma chamada que produz a resposta. `DocumentQueryService` aceita cada interação somente quando os participantes pertencem ao contexto, foram citados e seus fragmentos existem literalmente nas evidências. Nada disso é persistido como Cnode.
+`QueryAnswerProvider` pode declarar interações `simetry` ou `assimetry` na mesma chamada que produz a resposta e orienta que cada viés de análise seja apresentado em novo parágrafo. `DocumentQueryService` aceita cada interação somente quando os participantes pertencem ao contexto, foram citados e seus fragmentos existem literalmente nas evidências. Nada disso é persistido como Cnode.
 
 Projetos podem definir um **Perfil de respostas** administrado pelo superadmin. Quando um projeto é marcado explicitamente no chat, esse perfil é acrescentado ao `SYSTEM_PROMPT` como uma camada complementar identificada pelo projeto e por suas obras. Selecionar somente uma obra não ativa implicitamente o perfil do projeto. Em consultas com vários projetos, os perfis são enviados separadamente e permanecem subordinados às regras de evidência, citação, limitação e saída JSON da EVA.
 
@@ -120,7 +120,7 @@ Além de `--live`, `AI_LIVE_ENABLED=true` deve estar configurado. Resumos criam 
 
 ## Consulta documental
 
-`InputTypeDetector` reconhece inputs diretos, estruturais, conceituais, relacionais e amplos sem consumir IA. `DocumentContextRetriever` escolhe a rota correspondente, usa embedding transitório e CIE apenas nas buscas conceituais/relacionais e retorna evidências primárias completas por acesso direto ou pela linhagem das sínteses derivadas.
+`InputTypeDetector` reconhece inputs diretos, estruturais, conceituais, relacionais e amplos sem consumir IA. `DocumentContextRetriever` escolhe a rota correspondente, usa embedding transitório e CIE apenas nas buscas conceituais/relacionais e retorna evidências primárias completas por acesso direto ou pela recuperação vetorial orientada às fontes.
 
 `DocumentQueryService` aceita somente identificadores pertencentes ao contexto recuperado. Citações desconhecidas, marcadores omitidos e inventários sem incorporação analítica são rejeitados; a aplicação não acrescenta citações ausentes para aparentar conformidade. Uma saída rejeitada pela validação local é regenerada silenciosamente até o limite de três tentativas totais com o mesmo contexto eleito. Da segunda tentativa em diante, o provedor recebe somente um código seguro da falha e, quando aplicável, o ID de uma evidência já eleita que deixou de ser incorporada. Somente a terceira falha consecutiva chega ao usuário como mensagem genérica, sem identificador de evidência. Evidências utilizadas, `simetry`, `assimetry` e limitações permanecem em campos separados.
 
@@ -134,7 +134,7 @@ A consulta real também exige dupla confirmação:
 php bin/query-document.php <document-id> --live "pergunta"
 ```
 
-Não existe Top-k nem limite numérico configurável para evidências semânticas. κq, CIE hierárquico, κe, CIE primário e CIE global determinam a população query-local; `QUERY_NON_SEMANTIC_MAX_EVIDENCE` e `--evidence-limit=N` atuam somente nas rotas direta, estrutural e ampla. `QUERY_MAX_INTERACTIONS` e `--interaction-limit=N` limitam apenas interações transitórias.
+Não existe Top-k nem limite numérico configurável para evidências semânticas. κq, o primeiro CIE sobre fontes, κe, CIE primário e CIE global determinam a população query-local; o primeiro CIE encaminha seu núcleo superior ou, se vazio, sua convergência. `QUERY_NON_SEMANTIC_MAX_EVIDENCE` e `--evidence-limit=N` atuam somente nas rotas direta, estrutural e ampla. `QUERY_MAX_INTERACTIONS` e `--interaction-limit=N` limitam apenas interações transitórias.
 
 ## Módulos conectores
 

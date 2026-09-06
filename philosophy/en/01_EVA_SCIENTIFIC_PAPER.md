@@ -9,7 +9,7 @@
 
 This paper presents EVA (Evidence Algorithm), an architecture for language-model-assisted documentary queries whose persistent memory is organized as traceable evidence rather than answers, cognitive relationships, or inferred graphs. The system transforms structured documents into a normalized tree, preserves literal content as primary evidence, and produces hierarchical summaries as derived evidence with explicit lineage. Embeddings represent these complete semantic units and respect document organization instead of fragmenting it by arbitrary character or token limits.
 
-At query time, EVA selects a retrieval route compatible with input type. Direct, structural, and broad questions may navigate hierarchy; conceptual and relational questions use a transient vector representation. On semantic routes, κq emerges from the complete hierarchical population before the first Context Intelligence Engine (CIE). Selected lineage is resolved completely; primary sources inherited from core and convergence pass separately through κe and primary CIE; and the union of local nuclei receives global CIE. The global nucleus—or convergence when that nucleus is empty—forms semantic context without a configured Top-k or evidence count. Only sources incorporated into prose with visible citations enter the final basis. If no sufficient primary evidence is found, the flow stops without calling the answer provider.
+At query time, EVA selects a retrieval route compatible with input type. Direct, structural, and broad questions may navigate hierarchy; conceptual and relational questions use a transient vector representation. On semantic routes, κq emerges from the complete primary population before the first Context Intelligence Engine (CIE). That stage forwards only its `s ≥ μ + σ` core, with convergence as fallback; surviving sources pass through κe and primary CIE, and the union of local nuclei receives global CIE. The global nucleus—or convergence when that nucleus is empty—forms semantic context without a configured Top-k or evidence count. Only sources incorporated into prose with visible citations enter the final basis. If no sufficient primary evidence is found, the flow stops without calling the answer provider.
 
 Cognitive relationships are transient **simetry** or **assimetry** interactions produced only within the query, without weights, judgmental taxonomies, or persistence. In multidisciplinary projects, evidence from different specialized documents may support emergent conceptual syntheses without promoting the resulting interpretation to evidence or memory. Citations and interaction participants are validated locally against recovered context. The proposal separates documentary memory, retrieval, interpretation, and presentation while keeping models and providers externally configured and replaceable. This paper describes the current architecture, its testable hypotheses, limitations, and a protocol for future evaluation.
 
@@ -211,7 +211,7 @@ Conceptual and relational inputs receive a transient embedding. For query `q` an
 sim(q,e_i) = \frac{v_q \cdot v_i}{\|v_q\|\|v_i\|}
 \]
 
-The value orders every eligible hierarchical summary in each document. κq analyzes the ordered curve and, when a break is confirmed by that query's own gaps, legitimizes the population before it; without an identifiable break, the complete population proceeds to CIE. Similarity is not persisted and is not epistemic confidence.
+The value orders every validated and embedded primary evidence record in each document. κq analyzes the ordered curve and, when a break is confirmed by that query's own gaps, legitimizes the population before it; without an identifiable break, the complete population proceeds to CIE. Similarity is not persisted and is not epistemic confidence.
 
 For `N` similarities `sᵢ`, CIE calculates:
 
@@ -231,11 +231,11 @@ When `μ = 0`, CV is `null`. `s < μ` is discard; `μ ≤ s < μ + σ` is conver
 
 The transformation is deterministic, preserves Retriever order within regions, and creates no additional grade, weight, or rank. Query output may expose regions and statistics for audit, but the answer provider receives only resolved final primary context.
 
-Derived evidence selected by hierarchical CIE maps larger regions. EVA traverses derivations completely, recovers primary evidence, and preserves whether each source was reached through core or convergence. The populations pass separately through κe and primary CIE using their own cosine against the same query. Summary locates; literal source retains documentary authority.
+The first CIE operates directly over primary evidence. Its upper core, or its convergence when the core is empty, passes through κe and primary CIE using its own cosine against the same query. Derived summaries preserve organization and lineage in built memory but do not replace sources in this initial retrieval.
 
 ### 7.4 Multi-document query and transient selection
 
-For a project query, documents remain independent retrieval units. Each work independently executes κq, hierarchical CIE, κe, and primary CIE. Local primary nuclei are united, deduplicated, and analyzed by global CIE. Composition is determined by current input, has no configured count, and creates no persistent inter-document relationship.
+For a project query, documents remain independent retrieval units. Each work independently executes κq, first source CIE, κe, and primary CIE. Local primary nuclei are united, deduplicated, and analyzed by global CIE. Composition is determined by current input, has no configured count, and creates no persistent inter-document relationship.
 
 Evidence from different disciplines may reach the provider simultaneously. The model may formulate relational synthesis, but every documentary claim remains tied to cited evidence from each field.
 
@@ -503,7 +503,7 @@ The summary model does not create the source, the embedding model does not deter
 
 ## 16. Conclusion
 
-EVA organizes documentary memory as verifiable primary and derived evidence over a preserved structural tree. Summaries have lineage, embeddings represent semantically organized units, and queries choose hierarchical or semantic routes according to operational form. On vector routes, κq, κe, and hierarchical, primary, and global CIE establish mathematical boundaries between retrieval and interpretation, making final quantity emerge from query geometry.
+EVA organizes documentary memory as verifiable primary and derived evidence over a preserved structural tree. Summaries have lineage, embeddings represent semantically organized units, and queries choose hierarchical or semantic routes according to operational form. On vector routes, κq, κe, and first-source, primary, and global CIE establish mathematical boundaries between retrieval and interpretation, making final quantity emerge from query geometry.
 
 The system blocks documentary generation without recovered primary evidence, locally validates citations and participants, and treats cognitive relationships as transient simetry or assimetry. Cnode no longer denotes a persistent entity, only the contextual interaction phenomenon when needed.
 

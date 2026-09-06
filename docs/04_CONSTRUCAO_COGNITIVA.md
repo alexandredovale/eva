@@ -27,7 +27,7 @@ Embeddings nunca são formados por cortes arbitrários de caracteres ou tokens. 
 
 Antes de qualquer lote ser enviado ao provedor, `EmbeddingInputGuard` estima de forma conservadora o tamanho de todas as unidades pendentes. O limite nominal é definido por `AI_EMBEDDING_MAX_INPUT_TOKENS`; a aplicação utiliza 90% desse valor como margem preventiva contra diferenças entre tokenizadores.
 
-Uma evidência primária incompatível não é truncada nem enviada ao provedor. Se existir uma síntese `derived` + `node_summary` válida, diretamente ligada à primária por `evidence_derivations` e compatível com o limite, o embedding da síntese passa a ser a rota semântica daquela unidade. A recuperação continua resolvendo essa síntese até a evidência primária integral, preservando conteúdo, identificador e linhagem.
+Uma evidência primária incompatível não é truncada nem enviada ao provedor. Sínteses `derived` + `node_summary` válidas continuam sendo construídas, vetorizadas e ligadas às fontes por `evidence_derivations`, mas a recuperação orientada às fontes da versão 4.0.2 consulta diretamente apenas embeddings primários. Para que uma unidade primária incompatível participe dessa população, ela precisa de subdivisão estrutural real.
 
 Se a evidência primária incompatível não possuir essa síntese derivada válida, a etapa é interrompida antes da primeira requisição ao provedor. O diagnóstico informa o identificador público da evidência e exige uma subdivisão estrutural real da fonte. Aumentar o lote, cortar texto ou criar fragmentos artificiais não é uma correção permitida.
 

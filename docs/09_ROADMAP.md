@@ -19,7 +19,7 @@ recuperação hierárquica
 ↓
 κq
 ↓
-CIE hierárquico
+CIE inicial sobre fontes
 ↓
 resolução da linhagem
 ↓
@@ -42,9 +42,9 @@ resposta citada
 
 ---
 
-# 1. κq — fronteira da consulta na camada hierárquica
+# 1. κq — fronteira da consulta na camada primária inicial
 
-`κq` atua primeiro, sobre os **resumos hierárquicos derivados** de cada documento.
+`κq` atua primeiro, sobre as **evidências primárias validadas e vetorizadas** de cada documento.
 
 O fluxo inicial é:
 
@@ -53,7 +53,7 @@ Pergunta do usuário
 ↓
 embedding da pergunta
 ↓
-todos os resumos hierárquicos elegíveis da obra
+todas as evidências primárias elegíveis da obra
 ↓
 similaridade cosine
 ↓
@@ -89,23 +89,23 @@ pegue os 20 melhores
 
 O κq procura fazer com que **a própria distribuição daquela consulta determine a fronteira**.
 
-Formalmente, ele trabalha sobre a população completa de resumos hierárquicos elegíveis, utilizando rank, similaridade normalizada e gaps entre candidatos.
+Formalmente, ele trabalha sobre a população completa de evidências primárias elegíveis, utilizando rank, similaridade normalizada e gaps entre candidatos.
 
 Se não existir uma ruptura suficientemente clara, **nenhum corte é inventado**.
 
-Nesse caso, toda a população segue para o CIE hierárquico.
+Nesse caso, toda a população segue para o CIE inicial sobre fontes.
 
 Portanto, a pergunta conceitual representada pelo κq é:
 
 ```text
 κq =
-onde termina a população hierárquica
+onde termina a população primária
 plausivelmente relacionada à pergunta?
 ```
 
 ---
 
-# 2. CIE hierárquico — organização estatística da população
+# 2. CIE inicial — organização estatística das fontes
 
 Depois do κq entra o primeiro **Context Intelligence Engine**.
 
@@ -158,41 +158,32 @@ A **convergência** representa a região intermediária.
 
 O **descarte** representa os candidatos abaixo da média da distribuição.
 
-Nesta etapa hierárquica, núcleo e convergência são preservados porque ainda serão resolvidos até suas fontes primárias e analisados separadamente.
+Nesta etapa inicial, somente o núcleo `s ≥ μ + σ` é encaminhado. A convergência é usada apenas como fallback quando o núcleo está vazio. O estágio continua exposto como `hierarchical` no contrato de diagnóstico por compatibilidade.
 
 ---
 
-# 3. Da hierarquia para as evidências primárias
+# 3. Da primeira seleção ao refinamento primário
 
-Até esse momento, o EVA está trabalhando principalmente com **sínteses derivadas**.
+Desde o primeiro cálculo, o EVA 4.0.2 trabalha diretamente com **evidências primárias**.
 
-Mas uma síntese não é a fonte documental final da resposta.
+O primeiro CIE encaminha seu núcleo superior ou, quando esse núcleo está vazio, sua convergência. A rastreabilidade das sínteses derivadas permanece na memória construída, mas não participa dessa primeira seleção.
 
-O sistema precisa retornar ao conteúdo literal que originou aquela síntese.
-
-Por isso, percorre a linhagem:
+O fluxo encaminhado é:
 
 ```text
-Resumo selecionado
-↓
-evidence_derivations
-↓
-outros resumos inferiores
-↓
-evidências primárias
+núcleo primário inicial
+ou fallback de convergência
 ↓
 texto documental literal
 ```
 
-A arquitetura exige que uma evidência derivada selecionada seja resolvida integralmente até suas fontes primárias antes da geração da resposta.
-
-É nesse ponto que aparece o **κe**.
+Essas fontes já literais seguem para o **κe**, preservando os cálculos posteriores do fluxo.
 
 ---
 
 # 4. κe — fronteira aplicada às evidências primárias
 
-`κe` atua agora sobre as **evidências primárias** recuperadas através da linhagem.
+`κe` atua sobre as **evidências primárias** encaminhadas pelo primeiro CIE.
 
 A pergunta continua representada pelo mesmo embedding transitório.
 
@@ -203,7 +194,7 @@ Pergunta
 ↓
 embedding já existente
 ↓
-evidências primárias encontradas pela linhagem
+evidências primárias do núcleo inicial ou fallback
 ↓
 similaridade cosine
 ↓
@@ -215,24 +206,24 @@ A diferença fundamental entre κq e κe é:
 ```text
 κq
 atua sobre:
-resumos hierárquicos
+evidências primárias
 
 κe
 atua sobre:
 evidências primárias
 ```
 
-Assim, o EVA primeiro encontra **onde procurar no documento** e depois verifica **quais conteúdos literais daquela região continuam semanticamente relacionados à pergunta**.
+Assim, o EVA primeiro delimita **quais fontes se destacam na população primária completa** e depois verifica **quais delas permanecem semanticamente relacionadas na população local sobrevivente**.
 
 Uma forma simples de compreender a diferença é:
 
 ```text
 κq:
-"qual região conceitual da obra parece pertinente?"
+"quais fontes se destacam na população completa da obra?"
 
 κe:
-"dentro dessa região,
-quais evidências literais continuam pertinentes?"
+"entre as fontes encaminhadas,
+quais evidências continuam pertinentes?"
 ```
 
 ---
@@ -241,7 +232,7 @@ quais evidências literais continuam pertinentes?"
 
 Depois do κe entra outro CIE.
 
-Agora o cálculo não ocorre mais sobre resumos derivados, mas sobre **evidências primárias**.
+O cálculo continua sobre **evidências primárias**, agora restritas ao núcleo inicial ou ao fallback.
 
 Novamente são calculados:
 
@@ -261,13 +252,13 @@ núcleo
 
 Existe, porém, uma característica importante.
 
-Essa análise ocorre **por obra e pela região hierárquica herdada**.
+Essa análise ocorre **por obra e pela região inicial herdada**.
 
 Por exemplo:
 
 ```text
 Documento A
-    núcleo hierárquico
+    núcleo inicial
         ↓
       κe
         ↓
@@ -278,7 +269,7 @@ E separadamente:
 
 ```text
 Documento A
-    convergência hierárquica
+    fallback de convergência inicial
         ↓
       κe
         ↓
@@ -364,24 +355,21 @@ PERGUNTA
 ├─ embedding
 │
 ▼
-TODOS OS RESUMOS HIERÁRQUICOS
+TODAS AS EVIDÊNCIAS PRIMÁRIAS
 │
 ├─ cosine
 │
 ├─ κq
 │
 ▼
-CIE HIERÁRQUICO
+CIE INICIAL SOBRE FONTES
 │
 ├─ núcleo
-├─ convergência
+├─ convergência (somente fallback)
 └─ descarte
 │
 ▼
-RESOLUÇÃO DA LINHAGEM
-│
-▼
-EVIDÊNCIAS PRIMÁRIAS
+NÚCLEO SUPERIOR OU FALLBACK
 │
 ├─ cosine
 ├─ κe
@@ -441,8 +429,8 @@ CIE
 
 | Elemento | Atua sobre | Função |
 |---|---|---|
-| **κq** | resumos hierárquicos | encontrar uma fronteira natural da consulta na hierarquia |
-| **CIE hierárquico** | resumos sobreviventes | separar núcleo, convergência e descarte |
+| **κq** | evidências primárias | encontrar uma fronteira natural da consulta nas fontes |
+| **CIE inicial** | fontes sobreviventes a κq | encaminhar núcleo superior ou convergência como fallback |
 | **κe** | evidências primárias | refinar a pertinência no conteúdo literal |
 | **CIE primário** | evidências primárias | formar núcleos locais de cada obra |
 | **CIE global** | núcleos primários das obras | consolidar o contexto multidocumental final |
@@ -462,7 +450,7 @@ Em que regiões conceituais desta obra
 vale a pena procurar?
 ```
 
-## CIE hierárquico
+## CIE inicial
 
 Pergunta:
 
@@ -589,13 +577,13 @@ O κe atua na segunda.
 
 Os três CIEs correspondem a três escalas diferentes do problema.
 
-## Escala 1 — hierarquia
+## Escala 1 — população primária completa
 
 ```text
-CIE hierárquico
+CIE inicial
 ```
 
-Organiza os resumos estruturais da obra.
+Organiza as evidências primárias elegíveis da obra e encaminha somente o núcleo superior ou seu fallback.
 
 ## Escala 2 — conteúdo literal
 
@@ -616,7 +604,7 @@ Consolida os núcleos primários locais provenientes de todas as obras participa
 Assim:
 
 ```text
-hierarquia
+fontes primárias completas
 ↓
 conteúdo literal
 ↓
@@ -626,7 +614,7 @@ corpus multidocumental
 corresponde a:
 
 ```text
-CIE hierárquico
+CIE inicial
 ↓
 CIE primário
 ↓
@@ -647,8 +635,6 @@ localizar
 delimitar
 ↓
 classificar
-↓
-resolver a linhagem
 ↓
 refinar
 ↓
@@ -684,11 +670,11 @@ A estrutura pode ser reduzida à seguinte ideia:
 ```text
 κq
 =
-fronteira na hierarquia
+fronteira na população primária completa
 
-CIE hierárquico
+CIE inicial
 =
-organização estatística da hierarquia
+organização estatística das fontes
 
 κe
 =
@@ -784,7 +770,7 @@ As cinco fases e o primeiro upgrade arquitetural estão concluídos. Novas fases
 - regiões de descarte, convergência e núcleo — concluído;
 - fallback determinístico para convergência quando não houver núcleo — concluído;
 - resolução integral de linhagem somente após a seleção estatística, preservando a região herdada — concluído;
-- κe e CIE primário separados para fontes herdadas de núcleo e convergência — concluído;
+- κe e CIE primário preservados para as fontes encaminhadas pelo núcleo inicial ou por seu fallback de convergência — concluído;
 - união deduplicada dos núcleos primários locais e CIE global de consolidação — concluído;
 - remoção de `QUERY_MAX_EVIDENCE` das rotas semânticas e isolamento de `QUERY_NON_SEMANTIC_MAX_EVIDENCE` — concluído;
 - saída transitória auditável em `context_intelligence` — concluído;

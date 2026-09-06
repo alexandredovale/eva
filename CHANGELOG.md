@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project uses [Semantic Versioning](https://semver.org/).
 
+## [4.0.2] - 2026-09-06
+
+### Changed
+
+- Semantic retrieval now calculates the first query-local score distribution directly over validated `primary:node_content` embeddings instead of derived hierarchical summaries.
+- The first CIE stage forwards only the upper core (`s ≥ μ + σ`) and uses convergence (`μ ≤ s < μ + σ`) only as a fallback when no core exists; κq, primary-stage calculations, multidocument consolidation, and final validation remain unchanged.
+- Answer generation now places each analytical perspective in a separate paragraph to improve cognitive contextualization without weakening the evidence and citation contract.
+- The previous summary-first query and core-plus-convergence forwarding modes remain documented as adjacent source comments for controlled manual rollback tests.
+
 ## [4.0.1] - 2026-08-12
 
 ### Fixed

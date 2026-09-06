@@ -199,29 +199,25 @@ try {
     $context = $retriever->retrieve($documentId, 'Explique a distribuição estatística.', 8, 0);
     $analysis = $context->contextIntelligenceAnalyses[0] ?? null;
     $primaryCoreAnalysis = $context->contextIntelligenceAnalyses[1] ?? null;
-    $primaryConvergenceAnalysis = $context->contextIntelligenceAnalyses[2] ?? null;
 
     assertContextIntegration($analysis !== null, 'A recuperação semântica não produziu análise do CIE.');
-    assertContextIntegration(abs($analysis->mean - 0.6) < 1e-12, 'A integração alterou a média esperada.');
+    assertContextIntegration(abs($analysis->mean - 0.46) < 1e-12, 'A integração alterou a média primária esperada.');
     assertContextIntegration($analysis->selectedRegion === 'core', 'A integração não selecionou o núcleo.');
     assertContextIntegration(
-        array_column($analysis->selectedCandidates, 'evidenceId') === array_slice($summaryIds, 0, 4),
-        'A integração não preservou núcleo e convergência complementar.'
+        array_column($analysis->coreCandidates, 'evidenceId') === [$evidenceIds[1]],
+        'A integração não formou o núcleo superior diretamente sobre as evidências primárias.'
     );
     assertContextIntegration(
-        array_column($context->evidences, 'id') === array_slice($evidenceIds, 0, 2)
-            && ($context->evidenceSelection[$context->evidences[0]->publicId] ?? null) === 'core'
-            && ($context->evidenceSelection[$context->evidences[1]->publicId] ?? null) === 'convergence',
-        'Os CIEs primários não preservaram os núcleos de cada região herdada.'
+        array_column($context->evidences, 'id') === [$evidenceIds[1]]
+            && ($context->evidenceSelection[$context->evidences[0]->publicId] ?? null) === 'core',
+        'Somente o núcleo superior deveria seguir para os cálculos primários posteriores.'
     );
     assertContextIntegration(
         $primaryCoreAnalysis?->stage === 'primary'
             && $primaryCoreAnalysis->sourceRegion === 'core'
-            && count($primaryCoreAnalysis->coreCandidates) === 1
-            && $primaryConvergenceAnalysis?->stage === 'primary'
-            && $primaryConvergenceAnalysis->sourceRegion === 'convergence'
-            && array_column($primaryConvergenceAnalysis->coreCandidates, 'evidenceId') === [$evidenceIds[1]],
-        'A análise primária estratificada não permaneceu auditável.'
+            && array_column($primaryCoreAnalysis->coreCandidates, 'evidenceId') === [$evidenceIds[1]]
+            && count($context->contextIntelligenceAnalyses) === 2,
+        'A análise primária posterior não permaneceu auditável.'
     );
     assertContextIntegration(
         $analysis->documentId === $documentPublicId && $analysis->documentTitle === 'Documento simples do CIE',
@@ -240,11 +236,11 @@ try {
             && ($payload['context_intelligence'][0]['candidate_count'] ?? null) === 5
             && ($payload['context_intelligence'][0]['retrieval_boundary']['hierarchical_candidate_count'] ?? null) === 5
             && ($payload['context_intelligence'][1]['stage'] ?? null) === 'primary'
-            && ($payload['context_intelligence'][2]['source_region'] ?? null) === 'convergence'
-            && ($payload['context_intelligence'][3]['stage'] ?? null) === 'global'
-            && ($payload['context_intelligence'][3]['candidate_count'] ?? null) === 2
-            && ($payload['evidence_selection']['core_evidence_ids'] ?? []) === []
-            && ($payload['evidences_used'][0]['selection_region'] ?? null) === 'convergence',
+            && ($payload['context_intelligence'][1]['source_region'] ?? null) === 'core'
+            && ($payload['context_intelligence'][2]['stage'] ?? null) === 'global'
+            && ($payload['context_intelligence'][2]['candidate_count'] ?? null) === 1
+            && ($payload['evidence_selection']['core_evidence_ids'] ?? []) === [$context->evidences[0]->publicId]
+            && ($payload['evidences_used'][0]['selection_region'] ?? null) === 'core',
         'A API não expôs a análise transitória e os papéis eleitos esperados.'
     );
     assertContextIntegration($embeddingProvider->calls === 1, 'Consultas idênticas devem reutilizar o embedding transitório.');

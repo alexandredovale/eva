@@ -175,12 +175,12 @@ POST /api/query                              <- EVA internal API
            +-------------------------+---------------------+
                                      |
                                      v
-                     [HIERARCHICAL CIE PER DOCUMENT]
-                     - core and convergence remain separate
-                     - discard does not enter lineage
+                     [FIRST SOURCE CIE PER DOCUMENT]
+                     - only core proceeds normally
+                     - convergence is fallback when core is empty
                                      |
                                      v
-                     [COMPLETE PRIMARY-SOURCE RESOLUTION]
+                     [SURVIVING PRIMARY SOURCES]
                      - κe + primary CIE per region/document
                      - no truncation or new embedding call
                                      |
@@ -254,7 +254,7 @@ POST /api/query                              <- EVA internal API
            +--> candidates from C
            |
            v
-[κq + HIERARCHICAL CIE + κe + PRIMARY CIE PER DOCUMENT]
+[κq + FIRST SOURCE CIE + κe + PRIMARY CIE PER DOCUMENT]
            |
            v
 [DEDUPLICATED UNION OF LOCAL PRIMARY NUCLEI]
@@ -311,7 +311,7 @@ DIRECT / STRUCTURAL / BROAD QUERY
 
 CONCEPTUAL / RELATIONAL QUERY
   ├── 1 input-embedding call, reused at every stage
-  ├── κq/hierarchical CIE and κe/primary CIE per document, local
+  ├── κq/first source CIE and κe/primary CIE per document, local
   ├── 1 global CIE, local
   └── 1 answer call, only when evidence exists
 
@@ -342,9 +342,9 @@ USER INPUT                        |
    |                              |
    +----------> RETRIEVAL <-------+
                      |
-   COMPLETE POPULATION → κq → HIERARCHICAL CIE
+     PRIMARY POPULATION → κq → FIRST SOURCE CIE
                      |
-      LINEAGE → κe → PRIMARY CIE → GLOBAL CIE
+   CORE/FALLBACK → κe → PRIMARY CIE → GLOBAL CIE
                      |
          AVAILABLE PRIMARY CONTEXT
                      |

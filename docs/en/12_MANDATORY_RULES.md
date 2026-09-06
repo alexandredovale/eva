@@ -57,7 +57,7 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 53. Never truncate, cut, or arbitrarily fragment evidence to create its embedding.
 54. Represent an oversized primary unit through the embedding of a valid derived summary only when lineage to the complete primary evidence is persisted.
 55. Apply CIE only to vector distributions from conceptual and relational routes.
-56. Score the complete eligible `derived:node_summary` population, globally order it, and derive κq without a configured Top-k, semantic thresholds, or weights.
+56. Score the complete validated and embedded `primary:node_content` population, globally order it, and derive κq without a configured Top-k, semantic thresholds, or weights.
 57. Calculate population mean and population standard deviation over the κq-legitimized population — or the complete population when no break exists — and calculate `CV = σ / μ`, using `null` when `μ = 0`.
 58. Classify `s < μ` as discard, `μ ≤ s < μ + σ` as convergence, and `s ≥ μ + σ` as core.
 59. At each CIE stage, elect core and promote convergence only when core is empty; at the hierarchical stage, retain both regions for separate lineage resolution and primary analysis.

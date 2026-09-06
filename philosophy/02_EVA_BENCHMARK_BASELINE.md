@@ -314,9 +314,9 @@ Uma síntese conceitual emergente será considerada válida somente quando seus 
 As execuções registradas em 20 de julho de 2026 antecedem o CIE e não demonstram seus efeitos. Elas permanecem como baseline histórico sem estabilização estatística. A próxima rodada deve repetir as mesmas consultas conceituais e relacionais, preservando corpus, modelos, prompts e condições operacionais, e comparar:
 
 1. Top-k vetorial direto, identificado explicitamente como baseline legado;
-2. fluxo atual com população hierárquica completa, κq, CIE hierárquico, κe, CIE primário e CIE global;
+2. fluxo 4.0.2 com população primária completa, κq, primeiro CIE sobre fontes, κe, CIE primário e CIE global;
 3. reranker de referência, quando disponível sob orçamento comparável.
 
-Além das métricas já registradas, a rodada deve capturar a população hierárquica total, κq, cada κe, `μ`, `σ`, `CV` e quantidades de descarte/convergência/núcleo nos estágios hierárquico, primário e global, fontes após resolução, tamanho de `Gq`, tamanho final `K(q)`, precision/recall, tokens de contexto, latência local e estabilidade entre paráfrases. O baseline legado deve registrar seu Top-k como variável experimental, nunca como configuração do fluxo atual.
+Além das métricas já registradas, a rodada deve capturar a população primária inicial total, κq, cada κe, `μ`, `σ`, `CV` e quantidades de descarte/convergência/núcleo nos estágios inicial, primário e global, fontes após cada corte, tamanho de `Gq`, tamanho final `K(q)`, precision/recall, tokens de contexto, latência local e estabilidade entre paráfrases. O baseline legado deve registrar seu Top-k como variável experimental, nunca como configuração do fluxo atual.
 
 O teste matemático offline comprova a execução determinística das fórmulas e fronteiras; não substitui essa avaliação empírica de qualidade de recuperação.

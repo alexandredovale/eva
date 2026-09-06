@@ -35,7 +35,7 @@ EVA can potentially reduce avoidable computation by:
 - producing the answer and transient interactions in one bounded call;
 - statistically consolidating semantic evidence context while bounding non-semantic context, chat history, output, and retries;
 - discarding recovered but uncited evidence instead of requiring another generation;
-- deriving κq from the complete hierarchical population before CIE and primary-context delivery;
+- deriving κq from the complete primary population before the first source CIE and primary-context delivery;
 - avoiding precomputed all-pairs relationships and persistent interaction graphs.
 
 At scale, fewer external calls, tokens, retries, and GPU-hours may reduce server and cooling demand. Provider neutrality also permits migration to more efficient models and infrastructure without replacing the documentary core.

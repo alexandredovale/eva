@@ -12,10 +12,10 @@ O fluxo vigente é:
 
 ```text
 consulta q
-  → população hierárquica completa por obra
+  → população primária completa por obra
   → κq
-  → CIE hierárquico
-  → linhagem integral separada por core/convergence
+  → primeiro CIE sobre fontes
+  → núcleo superior ou fallback de convergence
   → cosine primário
   → κe + CIE primário por região e obra
   → união deduplicada dos núcleos primários locais Gq
@@ -28,7 +28,7 @@ Correspondências literais exatas que não pertencem à população primária ve
 
 ## Por que não existe Top-k semântico
 
-Um Top-k conhecido antes da consulta definiria artificialmente a população sobre a qual média, desvio padrão e CV são calculados. O EVA calcula cosine para todos os `derived:node_summary` elegíveis de cada obra e deixa a ruptura κq emergir da curva ordenada.
+Um Top-k conhecido antes da consulta definiria artificialmente a população sobre a qual média, desvio padrão e CV são calculados. O EVA calcula cosine para todas as evidências `primary:node_content` validadas e vetorizadas de cada obra e deixa a ruptura κq emergir da curva ordenada.
 
 Se κq não encontra ruptura identificável — população pequena, ausência de dispersão, curva contínua ou ruptura ambígua — a população completa segue ao CIE. Nenhum corte substituto é fabricado.
 
@@ -54,13 +54,13 @@ Se `core` estiver vazio, `convergence` é promovida. Se `σ = 0`, todos os valor
 
 ## Três aplicações, três responsabilidades
 
-### 1. CIE hierárquico
+### 1. CIE inicial sobre fontes
 
-κq legitima a população de resumos hierárquicos por obra. O CIE classifica descarte, convergência e núcleo. Neste estágio, núcleo e convergência são preservados: ambos podem apontar para fontes primárias distintas e por isso seguem separadamente para a linhagem.
+κq legitima a população de evidências primárias por obra. O CIE classifica descarte, convergência e núcleo. Neste estágio, somente o núcleo `s ≥ μ + σ` segue para a próxima etapa; a convergência é encaminhada apenas como fallback quando o núcleo está vazio.
 
 ### 2. κe e CIE primário
 
-A resolução de `evidence_derivations` não sofre truncagem. Cada primária herda a melhor região hierárquica que a alcançou: `core` prevalece sobre `convergence`. O mesmo embedding transitório da consulta é reutilizado para calcular cosine contra os embeddings primários, sem nova chamada externa.
+Como a população inicial já é primária, não há resolução de sínteses nessa passagem. Cada fonte herda a região inicial encaminhada: `core` prevalece e `convergence` aparece somente como fallback. O mesmo embedding transitório da consulta é reutilizado para calcular cosine contra os embeddings primários, sem nova chamada externa.
 
 κe é calculado separadamente sobre as primárias herdadas de `core` e de `convergence`, em cada obra. Cada população legitimada recebe seu próprio CIE. O núcleo local é o `core` primário ou, quando vazio, sua `convergence`.
 
@@ -107,13 +107,13 @@ Dadas as mesmas populações ordenadas e similaridades, a saída é invariável.
 
 ## Contrato com a LLM
 
-O provedor recebe `Eq`, âncoras literais protegidas e os papéis hierárquicos herdados. Ele não recebe liberdade para buscar fontes externas. A presença de uma fonte no contexto autoriza seu uso, mas não obriga uma citação decorativa: somente fontes incorporadas analiticamente à prosa e citadas de forma visível permanecem em `used_evidence_ids`.
+O provedor recebe `Eq`, âncoras literais protegidas e os papéis iniciais herdados. Ele não recebe liberdade para buscar fontes externas. A presença de uma fonte no contexto autoriza seu uso, mas não obriga uma citação decorativa: somente fontes incorporadas analiticamente à prosa e citadas de forma visível permanecem em `used_evidence_ids`.
 
 ## Auditabilidade
 
 `context_intelligence` identifica cada análise por `stage`:
 
-- `hierarchical`: CIE após κq;
+- `hierarchical`: nome preservado por compatibilidade para o primeiro CIE sobre fontes após κq;
 - `primary`: CIE após κe, com `source_region` igual a `core` ou `convergence`;
 - `global`: CIE final sobre `Gq`.
 

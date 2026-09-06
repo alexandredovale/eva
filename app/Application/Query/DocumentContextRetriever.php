@@ -337,22 +337,30 @@ final class DocumentContextRetriever
     {
         $queryVector = $this->queryVector($input);
 
+        /*
+         * Modo alternativo — primeira consulta sobre resumos hierárquicos.
+         * Para reativá-lo, substitua na consulta abaixo as condições de evidência primária por:
+         *
+         * AND e.evidence_class = 'derived'
+         * AND e.evidence_type = 'node_summary'
+         * AND e.status IN ('generated', 'validated')
+         * AND e.id = (
+         *     SELECT MAX(latest_summary.id)
+         *       FROM evidences latest_summary
+         *      WHERE latest_summary.node_id = e.node_id
+         *        AND latest_summary.evidence_class = 'derived'
+         *        AND latest_summary.evidence_type = 'node_summary'
+         *        AND latest_summary.status IN ('generated', 'validated')
+         * )
+         */
         $statement = $this->database->prepare(
             "SELECT e.id, e.public_id, e.evidence_class, e.evidence_type, ee.vector_data
                FROM evidences e
                JOIN evidence_embeddings ee ON ee.evidence_id = e.id
               WHERE e.document_id = :document_id
-                AND e.evidence_class = 'derived'
-                AND e.evidence_type = 'node_summary'
-                AND e.status IN ('generated', 'validated')
-                AND e.id = (
-                    SELECT MAX(latest_summary.id)
-                      FROM evidences latest_summary
-                     WHERE latest_summary.node_id = e.node_id
-                       AND latest_summary.evidence_class = 'derived'
-                       AND latest_summary.evidence_type = 'node_summary'
-                       AND latest_summary.status IN ('generated', 'validated')
-                )
+                AND e.evidence_class = 'primary'
+                AND e.evidence_type = 'node_content'
+                AND e.status = 'validated'
                 AND ee.model = :model
                 AND ee.id = (
                     SELECT MAX(latest.id)
@@ -421,13 +429,20 @@ final class DocumentContextRetriever
             $candidateRegions[$candidate->evidenceId] = 'convergence';
         }
 
+        /*
+         * Modo alternativo — encaminhar núcleo e convergência para a próxima etapa:
+         * $firstStageCandidates = $analysis->selectedCandidates;
+         */
+        $firstStageCandidates = $analysis->coreCandidates !== []
+            ? $analysis->coreCandidates
+            : $analysis->convergenceCandidates;
         $matches = array_map(
             static fn (ContextCandidate $candidate): array => [
                 'id' => $candidate->evidenceId,
                 'evidence_class' => $candidate->evidenceClass,
                 'region' => $candidateRegions[$candidate->evidenceId] ?? 'convergence',
             ],
-            $analysis->selectedCandidates
+            $firstStageCandidates
         );
         $primaryRegions = $this->resolvePrimaryEvidenceRegions(
             $documentId,
@@ -445,7 +460,7 @@ final class DocumentContextRetriever
                 $candidate->evidenceClass,
                 $candidate->evidenceType
             ),
-            $analysis->selectedCandidates
+            $firstStageCandidates
         )];
 
         $evidences = $this->loadEvidenceByIds($documentId, $primaryIds);

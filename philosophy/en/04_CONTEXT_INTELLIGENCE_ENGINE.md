@@ -12,10 +12,10 @@ The current flow is:
 
 ```text
 query q
-  → complete hierarchical population per work
+  → complete primary population per work
   → κq
-  → hierarchical CIE
-  → complete lineage split by inherited core/convergence
+  → first source CIE
+  → upper core or convergence fallback
   → primary cosine
   → κe + primary CIE per region and work
   → deduplicated union of local primary nuclei Gq
@@ -28,7 +28,7 @@ Exact literal matches outside the vector primary population remain protected anc
 
 ## Why semantic Top-k no longer exists
 
-A Top-k known before the query would artificially define the population used to calculate mean, standard deviation, and CV. EVA calculates cosine for every eligible `derived:node_summary` in each work and lets κq emerge from the ordered curve.
+A Top-k known before the query would artificially define the population used to calculate mean, standard deviation, and CV. EVA calculates cosine for every validated and embedded `primary:node_content` record in each work and lets κq emerge from the ordered curve.
 
 If κq finds no identifiable break—because the population is small, dispersion is absent, the curve is continuous, or the break is ambiguous—the complete population proceeds to CIE. No substitute cutoff is invented.
 
@@ -54,13 +54,13 @@ If `core` is empty, `convergence` is promoted. If `σ = 0`, every value equal to
 
 ## Three applications, three responsibilities
 
-### 1. Hierarchical CIE
+### 1. Initial source CIE
 
-κq legitimizes the hierarchical-summary population per work. CIE classifies discard, convergence, and core. Both core and convergence are retained at this stage because they may lead to different primary sources; they therefore proceed separately through lineage resolution.
+κq legitimizes the primary-evidence population per work. CIE classifies discard, convergence, and core. Only the `s ≥ μ + σ` core proceeds at this stage; convergence is forwarded only as fallback when that core is empty.
 
 ### 2. κe and primary CIE
 
-Resolution through `evidence_derivations` is not truncated. Each primary source inherits the best hierarchical region that reaches it: `core` prevails over `convergence`. The same transient query embedding is reused to calculate cosine against primary embeddings, with no additional external call.
+Because the initial population is already primary, no summary resolution occurs in this pass. Each source inherits the forwarded initial region: `core` prevails and `convergence` appears only as fallback. The same transient query embedding is reused to calculate cosine against primary embeddings, with no additional external call.
 
 κe is calculated separately for primary sources inherited from `core` and from `convergence` in each work. Each legitimized population receives its own CIE. The local nucleus is the primary `core`, or its `convergence` when core is empty.
 
@@ -107,13 +107,13 @@ Given the same ordered populations and similarities, output is invariant. The fl
 
 ## LLM contract
 
-The provider receives `Eq`, protected literal anchors, and inherited hierarchical roles. It has no authority to retrieve external sources. Presence in available context authorizes use but does not require a decorative citation: only sources analytically incorporated into prose and visibly cited remain in `used_evidence_ids`.
+The provider receives `Eq`, protected literal anchors, and inherited initial roles. It has no authority to retrieve external sources. Presence in available context authorizes use but does not require a decorative citation: only sources analytically incorporated into prose and visibly cited remain in `used_evidence_ids`.
 
 ## Auditability
 
 `context_intelligence` identifies each analysis by `stage`:
 
-- `hierarchical`: CIE after κq;
+- `hierarchical`: compatibility name retained for the first source CIE after κq;
 - `primary`: CIE after κe, with `source_region` equal to `core` or `convergence`;
 - `global`: final CIE over `Gq`.
 

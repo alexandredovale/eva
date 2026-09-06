@@ -84,11 +84,11 @@ Generated and original content therefore remain distinguishable throughout retri
 
 `EvidenceEmbeddingService` builds structured text containing document title, path, evidence class/type, and complete content. It batches complete units without dividing an individual unit.
 
-`EmbeddingInputGuard` reserves a safety margin under the configured provider limit. An incompatible primary unit is never truncated. A directly traceable compatible derived summary may represent its semantic route; otherwise the build stops before the provider call and requires a real structural subdivision.
+`EmbeddingInputGuard` reserves a safety margin under the configured provider limit. An incompatible primary unit is never truncated. A directly traceable compatible derived summary may still be built and embedded, but source-first retrieval in version 4.0.2 queries primary embeddings directly; the primary unit therefore requires real structural subdivision to enter that population.
 
 The nominal limit is `AI_EMBEDDING_MAX_INPUT_TOKENS`; the guard uses 90% as a preventive margin for tokenizer differences. It validates all pending units before sending the first batch.
 
-When a valid compatible `derived` + `node_summary` record directly linked through `evidence_derivations` represents an oversized primary unit, retrieval still resolves that route back to the complete primary content, identifier, and lineage. If no such derived representation exists, the diagnostic identifies the public evidence ID and stops. Increasing the batch, cutting text, or creating artificial fragments is not an allowed correction.
+Valid compatible `derived` + `node_summary` records remain linked through `evidence_derivations`, but they do not replace the source in the first query of the source-first mode. An oversized primary unit without its own embedding is outside that vector population until the document receives real structural subdivision. Increasing the batch, cutting text, or creating artificial fragments is not an allowed correction.
 
 Model, dimension, and content hash identify the vector version. Similarity is used only during retrieval and is discarded after transient analysis.
 

@@ -10,7 +10,7 @@ A aplicação não possui dependência de runtime do Composer ou Node.js. Apache
 
 Copie `.env.example` para `.env`. Configure a URL da aplicação, conexão com o banco, identidade visual, limites de consulta e identidade da fila. Gere um `ADMIN_API_TOKEN` exclusivo com pelo menos 24 caracteres.
 
-`QUERY_NON_SEMANTIC_MAX_EVIDENCE` aplica-se somente às rotas sem CIE. Rotas semânticas usam κq, CIE hierárquico, κe, CIE primário e CIE global sem uma quantidade configurada de evidências.
+`QUERY_NON_SEMANTIC_MAX_EVIDENCE` aplica-se somente às rotas sem CIE. Rotas semânticas usam κq e o primeiro CIE diretamente sobre evidências primárias, seguidos por κe, CIE primário e CIE global, sem uma quantidade configurada de evidências.
 
 Mantenha os campos de provedor vazios e `AI_LIVE_ENABLED=false` até concluir a instalação local e os testes offline.
 

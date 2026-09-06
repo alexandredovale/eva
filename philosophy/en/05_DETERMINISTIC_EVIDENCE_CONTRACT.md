@@ -1,7 +1,7 @@
 # Deterministic evidence contract
 
 **Status:** implemented
-**Updated:** August 8, 2026
+**Updated:** September 6, 2026
 **Português:** [Contrato determinístico de evidências](../05_DETERMINISTIC_EVIDENCE_CONTRACT.md)
 
 ## Principle
@@ -10,9 +10,9 @@ In EVA, the answer model does not define the authorized documentary universe. Th
 
 ```text
 semantic route
-  → complete hierarchical population
-  → κq → hierarchical CIE
-  → complete lineage by inherited region
+  → complete primary population
+  → κq → first source CIE
+  → upper core or convergence fallback
   → κe → primary CIE
   → union of local nuclei → global CIE
   → global nucleus or convergence fallback
@@ -35,7 +35,7 @@ A recovered but uncited source is discarded without invalidating the entire answ
 
 ## Preserved roles
 
-Global CIE decides final eligibility but does not erase hierarchical origin. A source may be global `core` while retaining `source_region: convergence`; it is then delivered with the inherited documentary role `convergence`. That role may indicate reinforcement, context, limitation, or counterpoint—never importance, truth, or confidence.
+Global CIE decides final eligibility but does not erase first-stage origin. A source may be global `core` while retaining `source_region: convergence`; in that case it was forwarded by the initial convergence fallback. That role may indicate reinforcement, context, limitation, or counterpoint—never importance, truth, or confidence.
 
 Exact literal matches outside the analyzed primary population remain protected anchors. Global CIE cannot remove them, and they remain subject to the same citation rules.
 
@@ -72,7 +72,7 @@ Documents, nodes, evidence, derivations, embeddings, and sanitized audit events 
 
 - query embedding;
 - similarities and κ diagnostics;
-- hierarchical, primary, and global CIE analyses;
+- initial (`hierarchical` for compatibility), primary, and global CIE analyses;
 - authorized context and answer;
 - `simetry`, `assimetry`, and conversational continuity.
 
@@ -83,7 +83,7 @@ Querying the collection is a read operation, not authorization to rewrite its me
 1. Every documentary claim must trace back to cited primary evidence.
 2. No source outside final context may be accepted.
 3. κq and κe are query-local and receive no prior Top-k.
-4. Semantic lineage is not truncated.
+4. Initial semantic retrieval operates directly over primary evidence without replacing sources with summaries.
 5. Global CIE receives only deduplicated local primary nuclei.
 6. The LLM receives the global nucleus or convergence fallback, plus protected literal anchors.
 7. Final semantic evidence count is not configured.

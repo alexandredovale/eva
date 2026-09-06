@@ -1,7 +1,7 @@
 # Contrato determinístico de evidências
 
 **Estado:** implementado
-**Atualização:** 8 de agosto de 2026
+**Atualização:** 6 de setembro de 2026
 **English:** [Deterministic evidence contract](en/05_DETERMINISTIC_EVIDENCE_CONTRACT.md)
 
 ## Princípio
@@ -10,9 +10,9 @@ No EVA, o modelo de resposta não define o universo documental autorizado. A apl
 
 ```text
 rota semântica
-  → população hierárquica completa
-  → κq → CIE hierárquico
-  → linhagem integral por região herdada
+  → população primária completa
+  → κq → primeiro CIE sobre fontes
+  → núcleo superior ou fallback de convergência
   → κe → CIE primário
   → união dos núcleos locais → CIE global
   → núcleo global ou fallback de convergence
@@ -35,7 +35,7 @@ Uma fonte recuperada, mas não citada, é descartada sem invalidar a resposta in
 
 ## Papéis preservados
 
-O CIE global decide a elegibilidade final, mas não apaga a origem hierárquica. Uma fonte pode ser `core` global e conservar `source_region: convergence`; nesse caso, ela é enviada com o papel documental herdado `convergence`. Esse papel pode indicar reforço, contexto, limite ou contraponto, nunca importância, verdade ou confiança.
+O CIE global decide a elegibilidade final, mas não apaga a origem no primeiro estágio. Uma fonte pode ser `core` global e conservar `source_region: convergence`; nesse caso, ela foi encaminhada pelo fallback de convergência inicial. Esse papel pode indicar reforço, contexto, limite ou contraponto, nunca importância, verdade ou confiança.
 
 Correspondências literais exatas externas à população primária analisada permanecem como âncoras protegidas. Elas não são eliminadas pelo CIE global e continuam submetidas às mesmas regras de citação.
 
@@ -72,7 +72,7 @@ São persistidos documentos, nós, evidências, derivações, embeddings e audit
 
 - embedding da consulta;
 - similaridades e diagnósticos κ;
-- análises hierárquica, primária e global do CIE;
+- análises inicial (`hierarchical` por compatibilidade), primária e global do CIE;
 - contexto autorizado e resposta;
 - `simetry`, `assimetry` e continuidade conversacional.
 
@@ -83,7 +83,7 @@ Consultar o acervo é leitura, não autorização para reescrever sua memória.
 1. Toda afirmação documental deve voltar a uma evidência primária citada.
 2. Nenhuma fonte externa ao contexto final pode ser aceita.
 3. κq e κe são query-local e não recebem Top-k prévio.
-4. A linhagem semântica não é truncada.
+4. A recuperação semântica inicial atua diretamente sobre evidências primárias, sem substituir fontes por resumos.
 5. O CIE global recebe apenas núcleos primários locais deduplicados.
 6. A LLM recebe o núcleo global ou o fallback de convergência, mais âncoras literais protegidas.
 7. A quantidade semântica final não é configurada.

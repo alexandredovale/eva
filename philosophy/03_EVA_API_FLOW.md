@@ -176,12 +176,12 @@ POST /api/query                              <- API interna do EVA
            +--------------------------+------------------------+
                                       |
                                       v
-                     [CIE HIERÁRQUICO POR DOCUMENTO]
-                     - core e convergence seguem separados
-                     - discard não participa da linhagem
+                     [PRIMEIRO CIE SOBRE FONTES POR DOCUMENTO]
+                     - somente core segue normalmente
+                     - convergence é fallback se core estiver vazio
                                       |
                                       v
-                     [RESOLUÇÃO INTEGRAL PARA FONTES PRIMÁRIAS]
+                     [FONTES PRIMÁRIAS SOBREVIVENTES]
                      - κe + CIE primário por região e documento
                      - sem truncagem ou nova chamada de embedding
                                       |
@@ -256,7 +256,7 @@ POST /api/query                              <- API interna do EVA
            +--> candidatos de C
            |
            v
-[κq + CIE HIERÁRQUICO + κe + CIE PRIMÁRIO POR DOCUMENTO]
+[κq + PRIMEIRO CIE SOBRE FONTES + κe + CIE PRIMÁRIO POR DOCUMENTO]
            |
            v
 [UNIÃO DEDUPLICADA DOS NÚCLEOS PRIMÁRIOS LOCAIS]
@@ -317,7 +317,7 @@ CONSULTA DIRETA / ESTRUTURAL / AMPLA
 
 CONSULTA CONCEITUAL / RELACIONAL
   ├── 1 chamada de embedding do input, reutilizado em todos os estágios
-  ├── κq/CIE hierárquico e κe/CIE primário por documento, sem chamada externa
+  ├── κq/primeiro CIE sobre fontes e κe/CIE primário por documento, sem chamada externa
   ├── 1 CIE global, sem chamada externa
   └── 1 chamada de resposta, somente se houver evidência
 
@@ -348,9 +348,9 @@ INPUT DO USUÁRIO                  |
    |                              |
    +----------> RECUPERAÇÃO <-----+
                      |
-     POPULAÇÃO COMPLETA → κq → CIE HIERÁRQUICO
+  POPULAÇÃO PRIMÁRIA → κq → PRIMEIRO CIE SOBRE FONTES
                      |
-       LINHAGEM → κe → CIE PRIMÁRIO → CIE GLOBAL
+        NÚCLEO/FALLBACK → κe → CIE PRIMÁRIO → CIE GLOBAL
                      |
         CONTEXTO PRIMÁRIO DISPONÍVEL
                      |

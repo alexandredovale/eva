@@ -495,9 +495,9 @@ try {
     $boundary = $contextAnalysis->retrievalBoundary;
     assertQuery(
         $boundary !== null
-            && count($boundary->scores) === 98
+            && count($boundary->scores) === 77
             && $contextAnalysis->selectedCandidates !== [],
-        'κq deve examinar todas as 98 unidades hierárquicas antes do CIE.'
+        'κq deve examinar todas as 77 evidências primárias antes do CIE.'
     );
     assertQuery(
         $contextAnalysis->coreCandidates !== []

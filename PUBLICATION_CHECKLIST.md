@@ -2,6 +2,17 @@
 
 Use this checklist for every public release. Always start from a fresh clone of the canonical GitHub repository in an exclusive local analysis directory, inspect the remote state, and copy only an explicit source allowlist.
 
+## Release v4.0.2
+
+- [x] Start from a fresh clone of canonical `main` without creating a release branch.
+- [x] Copy only the two authorized source changes: source-first retrieval in `DocumentContextRetriever` and paragraph-separated analytical perspectives in `QueryAnswerProvider`.
+- [x] Preserve the former summary-first and core-plus-convergence modes as adjacent comments for manual rollback tests.
+- [x] Update Portuguese and English documentation for the primary-evidence κq population, upper-core first-stage forwarding, convergence fallback, and answer paragraph behavior.
+- [x] Update public version metadata, citation metadata, changelog, and asset cache markers to 4.0.2.
+- [x] Run PHP and JavaScript syntax checks and the affected regression suites with real AI calls disabled; 27 available public offline suites passed. `GoLiveReadinessTest` requires explicit paid live execution, `InfrastructureBackupRestoreTest` requires the unavailable `ZipArchive` extension, and `AiAdaptersTest` retains a pre-existing assertion inconsistent with the prompt examples already present in 4.0.1.
+- [x] Review the complete diff and confirm that no credential, operational data, upload, log, dump, backup, private connector, or Runtime state is present.
+- [x] Commit and push canonical `main`, create annotated tag `v4.0.2`, and publish the GitHub release.
+
 ## Release v4.0.1
 
 - [x] Create a fresh clone from `alexandredovale/eva` under an exclusive local analysis directory and verify `origin/main` before copying files.

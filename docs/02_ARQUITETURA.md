@@ -12,7 +12,7 @@ Separar responsabilidades sem duplicar conceitos e sem permitir que a IA atribua
 4. **Evidências:** persiste conteúdo primário, sínteses derivadas e sua proveniência.
 5. **Embeddings:** vetoriza unidades completas previamente organizadas.
 6. **Retriever:** roteia o input e recupera candidatos primários ou derivados.
-7. **Fronteiras query-local + CIE:** κq legitima a população hierárquica completa; κe legitima separadamente as fontes primárias herdadas de núcleo e convergência; o CIE classifica cada estágio e consolida globalmente os núcleos primários locais.
+7. **Fronteiras query-local + CIE:** κq legitima a população primária completa; o primeiro CIE encaminha seu núcleo superior ou a convergência como fallback; κe e o CIE primário refinam as fontes, e o CIE global consolida os núcleos locais.
 8. **Interação transitória:** deriva conceitualmente um Cnode por `simetry`/`assimetry` entre fontes citadas.
 9. **Validação:** mantém somente fontes analiticamente citadas e exige participantes conhecidos, citações visíveis e fragmentos literais.
 10. **Produto:** fornece interface, API, fila, auditoria, métricas e identidade visual.
@@ -23,9 +23,9 @@ Separar responsabilidades sem duplicar conceitos e sem permitir que a IA atribua
 ```text
 Arquivo → parser → árvore → evidências primárias → sínteses → derivações → embeddings
 
-Pergunta → roteamento → população `derived:node_summary` completa
-         → cosine global → κq → CIE hierárquico (μ, σ, CV)
-         → resolução integral da linhagem por região herdada
+Pergunta → roteamento → população `primary:node_content` completa
+         → cosine global → κq → primeiro CIE (μ, σ, CV)
+         → núcleo superior ou fallback de convergência
          → cosine primário → κe → CIE primário por região e obra
          → união dos núcleos locais → CIE global
          → núcleo global (ou fallback de convergência) + âncoras literais
@@ -34,7 +34,7 @@ Pergunta → roteamento → população `derived:node_summary` completa
 
 ## Separação de responsabilidades
 
-Embeddings localizam unidades hierárquicas semanticamente compatíveis. Nas rotas semânticas, toda a população elegível é ordenada e κq emerge da geometria query-local antes do CIE hierárquico. A linhagem selecionada é resolvida sem truncagem; as fontes primárias, separadas pelo papel hierárquico herdado, passam por κe e CIE primário. A união deduplicada dos núcleos primários locais recebe o CIE global. Seu núcleo (`s ≥ μ + σ`) forma o contexto final, com fallback para a convergência (`μ ≤ s < μ + σ`) somente quando o núcleo estiver vazio. Correspondências literais exatas externas à população vetorial permanecem como âncoras protegidas.
+Embeddings localizam evidências primárias semanticamente compatíveis. Nas rotas semânticas, toda a população primária elegível é ordenada e κq emerge da geometria query-local antes do primeiro CIE. Esse estágio encaminha somente seu núcleo (`s ≥ μ + σ`), com fallback para a convergência (`μ ≤ s < μ + σ`) quando o núcleo estiver vazio. As fontes sobreviventes passam pelos cálculos posteriores de κe e CIE primário sem alterações. A união deduplicada dos núcleos locais recebe o CIE global, cujo núcleo forma o contexto final, também com fallback de convergência. Correspondências literais exatas externas à população vetorial permanecem como âncoras protegidas.
 
 Depois da resolução para fontes primárias, o contexto disponível está concluído. A IA não pode introduzir fontes externas ou IDs fora desse conjunto. A base final da resposta contém somente as fontes efetivamente incorporadas à prosa com citações visíveis; uma fonte recuperada mas não citada é descartada, sem invalidar toda a resposta. Citação inexistente, fora do contexto ou apresentada apenas como inventário continua inválida, e a aplicação não completa marcadores omitidos.
 

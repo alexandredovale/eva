@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Current version:** `4.0.1`
+**Current version:** `4.0.2`
 
-**Version highlight:** EVA 4.0.1 removes installation-specific domain references from public documentation and uses `eva.your-domain.com` in deployment examples, preserving the white-label distribution contract.
+**Version highlight:** EVA 4.0.2 makes semantic retrieval source-first: the initial similarity distribution is calculated directly over primary evidence and forwards only the upper core, with convergence as fallback. Answer generation also places each analytical perspective in a separate paragraph.
 
 EVA is a provider-neutral PHP system for building and querying **verifiable documentary memory**. It preserves document hierarchy, keeps literal source evidence separate from generated summaries, and validates every answer against the primary evidence recovered for the current query.
 
@@ -20,7 +20,7 @@ Many retrieval systems begin with arbitrary token chunks and later try to recons
 Source → normalized tree → literal primary evidence
        → traceable hierarchical summaries → contextual embeddings
 
-Semantic query → local routing → complete hierarchy → κq → CIE → primary sources
+Semantic query → local routing → complete primary evidence → κq → upper-core CIE → primary sources
       → one bounded answer → local citation and interaction validation
 ```
 
@@ -30,10 +30,10 @@ Core properties:
 - Primary evidence is literal; derived evidence is generated and explicitly linked to its sources.
 - Embeddings represent complete, previously organized semantic units rather than arbitrary cuts.
 - Direct, structural, and broad queries can avoid a transient query embedding.
-- Conceptual and relational queries use semantic retrieval and resolve summaries back to primary evidence.
-- The query-local κq boundary emerges from the complete eligible hierarchical score distribution; complete lineage then passes through κe and primary CIE, and global CIE consolidates local primary nuclei. There is no configured semantic Top-k or evidence count.
-- CIE deterministically identifies a leading vector core plus complementary available convergence context from mean and population standard deviation before lineage resolution.
-- The answer model may use only the relevant subset of the available primary context. Every retained source must be cited where its analytical contribution is explained; uncited candidates are discarded, and citation-only inventories are rejected.
+- Conceptual and relational queries calculate their initial semantic distribution directly over validated primary-evidence embeddings.
+- The query-local κq boundary emerges from the complete eligible primary score distribution; the upper core then passes through the unchanged primary and multidocument stages. There is no configured semantic Top-k or evidence count.
+- The first CIE forwards only scores at or above mean plus population standard deviation, using convergence only when that core is empty.
+- The answer model may use only the relevant subset of the available primary context and presents each analytical perspective in a separate paragraph. Every retained source must be cited where its analytical contribution is explained; uncited candidates are discarded, and citation-only inventories are rejected.
 - Locally rejected answer generations are retried silently up to three total attempts; only the third consecutive validation failure reaches the user as a generic error.
 - Answer generation is skipped when no primary evidence is recovered.
 - `simetry` and `assimetry` interactions exist only for the current query and require two cited primary sources with literal excerpts.

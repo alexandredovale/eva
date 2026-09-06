@@ -43,8 +43,8 @@ The implemented flow is:
 4. Versioned bottom-up summaries may be produced while preserving lineage between each summary and its sources.
 5. Embeddings are generated for complete, previously structured documentary units.
 6. At query time, the input is routed through direct, structural, broad, or semantic paths.
-7. On semantic routes, κq and hierarchical CIE operate over the complete population; κe and primary CIE elect local nuclei.
-8. Selected derived evidence is resolved completely to primary sources, split by inherited region.
+7. On semantic routes, κq and the first CIE operate directly over the complete primary population; only the upper core, or convergence as fallback, continues.
+8. κe and primary CIE preserve the subsequent calculations and elect local nuclei from the surviving sources.
 9. Global CIE consolidates local nuclei, and the model receives only its nucleus or convergence fallback, plus protected literal anchors.
 10. The final basis retains only evidence incorporated into the prose with visible citations; recovered but uncited candidates are discarded.
 11. When an interaction can be demonstrated between cited evidence, Cnode exists only as a transient conceptual derivation of EVA, not as a system, hierarchical layer, or entity.
@@ -88,7 +88,7 @@ In the August 8, 2026 directed test over seven works, 350 local primary-nucleus 
 
 #### Vector scanning
 
-Semantic retrieval loads every eligible hierarchical-summary vector, deserializes JSON, calculates every cosine in PHP, globally orders the distribution, and only then derives κq. This flow can be observed in [`DocumentContextRetriever.php`](../../app/Application/Query/DocumentContextRetriever.php).
+Semantic retrieval loads every eligible primary-evidence vector, deserializes JSON, calculates every cosine in PHP, globally orders the distribution, and only then derives κq. The first CIE forwards its `s ≥ μ + σ` core, using convergence only as fallback. This flow can be observed in [`DocumentContextRetriever.php`](../../app/Application/Query/DocumentContextRetriever.php).
 
 Its cost is approximately proportional to the number of embeddings multiplied by their dimensions for every document and query. In multi-document queries, the work is repeated for each work.
 

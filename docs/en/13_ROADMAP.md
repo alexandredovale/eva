@@ -19,7 +19,7 @@ hierarchical retrieval
 ↓
 κq
 ↓
-hierarchical CIE
+first source CIE
 ↓
 lineage resolution
 ↓
@@ -42,9 +42,9 @@ cited response
 
 ---
 
-# 1. κq — query boundary at the hierarchical layer
+# 1. κq — query boundary at the initial primary layer
 
-`κq` acts first on the **derived hierarchical summaries** of each document.
+`κq` acts first on the **validated and embedded primary evidence** of each document.
 
 The initial flow is:
 
@@ -53,7 +53,7 @@ User question
 ↓
 question embedding
 ↓
-all eligible hierarchical summaries of the work
+all eligible primary evidence of the work
 ↓
 cosine similarity
 ↓
@@ -89,23 +89,23 @@ take the top 20
 
 κq seeks to let **the distribution of that specific query determine the boundary itself**.
 
-Formally, it operates on the complete population of eligible hierarchical summaries, using rank, normalized similarity, and gaps between candidates.
+Formally, it operates on the complete population of eligible primary evidence, using rank, normalized similarity, and gaps between candidates.
 
 If there is no sufficiently clear break, **no cutoff is invented**.
 
-In that case, the entire population proceeds to the hierarchical CIE.
+In that case, the entire population proceeds to the first source CIE.
 
 Therefore, the conceptual question represented by κq is:
 
 ```text
 κq =
-where does the hierarchical population
+where does the primary population
 plausibly related to the question end?
 ```
 
 ---
 
-# 2. Hierarchical CIE — statistical organization of the population
+# 2. First CIE — statistical organization of the sources
 
 The first **Context Intelligence Engine** follows κq.
 
@@ -158,41 +158,32 @@ The **core** represents the region that is statistically most concentrated in re
 
 **Discard** represents candidates below the distribution mean.
 
-At this hierarchical stage, core and convergence are preserved because they will still be resolved down to their primary sources and analyzed separately.
+At this initial stage, only the `s ≥ μ + σ` core is forwarded. Convergence is used only as fallback when that core is empty. The diagnostic contract continues to expose this stage as `hierarchical` for compatibility.
 
 ---
 
-# 3. From the hierarchy to primary evidence
+# 3. From first selection to primary refinement
 
-Up to this point, EVA is working mainly with **derived syntheses**.
+From the first calculation onward, EVA 4.0.2 works directly with **primary evidence**.
 
-However, a synthesis is not the final documentary source of the response.
+The first CIE forwards its upper core or, when that core is empty, its convergence. Derived-summary traceability remains in built memory but does not participate in this first selection.
 
-The system must return to the literal content from which that synthesis originated.
-
-It therefore traverses the lineage:
+The forwarded flow is:
 
 ```text
-Selected summary
-↓
-evidence_derivations
-↓
-other lower-level summaries
-↓
-primary evidence
+initial primary core
+or convergence fallback
 ↓
 literal documentary text
 ```
 
-The architecture requires a selected derived evidence item to be fully resolved down to its primary sources before response generation.
-
-This is where **κe** appears.
+These already literal sources proceed to **κe**, preserving the subsequent calculations.
 
 ---
 
 # 4. κe — boundary applied to primary evidence
 
-`κe` now acts on the **primary evidence** retrieved through the lineage.
+`κe` acts on the **primary evidence** forwarded by the first CIE.
 
 The question continues to be represented by the same transient embedding.
 
@@ -203,7 +194,7 @@ Question
 ↓
 existing embedding
 ↓
-primary evidence found through the lineage
+primary evidence from the initial core or fallback
 ↓
 cosine similarity
 ↓
@@ -215,24 +206,24 @@ The fundamental difference between κq and κe is:
 ```text
 κq
 acts on:
-hierarchical summaries
+primary evidence
 
 κe
 acts on:
 primary evidence
 ```
 
-EVA thus first determines **where to look in the document** and then verifies **which literal content from that region remains semantically related to the question**.
+EVA thus first determines **which sources stand out in the complete primary population** and then verifies **which remain semantically related in the surviving local population**.
 
 A simple way to understand the difference is:
 
 ```text
 κq:
-"which conceptual region of the work appears pertinent?"
+"which sources stand out in the work's complete population?"
 
 κe:
-"within that region,
-which literal evidence remains pertinent?"
+"among the forwarded sources,
+which evidence remains pertinent?"
 ```
 
 ---
@@ -241,7 +232,7 @@ which literal evidence remains pertinent?"
 
 Another CIE follows κe.
 
-The calculation now occurs not on derived summaries but on **primary evidence**.
+The calculation remains on **primary evidence**, now restricted to the initial core or fallback.
 
 The following are calculated again:
 
@@ -261,13 +252,13 @@ core
 
 There is, however, an important characteristic.
 
-This analysis occurs **by work and by inherited hierarchical region**.
+This analysis occurs **by work and by inherited initial region**.
 
 For example:
 
 ```text
 Document A
-    hierarchical core
+    initial core
         ↓
       κe
         ↓
@@ -278,7 +269,7 @@ And separately:
 
 ```text
 Document A
-    hierarchical convergence
+    initial convergence fallback
         ↓
       κe
         ↓
@@ -364,24 +355,21 @@ QUESTION
 ├─ embedding
 │
 ▼
-ALL HIERARCHICAL SUMMARIES
+ALL PRIMARY EVIDENCE
 │
 ├─ cosine
 │
 ├─ κq
 │
 ▼
-HIERARCHICAL CIE
+FIRST SOURCE CIE
 │
 ├─ core
-├─ convergence
+├─ convergence (fallback only)
 └─ discard
 │
 ▼
-LINEAGE RESOLUTION
-│
-▼
-PRIMARY EVIDENCE
+UPPER CORE OR FALLBACK
 │
 ├─ cosine
 ├─ κe
@@ -441,8 +429,8 @@ CIE
 
 | Element | Operates on | Function |
 |---|---|---|
-| **κq** | hierarchical summaries | find a natural query boundary in the hierarchy |
-| **Hierarchical CIE** | surviving summaries | separate core, convergence, and discard |
+| **κq** | primary evidence | find a natural query boundary in the sources |
+| **First CIE** | sources surviving κq | forward upper core or convergence fallback |
 | **κe** | primary evidence | refine pertinence in the literal content |
 | **Primary CIE** | primary evidence | form local cores for each work |
 | **Global CIE** | primary cores of the works | consolidate the final multidocument context |
@@ -462,7 +450,7 @@ Which conceptual regions of this work
 are worth searching?
 ```
 
-## Hierarchical CIE
+## First CIE
 
 Question:
 
@@ -589,13 +577,13 @@ validation of primary documentary pertinence
 
 The three CIEs correspond to three different scales of the problem.
 
-## Scale 1 — hierarchy
+## Scale 1 — complete primary population
 
 ```text
-hierarchical CIE
+first CIE
 ```
 
-Organizes the structural summaries of the work.
+Organizes the work's eligible primary evidence and forwards only the upper core or its fallback.
 
 ## Scale 2 — literal content
 
@@ -616,7 +604,7 @@ Consolidates the local primary cores from all works participating in the query.
 Thus:
 
 ```text
-hierarchy
+complete primary sources
 ↓
 literal content
 ↓
@@ -626,7 +614,7 @@ multidocument corpus
 corresponds to:
 
 ```text
-hierarchical CIE
+first CIE
 ↓
 primary CIE
 ↓
@@ -647,8 +635,6 @@ locate
 delimit
 ↓
 classify
-↓
-resolve the lineage
 ↓
 refine
 ↓
@@ -684,11 +670,11 @@ The structure can be reduced to the following idea:
 ```text
 κq
 =
-boundary in the hierarchy
+boundary in the complete primary population
 
-hierarchical CIE
+first CIE
 =
-statistical organization of the hierarchy
+statistical organization of the sources
 
 κe
 =
@@ -784,7 +770,7 @@ The five phases and the first architectural upgrade are complete. New phases mus
 - discard, convergence, and core regions — **completed**;
 - deterministic convergence fallback when no core exists — **completed**;
 - complete lineage resolution only after statistical selection, preserving inherited region — **completed**;
-- separate κe and primary CIE for sources inherited from hierarchical core and convergence — **completed**;
+- κe and primary CIE preserved for sources forwarded by the initial core or its convergence fallback — **completed**;
 - deduplicated union of local primary cores and global consolidation CIE — **completed**;
 - removal of `QUERY_MAX_EVIDENCE` from semantic routes and isolation of `QUERY_NON_SEMANTIC_MAX_EVIDENCE` — **completed**;
 - transient auditable `context_intelligence` output — **completed**;

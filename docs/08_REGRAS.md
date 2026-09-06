@@ -55,7 +55,7 @@
 53. Nunca truncar, cortar ou fragmentar arbitrariamente uma evidência para produzir seu embedding.
 54. Representar uma primária excedente pelo embedding de uma síntese derivada válida somente quando a linhagem até a evidência primária integral estiver persistida.
 55. Aplicar o CIE somente às distribuições vetoriais das rotas conceitual e relacional.
-56. Calcular cosine contra toda a população `derived:node_summary` elegível, ordenar globalmente e determinar κq sem Top-k, pesos ou thresholds semânticos humanos.
+56. Calcular cosine contra toda a população `primary:node_content` validada e vetorizada, ordenar globalmente e determinar κq sem Top-k, pesos ou thresholds semânticos humanos.
 57. Calcular média e desvio padrão populacionais sobre a população legitimada por κq — ou sobre a população completa quando não houver ruptura — e calcular `CV = σ / μ`, usando `null` quando `μ = 0`.
 58. Classificar como descarte `s < μ`, convergência `μ ≤ s < μ + σ` e núcleo `s ≥ μ + σ`.
 59. Em cada CIE, usar o núcleo como população eleita e promover a convergência somente quando o núcleo estiver vazio; no estágio hierárquico, preservar ambas as regiões para resolução e análise primária separadas.

@@ -25,8 +25,8 @@ It does not contain persistent relationships, cognitive scores, confidence, impo
 
 ```text
 Build: source → tree → primary evidence → derived summaries → embeddings
-Semantic query: input → complete hierarchy → κq → hierarchical CIE
-                → lineage → κe/primary CIE → global CIE → primary sources
+Semantic query: input → complete primary evidence → κq → first-stage CIE
+                → upper core/fallback → κe/primary CIE → global CIE
 Interaction: recovered sources → transient simetry/assimetry → literal validation
 Answer: cited evidence → answer and limitations
 ```
