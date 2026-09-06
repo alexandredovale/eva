@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Versão atual:** `6.0.0`
+**Versão atual:** `6.0.1`
 
-**Destaque da versão:** o EVA 6.0.0 remove os resumos hierárquicos da construção, persistência, vetorização, fila e recuperação. O fluxo operacional passa a trabalhar exclusivamente com evidências primárias literais da ingestão à validação da resposta.
+**Destaque da versão:** o EVA 6.0.1 alinha a leitura de evidências do Runtime modular ao schema exclusivamente primário introduzido na 6.0.0. O fluxo operacional trabalha somente com evidências primárias literais da ingestão à validação da resposta.
 
 O EVA é uma plataforma para construir, organizar e consultar memória cognitiva documental verificável. O EVA (Evidence Algorithm) transforma documentos estruturados em evidências hierárquicas. Cnode é a compreensão transitória de uma interação explícita entre essas evidências durante a consulta, não uma entidade persistente.
 

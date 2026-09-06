@@ -114,7 +114,7 @@ final readonly class CoreReadApi
     {
         $this->requireCapability('core.read.evidences');
         $statement = $this->database->prepare(
-            'SELECT id, public_id, document_id, evidence_class, evidence_type, content, summary, status, created_at
+            'SELECT id, public_id, document_id, evidence_class, evidence_type, content, status, created_at
                FROM evidences
               WHERE public_id = :public_id'
         );

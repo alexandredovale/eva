@@ -2,7 +2,13 @@
 
 Use this checklist for every public release. Always start from a fresh clone of the canonical GitHub repository in an exclusive local analysis directory, inspect the remote state, and copy only an explicit source allowlist.
 
-## Release v6.0.0
+## Release v6.0.1
+
+- [x] Remove the obsolete `evidences.summary` projection from the shared module Runtime.
+- [x] Validate the primary-only Core evidence reader and the ENADE/EXPLORER module paths.
+- [x] Commit and push `main`, create annotated tag `v6.0.1`, and publish the GitHub patch release after explicit authorization.
+
+## Historical release v6.0.0
 
 - [x] Remove summaries and derivation lineage from ingestion, cognitive build, queueing, retrieval, metrics, and the consolidated schema.
 - [x] Add and validate the manual 4.x-to-6.0.0 database migration and apply it to the authorized local database after a complete backup.

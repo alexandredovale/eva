@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Current version:** `6.0.0`
+**Current version:** `6.0.1`
 
-**Version highlight:** EVA 6.0.0 removes hierarchical summaries from construction, storage, embeddings, queues, and retrieval. The operational pipeline now works exclusively with literal primary evidence from ingestion through answer validation.
+**Version highlight:** EVA 6.0.1 aligns the shared module Runtime evidence reader with the primary-only schema introduced in 6.0.0. The operational pipeline works exclusively with literal primary evidence from ingestion through answer validation.
 
 EVA is a provider-neutral PHP system for building and querying **verifiable documentary memory**. It preserves document hierarchy, stores literal source evidence, and validates every answer against the primary evidence recovered for the current query.
 

@@ -130,8 +130,8 @@ if (str_contains($html, 'nav-index') || str_contains($script, 'nav-index') || st
     throw new RuntimeException('A navegação ainda contém numeração visual de itens.');
 }
 
-if (!preg_match('~assets/app\.css\?v=6\.0\.0~', $html)
-    || !preg_match('~assets/app\.js\?v=6\.0\.0~', $html)) {
+if (!preg_match('~assets/app\.css\?v=6\.0\.1~', $html)
+    || !preg_match('~assets/app\.js\?v=6\.0\.1~', $html)) {
     throw new RuntimeException('Os assets públicos modulares não receberam a mesma versão.');
 }
 

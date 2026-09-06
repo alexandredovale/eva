@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project uses [Semantic Versioning](https://semver.org/).
 
+## [6.0.1] - 2026-09-06
+
+### Fixed
+
+- The shared module Runtime no longer selects the removed `evidences.summary` column when a module reads primary evidence by public ID.
+- A database-backed regression test now verifies the primary-only modular evidence contract used alongside ENADE and EXPLORER.
+
 ## [6.0.0] - 2026-09-06
 
 ### Removed
