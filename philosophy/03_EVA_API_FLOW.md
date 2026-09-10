@@ -152,7 +152,7 @@ POST /api/query                              <- API interna do EVA
                                       |
                                       v
                      [UNIÃO DOS NÚCLEOS LOCAIS → CIE GLOBAL]
-                     - núcleo global ou fallback de convergence
+                     - núcleo global + convergence auxiliar
                      - âncoras literais exatas permanecem protegidas
                      - a LLM não pode introduzir fontes externas
                                       |

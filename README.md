@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Current version:** `6.0.1`
+**Current version:** `7.0.0`
 
-**Version highlight:** EVA 6.0.1 aligns the shared module Runtime evidence reader with the primary-only schema introduced in 6.0.0. The operational pipeline works exclusively with literal primary evidence from ingestion through answer validation.
+**Version highlight:** EVA 7.0.0 preserves the global CIE core as the deterministic cutoff and adds global convergence only as complementary answer context, without changing κq, κe, or the `μ + σ` rule.
 
 EVA is a provider-neutral PHP system for building and querying **verifiable documentary memory**. It preserves document hierarchy, stores literal source evidence, and validates every answer against the primary evidence recovered for the current query.
 
@@ -30,8 +30,8 @@ Core properties:
 - Embeddings represent complete, previously organized semantic units rather than arbitrary cuts.
 - Direct, structural, and broad queries can avoid a transient query embedding.
 - Conceptual and relational queries calculate their initial semantic distribution directly over validated primary-evidence embeddings.
-- The query-local κq boundary emerges from the complete eligible primary score distribution; the upper core then passes through the unchanged primary and multidocument stages. There is no configured semantic Top-k or evidence count.
-- The first CIE forwards only scores at or above mean plus population standard deviation, using convergence only when that core is empty.
+- The query-local κq boundary emerges from the complete eligible primary score distribution; the upper core then passes through the primary and multidocument refinement stages. There is no configured semantic Top-k or evidence count.
+- The global CIE keeps core (`s ≥ μ + σ`) as the cutoff and adds convergence (`μ ≤ s < μ + σ`) only as complementary context for the answer provider.
 - The answer model may use only the relevant subset of the available primary context and presents each analytical perspective in a separate paragraph. Every retained source must be cited where its analytical contribution is explained; uncited candidates are discarded, and citation-only inventories are rejected.
 - Locally rejected answer generations are retried silently up to three total attempts; only the third consecutive validation failure reaches the user as a generic error.
 - Answer generation is skipped when no primary evidence is recovered.

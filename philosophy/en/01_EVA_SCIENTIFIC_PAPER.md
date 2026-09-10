@@ -9,7 +9,7 @@
 
 This paper presents EVA (Evidence Algorithm), an architecture for language-model-assisted documentary queries whose persistent memory is organized as traceable evidence rather than answers, cognitive relationships, or inferred graphs. The system transforms structured documents into a normalized tree, preserves literal content as primary evidence, and generates embeddings for these complete semantic units. The representation respects document organization instead of fragmenting it by arbitrary character or token limits.
 
-At query time, EVA selects a retrieval route compatible with input type. Direct, structural, and broad questions may navigate hierarchy; conceptual and relational questions use a transient vector representation. On semantic routes, κq emerges from the complete primary population before the first Context Intelligence Engine (CIE). That stage forwards only its `s ≥ μ + σ` core, with convergence as fallback; surviving sources pass through κe and primary CIE, and the union of local nuclei receives global CIE. The global nucleus—or convergence when that nucleus is empty—forms semantic context without a configured Top-k or evidence count. Only sources incorporated into prose with visible citations enter the final basis. If no sufficient primary evidence is found, the flow stops without calling the answer provider.
+At query time, EVA selects a retrieval route compatible with input type. Direct, structural, and broad questions may navigate hierarchy; conceptual and relational questions use a transient vector representation. On semantic routes, κq emerges from the complete primary population before the first Context Intelligence Engine (CIE). That stage keeps core `s ≥ μ + σ` as the cutoff, with convergence as fallback; surviving sources pass through κe and primary CIE, and the union of local nuclei receives global CIE. Global core forms the primary basis and global convergence `μ ≤ s < μ + σ` is appended as auxiliary context without a configured Top-k or evidence count. Only sources incorporated into prose with visible citations enter the final basis. If no sufficient primary evidence is found, the flow stops without calling the answer provider.
 
 Cognitive relationships are transient **simetry** or **assimetry** interactions produced only within the query, without weights, judgmental taxonomies, or persistence. In multidisciplinary projects, evidence from different specialized documents may support emergent conceptual syntheses without promoting the resulting interpretation to evidence or memory. Citations and interaction participants are validated locally against recovered context. The proposal separates documentary memory, retrieval, interpretation, and presentation while keeping models and providers externally configured and replaceable. This paper describes the current architecture, its testable hypotheses, limitations, and a protocol for future evaluation.
 
@@ -202,11 +202,11 @@ For `N` similarities `sᵢ`, CIE calculates:
 CV = \frac{\sigma}{\mu}
 \]
 
-When `μ = 0`, CV is `null`. `s < μ` is discard; `μ ≤ s < μ + σ` is convergence; `s ≥ μ + σ` is core. At every CIE stage, core is elected and convergence takes its place only when core is empty. Minimal numerical tolerance protects threshold comparisons without changing values.
+When `μ = 0`, CV is `null`. `s < μ` is discard; `μ ≤ s < μ + σ` is convergence; `s ≥ μ + σ` is core. Core remains the cutoff at every CIE and convergence acts as fallback; after the global cutoff, it is also appended as auxiliary context. Minimal numerical tolerance protects threshold comparisons without changing values.
 
 The transformation is deterministic, preserves Retriever order within regions, and creates no additional grade, weight, or rank. Query output may expose regions and statistics for audit, but the answer provider receives only resolved final primary context.
 
-The first CIE operates directly over primary evidence. Its upper core, or its convergence when the core is empty, passes through κe and primary CIE using its own cosine against the same query.
+The first CIE operates directly over primary evidence. Its upper core, or convergence when core is empty, passes through κe and primary CIE using its own cosine against the same query.
 
 ### 7.4 Multi-document query and transient selection
 

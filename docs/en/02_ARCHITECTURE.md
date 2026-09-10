@@ -28,13 +28,13 @@ Question → routing → complete `primary:node_content` retrieval → κq → f
          → upper core or convergence fallback
          → primary cosine → κe → primary CIE by region and work
          → union of local nuclei → global CIE
-         → global nucleus (or convergence fallback) + literal anchors
+         → global core + auxiliary convergence + literal anchors
          → deterministic contract → answer + transient interactions → validation
 ```
 
 ## Separation of responsibilities
 
-Embeddings locate semantically compatible primary evidence. Similarity globally orders the complete eligible primary population, κq establishes its query-local boundary, and the first CIE forwards only its core (`s ≥ μ + σ`), using convergence (`μ ≤ s < μ + σ`) only when that core is empty. The surviving sources pass through the unchanged κe and primary CIE calculations. A final global CIE classifies the deduplicated union of local primary nuclei. Its nucleus forms the final semantic context, with convergence used only when that nucleus is empty. Exact literal matches outside the vector population remain protected anchors. All analyses remain transient.
+Embeddings locate semantically compatible primary evidence. Similarity globally orders the complete eligible primary population, κq establishes its query-local boundary, and the first CIE forwards only core (`s ≥ μ + σ`), using convergence (`μ ≤ s < μ + σ`) as fallback when core is empty. The surviving sources pass through κe and primary CIE. A final global CIE classifies the deduplicated union of local primary nuclei. Its core remains the primary cutoff and its convergence is appended as auxiliary provider context. Exact literal matches outside the vector population remain protected anchors. All analyses remain transient.
 
 Version 6.0.0 construction and retrieval operate exclusively on primary evidence. The answer provider cannot introduce external sources or IDs outside the recovered set. The final evidence basis retains only sources incorporated into the prose with visible citations; a recovered but uncited source is discarded without invalidating the entire answer. Missing, out-of-context, or citation-only inventory references remain invalid. The answer provider may declare `simetry` or `assimetry` in the same call that produces the answer. Local code accepts an interaction only when both participants belong to the recovered context, were cited, and contain the declared literal excerpts.
 

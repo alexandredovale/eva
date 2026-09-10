@@ -2,7 +2,16 @@
 
 Use this checklist for every public release. Always start from a fresh clone of the canonical GitHub repository in an exclusive local analysis directory, inspect the remote state, and copy only an explicit source allowlist.
 
-## Release v6.0.1
+## Release v7.0.0
+
+- [x] Preserve κq, κe, curve-break detection, and the `μ + σ` core cutoff.
+- [x] Add global convergence only as complementary final answer context.
+- [x] Correct the default `Evidence Algorithm` product tagline.
+- [x] Update bilingual documentation, public version metadata, and asset cache markers.
+- [x] Validate the affected offline regression suites with zero paid calls.
+- [x] Commit and push `main`, create annotated tag `v7.0.0`, and publish the GitHub release after explicit authorization.
+
+## Historical release v6.0.1
 
 - [x] Remove the obsolete `evidences.summary` projection from the shared module Runtime.
 - [x] Validate the primary-only Core evidence reader and the ENADE/EXPLORER module paths.

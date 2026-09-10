@@ -41,11 +41,11 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 37. Name each aspect for which the recovered context contains insufficient evidence.
 38. Never erase a valid partial relationship only because another input aspect lacks evidence.
 39. Treat retrieved results as candidates until the application completes deterministic composition of the available context.
-40. Deliver only the authorized final context to the provider: the global CIE nucleus—or its convergence when the nucleus is empty—protected literal anchors, and inherited hierarchical `core` or `convergence` roles.
+40. Deliver only the authorized final context to the provider: the global CIE core as the primary basis, its convergence as auxiliary context, and protected literal anchors, preserving the global `core` and `convergence` roles.
 41. Require every evidence record retained in the result to be cited in the analytical passage where it contributes.
 42. Discard recovered evidence omitted from the text, and reject isolated markers or citation inventories that do not demonstrate analytical incorporation.
 43. Never add a citation omitted by the provider merely to make the response appear compliant.
-44. On semantic routes, form final context from the global CIE nucleus over local primary nuclei; `QUERY_NON_SEMANTIC_MAX_EVIDENCE` must not participate in those populations.
+44. On semantic routes, form final context from the global CIE core and convergence over local primary nuclei; `QUERY_NON_SEMANTIC_MAX_EVIDENCE` must not participate in those populations.
 45. Do not confuse recovered context with used evidence. The application authorizes the available set and retains only effectively cited sources in the result.
 46. Treat `QUERY_MAX_INTERACTIONS` as a transient relational-output limit, never as an evidence count, persisted-pair count, or instruction to precompute combinations.
 47. A zero `QUERY_MAX_INTERACTIONS` disables interactions without disabling the evidence-based documentary answer.
@@ -60,7 +60,7 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 56. Score the complete validated and embedded `primary:node_content` population, globally order it, and derive κq without a configured Top-k, semantic thresholds, or weights.
 57. Calculate population mean and population standard deviation over the κq-legitimized population — or the complete population when no break exists — and calculate `CV = σ / μ`, using `null` when `μ = 0`.
 58. Classify `s < μ` as discard, `μ ≤ s < μ + σ` as convergence, and `s ≥ μ + σ` as core.
-59. At each CIE stage, elect core and promote convergence only when core is empty.
+59. Keep core as the elected cutoff at every CIE and promote convergence only when core is empty; after the global cutoff, append its convergence only as auxiliary context without changing κq, κe, or the `μ + σ` threshold.
 60. Preserve Retriever order within regions; do not create a subjective score, weight, heuristic, or AI reranking stage.
 61. Apply κe and primary CIE to the forwarded sources by work, then submit the deduplicated union of local nuclei to global CIE before calling the answer provider.
 62. Do not persist candidates, similarities, statistics, regions, or the CIE selection as documentary memory.

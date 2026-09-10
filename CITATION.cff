@@ -5,9 +5,9 @@ type: software
 authors:
   - given-names: "Alexandre"
     family-names: "do Vale Brostel"
-version: 6.0.1
+version: 7.0.0
 doi: "10.5281/zenodo.21500611"
-date-released: 2026-09-06
+date-released: 2026-09-09
 license: Apache-2.0
 abstract: >-
   EVA is a provider-neutral architecture for verifiable documentary memory.

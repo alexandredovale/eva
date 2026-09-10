@@ -47,7 +47,7 @@ After publishing, run the deployment verifier from a machine that can reach the 
 php bin\verify-deployment.php https://your-production-host.example
 ```
 
-Require zero failures. Then verify one superadmin login, one normal-user login, and one controlled conceptual or relational query. The semantic response must expose hierarchical, primary, and global `context_intelligence`, resolve final context to primary sources, preserve inherited roles, deliver the global nucleus or convergence fallback plus literal anchors, and cite every retained evidence record analytically.
+Require zero failures. Then verify one superadmin login, one normal-user login, and one controlled conceptual or relational query. The semantic response must expose hierarchical, primary, and global `context_intelligence`, preserve global core as the cutoff, deliver that core as the primary basis and convergence as auxiliary context plus literal anchors, and cite every retained evidence record analytically.
 
 If any verifier check fails, keep the release in acceptance until it is corrected. Re-run tests for any code, schema, configuration, provider, or hosting behavior that changed since the accepted build.
 

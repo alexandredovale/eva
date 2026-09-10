@@ -151,7 +151,7 @@ POST /api/query                              <- EVA internal API
                                      |
                                      v
                      [UNION OF LOCAL NUCLEI → GLOBAL CIE]
-                     - global nucleus or convergence fallback
+                     - global core + auxiliary convergence
                      - exact literal anchors remain protected
                      - the LLM cannot add external sources
                                      |
@@ -234,7 +234,7 @@ POST /api/query                              <- EVA internal API
 +-------------------------------------------------------------+
 | EXTERNAL API — ANSWER GENERATION                            |
 | Uses only the documentary subset that contributes, retains  |
-| inherited roles, evaluates simetry/assimetry, declares gaps.|
+| global core/convergence roles, evaluates simetry/assimetry, declares gaps.|
 +-------------------------------------------------------------+
            |
            v

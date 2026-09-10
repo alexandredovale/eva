@@ -413,10 +413,6 @@ final class DocumentContextRetriever
             $candidateRegions[$candidate->evidenceId] = 'convergence';
         }
 
-        /*
-         * Modo alternativo — encaminhar núcleo e convergência para a próxima etapa:
-         * $firstStageCandidates = $analysis->selectedCandidates;
-         */
         $firstStageCandidates = $analysis->coreCandidates !== []
             ? $analysis->coreCandidates
             : $analysis->convergenceCandidates;

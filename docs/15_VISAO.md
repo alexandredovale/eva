@@ -45,7 +45,7 @@ O fluxo implementado é:
 6. Na consulta, o input é encaminhado para rotas diretas, estruturais, amplas ou semânticas.
 7. Nas rotas semânticas, κq e o primeiro CIE atuam diretamente sobre a população primária completa; somente o núcleo superior, ou a convergência como fallback, segue adiante.
 8. κe e CIE primário preservam os cálculos posteriores e elegem núcleos locais sobre as fontes sobreviventes.
-9. O CIE global consolida os núcleos locais, e o modelo recebe apenas seu núcleo ou fallback de convergência, além de âncoras literais protegidas.
+9. O CIE global consolida os núcleos locais, e o modelo recebe seu núcleo como base principal, sua convergência como contexto auxiliar e âncoras literais protegidas.
 10. A base final mantém apenas evidências incorporadas à prosa com citações visíveis; candidatas recuperadas mas não citadas são descartadas.
 11. Quando há interação demonstrável entre evidências citadas, Cnode existe apenas como derivação conceitual transitória do EVA, não como sistema, camada hierárquica ou entidade.
 12. A consulta e suas interações não alteram a memória documental persistente.
@@ -88,7 +88,7 @@ No teste dirigido de 8 de agosto de 2026 sobre sete obras, 350 núcleos primári
 
 #### Varredura vetorial
 
-A recuperação semântica carrega os vetores das evidências primárias elegíveis, desserializa o JSON, calcula todos os cosines em PHP, ordena globalmente e só então determina κq. O primeiro CIE encaminha seu núcleo `s ≥ μ + σ`, com convergência apenas como fallback. Esse fluxo pode ser observado em [`DocumentContextRetriever.php`](../app/Application/Query/DocumentContextRetriever.php).
+A recuperação semântica carrega os vetores das evidências primárias elegíveis, desserializa o JSON, calcula todos os cosines em PHP, ordena globalmente e só então determina κq. O primeiro CIE encaminha seu núcleo `s ≥ μ + σ`, com convergência apenas como fallback. O CIE global mantém esse corte e anexa a convergência como contexto auxiliar. Esse fluxo pode ser observado em [`DocumentContextRetriever.php`](../app/Application/Query/DocumentContextRetriever.php).
 
 O custo é aproximadamente proporcional à quantidade de embeddings multiplicada por sua dimensão, para cada documento e consulta. Em consultas multidocumentais, o trabalho se repete por obra.
 

@@ -295,7 +295,7 @@ Cada resposta deverá ser avaliada quanto a:
 - validade dos fragmentos e participantes de `simetry`/`assimetry`;
 - taxa de afirmações que extrapolam as fontes citadas;
 - declaração não evasiva das áreas sem fundamento;
-- diversidade de documentos no núcleo global final;
+- diversidade de documentos no núcleo e na convergência globais finais;
 - estabilidade da resposta sob variações do input;
 - invariância da memória documental antes e depois das consultas.
 

@@ -28,13 +28,13 @@ Pergunta → roteamento → população `primary:node_content` completa
          → núcleo superior ou fallback de convergência
          → cosine primário → κe → CIE primário por região e obra
          → união dos núcleos locais → CIE global
-         → núcleo global (ou fallback de convergência) + âncoras literais
+         → núcleo global + convergência auxiliar + âncoras literais
          → contrato determinístico → resposta + interações transitórias → validação
 ```
 
 ## Separação de responsabilidades
 
-Embeddings localizam evidências primárias semanticamente compatíveis. Nas rotas semânticas, toda a população primária elegível é ordenada e κq emerge da geometria query-local antes do primeiro CIE. Esse estágio encaminha somente seu núcleo (`s ≥ μ + σ`), com fallback para a convergência (`μ ≤ s < μ + σ`) quando o núcleo estiver vazio. As fontes sobreviventes passam pelos cálculos posteriores de κe e CIE primário sem alterações. A união deduplicada dos núcleos locais recebe o CIE global, cujo núcleo forma o contexto final, também com fallback de convergência. Correspondências literais exatas externas à população vetorial permanecem como âncoras protegidas.
+Embeddings localizam evidências primárias semanticamente compatíveis. Nas rotas semânticas, toda a população primária elegível é ordenada e κq emerge da geometria query-local antes do primeiro CIE. Esse estágio encaminha somente seu núcleo (`s ≥ μ + σ`), com fallback para a convergência (`μ ≤ s < μ + σ`) quando o núcleo estiver vazio. As fontes sobreviventes passam pelos cálculos posteriores de κe e CIE primário. A união deduplicada dos núcleos locais recebe o CIE global. Seu núcleo continua sendo o corte principal, mas a convergência global é anexada como contexto complementar para o provedor. Correspondências literais exatas externas à população vetorial permanecem como âncoras protegidas.
 
 Depois da seleção das fontes primárias, o contexto disponível está concluído. A IA não pode introduzir fontes externas ou IDs fora desse conjunto. A base final da resposta contém somente as fontes efetivamente incorporadas à prosa com citações visíveis; uma fonte recuperada mas não citada é descartada, sem invalidar toda a resposta. Citação inexistente, fora do contexto ou apresentada apenas como inventário continua inválida, e a aplicação não completa marcadores omitidos.
 

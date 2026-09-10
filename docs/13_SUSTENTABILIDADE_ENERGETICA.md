@@ -109,7 +109,7 @@ As métricas mínimas são:
 - joules por consulta e kWh por mil consultas;
 - energia de construção amortizada;
 - chamadas externas e embeddings por consulta;
-- tamanhos de κq e κe, descartes nos estágios hierárquico/primário/global, união dos núcleos locais, núcleo global final e tokens em cada estágio;
+- tamanhos de κq e κe, descartes nos estágios hierárquico/primário/global, união dos núcleos locais, núcleo e convergência globais finais e tokens em cada estágio;
 - tokens de entrada e saída;
 - tempo de GPU e latências p50, p95 e p99;
 - taxa de reutilização de sínteses e embeddings;

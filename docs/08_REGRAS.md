@@ -39,11 +39,11 @@
 37. Nomear separadamente cada aspecto sem evidência suficiente no contexto recuperado.
 38. Nunca apagar uma relação parcial válida apenas porque outro aspecto do input não possui evidência.
 39. Tratar resultados recuperados como candidatos até a composição determinística do contexto disponível concluída pela aplicação.
-40. Entregar ao provedor somente o contexto final autorizado: núcleo do CIE global — ou sua convergência quando o núcleo estiver vazio —, âncoras literais protegidas e os papéis hierárquicos herdados `core` ou `convergence`.
+40. Entregar ao provedor somente o contexto final autorizado: núcleo do CIE global como base principal, sua convergência como contexto auxiliar e âncoras literais protegidas, preservando os papéis globais `core` e `convergence`.
 41. Exigir que toda evidência mantida no resultado seja citada no trecho analítico em que contribui para a resposta.
 42. Descartar evidência recuperada omitida no texto e rejeitar marcador isolado ou inventário de citações que não demonstre incorporação analítica.
 43. Nunca acrescentar automaticamente uma citação omitida pelo provedor para fazer a resposta aparentar conformidade.
-44. Nas rotas semânticas, formar o contexto final pelo núcleo do CIE global sobre os núcleos primários locais; `QUERY_NON_SEMANTIC_MAX_EVIDENCE` não pode participar dessas populações.
+44. Nas rotas semânticas, formar o contexto final pelo núcleo e pela convergência do CIE global sobre os núcleos primários locais; `QUERY_NON_SEMANTIC_MAX_EVIDENCE` não pode participar dessas populações.
 45. Não confundir contexto recuperado com evidência utilizada; a aplicação autoriza o conjunto disponível e conserva no resultado somente as fontes efetivamente citadas.
 46. Tratar `QUERY_MAX_INTERACTIONS` como limite de saída relacional transitória, nunca como quantidade de evidências, pares persistidos ou combinações antecipadas.
 47. Desativar interações quando `QUERY_MAX_INTERACTIONS` for zero sem desativar a resposta documental baseada em evidências.
@@ -58,7 +58,7 @@
 56. Calcular cosine contra toda a população `primary:node_content` validada e vetorizada, ordenar globalmente e determinar κq sem Top-k, pesos ou thresholds semânticos humanos.
 57. Calcular média e desvio padrão populacionais sobre a população legitimada por κq — ou sobre a população completa quando não houver ruptura — e calcular `CV = σ / μ`, usando `null` quando `μ = 0`.
 58. Classificar como descarte `s < μ`, convergência `μ ≤ s < μ + σ` e núcleo `s ≥ μ + σ`.
-59. Em cada CIE, usar o núcleo como população eleita e promover a convergência somente quando o núcleo estiver vazio.
+59. Manter o núcleo como corte eleito em todos os CIEs e promover a convergência somente quando o núcleo estiver vazio; após o corte global, anexar sua convergência apenas como contexto auxiliar, sem alterar κq, κe ou o limiar `μ + σ`.
 60. Preservar a ordem do Retriever dentro das regiões; não criar nota, peso, heurística subjetiva ou reranking por IA.
 61. Aplicar κe e CIE primário às fontes encaminhadas por obra e submeter a união deduplicada dos núcleos locais ao CIE global antes de chamar o provedor.
 62. Não persistir candidatos, similaridades, estatísticas, regiões ou seleção do CIE como memória documental.

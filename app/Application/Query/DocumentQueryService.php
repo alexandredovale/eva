@@ -33,7 +33,7 @@ final readonly class DocumentQueryService
             $maxEvidence,
             $maxInteractions
         );
-        $context = $this->consolidateGlobalPrimaryCore($context);
+        $context = $this->consolidateGlobalPrimaryContext($context);
 
         if ($responseProfiles !== [] || $supplementaryInstructions !== []) {
             $context = new QueryContext(
@@ -169,12 +169,12 @@ final readonly class DocumentQueryService
             $evidenceSelection,
             $supplementaryInstructions
         );
-        $context = $this->consolidateGlobalPrimaryCore($context);
+        $context = $this->consolidateGlobalPrimaryContext($context);
 
         return $this->answerFromContext($input, $context);
     }
 
-    private function consolidateGlobalPrimaryCore(QueryContext $context): QueryContext
+    private function consolidateGlobalPrimaryContext(QueryContext $context): QueryContext
     {
         /** @var array<int, ContextCandidate> $candidateById */
         $candidateById = [];
@@ -208,13 +208,27 @@ final readonly class DocumentQueryService
         $globalAnalysis = $this->contextIntelligenceEngine
             ->analyze($globalCandidates)
             ->forGlobalStage();
-        $globalNucleus = $globalAnalysis->coreCandidates !== []
+        $globalCore = $globalAnalysis->coreCandidates !== []
             ? $globalAnalysis->coreCandidates
             : $globalAnalysis->convergenceCandidates;
+        $globalAuxiliaryConvergence = $globalAnalysis->coreCandidates !== []
+            ? $globalAnalysis->convergenceCandidates
+            : [];
+        $globalContextCandidates = [...$globalCore, ...$globalAuxiliaryConvergence];
         $eligiblePrimaryIds = array_fill_keys(array_map(
             static fn (ContextCandidate $candidate): int => $candidate->evidenceId,
-            $globalNucleus
+            $globalContextCandidates
         ), true);
+        $globalSelectionByInternalId = [];
+
+        foreach ($globalAnalysis->coreCandidates as $candidate) {
+            $globalSelectionByInternalId[$candidate->evidenceId] = 'core';
+        }
+
+        foreach ($globalAnalysis->convergenceCandidates as $candidate) {
+            $globalSelectionByInternalId[$candidate->evidenceId] = 'convergence';
+        }
+
         $knownPrimaryIds = array_fill_keys(array_keys($candidateById), true);
         $evidences = array_values(array_filter(
             $context->evidences,
@@ -225,6 +239,13 @@ final readonly class DocumentQueryService
             static fn (RetrievedEvidence $evidence): string => $evidence->publicId,
             $evidences
         ), true);
+        $evidenceSelection = array_intersect_key($context->evidenceSelection, $retainedPublicIds);
+
+        foreach ($evidences as $evidence) {
+            if (isset($globalSelectionByInternalId[$evidence->id])) {
+                $evidenceSelection[$evidence->publicId] = $globalSelectionByInternalId[$evidence->id];
+            }
+        }
 
         return new QueryContext(
             $context->understanding,
@@ -234,7 +255,7 @@ final readonly class DocumentQueryService
             $context->limitations,
             $context->responseProfiles,
             [...$context->contextIntelligenceAnalyses, $globalAnalysis],
-            array_intersect_key($context->evidenceSelection, $retainedPublicIds),
+            $evidenceSelection,
             $context->supplementaryInstructions
         );
     }

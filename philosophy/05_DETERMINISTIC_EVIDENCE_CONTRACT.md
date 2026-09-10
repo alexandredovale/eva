@@ -15,7 +15,7 @@ rota semântica
   → núcleo superior ou fallback de convergência
   → κe → CIE primário
   → união dos núcleos locais → CIE global
-  → núcleo global ou fallback de convergence
+  → núcleo global + convergence auxiliar
   → âncoras literais protegidas
   → contexto final autorizado
 ```
@@ -35,7 +35,7 @@ Uma fonte recuperada, mas não citada, é descartada sem invalidar a resposta in
 
 ## Papéis preservados
 
-O CIE global decide a elegibilidade final, mas não apaga a origem no primeiro estágio. Uma fonte pode ser `core` global e conservar `source_region: convergence`; nesse caso, ela foi encaminhada pelo fallback de convergência inicial. Esse papel pode indicar reforço, contexto, limite ou contraponto, nunca importância, verdade ou confiança.
+O CIE global decide a elegibilidade final e atribui o papel final `core` ou `convergence`. O núcleo conserva a precedência argumentativa; a convergência pode indicar reforço, contexto, limite ou contraponto, nunca importância, verdade ou confiança.
 
 Correspondências literais exatas externas à população primária analisada permanecem como âncoras protegidas. Elas não são eliminadas pelo CIE global e continuam submetidas às mesmas regras de citação.
 
@@ -44,7 +44,7 @@ Correspondências literais exatas externas à população primária analisada pe
 Não existe `QUERY_MAX_EVIDENCE` nas rotas semânticas. A quantidade final é:
 
 ```text
-K(q) = |CoreG|, se CoreG ≠ ∅
+K(q) = |CoreG ∪ ConvG|, se CoreG ≠ ∅
 K(q) = |ConvG|, se CoreG = ∅
 ```
 
@@ -85,7 +85,7 @@ Consultar o acervo é leitura, não autorização para reescrever sua memória.
 3. κq e κe são query-local e não recebem Top-k prévio.
 4. A recuperação semântica inicial atua diretamente sobre evidências primárias, sem substituir fontes por resumos.
 5. O CIE global recebe apenas núcleos primários locais deduplicados.
-6. A LLM recebe o núcleo global ou o fallback de convergência, mais âncoras literais protegidas.
+6. A LLM recebe o núcleo global como base principal, a convergência global como contexto auxiliar e as âncoras literais protegidas.
 7. A quantidade semântica final não é configurada.
 8. Somente evidências citadas analiticamente integram a base final.
 9. Análises e interações da consulta não alteram a memória documental.

@@ -263,7 +263,7 @@ Documento A
     CIE primário
 ```
 
-E separadamente:
+Somente quando o núcleo inicial estiver vazio:
 
 ```text
 Documento A
@@ -339,7 +339,7 @@ O CIE global funciona, portanto, como a última consolidação estatística da c
 
 Seu núcleo representa o contexto principal autorizado para a geração.
 
-Se, excepcionalmente, o núcleo estiver vazio, a faixa de convergência funciona como fallback.
+O núcleo permanece como corte principal. Sua faixa de convergência é acrescentada ao contexto final como subsídio auxiliar; quando o núcleo estiver vazio, ela também funciona como fallback.
 
 ---
 
@@ -391,6 +391,8 @@ CIE GLOBAL
 │
 ▼
 CONTEXTO FINAL
+├─ núcleo global (base principal)
+└─ convergência global (contexto auxiliar)
 │
 ▼
 LLM
@@ -431,7 +433,7 @@ CIE
 | **CIE inicial** | fontes sobreviventes a κq | encaminhar núcleo superior ou convergência como fallback |
 | **κe** | evidências primárias | refinar a pertinência no conteúdo literal |
 | **CIE primário** | evidências primárias | formar núcleos locais de cada obra |
-| **CIE global** | núcleos primários das obras | consolidar o contexto multidocumental final |
+| **CIE global** | núcleos primários das obras | consolidar núcleo principal e convergência auxiliar no contexto final |
 
 ---
 
@@ -771,6 +773,7 @@ As cinco fases e o primeiro upgrade arquitetural estão concluídos. Novas fases
 - remoção de `QUERY_MAX_EVIDENCE` das rotas semânticas e isolamento de `QUERY_NON_SEMANTIC_MAX_EVIDENCE` — concluído;
 - saída transitória auditável em `context_intelligence` — concluído;
 - núcleo como população eleita em cada estágio, com fallback para convergência somente quando vazio — concluído;
+- convergência global acrescentada ao contexto final como subsídio auxiliar, sem alterar o corte do núcleo ou as fronteiras κ — concluído;
 - contrato de `used_evidence_ids` derivado das citações visíveis, com descarte de candidatos omitidos — concluído;
 - validação fechada da incorporação analítica, sem preenchimento automático ou inventário de citações — concluído;
 - validação real de referência com 10/10 evidências incorporadas e sem truncamento — concluído;

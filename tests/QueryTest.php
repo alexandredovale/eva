@@ -559,15 +559,10 @@ try {
     }
 
     $globalAnalysis = $globalAnalyses[0] ?? null;
-    $expectedGlobalNucleusIds = $globalAnalysis === null
+    $expectedGlobalContextIds = $globalAnalysis === null
         ? []
-        : array_column(
-            $globalAnalysis->coreCandidates !== []
-                ? $globalAnalysis->coreCandidates
-                : $globalAnalysis->convergenceCandidates,
-            'evidenceId'
-        );
-    sort($expectedGlobalNucleusIds);
+        : array_column($globalAnalysis->selectedCandidates, 'evidenceId');
+    sort($expectedGlobalContextIds);
     $actualAnalyzedIds = array_values(array_filter(
         array_column($relationalResult->usedEvidences, 'id'),
         static fn (int $evidenceId): bool => isset($knownLocalNucleusIds[$evidenceId])
@@ -575,10 +570,9 @@ try {
     sort($actualAnalyzedIds);
 
     assertQuery(
-        count($globalAnalyses) === 1 && $actualAnalyzedIds === $expectedGlobalNucleusIds,
-        'O contexto semântico final deve coincidir com o núcleo global ou seu fallback, sem convergência global excedente.'
+        count($globalAnalyses) === 1 && $actualAnalyzedIds === $expectedGlobalContextIds,
+        'O contexto semântico final deve coincidir com o núcleo e a convergência do CIE global.'
     );
-
     $recoveringProvider = new RecoveringAnswerProvider();
     $recoveredResult = (new DocumentQueryService($retriever, $recoveringProvider))
         ->query($documentId, 'Explique ' . $intelligence['public_id']);

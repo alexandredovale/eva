@@ -204,6 +204,87 @@ try {
         'A API não expôs a análise transitória e os papéis eleitos esperados.'
     );
     assertContextIntegration($embeddingProvider->calls === 1, 'Consultas idênticas devem reutilizar o embedding transitório.');
+
+    $globalDocumentIds = [];
+    $globalEvidenceIds = [];
+    $globalSimilarities = [0.9, 0.7, 0.6, 0.1, 0.1];
+    $documentStatement = $database->prepare(
+        "INSERT INTO documents
+            (public_id, title, original_name, format, source_hash, status)
+         VALUES (:public_id, :title, :original_name, 'markdown', :source_hash, 'ready')"
+    );
+
+    foreach ($globalSimilarities as $index => $similarity) {
+        $content = sprintf('Registro documental controlado %d.', $index + 1);
+        $contentHash = hash('sha256', $content);
+        $documentStatement->execute([
+            'public_id' => 'pending-' . bin2hex(random_bytes(6)),
+            'title' => 'Documento global ' . ($index + 1),
+            'original_name' => 'global-' . ($index + 1) . '.md',
+            'source_hash' => $contentHash,
+        ]);
+        $globalDocumentId = (int) $database->lastInsertId();
+        $database->prepare('UPDATE documents SET public_id = :public_id WHERE id = :id')->execute([
+            'public_id' => sprintf('EVA-D%06d', $globalDocumentId),
+            'id' => $globalDocumentId,
+        ]);
+        $nodeStatement->execute([
+            'document_id' => $globalDocumentId,
+            'node_type' => 'paragraph',
+            'title' => 'Registro ' . ($index + 1),
+            'structural_path' => '/registro-' . ($index + 1),
+            'sort_order' => 1,
+            'content' => $content,
+            'source_reference' => 'registro ' . ($index + 1),
+            'source_hash' => $contentHash,
+        ]);
+        $nodeId = (int) $database->lastInsertId();
+        $evidenceStatement->execute([
+            'public_id' => 'pending-' . bin2hex(random_bytes(6)),
+            'document_id' => $globalDocumentId,
+            'node_id' => $nodeId,
+            'content' => $content,
+            'source_hash' => $contentHash,
+        ]);
+        $globalEvidenceId = (int) $database->lastInsertId();
+        $database->prepare('UPDATE evidences SET public_id = :public_id WHERE id = :id')->execute([
+            'public_id' => sprintf('EVA-E%06d', $globalEvidenceId),
+            'id' => $globalEvidenceId,
+        ]);
+        $embeddingStatement->execute([
+            'evidence_id' => $globalEvidenceId,
+            'model' => 'fake-cie-integration-v1',
+            'vector_data' => json_encode([
+                $similarity,
+                sqrt(1 - ($similarity * $similarity)),
+            ], JSON_THROW_ON_ERROR),
+            'content_hash' => $contentHash,
+        ]);
+        $globalDocumentIds[] = $globalDocumentId;
+        $globalEvidenceIds[] = $globalEvidenceId;
+    }
+
+    $globalResult = (new DocumentQueryService($retriever, new ContextIntegrationAnswerProvider()))
+        ->queryDocuments($globalDocumentIds, 'Explique a doutrina comparada.', 8, 0);
+    $globalAnalysis = array_values(array_filter(
+        $globalResult->contextIntelligenceAnalyses,
+        static fn ($analysis): bool => $analysis->stage === 'global'
+    ))[0] ?? null;
+
+    assertContextIntegration(
+        $globalAnalysis !== null
+            && array_column($globalAnalysis->coreCandidates, 'evidenceId') === [$globalEvidenceIds[0]]
+            && array_column($globalAnalysis->convergenceCandidates, 'evidenceId') === [
+                $globalEvidenceIds[1],
+                $globalEvidenceIds[2],
+            ],
+        'O CIE global deve preservar o corte em core e classificar a convergência separadamente.'
+    );
+    assertContextIntegration(
+        array_column($globalResult->usedEvidences, 'id') === array_slice($globalEvidenceIds, 0, 3)
+            && array_values($globalResult->evidenceSelection) === ['core', 'convergence', 'convergence'],
+        'O contexto final deve acrescentar a convergência após o núcleo sem promover seus papéis.'
+    );
 } finally {
     $database->rollBack();
 }

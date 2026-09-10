@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+## [7.0.0] - 2026-09-09
+
+### Changed
+
+- The global CIE keeps the core cutoff (`s ≥ μ + σ`) and now also supplies its convergence range (`μ ≤ s < μ + σ`) as complementary answer context. κq curve-break detection and the core-only intermediate refinement remain unchanged.
+
+### Fixed
+
+- Corrected the default product tagline from `Evidency Algorithm` to `Evidence Algorithm`.
+
 ## [6.0.1] - 2026-09-06
 
 ### Fixed

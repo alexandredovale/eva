@@ -28,7 +28,7 @@ Literal, lexical, and structural matches are candidates rather than conclusions.
 
 `simetry` and `assimetry` are internal cognitive operators. They guide relational understanding but are not treated as expressions that a documentary source must contain.
 
-For semantic routes, Retriever scores every eligible primary evidence record, globally orders the distribution, and derives κq from normalized geometry and query-local gaps. If no structural break is identified, the complete population proceeds to the first CIE. CIE then calculates the mean, population standard deviation, and coefficient of variation. Only scores at or above `μ + σ` continue normally; convergence is used only as fallback when that core is empty. Because this population is already primary, no initial summary-to-source expansion occurs.
+For semantic routes, Retriever scores every eligible primary evidence record, globally orders the distribution, and derives κq from normalized geometry and query-local gaps. If no structural break is identified, the complete population proceeds to the first CIE. CIE then calculates the mean, population standard deviation, and coefficient of variation. Only scores at or above `μ + σ` continue normally; convergence is used as fallback when that core is empty. Because this population is already primary, no initial summary-to-source expansion occurs.
 
 ## Project response governance
 
@@ -45,7 +45,7 @@ The backend merges authorized document IDs and deduplicates them before retrieva
 
 ## Evidence gate
 
-If retrieval finds no primary evidence, EVA returns an explicit documentary limitation without calling the answer provider. On semantic routes, the provider receives the global CIE nucleus—or global convergence when that nucleus is empty—plus protected literal anchors. Every source retains its inherited `core` or `convergence` role. Every retained evidence must be visibly cited where its analytical contribution is explained, and each analytical perspective is presented in a separate paragraph; recovered candidates without a citation are discarded without invalidating the answer, and citation-only inventories are rejected.
+If retrieval finds no primary evidence, EVA returns an explicit documentary limitation without calling the answer provider. On semantic routes, the provider receives the global CIE core as its primary basis, global convergence as auxiliary context, and protected literal anchors. Every source retains its global `core` or `convergence` role. Every retained evidence must be visibly cited where its analytical contribution is explained, and each analytical perspective is presented in a separate paragraph; recovered candidates without a citation are discarded without invalidating the answer, and citation-only inventories are rejected.
 
 ## Query limits
 

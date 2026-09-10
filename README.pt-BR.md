@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Versão atual:** `6.0.1`
+**Versão atual:** `7.0.0`
 
-**Destaque da versão:** o EVA 6.0.1 alinha a leitura de evidências do Runtime modular ao schema exclusivamente primário introduzido na 6.0.0. O fluxo operacional trabalha somente com evidências primárias literais da ingestão à validação da resposta.
+**Destaque da versão:** o EVA 7.0.0 preserva o núcleo do CIE global como corte determinístico e acrescenta a convergência global somente como contexto complementar da resposta, sem alterar κq, κe ou a regra `μ + σ`.
 
 O EVA é uma plataforma para construir, organizar e consultar memória cognitiva documental verificável. O EVA (Evidence Algorithm) transforma documentos estruturados em evidências hierárquicas. Cnode é a compreensão transitória de uma interação explícita entre essas evidências durante a consulta, não uma entidade persistente.
 
@@ -90,7 +90,7 @@ A ingestão não produz embeddings. A construção cognitiva é uma etapa poster
 
 `EvidenceEmbeddingService` vetoriza exclusivamente evidências primárias com título do documento, caminho, nó e conteúdo literal organizado. Antes de chamar o provedor, todas as unidades pendentes são validadas contra `AI_EMBEDDING_MAX_INPUT_TOKENS`, com margem preventiva de 10%. Lotes técnicos agrupam unidades completas e nunca fragmentam nenhuma delas. Unidades maiores exigem subdivisão estrutural real para ingressar na população semântica. Uma versão já existente para o mesmo modelo e hash é reutilizada antes de chamar o provedor.
 
-Na consulta conceitual ou relacional, `DocumentContextRetriever` compara o embedding transitório do input com todas as evidências primárias `primary:node_content` elegíveis. A distribuição determina a fronteira query-local κq; quando não há ruptura identificável, a população completa segue ao primeiro CIE. Esse estágio calcula média, desvio padrão populacional e CV e encaminha somente o núcleo superior (`s ≥ μ + σ`), usando a convergência (`μ ≤ s < μ + σ`) apenas quando o núcleo estiver vazio. Os cálculos primários posteriores, a consolidação entre documentos e as validações permanecem intactos. Similaridades e estatísticas são transitórias.
+Na consulta conceitual ou relacional, `DocumentContextRetriever` compara o embedding transitório do input com todas as evidências primárias `primary:node_content` elegíveis. A distribuição determina a fronteira query-local κq; quando não há ruptura identificável, a população completa segue ao primeiro CIE. Esse estágio calcula média, desvio padrão populacional e CV e encaminha o núcleo (`s ≥ μ + σ`), usando a convergência (`μ ≤ s < μ + σ`) apenas como fallback quando o núcleo estiver vazio. O CIE global mantém esse corte e acrescenta sua convergência somente como contexto complementar para a resposta. Similaridades e estatísticas são transitórias.
 
 `QueryAnswerProvider` pode declarar interações `simetry` ou `assimetry` na mesma chamada que produz a resposta e orienta que cada viés de análise seja apresentado em novo parágrafo. `DocumentQueryService` aceita cada interação somente quando os participantes pertencem ao contexto, foram citados e seus fragmentos existem literalmente nas evidências. Nada disso é persistido como Cnode.
 
@@ -131,7 +131,7 @@ A consulta real também exige dupla confirmação:
 php bin/query-document.php <document-id> --live "pergunta"
 ```
 
-Não existe Top-k nem limite numérico configurável para evidências semânticas. κq, o primeiro CIE sobre fontes, κe, CIE primário e CIE global determinam a população query-local; o primeiro CIE encaminha seu núcleo superior ou, se vazio, sua convergência. `QUERY_NON_SEMANTIC_MAX_EVIDENCE` e `--evidence-limit=N` atuam somente nas rotas direta, estrutural e ampla. `QUERY_MAX_INTERACTIONS` e `--interaction-limit=N` limitam apenas interações transitórias.
+Não existe Top-k nem limite numérico configurável para evidências semânticas. κq, o primeiro CIE sobre fontes, κe, CIE primário e CIE global determinam a população query-local; o corte principal permanece no núcleo, e a convergência global é acrescentada apenas como contexto complementar. `QUERY_NON_SEMANTIC_MAX_EVIDENCE` e `--evidence-limit=N` atuam somente nas rotas direta, estrutural e ampla. `QUERY_MAX_INTERACTIONS` e `--interaction-limit=N` limitam apenas interações transitórias.
 
 ## Módulos conectores
 

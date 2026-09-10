@@ -164,7 +164,7 @@
     <text x="120" y="28" class="label">Primeiro CIE sobre fontes</text>
     <text x="120" y="52" class="accent">μ · σ · CV</text>
     <text x="120" y="75" class="small">descarte · convergence · core</text>
-    <text x="120" y="97" class="tiny">core precede; convergence complementa</text>
+    <text x="120" y="97" class="tiny">core; convergence somente como fallback</text>
     <text x="120" y="114" class="tiny">zero chamadas externas</text>
   </g>
   <path d="M1240 660 H1275" class="arrow"/>
@@ -182,7 +182,7 @@
     <rect width="400" height="92" rx="15" class="node-db"/>
     <text x="200" y="27" class="label">Composição do contexto disponível</text>
     <text x="200" y="50" class="small">κe + CIE primário · deduplicação</text>
-    <text x="200" y="71" class="small">CIE global · núcleo final query-local</text>
+    <text x="200" y="71" class="small">CIE global · núcleo + convergence auxiliar</text>
   </g>
   <path d="M970 781 H1010" class="arrow-green"/>
   <g transform="translate(1010 735)">

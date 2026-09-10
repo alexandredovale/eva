@@ -108,7 +108,7 @@ php bin\verify-deployment.php https://eva.your-domain.com
 ```
 
 5. Exigir zero falhas no verificador e realizar um último login de superadmin e de usuário comum no domínio publicado.
-6. Confirmar que uma consulta conceitual ou relacional retorna análises `hierarchical`, `primary` e `global`, preserva os papéis hierárquicos herdados, entrega o núcleo global ou fallback de convergência mais âncoras literais, mantém na base final apenas evidências citadas analiticamente e descarta candidatas não citadas sem invalidar a resposta.
+6. Confirmar que uma consulta conceitual ou relacional retorna análises `hierarchical`, `primary` e `global`, preserva o corte global em `core`, entrega esse núcleo como base principal e a convergência como contexto auxiliar, além das âncoras literais, mantém na base final apenas evidências citadas analiticamente e descarta candidatas não citadas sem invalidar a resposta.
 
 Se o verificador tiver qualquer falha, a publicação deve permanecer em homologação até a correção. Não é necessário repetir toda a matriz paga de IA se código, banco e configuração forem exatamente os homologados; basta o smoke online final e uma consulta controlada por perfil.
 

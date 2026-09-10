@@ -36,7 +36,7 @@ Resposta: evidências citadas → resposta e limitações
 
 A IA apenas compreende e descreve relações semânticas explícitas. Ela não julga conteúdos, não atribui pesos, não classifica importância e não transforma proximidade semântica em conclusão documental.
 
-O Context Intelligence Engine (CIE) reforça essa neutralidade entre o Retriever e as camadas cognitivas. Média, desvio padrão e coeficiente de variação identificam descarte, convergência e núcleo em três estágios: inicial sobre fontes primárias, primário estratificado e global. κq e κe fazem as fronteiras query-local sem quantidades configuradas; o primeiro estágio encaminha somente o núcleo `s ≥ μ + σ`, com convergência como fallback, e o núcleo global determina o contexto semântico enviado ao modelo. Âncoras literais exatas permanecem protegidas. Somente evidências efetivamente citadas são mantidas na resposta.
+O Context Intelligence Engine (CIE) reforça essa neutralidade entre o Retriever e as camadas cognitivas. Média, desvio padrão e coeficiente de variação identificam descarte, convergência e núcleo em três estágios: inicial sobre fontes primárias, primário estratificado e global. κq e κe fazem as fronteiras query-local sem quantidades configuradas; o corte principal permanece no núcleo `s ≥ μ + σ`. Ao final, o núcleo global recebe precedência e sua convergência `μ ≤ s < μ + σ` é acrescentada como contexto auxiliar. Âncoras literais exatas permanecem protegidas. Somente evidências efetivamente citadas são mantidas na resposta.
 
 ## White label
 

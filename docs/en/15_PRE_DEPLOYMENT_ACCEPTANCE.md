@@ -106,7 +106,7 @@ For the August 2, 2026 CIE update, `tests/ContextIntelligenceEngineTest.php` pas
    ```
 
 5. Require zero verifier failures, then perform a final superadmin login and normal-user login on the published domain.
-6. Confirm that a conceptual or relational query returns `hierarchical`, `primary`, and `global` analyses, preserves inherited hierarchical roles, delivers the global nucleus or convergence fallback plus literal anchors, retains only analytically cited evidence in the final basis, and discards uncited candidates without invalidating the answer.
+6. Confirm that a conceptual or relational query returns `hierarchical`, `primary`, and `global` analyses, preserves global core as the cutoff, delivers that core as the primary basis and convergence as auxiliary context plus literal anchors, retains only analytically cited evidence in the final basis, and discards uncited candidates without invalidating the answer.
 
 If any verifier check fails, keep the release in acceptance until corrected. The entire paid AI matrix need not be repeated only when code, database, and configuration are exactly those accepted; otherwise revalidate the affected behavior. In all cases, complete the final online smoke test and one controlled profile-aware query.
 

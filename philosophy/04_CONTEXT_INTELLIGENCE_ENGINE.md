@@ -20,7 +20,7 @@ consulta q
   → κe + CIE primário por região e obra
   → união deduplicada dos núcleos primários locais Gq
   → CIE global
-  → núcleo global Eq (ou convergence se o núcleo estiver vazio)
+  → núcleo global + convergence auxiliar Eq
   → LLM
 ```
 
@@ -60,7 +60,7 @@ Se `core` estiver vazio, `convergence` é promovida. Se `σ = 0`, todos os valor
 
 ### 2. κe e CIE primário
 
-Como a população inicial já é primária, não há resolução de sínteses nessa passagem. Cada fonte herda a região inicial encaminhada: `core` prevalece e `convergence` aparece somente como fallback. O mesmo embedding transitório da consulta é reutilizado para calcular cosine contra os embeddings primários, sem nova chamada externa.
+Como a população inicial já é primária, não há resolução de sínteses nessa passagem. O mesmo embedding transitório da consulta é reutilizado para calcular cosine contra os embeddings primários, sem nova chamada externa.
 
 κe é calculado separadamente sobre as primárias herdadas de `core` e de `convergence`, em cada obra. Cada população legitimada recebe seu próprio CIE. O núcleo local é o `core` primário ou, quando vazio, sua `convergence`.
 
@@ -72,15 +72,15 @@ Os núcleos primários locais são unidos e deduplicados:
 Gq = ⋃d (Ld,core ∪ Ld,convergence)
 ```
 
-Como todos os cosines primários usam a mesma consulta e o mesmo modelo de embedding, o CIE pode classificar `Gq` globalmente. A população entregue à LLM é:
+Como todos os cosines primários usam a mesma consulta e o mesmo modelo de embedding, o CIE pode classificar `Gq` globalmente. O núcleo continua sendo o corte principal e a convergência é anexada como contexto auxiliar. A população entregue à LLM é:
 
 ```text
-Eq = CoreG, se CoreG ≠ ∅
+Eq = CoreG ∪ ConvG, se CoreG ≠ ∅
 Eq = ConvG, se CoreG = ∅
 K(q) = |Eq|
 ```
 
-`K(q)` não é configurado nem conhecido antes da consulta. O papel herdado `core` ou `convergence` permanece anexado à fonte final, mesmo que sua região no CIE global seja `core`.
+`K(q)` não é configurado nem conhecido antes da consulta. O papel global `core` ou `convergence` permanece anexado à fonte final; a convergência não altera o corte `μ + σ` nem se transforma em núcleo.
 
 ## Cantelli como limite, não como quota
 
@@ -107,7 +107,7 @@ Dadas as mesmas populações ordenadas e similaridades, a saída é invariável.
 
 ## Contrato com a LLM
 
-O provedor recebe `Eq`, âncoras literais protegidas e os papéis iniciais herdados. Ele não recebe liberdade para buscar fontes externas. A presença de uma fonte no contexto autoriza seu uso, mas não obriga uma citação decorativa: somente fontes incorporadas analiticamente à prosa e citadas de forma visível permanecem em `used_evidence_ids`.
+O provedor recebe `Eq`, âncoras literais protegidas e os papéis globais `core` e `convergence`. Ele não recebe liberdade para buscar fontes externas. A presença de uma fonte no contexto autoriza seu uso, mas não obriga uma citação decorativa: somente fontes incorporadas analiticamente à prosa e citadas de forma visível permanecem em `used_evidence_ids`.
 
 ## Auditabilidade
 

@@ -18,7 +18,7 @@ input conceitual ou relacional
         → núcleo superior ou fallback de convergência
         → cosine primário → κe → CIE primário por região e obra
         → união dos núcleos locais → CIE global
-        → núcleo global (ou fallback de convergência) + âncoras literais
+        → núcleo global + convergência auxiliar + âncoras literais
         → camadas cognitivas
         → LLM
 ```
@@ -41,7 +41,7 @@ Quando `μ = 0`, o CV é matematicamente indefinido e a saída auditável usa `n
 - **Faixa de convergência:** `μ ≤ s < μ + σ`.
 - **Núcleo de convergência:** `s ≥ μ + σ`.
 
-Em qualquer estágio, se o núcleo existir, ele é a população eleita; se estiver vazio, a faixa de convergência assume esse papel. No primeiro estágio sobre fontes, somente o núcleo é encaminhado; a convergência segue apenas como fallback quando esse núcleo está vazio. Uma distribuição homogênea possui `σ = 0`; nesse caso, todos os candidatos iguais à média pertencem ao núcleo.
+Em todos os estágios, o núcleo permanece como população eleita e, se estiver vazio, a faixa de convergência assume esse papel. No CIE global, a convergência também é anexada depois do núcleo como contexto auxiliar, sem alterar o corte `μ + σ`. Uma distribuição homogênea possui `σ = 0`; nesse caso, todos os candidatos iguais à média pertencem ao núcleo.
 
 As comparações de fronteira usam tolerância numérica de `1e-12` na escala da distribuição para impedir que a representação binária de ponto flutuante desloque um valor matematicamente igual à média. Essa tolerância não altera as fórmulas nem os valores expostos.
 
@@ -56,11 +56,11 @@ Dado o mesmo conjunto ordenado de candidatos e similaridades, o CIE sempre produ
 - persiste análise, contexto ou similaridades;
 - substitui a validação de citações e fragmentos.
 
-O provedor de resposta recebe somente o núcleo do CIE global — ou sua convergência quando o núcleo estiver vazio — e eventuais âncoras literais protegidas. Cada evidência conserva o papel hierárquico herdado `core` ou `convergence`; esse papel não significa que a convergência global também foi enviada. O provedor não recebe as similaridades nem as usa como autoridade documental. Somente as fontes efetivamente citadas integram o resultado.
+O provedor de resposta recebe o núcleo do CIE global como base principal, sua convergência como contexto auxiliar e eventuais âncoras literais protegidas. Cada evidência conserva o papel global `core` ou `convergence`. O provedor não recebe as similaridades nem as usa como autoridade documental. Somente as fontes efetivamente citadas integram o resultado.
 
 ## Evidências primárias e múltiplos documentos
 
-O primeiro CIE classifica candidatos primários e encaminha somente seu núcleo superior, ou sua convergência quando o núcleo estiver vazio. κe e um CIE primário elegem núcleos locais por obra e região. A união desses núcleos recebe um CIE global de consolidação. Somente seu núcleo, ou sua convergência quando o núcleo estiver vazio, chega ao provedor.
+O primeiro CIE classifica candidatos primários e encaminha somente seu núcleo superior, ou sua convergência quando o núcleo estiver vazio. κe e um CIE primário elegem núcleos locais por obra e região. A união desses núcleos recebe um CIE global de consolidação. Seu núcleo chega ao provedor como base principal e sua convergência como contexto auxiliar.
 
 Cada fonte primária mantida deve ser incorporada à resposta no trecho analítico em que contribui. A reprodução de IDs em `used_evidence_ids` sem uso textual não é suficiente, e listas isoladas de citações são rejeitadas. Fontes recuperadas sem citação são descartadas sem derrubar a resposta. O núcleo preserva precedência; a convergência pode reforçar, contextualizar, delimitar ou contrapor o núcleo sem autorizar relações inventadas.
 
@@ -74,7 +74,7 @@ Estados degenerados são explícitos: população vazia, população insuficient
 
 ## Configuração
 
-Não existe configuração de quantidade para evidências semânticas. `QUERY_NON_SEMANTIC_MAX_EVIDENCE` permanece restrita às rotas que não executam CIE. A base final será o subconjunto efetivamente citado no núcleo global.
+Não existe configuração de quantidade para evidências semânticas. `QUERY_NON_SEMANTIC_MAX_EVIDENCE` permanece restrita às rotas que não executam CIE. A base final será o subconjunto efetivamente citado do núcleo e da convergência globais.
 
 ## Saída auditável
 

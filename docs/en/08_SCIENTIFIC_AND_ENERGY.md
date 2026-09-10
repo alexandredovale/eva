@@ -81,7 +81,7 @@ At minimum, report:
 - joules per query and kWh per thousand queries;
 - amortized build energy;
 - external calls and embeddings per query;
-- κq and κe sizes, hierarchical/primary/global discard ratios, local-nucleus union, final global nucleus, and context tokens at every stage;
+- κq and κe sizes, hierarchical/primary/global discard ratios, local-nucleus union, final global core and convergence, and context tokens at every stage;
 - input and output tokens;
 - GPU time and p50, p95, and p99 latency;
 - embedding reuse rate;

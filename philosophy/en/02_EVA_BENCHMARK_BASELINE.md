@@ -254,7 +254,7 @@ In the architecture then evaluated, retrieval produced candidates and AI selecte
 
 The baseline used one work and does not measure EVA's multidisciplinary capacity. A future study should build projects with documents from at least three disciplines and include: explicitly supported cross-field relationships; relationships supported through different vocabularies; partial coverage with one unsupported field; and false intersections where semantic proximity does not support the requested relationship.
 
-Evaluate source/discipline provenance, multi-document precision/recall, interaction fragments and participants, claims beyond cited sources, non-evasive declarations of unsupported fields, document diversity in the final global nucleus, stability under input variation, and documentary-memory invariance before and after queries.
+Evaluate source/discipline provenance, multi-document precision/recall, interaction fragments and participants, claims beyond cited sources, non-evasive declarations of unsupported fields, document diversity in final global core and convergence, stability under input variation, and documentary-memory invariance before and after queries.
 
 Invariance must compare counts and hashes of documents, nodes, evidence, derivations, and embeddings. Distinguish process reliability, semantic correctness evaluated by annotators, and multidisciplinary completeness. Emergent synthesis is valid only when components are traceable and formulation stays within citations; it remains transient, not new evidence.
 

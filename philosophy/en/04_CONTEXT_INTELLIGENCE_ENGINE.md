@@ -20,7 +20,7 @@ query q
   → κe + primary CIE per region and work
   → deduplicated union of local primary nuclei Gq
   → global CIE
-  → global nucleus Eq (or convergence if the nucleus is empty)
+  → global core + auxiliary convergence Eq
   → LLM
 ```
 
@@ -56,11 +56,11 @@ If `core` is empty, `convergence` is promoted. If `σ = 0`, every value equal to
 
 ### 1. Initial source CIE
 
-κq legitimizes the primary-evidence population per work. CIE classifies discard, convergence, and core. Only the `s ≥ μ + σ` core proceeds at this stage; convergence is forwarded only as fallback when that core is empty.
+κq legitimizes the primary-evidence population per work. CIE classifies discard, convergence, and core. At this stage, only core `s ≥ μ + σ` proceeds; convergence is forwarded only as fallback when core is empty.
 
 ### 2. κe and primary CIE
 
-Because the initial population is already primary, no summary resolution occurs in this pass. Each source inherits the forwarded initial region: `core` prevails and `convergence` appears only as fallback. The same transient query embedding is reused to calculate cosine against primary embeddings, with no additional external call.
+Because the initial population is already primary, no summary resolution occurs in this pass. The same transient query embedding is reused to calculate cosine against primary embeddings, with no additional external call.
 
 κe is calculated separately for primary sources inherited from `core` and from `convergence` in each work. Each legitimized population receives its own CIE. The local nucleus is the primary `core`, or its `convergence` when core is empty.
 
@@ -72,15 +72,15 @@ Local primary nuclei are deduplicated and united:
 Gq = ⋃d (Ld,core ∪ Ld,convergence)
 ```
 
-Because every primary cosine uses the same query and embedding model, CIE can classify `Gq` globally. The population delivered to the LLM is:
+Because every primary cosine uses the same query and embedding model, CIE can classify `Gq` globally. Core remains the primary cutoff and convergence is appended as auxiliary context. The population delivered to the LLM is:
 
 ```text
-Eq = CoreG, when CoreG ≠ ∅
+Eq = CoreG ∪ ConvG, when CoreG ≠ ∅
 Eq = ConvG, when CoreG = ∅
 K(q) = |Eq|
 ```
 
-`K(q)` is neither configured nor known before the query. Each final source retains its inherited `core` or `convergence` role even when its global CIE region is `core`.
+`K(q)` is neither configured nor known before the query. Each final source retains its global `core` or `convergence` role; convergence does not change the `μ + σ` cutoff or become core.
 
 ## Cantelli as a bound, not a quota
 
@@ -107,7 +107,7 @@ Given the same ordered populations and similarities, output is invariant. The fl
 
 ## LLM contract
 
-The provider receives `Eq`, protected literal anchors, and inherited initial roles. It has no authority to retrieve external sources. Presence in available context authorizes use but does not require a decorative citation: only sources analytically incorporated into prose and visibly cited remain in `used_evidence_ids`.
+The provider receives `Eq`, protected literal anchors, and global `core` and `convergence` roles. It has no authority to retrieve external sources. Presence in available context authorizes use but does not require a decorative citation: only sources analytically incorporated into prose and visibly cited remain in `used_evidence_ids`.
 
 ## Auditability
 

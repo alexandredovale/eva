@@ -33,7 +33,7 @@ Answer: cited evidence → answer and limitations
 
 The system describes evidence and explicit interactions without assigning truth, superiority, quality, priority, intensity, or importance. Provider brands, endpoints, models, and credential-variable names remain configurable and do not appear in domain contracts.
 
-For vector routes, the Context Intelligence Engine (CIE) uses mean, population standard deviation, and coefficient of variation at three stages: hierarchical, stratified primary, and global. Query-local κq and κe boundaries require no configured counts. The global core—or global convergence only when the core is empty—forms the semantic context delivered to the model, while exact literal anchors remain protected. Every primary source retained in the result must be cited; recovered but uncited sources are discarded.
+For vector routes, the Context Intelligence Engine (CIE) uses mean, population standard deviation, and coefficient of variation at three stages: hierarchical, stratified primary, and global. Query-local κq and κe boundaries require no configured counts. Core (`s ≥ μ + σ`) remains the cutoff throughout the flow. The global core is the primary context delivered to the model, while global convergence (`μ ≤ s < μ + σ`) is appended only as auxiliary context and exact literal anchors remain protected. Every primary source retained in the result must be cited; recovered but uncited sources are discarded.
 
 ## Product scope
 

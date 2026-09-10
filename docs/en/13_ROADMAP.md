@@ -263,7 +263,7 @@ Document A
     primary CIE
 ```
 
-And separately:
+Only when the initial core is empty:
 
 ```text
 Document A
@@ -339,7 +339,7 @@ The global CIE therefore acts as the final statistical consolidation of the quer
 
 Its core represents the main context authorized for generation.
 
-If, exceptionally, the core is empty, the convergence range acts as a fallback.
+Core remains the primary cutoff. Its convergence range is appended to final context as auxiliary support; when core is empty, it also acts as fallback.
 
 ---
 
@@ -391,6 +391,8 @@ GLOBAL CIE
 │
 ▼
 FINAL CONTEXT
+├─ global core (primary basis)
+└─ global convergence (auxiliary context)
 │
 ▼
 LLM
@@ -431,7 +433,7 @@ CIE
 | **First CIE** | sources surviving κq | forward upper core or convergence fallback |
 | **κe** | primary evidence | refine pertinence in the literal content |
 | **Primary CIE** | primary evidence | form local cores for each work |
-| **Global CIE** | primary cores of the works | consolidate the final multidocument context |
+| **Global CIE** | primary cores of the works | consolidate primary core and auxiliary convergence in final context |
 
 ---
 
@@ -773,6 +775,7 @@ The five phases and the first architectural upgrade are complete. New phases mus
 - removal of `QUERY_MAX_EVIDENCE` from semantic routes and isolation of `QUERY_NON_SEMANTIC_MAX_EVIDENCE` — **completed**;
 - transient auditable `context_intelligence` output — **completed**;
 - core as the elected population at every stage, with convergence fallback only when core is empty — **completed**;
+- global convergence appended to final context as auxiliary support without changing the core cutoff or κ boundaries — **completed**;
 - `used_evidence_ids` contract derived from visible citations, with omitted candidates discarded — **completed**;
 - closed validation of analytical incorporation, without automatic completion or citation inventories — **completed**;
 - real reference validation with 10/10 evidence items incorporated and no truncation — **completed**;
