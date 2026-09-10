@@ -162,7 +162,7 @@ At this initial stage, only the `s ≥ μ + σ` core is forwarded. Convergence i
 
 # 3. From first selection to primary refinement
 
-From the first calculation onward, EVA 6.0.0 works exclusively with **primary evidence**.
+From the first calculation onward, EVA works exclusively with **primary evidence**.
 
 The first CIE forwards its upper core or, when that core is empty, its convergence. There is no intermediate summary or lineage-resolution stage.
 
