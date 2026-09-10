@@ -162,7 +162,7 @@ Nesta etapa inicial, somente o núcleo `s ≥ μ + σ` é encaminhado. A converg
 
 # 3. Da primeira seleção ao refinamento primário
 
-Desde o primeiro cálculo, o EVA 6.0.0 trabalha exclusivamente com **evidências primárias**.
+Desde o primeiro cálculo, o EVA trabalha exclusivamente com **evidências primárias**.
 
 O primeiro CIE encaminha seu núcleo superior ou, quando esse núcleo está vazio, sua convergência. Não existe etapa intermediária de síntese ou resolução de linhagem.
 
