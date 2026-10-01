@@ -45,8 +45,8 @@ CV = σ / μ
 When `μ = 0`, the auditable value of `CV` is `null`. Regions are always:
 
 ```text
-discard:     s < μ
-convergence: μ ≤ s < μ + σ
+discard:     s < μ + σ/2
+convergence: μ + σ/2 ≤ s < μ + σ
 core:        s ≥ μ + σ
 ```
 

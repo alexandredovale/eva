@@ -7,6 +7,16 @@ and the project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [7.0.1] - 2026-10-01
+
+### Changed
+
+- The CIE convergence range now uses only its upper half (`μ + σ/2 ≤ s < μ + σ`) at the hierarchical, primary, and global stages. The core cutoff remains `s ≥ μ + σ`, and candidates below the new convergence lower bound are discarded.
+
+### Fixed
+
+- Removed concrete evidence identifiers from the query system prompt examples so illustrative citations cannot be copied as documentary references outside the current `available_evidence_ids`, while preserving the analytical citation contract.
+
 ## [7.0.0] - 2026-09-09
 
 ### Changed

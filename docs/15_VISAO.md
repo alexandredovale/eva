@@ -98,9 +98,9 @@ Nas rotas semânticas, o CIE global substitui o antigo limite numérico de evid�
 
 #### Ausência de limiar absoluto de pertinência
 
-O CIE usa limites relativos à distribuição: média e média mais desvio padrão. Não existe um limiar absoluto que represente “nenhum candidato suficientemente relacionado”.
+O CIE usa limites relativos à distribuição: média mais metade do desvio padrão e média mais desvio padrão. Não existe um limiar absoluto que represente “nenhum candidato suficientemente relacionado”.
 
-Quando existem embeddings compatíveis, ao menos algum candidato tende a ficar igual ou acima da média e ser eleito, mesmo que todas as similaridades sejam baixas. Esse comportamento, implementado em [`ContextIntelligenceEngine.php`](../app/Application/Query/ContextIntelligenceEngine.php), pode enfraquecer a recusa negativa nas rotas semânticas.
+Como a convergência começa em `μ + σ/2`, uma distribuição pode não produzir núcleo nem convergência quando nenhum candidato alcançar esse limite relativo. Esse comportamento, implementado em [`ContextIntelligenceEngine.php`](../app/Application/Query/ContextIntelligenceEngine.php), permite interromper a rota semântica sem eleger artificialmente candidatos situados apenas na metade inferior da antiga faixa.
 
 #### Filtragem por citações após a recuperação
 

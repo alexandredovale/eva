@@ -59,7 +59,7 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 55. Apply CIE only to vector distributions from conceptual and relational routes.
 56. Score the complete validated and embedded `primary:node_content` population, globally order it, and derive κq without a configured Top-k, semantic thresholds, or weights.
 57. Calculate population mean and population standard deviation over the κq-legitimized population — or the complete population when no break exists — and calculate `CV = σ / μ`, using `null` when `μ = 0`.
-58. Classify `s < μ` as discard, `μ ≤ s < μ + σ` as convergence, and `s ≥ μ + σ` as core.
+58. Classify `s < μ + σ/2` as discard, `μ + σ/2 ≤ s < μ + σ` as convergence, and `s ≥ μ + σ` as core.
 59. Keep core as the elected cutoff at every CIE and promote convergence only when core is empty; after the global cutoff, append its convergence only as auxiliary context without changing κq, κe, or the `μ + σ` threshold.
 60. Preserve Retriever order within regions; do not create a subjective score, weight, heuristic, or AI reranking stage.
 61. Apply κe and primary CIE to the forwarded sources by work, then submit the deduplicated union of local nuclei to global CIE before calling the answer provider.

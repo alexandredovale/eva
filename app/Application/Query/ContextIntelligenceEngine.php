@@ -33,14 +33,19 @@ final readonly class ContextIntelligenceEngine
 
         $standardDeviation = sqrt($squaredDeviationSum / $count);
         $coefficientOfVariation = $mean == 0.0 ? null : $standardDeviation / $mean;
+        $convergenceLowerBound = $mean + ($standardDeviation / 2.0);
         $upperBound = $mean + $standardDeviation;
-        $comparisonTolerance = max(1.0, abs($mean), abs($upperBound)) * 1e-12;
+        $comparisonTolerance = max(
+            1.0,
+            abs($convergenceLowerBound),
+            abs($upperBound)
+        ) * 1e-12;
         $convergence = [];
         $core = [];
         $discarded = [];
 
         foreach ($candidates as $candidate) {
-            if ($candidate->similarity < $mean - $comparisonTolerance) {
+            if ($candidate->similarity < $convergenceLowerBound - $comparisonTolerance) {
                 $discarded[] = $candidate;
             } elseif ($candidate->similarity < $upperBound - $comparisonTolerance) {
                 $convergence[] = $candidate;

@@ -120,10 +120,10 @@ CV = σ / μ
 A partir desses valores, a população é dividida em três regiões:
 
 ```text
-s < μ
+s < μ + σ/2
 → descarte
 
-μ ≤ s < μ + σ
+μ + σ/2 ≤ s < μ + σ
 → convergência
 
 s ≥ μ + σ
@@ -141,10 +141,10 @@ Então:
 
 ```text
 Descarte:
-s < 0,70
+s < 0,74
 
 Convergência:
-0,70 ≤ s < 0,78
+0,74 ≤ s < 0,78
 
 Núcleo:
 s ≥ 0,78
@@ -154,7 +154,7 @@ O **núcleo** representa a região estatisticamente mais concentrada em relaçã
 
 A **convergência** representa a região intermediária.
 
-O **descarte** representa os candidatos abaixo da média da distribuição.
+O **descarte** representa os candidatos abaixo da média acrescida de metade do desvio padrão da distribuição.
 
 Nesta etapa inicial, somente o núcleo `s ≥ μ + σ` é encaminhado. A convergência é usada apenas como fallback quando o núcleo está vazio. O estágio continua exposto como `hierarchical` no contrato de diagnóstico por compatibilidade.
 

@@ -27,20 +27,20 @@ function candidate(int $id, float $similarity): ContextCandidate
 $engine = new ContextIntelligenceEngine();
 $analysis = $engine->analyze([
     candidate(1, 1.0),
-    candidate(2, 0.6),
+    candidate(2, 0.8),
     candidate(3, 0.6),
     candidate(4, 0.6),
     candidate(5, 0.2),
 ]);
 
-assertContextIntelligence(abs($analysis->mean - 0.6) < 1e-12, 'A média populacional do CIE está incorreta.');
+assertContextIntelligence(abs($analysis->mean - 0.64) < 1e-12, 'A média populacional do CIE está incorreta.');
 assertContextIntelligence(
-    abs($analysis->standardDeviation - sqrt(0.32 / 5)) < 1e-12,
+    abs($analysis->standardDeviation - sqrt(0.352 / 5)) < 1e-12,
     'O desvio padrão populacional do CIE está incorreto.'
 );
 assertContextIntelligence(
     $analysis->coefficientOfVariation !== null
-        && abs($analysis->coefficientOfVariation - ($analysis->standardDeviation / 0.6)) < 1e-12,
+        && abs($analysis->coefficientOfVariation - ($analysis->standardDeviation / 0.64)) < 1e-12,
     'O coeficiente de variação do CIE está incorreto.'
 );
 assertContextIntelligence(
@@ -48,24 +48,22 @@ assertContextIntelligence(
     'O núcleo deve conter somente candidatos em s >= média + desvio padrão.'
 );
 assertContextIntelligence(
-    array_column($analysis->convergenceCandidates, 'publicId') === [
-        'EVA-E000002',
-        'EVA-E000003',
-        'EVA-E000004',
-    ],
-    'A faixa de convergência deve conter candidatos em média <= s < média + desvio padrão.'
+    array_column($analysis->convergenceCandidates, 'publicId') === ['EVA-E000002'],
+    'A faixa de convergência deve conter candidatos em média + metade do desvio padrão <= s < média + desvio padrão.'
 );
 assertContextIntelligence(
-    array_column($analysis->discardedCandidates, 'publicId') === ['EVA-E000005'],
-    'A região abaixo da média deve ser descartada.'
+    array_column($analysis->discardedCandidates, 'publicId') === [
+        'EVA-E000003',
+        'EVA-E000004',
+        'EVA-E000005',
+    ],
+    'A região abaixo da metade superior da faixa deve ser descartada.'
 );
 assertContextIntelligence(
     $analysis->selectedRegion === 'core'
         && array_column($analysis->selectedCandidates, 'publicId') === [
             'EVA-E000001',
             'EVA-E000002',
-            'EVA-E000003',
-            'EVA-E000004',
         ],
     'O núcleo deve preceder a convergência complementar no contexto final.'
 );
@@ -111,8 +109,10 @@ assertContextIntelligence(
 $serialized = $analysis->toArray();
 assertContextIntelligence(
     $serialized['candidate_count'] === 5
-        && $serialized['selected_count'] === 4
-        && $serialized['selected_region'] === 'core',
+        && $serialized['selected_count'] === 2
+        && $serialized['selected_region'] === 'core'
+        && abs($serialized['convergence_range']['lower_bound']
+            - ($analysis->mean + ($analysis->standardDeviation / 2.0))) < 1e-12,
     'A saída auditável do CIE perdeu suas contagens ou região selecionada.'
 );
 

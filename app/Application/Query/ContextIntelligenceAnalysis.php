@@ -54,7 +54,7 @@ final readonly class ContextIntelligenceAnalysis
             'standard_deviation' => $this->standardDeviation,
             'coefficient_of_variation' => $this->coefficientOfVariation,
             'convergence_range' => [
-                'lower_bound' => $this->mean,
+                'lower_bound' => $this->mean + ($this->standardDeviation / 2.0),
                 'upper_bound' => $this->mean + $this->standardDeviation,
             ],
             'selected_region' => $this->selectedRegion,

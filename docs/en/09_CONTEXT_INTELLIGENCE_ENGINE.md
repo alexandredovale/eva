@@ -33,8 +33,8 @@ For `N` candidates with similarities `sᵢ`:
 CV = σ / μ
 ```
 
-- **Discard:** `s < μ`.
-- **Convergence range:** `μ ≤ s < μ + σ`; complementary analysis context.
+- **Discard:** `s < μ + σ/2`.
+- **Convergence range:** `μ + σ/2 ≤ s < μ + σ`; complementary analysis context.
 - **Convergence core:** `s ≥ μ + σ`; primary answer context.
 
 At every stage, a non-empty core remains the elected cutoff and convergence is promoted only when that core is empty. After the global cutoff, global convergence is also appended as auxiliary context without changing `μ + σ`. If `μ = 0`, CV is undefined and the auditable output uses `null`. A homogeneous distribution has `σ = 0`, so all candidates equal to the mean belong to the core.

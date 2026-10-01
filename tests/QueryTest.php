@@ -87,8 +87,12 @@ final class SemanticFakeEmbeddingProvider implements EmbeddingProviderInterface
             if (str_starts_with($unit->evidencePublicId, 'EVA-Q')
                 && (str_contains($normalized, 'intelligence') || str_contains($normalized, 'instinct'))) {
                 $vector = [1.0, 0.0, 0.0];
-            } elseif (str_contains($normalized, '/intelligence-and-instinct')) {
-                $vector = [1.0, 0.0, 0.0];
+            } elseif (preg_match('~/intelligence-and-instinct/item-(\d+)~', $normalized, $matches) === 1) {
+                $similarity = match ((int) $matches[1]) {
+                    1, 2, 3 => 1.0,
+                    default => 0.9,
+                };
+                $vector = [$similarity, sqrt(1 - ($similarity * $similarity)), 0.0];
             } elseif (str_contains($normalized, 'intelligence') || str_contains($normalized, 'instinct')) {
                 $vector = [0.7, 0.3, 0.0];
             } elseif (str_contains($normalized, 'data') || str_contains($normalized, 'control')) {
@@ -425,7 +429,7 @@ try {
     );
     assertQuery(
         count($literalResult->usedEvidences) > 1,
-        'Uma correspondência textual exata conceitual deve receber evidências semânticas complementares.'
+        'A correspondência textual exata conceitual deve receber evidências aprovadas pelo novo corte do CIE.'
     );
     assertQuery(
         count(array_filter(

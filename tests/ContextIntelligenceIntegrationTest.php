@@ -274,15 +274,13 @@ try {
     assertContextIntegration(
         $globalAnalysis !== null
             && array_column($globalAnalysis->coreCandidates, 'evidenceId') === [$globalEvidenceIds[0]]
-            && array_column($globalAnalysis->convergenceCandidates, 'evidenceId') === [
-                $globalEvidenceIds[1],
-                $globalEvidenceIds[2],
-            ],
-        'O CIE global deve preservar o corte em core e classificar a convergência separadamente.'
+            && array_column($globalAnalysis->convergenceCandidates, 'evidenceId') === [$globalEvidenceIds[1]]
+            && array_column($globalAnalysis->discardedCandidates, 'evidenceId') === array_slice($globalEvidenceIds, 2),
+        'O CIE global deve preservar o corte em core e limitar a convergência à metade superior da faixa.'
     );
     assertContextIntegration(
-        array_column($globalResult->usedEvidences, 'id') === array_slice($globalEvidenceIds, 0, 3)
-            && array_values($globalResult->evidenceSelection) === ['core', 'convergence', 'convergence'],
+        array_column($globalResult->usedEvidences, 'id') === array_slice($globalEvidenceIds, 0, 2)
+            && array_values($globalResult->evidenceSelection) === ['core', 'convergence'],
         'O contexto final deve acrescentar a convergência após o núcleo sem promover seus papéis.'
     );
 } finally {

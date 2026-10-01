@@ -45,8 +45,8 @@ CV = σ / μ
 Quando `μ = 0`, `CV` é exposto como `null`. As regiões são sempre:
 
 ```text
-discard:     s < μ
-convergence: μ ≤ s < μ + σ
+discard:     s < μ + σ/2
+convergence: μ + σ/2 ≤ s < μ + σ
 core:        s ≥ μ + σ
 ```
 

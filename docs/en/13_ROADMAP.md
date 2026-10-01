@@ -120,10 +120,10 @@ CV = σ / μ
 Based on these values, the population is divided into three regions:
 
 ```text
-s < μ
+s < μ + σ/2
 → discard
 
-μ ≤ s < μ + σ
+μ + σ/2 ≤ s < μ + σ
 → convergence
 
 s ≥ μ + σ
@@ -141,10 +141,10 @@ Therefore:
 
 ```text
 Discard:
-s < 0.70
+s < 0.74
 
 Convergence:
-0.70 ≤ s < 0.78
+0.74 ≤ s < 0.78
 
 Core:
 s ≥ 0.78
@@ -154,7 +154,7 @@ The **core** represents the region that is statistically most concentrated in re
 
 **Convergence** represents the intermediate region.
 
-**Discard** represents candidates below the distribution mean.
+**Discard** represents candidates below the distribution mean plus half its standard deviation.
 
 At this initial stage, only the `s ≥ μ + σ` core is forwarded. Convergence is used only as fallback when that core is empty. The diagnostic contract continues to expose this stage as `hierarchical` for compatibility.
 

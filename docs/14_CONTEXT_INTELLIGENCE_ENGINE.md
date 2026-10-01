@@ -37,8 +37,8 @@ Quando `μ = 0`, o CV é matematicamente indefinido e a saída auditável usa `n
 
 ## Regiões da distribuição
 
-- **Descarte:** `s < μ`.
-- **Faixa de convergência:** `μ ≤ s < μ + σ`.
+- **Descarte:** `s < μ + σ/2`.
+- **Faixa de convergência:** `μ + σ/2 ≤ s < μ + σ`.
 - **Núcleo de convergência:** `s ≥ μ + σ`.
 
 Em todos os estágios, o núcleo permanece como população eleita e, se estiver vazio, a faixa de convergência assume esse papel. No CIE global, a convergência também é anexada depois do núcleo como contexto auxiliar, sem alterar o corte `μ + σ`. Uma distribuição homogênea possui `σ = 0`; nesse caso, todos os candidatos iguais à média pertencem ao núcleo.

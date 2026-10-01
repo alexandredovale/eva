@@ -98,9 +98,9 @@ On semantic routes, global CIE replaces the former configured evidence count. A 
 
 #### No absolute relevance threshold
 
-CIE uses thresholds relative to the distribution: the mean and the mean plus the standard deviation. There is no absolute threshold representing “no sufficiently related candidate.”
+CIE uses thresholds relative to the distribution: the mean plus half the standard deviation and the mean plus the standard deviation. There is no absolute threshold representing “no sufficiently related candidate.”
 
-When compatible embeddings exist, at least one candidate will usually be at or above the mean and become elected even when all similarities are low. This behavior, implemented in [`ContextIntelligenceEngine.php`](../../app/Application/Query/ContextIntelligenceEngine.php), may weaken negative refusal on semantic routes.
+Because convergence starts at `μ + σ/2`, a distribution may produce neither core nor convergence when no candidate reaches that relative bound. This behavior, implemented in [`ContextIntelligenceEngine.php`](../../app/Application/Query/ContextIntelligenceEngine.php), allows the semantic route to stop without artificially electing candidates from the lower half of the former range.
 
 #### Citation filtering after retrieval
 

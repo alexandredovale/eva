@@ -57,7 +57,7 @@
 55. Aplicar o CIE somente às distribuições vetoriais das rotas conceitual e relacional.
 56. Calcular cosine contra toda a população `primary:node_content` validada e vetorizada, ordenar globalmente e determinar κq sem Top-k, pesos ou thresholds semânticos humanos.
 57. Calcular média e desvio padrão populacionais sobre a população legitimada por κq — ou sobre a população completa quando não houver ruptura — e calcular `CV = σ / μ`, usando `null` quando `μ = 0`.
-58. Classificar como descarte `s < μ`, convergência `μ ≤ s < μ + σ` e núcleo `s ≥ μ + σ`.
+58. Classificar como descarte `s < μ + σ/2`, convergência `μ + σ/2 ≤ s < μ + σ` e núcleo `s ≥ μ + σ`.
 59. Manter o núcleo como corte eleito em todos os CIEs e promover a convergência somente quando o núcleo estiver vazio; após o corte global, anexar sua convergência apenas como contexto auxiliar, sem alterar κq, κe ou o limiar `μ + σ`.
 60. Preservar a ordem do Retriever dentro das regiões; não criar nota, peso, heurística subjetiva ou reranking por IA.
 61. Aplicar κe e CIE primário às fontes encaminhadas por obra e submeter a união deduplicada dos núcleos locais ao CIE global antes de chamar o provedor.
