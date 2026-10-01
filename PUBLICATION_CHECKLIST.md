@@ -2,6 +2,17 @@
 
 Use this checklist for every public release. Always start from a fresh clone of the canonical GitHub repository in an exclusive local analysis directory, inspect the remote state, and copy only an explicit source allowlist.
 
+## Release v7.0.2
+
+- [x] Bind every validated answer citation deterministically to the evidence object from its own conversation turn.
+- [x] Present the exact evidence reference in an accessible, responsive modal without changing retrieval, answer validation, or the API contract.
+- [x] Preserve safe HTML escaping, focus restoration, reduced-motion behavior, transcript updates, and plain-text copying.
+- [x] Use the official regular Phosphor Copy glyph (`U+E1CA`) with a pinned webfont version and compatible CSP.
+- [x] Update bilingual documentation, public version metadata, citation metadata, and asset cache markers.
+- [x] Run PHP and JavaScript syntax checks and all 31 available public offline regression suites with real AI calls disabled.
+- [x] Confirm that credentials, operational data, uploads, logs, dumps, backups, private connectors, and Runtime state remain outside the public package.
+- [x] Commit and push `main`, create annotated tag `v7.0.2`, and publish the GitHub release after explicit authorization.
+
 ## Release v7.0.0
 
 - [x] Preserve κq, κe, curve-break detection, and the `μ + σ` core cutoff.

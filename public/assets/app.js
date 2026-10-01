@@ -40,6 +40,8 @@ const elements = {
     uploadProgress: document.querySelector('#upload-progress'), uploadProgressBar: document.querySelector('#upload-progress-bar'), uploadProgressLabel: document.querySelector('#upload-progress-label'),
     uploadProgressValue: document.querySelector('#upload-progress-value'), uploadProgressMeta: document.querySelector('#upload-progress-meta'), toast: document.querySelector('#toast'),
     secretDialog: document.querySelector('#secret-dialog'), recoverySecret: document.querySelector('#recovery-secret'),
+    evidenceReferenceDialog: document.querySelector('#evidence-reference-dialog'), evidenceReferenceId: document.querySelector('#evidence-reference-id'),
+    evidenceReferencePath: document.querySelector('#evidence-reference-path'), evidenceReferenceClose: document.querySelector('#evidence-reference-close'),
     confirmationDialog: document.querySelector('#confirmation-dialog'), confirmationForm: document.querySelector('#confirmation-form'),
     confirmationTitle: document.querySelector('#confirmation-title'), confirmationConsequence: document.querySelector('#confirmation-consequence'),
     confirmationTarget: document.querySelector('#confirmation-target'), confirmationInput: document.querySelector('#confirmation-input'),
@@ -190,6 +192,7 @@ function disconnect(showMessage = true) {
 }
 
 function resetChat() {
+    closeEvidenceReference(false);
     releaseFigureImages();
     state.scopes = { projects: [], documents: [] };
     state.queryHistory = [];
@@ -202,6 +205,7 @@ function resetChat() {
 }
 
 function restartChat() {
+    closeEvidenceReference(false);
     releaseFigureImages();
     state.queryHistory = [];
     elements.queryResult.innerHTML = initialChatEmptyMarkup;
@@ -832,7 +836,31 @@ function renderQuery(result, question, index) {
         ? `${renderContextIntelligence(contextIntelligence)}<div class="result-section"><h2>Interações simetry</h2>${renderList(simetry, item => item.summary)}</div><div class="result-section"><h2>Interações assimetry</h2>${renderList(assimetry, item => item.summary)}</div><div class="result-section"><h2>Limitações</h2>${renderList(limitations, item => item)}</div>`
         : '';
 
-    return `<section class="chat-turn"><article class="chat-message-user"><p class="eyebrow">Você</p><p>${escapeHtml(question)}</p></article><article class="card chat-message-assistant"><p class="eyebrow">Resposta documental</p><div class="answer">${escapeHtml(answer)}</div>${renderFigures(figures)}<div class="result-section"><h2>Evidências utilizadas</h2>${renderEvidenceList(evidences)}</div><div class="copy-result-action"><button type="button" class="button button-quiet button-copy-result" data-copy-query="${index}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span>Copiar pergunta e resposta</span></button></div>${technicalDetails}</article></section>`;
+    return `<section class="chat-turn"><article class="chat-message-user"><p class="eyebrow">Você</p><p>${escapeHtml(question)}</p></article><article class="card chat-message-assistant"><p class="eyebrow">Resposta documental</p><div class="answer">${renderAnswerWithCitations(answer, evidences, index)}</div>${renderFigures(figures)}<div class="result-section"><h2>Evidências utilizadas</h2>${renderEvidenceList(evidences)}</div><div class="copy-result-action"><button type="button" class="button button-quiet button-copy-result" data-copy-query="${index}"><i class="ph ph-copy" aria-hidden="true"></i><span>Copiar pergunta e resposta</span></button></div>${technicalDetails}</article></section>`;
+}
+
+function renderAnswerWithCitations(answer, evidences, queryIndex) {
+    const text = String(answer || '');
+    const evidenceById = new Map((Array.isArray(evidences) ? evidences : []).map(evidence => [String(evidence?.id || ''), evidence]));
+    let rendered = '';
+    let cursor = 0;
+
+    for (const match of text.matchAll(/\[(EVA-E\d{6,})\]/g)) {
+        const marker = match[0];
+        const evidenceId = match[1];
+        const position = Number(match.index);
+        rendered += escapeHtml(text.slice(cursor, position));
+
+        if (evidenceById.has(evidenceId)) {
+            rendered += `<button type="button" class="evidence-citation-link" data-evidence-citation="${escapeHtml(evidenceId)}" data-query-index="${Number(queryIndex)}" aria-haspopup="dialog" aria-label="Abrir referência ${escapeHtml(evidenceId)}">${escapeHtml(marker)}</button>`;
+        } else {
+            rendered += escapeHtml(marker);
+        }
+
+        cursor = position + marker.length;
+    }
+
+    return rendered + escapeHtml(text.slice(cursor));
 }
 
 function renderConversation(pendingQuestion = '', alignLatestAnswer = false) {
@@ -844,7 +872,7 @@ function renderConversation(pendingQuestion = '', alignLatestAnswer = false) {
     elements.queryResult.innerHTML = `<div class="chat-transcript">${completed}${pending}</div>`;
     hydrateFigureImages(elements.queryResult);
 
-    if (alignLatestAnswer) {
+    if (alignLatestAnswer && elements.evidenceReferenceDialog.hidden) {
         const assistantMessages = elements.queryResult.querySelectorAll('.chat-message-assistant:not(.chat-message-pending)');
         const latestAnswer = assistantMessages[assistantMessages.length - 1];
 
@@ -1023,6 +1051,64 @@ function formatStructuralSegment(segment) {
     );
 
     return withRomanNumerals.charAt(0).toLocaleUpperCase('pt-BR') + withRomanNumerals.slice(1);
+}
+
+function openEvidenceReference(trigger) {
+    const queryIndex = Number(trigger.dataset.queryIndex);
+    const evidenceId = String(trigger.dataset.evidenceCitation || '');
+    const turn = Number.isInteger(queryIndex) ? state.queryHistory[queryIndex] : null;
+    const evidences = Array.isArray(turn?.result?.evidences_used) ? turn.result.evidences_used : [];
+    const evidence = evidences.find(item => String(item?.id || '') === evidenceId);
+
+    if (!evidence) return;
+
+    openEvidenceReference.trigger = trigger;
+    openEvidenceReference.queryIndex = queryIndex;
+    openEvidenceReference.evidenceId = evidenceId;
+    elements.evidenceReferenceId.textContent = evidenceId;
+    elements.evidenceReferencePath.textContent = formatEvidenceBreadcrumb(evidence);
+    elements.evidenceReferenceDialog.hidden = false;
+    elements.topbar.inert = true;
+    elements.workspace.inert = true;
+    document.body.classList.add('auth-locked');
+    setTimeout(() => {
+        if (!elements.evidenceReferenceDialog.hidden) {
+            elements.evidenceReferenceClose.focus({ preventScroll: true });
+        }
+    }, 0);
+}
+
+function closeEvidenceReference(restoreFocus = true) {
+    if (elements.evidenceReferenceDialog.hidden) return;
+
+    const trigger = openEvidenceReference.trigger;
+    const queryIndex = openEvidenceReference.queryIndex;
+    const evidenceId = openEvidenceReference.evidenceId;
+    const replacementTrigger = Array.from(elements.queryResult.querySelectorAll('[data-evidence-citation]')).find(candidate =>
+        Number(candidate.dataset.queryIndex) === queryIndex
+            && candidate.dataset.evidenceCitation === evidenceId
+    );
+    elements.evidenceReferenceDialog.hidden = true;
+    elements.evidenceReferenceId.textContent = '';
+    elements.evidenceReferencePath.textContent = '';
+    elements.topbar.inert = !state.user;
+    elements.workspace.inert = !state.user;
+    document.body.classList.toggle('auth-locked', !state.user || !elements.secretDialog.hidden);
+    openEvidenceReference.trigger = null;
+    openEvidenceReference.queryIndex = null;
+    openEvidenceReference.evidenceId = '';
+
+    if (restoreFocus && state.user) {
+        const focusTarget = trigger instanceof HTMLElement && trigger.isConnected
+            ? trigger
+            : replacementTrigger;
+
+        if (focusTarget instanceof HTMLElement) {
+            focusTarget.focus({ preventScroll: true });
+        } else {
+            document.querySelector('#query-input').focus({ preventScroll: true });
+        }
+    }
 }
 
 function buildQueryCopyText(question, answer, evidences) {
@@ -1498,7 +1584,7 @@ document.querySelector('#query-form').addEventListener('submit', async event => 
     event.preventDefault(); const scopes = selectedQueryScopes(), input = document.querySelector('#query-input').value.trim(), button = event.currentTarget.querySelector('button[type="submit"]');
     if (!scopes.length || !input) return notify('Selecione ao menos um projeto ou obra e informe a consulta.', true);
     button.disabled = true; elements.restartChat.disabled = true; renderConversation(input);
-    try { const payload = await api('query', { method: 'POST', body: JSON.stringify({ scopes, current_input: input, input: buildConversationalInput(input) }) }); setQueryScopePanel(false); rememberConversationTurn(input, payload.query); renderConversation('', true); document.querySelector('#query-input').value = ''; document.querySelector('#query-input').focus({ preventScroll: true }); }
+    try { const payload = await api('query', { method: 'POST', body: JSON.stringify({ scopes, current_input: input, input: buildConversationalInput(input) }) }); setQueryScopePanel(false); rememberConversationTurn(input, payload.query); renderConversation('', true); document.querySelector('#query-input').value = ''; if (elements.evidenceReferenceDialog.hidden) document.querySelector('#query-input').focus({ preventScroll: true }); }
     catch (error) { if (state.queryHistory.length) renderConversation(); else elements.queryResult.innerHTML = initialChatEmptyMarkup; notify(error.message, true); }
     finally { button.disabled = false; elements.restartChat.disabled = false; }
 });
@@ -1767,6 +1853,13 @@ document.querySelector('#recovery-code-form').addEventListener('submit', async e
 
 document.querySelector('#copy-secret').addEventListener('click', async () => { try { await navigator.clipboard.writeText(elements.recoverySecret.textContent); notify('Código copiado.'); } catch (_) { notify('Não foi possível copiar automaticamente.', true); } });
 elements.queryResult.addEventListener('click', async event => {
+    const citation = event.target.closest('[data-evidence-citation]');
+
+    if (citation) {
+        openEvidenceReference(citation);
+        return;
+    }
+
     const button = event.target.closest('[data-copy-query]');
     const turn = button ? state.queryHistory[Number(button.dataset.copyQuery)] : null;
     if (!turn) return;
@@ -1783,6 +1876,10 @@ elements.queryResult.addEventListener('click', async event => {
     } finally {
         button.disabled = false;
     }
+});
+elements.evidenceReferenceClose.addEventListener('click', () => closeEvidenceReference());
+elements.evidenceReferenceDialog.addEventListener('click', event => {
+    if (event.target === elements.evidenceReferenceDialog) closeEvidenceReference();
 });
 document.querySelector('#download-secret').addEventListener('click', () => {
     const content = `EVA — código de recuperação\nUsuário: ${state.secretOwner}\nCódigo: ${elements.recoverySecret.textContent}\n\nGuarde este arquivo em local seguro.`;
@@ -1866,6 +1963,12 @@ elements.usernameRenameForm.addEventListener('submit', async event => {
 });
 document.querySelector('#username-rename-cancel').addEventListener('click', closeUsernameRename);
 document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !elements.evidenceReferenceDialog.hidden) {
+        event.preventDefault();
+        closeEvidenceReference();
+        return;
+    }
+
     if (event.key === 'Escape' && !elements.queryScopePanel.hidden) {
         setQueryScopePanel(false);
         elements.queryScopeToggle.focus();

@@ -397,6 +397,23 @@ tbody tr:hover { background: rgba(255, 255, 255, .018); }
     35% { opacity: 1; transform: translateY(-4px) scale(1); }
 }
 .answer { color: var(--ink); font-size: clamp(1.08rem, 1.3vw, 1.22rem); line-height: 1.75; white-space: pre-wrap; }
+.evidence-citation-link {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    color: var(--accent);
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
+    line-height: inherit;
+    text-decoration: underline;
+    text-decoration-color: rgba(223, 255, 0, .62);
+    text-decoration-thickness: 1px;
+    text-underline-offset: .18em;
+    transition: color .16s ease, text-decoration-color .16s ease;
+}
+.evidence-citation-link:hover { color: var(--ink); text-decoration-color: var(--accent); }
 .answer-figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 18px; margin-top: 26px; }
 .answer-figure { min-width: 0; margin: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: rgba(255, 255, 255, .018); }
 .answer-figure-media { min-height: 190px; display: grid; place-items: center; background: #0a0a0a; }
@@ -426,15 +443,7 @@ tbody tr:hover { background: rgba(255, 255, 255, .018); }
 .evidence-list span { color: var(--muted-strong); overflow-wrap: anywhere; }
 .copy-result-action { display: flex; justify-content: flex-end; margin-top: 16px; }
 .button-copy-result { display: inline-flex; align-items: center; gap: 9px; }
-.button-copy-result svg {
-    width: 17px;
-    height: 17px;
-    fill: none;
-    stroke: currentColor;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 1.8;
-}
+.button-copy-result .ph-copy { flex: 0 0 auto; font-size: 1.08rem; line-height: 1; }
 .query-form { display: grid; grid-template-columns: minmax(210px, 26%) minmax(0, 1fr); gap: 14px; padding: 18px; border-top: 1px solid var(--line); background: rgba(20, 20, 20, .98); }
 .composer-document { position: relative; display: grid; gap: 6px; }
 .composer-label { padding-left: 3px; color: var(--muted-strong); font-size: .72rem; }
@@ -661,6 +670,31 @@ legend {
 .access-panel { overflow-y: auto; }
 .secret-dialog { z-index: 140; }
 .secret-dialog .access-modal h2 { font-size: clamp(1.3rem, 4vw, 2rem); }
+.evidence-reference-dialog { z-index: 142; }
+.evidence-reference-modal { width: min(680px, 100%); }
+.evidence-reference-modal h2 { margin-bottom: 24px; font-size: clamp(1.55rem, 4vw, 2.4rem); }
+.evidence-reference-card {
+    display: grid;
+    gap: 12px;
+    padding: clamp(18px, 4vw, 26px);
+    border: 1px solid var(--line-strong);
+    border-radius: 14px;
+    background: #0b0b0b;
+}
+.evidence-reference-card code {
+    color: var(--accent);
+    font-family: "Cascadia Mono", monospace;
+    font-size: .82rem;
+    overflow-wrap: anywhere;
+}
+.evidence-reference-card p {
+    margin: 0;
+    color: var(--muted-strong);
+    font-size: clamp(1rem, 2.2vw, 1.16rem);
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+}
+.evidence-reference-actions { display: flex; justify-content: flex-end; margin-top: 22px; }
 .recovery-secret {
     display: block;
     margin: 25px 0;
@@ -837,6 +871,7 @@ legend {
     .secret-actions .button { width: 100%; }
     .confirmation-actions { flex-direction: column-reverse; }
     .confirmation-actions .button { width: 100%; }
+    .evidence-reference-actions .button { width: 100%; }
     .evidence-list li { grid-template-columns: 1fr; gap: 6px; }
     .chat-message-user { max-width: 92%; }
 }

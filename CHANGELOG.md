@@ -7,6 +7,17 @@ and the project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [7.0.2] - 2026-10-01
+
+### Added
+
+- Documentary citation markers in validated answers are now interactive and open an accessible, responsive modal containing the exact reference already listed in the answer evidence set.
+- Added a frontend regression test for deterministic citation binding, safe text rendering, modal accessibility, focus restoration, and concurrent transcript updates.
+
+### Fixed
+
+- Replaced the malformed inline copy drawing with the official regular Phosphor Copy icon (`U+E1CA`) from the pinned 2.1.2 webfont.
+
 ## [7.0.1] - 2026-10-01
 
 ### Changed

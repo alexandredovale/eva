@@ -10,7 +10,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cascadia+Mono:wght@400;500;600;700&family=Share+Tech&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/app.css?v=7.0.1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
+    <link rel="stylesheet" href="assets/app.css?v=7.0.2">
     <link rel="icon" type="image/png" href="logo/icone.png">
     <link rel="apple-touch-icon" href="logo/icone.png">
     <link rel="shortcut icon" href="logo/icone.png">
@@ -124,6 +125,17 @@
     </div>
 
     <div class="access-panel secret-dialog" id="secret-dialog" role="dialog" aria-modal="true" aria-labelledby="secret-title" hidden><div class="access-modal"><p class="eyebrow">Exibição única</p><h2 id="secret-title">Código de recuperação</h2><p>Guarde este código em local seguro. Ele não poderá ser consultado novamente.</p><code class="recovery-secret" id="recovery-secret"></code><div class="secret-actions"><button class="button button-primary" id="copy-secret" type="button">Copiar código</button><button class="button button-quiet" id="download-secret" type="button">Salvar arquivo</button><button class="button button-quiet" id="close-secret" type="button">Já guardei</button></div></div></div>
+    <div class="access-panel evidence-reference-dialog" id="evidence-reference-dialog" role="dialog" aria-modal="true" aria-labelledby="evidence-reference-title" aria-describedby="evidence-reference-path" hidden>
+        <article class="access-modal evidence-reference-modal">
+            <p class="eyebrow">Fonte da resposta</p>
+            <h2 id="evidence-reference-title">Referência documental</h2>
+            <div class="evidence-reference-card">
+                <code id="evidence-reference-id"></code>
+                <p id="evidence-reference-path"></p>
+            </div>
+            <div class="evidence-reference-actions"><button class="button button-primary" id="evidence-reference-close" type="button">Fechar</button></div>
+        </article>
+    </div>
     <div class="access-panel confirmation-dialog" id="confirmation-dialog" role="dialog" aria-modal="true" aria-labelledby="confirmation-title" aria-describedby="confirmation-consequence" hidden>
         <form class="access-modal confirmation-modal" id="confirmation-form">
             <div class="danger-mark" aria-hidden="true">!</div>
@@ -169,6 +181,6 @@
         </form>
     </div>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-    <script src="assets/app.js?v=7.0.1" defer></script>
+    <script src="assets/app.js?v=7.0.2" defer></script>
 </body>
 </html>

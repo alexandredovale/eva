@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Versão atual:** `7.0.1`
+**Versão atual:** `7.0.2`
 
-**Destaque da versão:** o EVA 7.0.1 restringe a convergência do CIE à sua metade superior (`μ + σ/2 ≤ s < μ + σ`), preservando o corte determinístico do núcleo em `μ + σ`.
+**Destaque da versão:** o EVA 7.0.2 transforma cada marcador de evidência validado da resposta em uma referência interativa determinística que abre o breadcrumb exato da fonte em um modal acessível.
 
 O EVA é uma plataforma para construir, organizar e consultar memória cognitiva documental verificável. O EVA (Evidence Algorithm) transforma documentos estruturados em evidências hierárquicas. Cnode é a compreensão transitória de uma interação explícita entre essas evidências durante a consulta, não uma entidade persistente.
 
