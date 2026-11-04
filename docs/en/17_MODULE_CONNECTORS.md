@@ -96,7 +96,7 @@ The first official event is `interaction.completed`. It contains actor identity,
   },
   "interaction": {
     "current_input": "Current question",
-    "contextual_input": "Current question and conversational context used by the Core",
+    "contextual_input": "Independent current question, identical to current_input",
     "answer": "Final answer"
   },
   "evidences": [{"id": "EVA-E000120", "document": "Document A"}],

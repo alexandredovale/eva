@@ -192,7 +192,7 @@ assertAiAdapter(
     ) !== 1
         && str_contains(
             $queryHttp->requests[0]['payload']['messages'][0]['content'],
-            'presente em available_evidence_ids'
+            'presente em [available_evidence_ids]'
         ),
     'O prompt-base não deve oferecer um identificador ilustrativo que possa ser emitido como citação real.'
 );
@@ -206,9 +206,9 @@ assertAiAdapter(
     'O prompt deve fixar o delimitador canônico das citações.'
 );
 assertAiAdapter(
-    str_contains($queryHttp->requests[0]['payload']['messages'][0]['content'], 'avalie por si mesmo se a solicitação atual é continuidade')
-        && str_contains($queryHttp->requests[0]['payload']['messages'][0]['content'], 'não são evidências documentais'),
-    'O prompt deve avaliar a continuidade sem transformar o histórico em evidência.'
+    str_contains($queryHttp->requests[0]['payload']['messages'][0]['content'], 'consulta independente e autossuficiente')
+        && !str_contains($queryHttp->requests[0]['payload']['messages'][0]['content'], 'Interação Anterior'),
+    'O prompt deve tratar cada consulta isoladamente, sem herdar histórico conversacional.'
 );
 assertAiAdapter($queryAnswer->usedEvidenceIds === ['EVA-E000001', 'EVA-E000002'], 'A resposta perdeu evidências utilizadas.');
 assertAiAdapter(count($queryAnswer->interactions) === 1, 'A interação transitória válida foi perdida.');

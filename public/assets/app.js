@@ -13,7 +13,8 @@ const state = {
     moduleLocalFilter: '',
     moduleLocalIdFilter: '',
     scopes: { projects: [], documents: [] },
-    queryHistory: [],
+    completedQuery: null,
+    queryInFlight: false,
     figureObjectUrls: new Map(),
     secretOwner: '',
     jobPollTimer: null,
@@ -29,8 +30,8 @@ const elements = {
     recoverForm: document.querySelector('#recover-form'), topbar: document.querySelector('.topbar'), workspace: document.querySelector('#workspace'),
     connection: document.querySelector('#connection-state'), connectionLabel: document.querySelector('#connection-label'), sessionUser: document.querySelector('#session-user'),
     metricGrid: document.querySelector('#metric-grid'), documentsBody: document.querySelector('#documents-body'), documentCount: document.querySelector('#document-count'),
-    queryScopes: document.querySelector('#query-scopes'), queryScopeToggle: document.querySelector('#query-scope-toggle'), queryScopePanel: document.querySelector('#query-scope-panel'), queryScopeSummary: document.querySelector('#query-scope-summary'),
-    queryResult: document.querySelector('#query-result'), restartChat: document.querySelector('#restart-chat'), jobsBody: document.querySelector('#jobs-body'), auditBody: document.querySelector('#audit-body'),
+    queryForm: document.querySelector('#query-form'), queryScopes: document.querySelector('#query-scopes'), queryScopeToggle: document.querySelector('#query-scope-toggle'), queryScopePanel: document.querySelector('#query-scope-panel'), queryScopeSummary: document.querySelector('#query-scope-summary'),
+    queryResult: document.querySelector('#query-result'), jobsBody: document.querySelector('#jobs-body'), auditBody: document.querySelector('#audit-body'),
     workerMonitor: document.querySelector('#worker-monitor'), workerStateLabel: document.querySelector('#worker-state-label'), workerStateDetail: document.querySelector('#worker-state-detail'),
     workerRunButtons: document.querySelectorAll('[data-run-worker]'),
     usersBody: document.querySelector('#users-body'), userCount: document.querySelector('#user-count'), projectsList: document.querySelector('#projects-list'),
@@ -57,7 +58,6 @@ const elements = {
 };
 
 const initialChatEmptyMarkup = elements.queryResult.innerHTML;
-const maxQueryPayloadLength = 20_000;
 const cspStyleNonce = document.querySelector('meta[name="csp-style-nonce"]')?.content || '';
 
 function escapeHtml(value) {
@@ -195,22 +195,34 @@ function resetChat() {
     closeEvidenceReference(false);
     releaseFigureImages();
     state.scopes = { projects: [], documents: [] };
-    state.queryHistory = [];
+    state.completedQuery = null;
+    state.queryInFlight = false;
     elements.queryResult.innerHTML = initialChatEmptyMarkup;
     elements.queryScopes.innerHTML = '<p class="tree-empty">Nenhuma obra disponível nesta sessão.</p>';
     elements.queryScopeSummary.textContent = 'Selecione o escopo da consulta';
     elements.queryScopeToggle.disabled = true;
     document.querySelector('#query-input').value = '';
+    setQueryComposerState();
     setQueryScopePanel(false);
 }
 
-function restartChat() {
+function startNewQuestion() {
     closeEvidenceReference(false);
     releaseFigureImages();
-    state.queryHistory = [];
+    state.completedQuery = null;
     elements.queryResult.innerHTML = initialChatEmptyMarkup;
     document.querySelector('#query-input').value = '';
-    document.querySelector('#query-input').focus();
+    setQueryScopePanel(false);
+    setQueryComposerState();
+    document.querySelector('#query-input').focus({ preventScroll: true });
+}
+
+function setQueryComposerState(completed = false, pending = false) {
+    const input = document.querySelector('#query-input');
+    const submit = elements.queryForm.querySelector('button[type="submit"]');
+    elements.queryForm.hidden = completed || pending;
+    input.disabled = completed || pending;
+    submit.disabled = completed || pending;
 }
 
 function switchView(view, requestedModuleId = '') {
@@ -836,7 +848,7 @@ function renderQuery(result, question, index) {
         ? `${renderContextIntelligence(contextIntelligence)}<div class="result-section"><h2>Interações simetry</h2>${renderList(simetry, item => item.summary)}</div><div class="result-section"><h2>Interações assimetry</h2>${renderList(assimetry, item => item.summary)}</div><div class="result-section"><h2>Limitações</h2>${renderList(limitations, item => item)}</div>`
         : '';
 
-    return `<section class="chat-turn"><article class="chat-message-user"><p class="eyebrow">Você</p><p>${escapeHtml(question)}</p></article><article class="card chat-message-assistant"><p class="eyebrow">Resposta documental</p><div class="answer">${renderAnswerWithCitations(answer, evidences, index)}</div>${renderFigures(figures)}<div class="result-section"><h2>Evidências utilizadas</h2>${renderEvidenceList(evidences)}</div><div class="copy-result-action"><button type="button" class="button button-quiet button-copy-result" data-copy-query="${index}"><i class="ph ph-copy" aria-hidden="true"></i><span>Copiar pergunta e resposta</span></button></div>${technicalDetails}</article></section>`;
+    return `<section class="chat-turn"><article class="chat-message-user"><p class="eyebrow">Você</p><p>${escapeHtml(question)}</p></article><article class="card chat-message-assistant"><p class="eyebrow">Resposta documental</p><div class="answer">${renderAnswerWithCitations(answer, evidences, index)}</div>${renderFigures(figures)}<div class="result-section"><h2>Evidências utilizadas</h2>${renderEvidenceList(evidences)}</div><div class="query-result-actions"><button type="button" class="button button-quiet button-copy-result" data-copy-query="${index}"><i class="ph ph-copy" aria-hidden="true"></i><span>Copiar pergunta e resposta</span></button><button type="button" class="button button-quiet" data-new-question><i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i><span>Fazer outra pergunta</span></button></div>${technicalDetails}</article></section>`;
 }
 
 function renderAnswerWithCitations(answer, evidences, queryIndex) {
@@ -864,7 +876,9 @@ function renderAnswerWithCitations(answer, evidences, queryIndex) {
 }
 
 function renderConversation(pendingQuestion = '', alignLatestAnswer = false) {
-    const completed = state.queryHistory.map((turn, index) => renderQuery(turn.result, turn.user, index)).join('');
+    const completed = state.completedQuery
+        ? renderQuery(state.completedQuery.result, state.completedQuery.user, 0)
+        : '';
     const pending = pendingQuestion
         ? `<section class="chat-turn"><article class="chat-message-user"><p class="eyebrow">Você</p><p>${escapeHtml(pendingQuestion)}</p></article><article class="card chat-message-assistant chat-message-pending"><p class="query-loading"><span>Consultando evidências</span><span class="query-loading-dots" aria-hidden="true"><span class="query-loading-dot"></span><span class="query-loading-dot"></span><span class="query-loading-dot"></span></span><span class="sr-only">…</span></p></article></section>`
         : '';
@@ -885,18 +899,8 @@ function renderConversation(pendingQuestion = '', alignLatestAnswer = false) {
     elements.queryResult.scrollTop = elements.queryResult.scrollHeight;
 }
 
-function buildConversationalInput(input) {
-    const historyBlocks = state.queryHistory.slice(-3).map(turn => `# Interação Anterior:\n## Usuário\n${turn.user}\n## Resposta\n${turn.response}`);
-
-    while (historyBlocks.length && new TextEncoder().encode(`${input}\n\n${historyBlocks.join('\n\n')}`).length > maxQueryPayloadLength) {
-        historyBlocks.shift();
-    }
-
-    return historyBlocks.length ? `${input}\n\n${historyBlocks.join('\n\n')}` : input;
-}
-
-function rememberConversationTurn(user, result) {
-    state.queryHistory.push({ user, response: result.answer || '', result });
+function rememberCompletedQuery(user, result) {
+    state.completedQuery = { user, response: result.answer || '', result };
 }
 
 function renderList(items, label) { return items.length ? `<ul>${items.map(item => `<li>${escapeHtml(label(item))}</li>`).join('')}</ul>` : '<p>Nenhum registro.</p>'; }
@@ -1056,7 +1060,7 @@ function formatStructuralSegment(segment) {
 function openEvidenceReference(trigger) {
     const queryIndex = Number(trigger.dataset.queryIndex);
     const evidenceId = String(trigger.dataset.evidenceCitation || '');
-    const turn = Number.isInteger(queryIndex) ? state.queryHistory[queryIndex] : null;
+    const turn = queryIndex === 0 ? state.completedQuery : null;
     const evidences = Array.isArray(turn?.result?.evidences_used) ? turn.result.evidences_used : [];
     const evidence = evidences.find(item => String(item?.id || '') === evidenceId);
 
@@ -1575,18 +1579,14 @@ elements.queryScopes.addEventListener('change', event => {
 document.addEventListener('click', event => {
     if (!elements.queryScopePanel.hidden && !event.target.closest('.composer-document')) setQueryScopePanel(false);
 });
-elements.restartChat.addEventListener('click', () => {
-    restartChat();
-    notify('Chat reiniciado.');
-});
-
-document.querySelector('#query-form').addEventListener('submit', async event => {
-    event.preventDefault(); const scopes = selectedQueryScopes(), input = document.querySelector('#query-input').value.trim(), button = event.currentTarget.querySelector('button[type="submit"]');
+elements.queryForm.addEventListener('submit', async event => {
+    event.preventDefault(); const scopes = selectedQueryScopes(), input = document.querySelector('#query-input').value.trim();
+    if (state.queryInFlight || state.completedQuery) return;
     if (!scopes.length || !input) return notify('Selecione ao menos um projeto ou obra e informe a consulta.', true);
-    button.disabled = true; elements.restartChat.disabled = true; renderConversation(input);
-    try { const payload = await api('query', { method: 'POST', body: JSON.stringify({ scopes, current_input: input, input: buildConversationalInput(input) }) }); setQueryScopePanel(false); rememberConversationTurn(input, payload.query); renderConversation('', true); document.querySelector('#query-input').value = ''; if (elements.evidenceReferenceDialog.hidden) document.querySelector('#query-input').focus({ preventScroll: true }); }
-    catch (error) { if (state.queryHistory.length) renderConversation(); else elements.queryResult.innerHTML = initialChatEmptyMarkup; notify(error.message, true); }
-    finally { button.disabled = false; elements.restartChat.disabled = false; }
+    state.queryInFlight = true; setQueryScopePanel(false); setQueryComposerState(false, true); renderConversation(input);
+    try { const payload = await api('query', { method: 'POST', body: JSON.stringify({ scopes, input }) }); rememberCompletedQuery(input, payload.query); renderConversation('', true); document.querySelector('#query-input').value = ''; }
+    catch (error) { elements.queryResult.innerHTML = initialChatEmptyMarkup; notify(error.message, true); }
+    finally { state.queryInFlight = false; setQueryComposerState(state.completedQuery !== null); }
 });
 
 document.querySelector('#user-form').addEventListener('submit', async event => {
@@ -1853,6 +1853,14 @@ document.querySelector('#recovery-code-form').addEventListener('submit', async e
 
 document.querySelector('#copy-secret').addEventListener('click', async () => { try { await navigator.clipboard.writeText(elements.recoverySecret.textContent); notify('Código copiado.'); } catch (_) { notify('Não foi possível copiar automaticamente.', true); } });
 elements.queryResult.addEventListener('click', async event => {
+    const newQuestion = event.target.closest('[data-new-question]');
+
+    if (newQuestion) {
+        startNewQuestion();
+        notify('Nova pergunta iniciada.');
+        return;
+    }
+
     const citation = event.target.closest('[data-evidence-citation]');
 
     if (citation) {
@@ -1861,7 +1869,7 @@ elements.queryResult.addEventListener('click', async event => {
     }
 
     const button = event.target.closest('[data-copy-query]');
-    const turn = button ? state.queryHistory[Number(button.dataset.copyQuery)] : null;
+    const turn = button && Number(button.dataset.copyQuery) === 0 ? state.completedQuery : null;
     if (!turn) return;
     button.disabled = true;
 

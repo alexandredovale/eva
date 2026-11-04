@@ -74,7 +74,7 @@ Documents, nodes, evidence, derivations, embeddings, and sanitized audit events 
 - similarities and κ diagnostics;
 - initial (`hierarchical` for compatibility), primary, and global CIE analyses;
 - authorized context and answer;
-- `simetry`, `assimetry`, and conversational continuity.
+- `simetry`, `assimetry`, and any transient state of the completed query.
 
 Querying the collection is a read operation, not authorization to rewrite its memory.
 

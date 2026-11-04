@@ -9,7 +9,7 @@
 
 Este artigo apresenta o EVA (Evidence Algorithm), uma arquitetura para consulta documental assistida por modelos de linguagem cuja memória persistente é organizada em evidências rastreáveis, e não em respostas, relações cognitivas ou grafos inferidos. O sistema transforma documentos estruturados em uma árvore normalizada, preserva seus conteúdos literais como evidências primárias e gera embeddings para essas unidades semânticas completas, respeitando a organização do documento em vez de fragmentá-lo por limites arbitrários de caracteres ou tokens.
 
-Na consulta, o EVA seleciona uma rota de recuperação compatível com o tipo de input. Perguntas diretas, estruturais e amplas podem navegar pela hierarquia; perguntas conceituais e relacionais usam uma representação vetorial transitória. Nessas rotas, κq emerge da população primária completa antes do primeiro Context Intelligence Engine (CIE). Esse estágio mantém o núcleo `s ≥ μ + σ` como corte, com convergência como fallback; as fontes sobreviventes passam por κe e CIE primário, e a união dos núcleos locais recebe um CIE global. O núcleo global forma a base principal e sua convergência `μ + σ/2 ≤ s < μ + σ` é anexada como contexto auxiliar, sem Top-k ou quantidade configurada. Somente fontes incorporadas à prosa com citações visíveis integram a base final. Se nenhuma evidência primária suficiente for encontrada, o fluxo é interrompido sem chamada ao provedor de resposta.
+Na consulta, o EVA seleciona uma rota de recuperação compatível com o tipo de input. Perguntas diretas, estruturais e amplas podem navegar pela hierarquia; perguntas conceituais e relacionais usam uma representação vetorial transitória. Nessas rotas, κq emerge da população primária completa antes do primeiro Context Intelligence Engine (CIE). Esse estágio mantém o núcleo `s ≥ μ + σ` como corte, com convergência como fallback; as fontes sobreviventes passam por κe e CIE primário, e a união dos núcleos locais recebe um CIE global. O núcleo global forma a base principal e sua convergência `μ ≤ s < μ + σ` é anexada como contexto auxiliar, sem Top-k ou quantidade configurada. Somente fontes incorporadas à prosa com citações visíveis integram a base final. Se nenhuma evidência primária suficiente for encontrada, o fluxo é interrompido sem chamada ao provedor de resposta.
 
 Relações cognitivas são tratadas como interações transitórias de **simetry** ou **assimetry**, produzidas somente no contexto da consulta, sem pesos, taxonomias julgamentais ou persistência. Em projetos multidisciplinares, evidências de documentos especializados distintos podem integrar uma seleção transitória e sustentar sínteses conceituais emergentes sem que a interpretação resultante seja promovida a evidência ou memória. Citações e participantes dessas interações são validados localmente contra o contexto recuperado. A proposta separa memória documental, recuperação, interpretação e apresentação, mantendo fornecedores e modelos como componentes substituíveis configurados externamente. O artigo descreve a arquitetura vigente, suas hipóteses verificáveis, limitações e um protocolo experimental para avaliação futura.
 
@@ -213,7 +213,7 @@ Para `N` candidatos com similaridades `sᵢ`, o CIE calcula as estatísticas pop
 CV = \frac{\sigma}{\mu}
 \]
 
-Quando `μ = 0`, o CV é indefinido e representado como `null`. Candidatos com `s < μ + σ/2` são descartados; `μ + σ/2 ≤ s < μ + σ` define a faixa de convergência; e `s ≥ μ + σ` define o núcleo. Em todos os CIEs o núcleo permanece como corte e a convergência funciona como fallback; após o corte global, ela também é anexada como contexto auxiliar. Uma tolerância numérica mínima protege as comparações de fronteira sem alterar os valores calculados.
+Quando `μ = 0`, o CV é indefinido e representado como `null`. Candidatos com `s < μ` são descartados; `μ ≤ s < μ + σ` define a faixa de convergência; e `s ≥ μ + σ` define o núcleo. Em todos os CIEs o núcleo permanece como corte e a convergência funciona como fallback; após o corte global, ela também é anexada como contexto auxiliar. Uma tolerância numérica mínima protege as comparações de fronteira sem alterar os valores calculados.
 
 Essa transformação é determinística e preserva a ordem original do Retriever dentro de cada região. Ela não cria peso, nota ou ranking adicional. A saída da consulta pode expor as regiões e estatísticas para auditoria, mas o provedor de resposta recebe apenas o contexto primário selecionado.
 
@@ -249,7 +249,7 @@ Essa barreira reduz evasão, mas não prova que toda resposta gerada seja corret
 
 ### 7.6 Geração conjunta de resposta e interação
 
-Quando há evidências, a tentativa nominal do provedor de resposta recebe o input atual, até três rodadas conversacionais anteriores anexadas pela interface e o contexto primário disponível. A mesma geração produz:
+Quando há evidências, a tentativa nominal do provedor de resposta recebe somente o input independente atual e o contexto primário disponível. A mesma geração produz:
 
 - resposta textual;
 - identificadores das evidências utilizadas;
@@ -275,9 +275,9 @@ A saída do provedor é tratada como proposta, não como autoridade. O backend v
 
 O embedding do input, os escores de similaridade, as estatísticas e regiões do CIE, o contexto montado, a resposta e as interações não são reinseridos na memória documental. Pares, papéis, descrições e fragmentos de `simetry`/`assimetry` são descartados ao final do request.
 
-O comportamento vigente admite continuidade conversacional curta e transitória. A interface mantém o transcript completo apenas em memória local da página e anexa ao input no máximo as três rodadas concluídas mais recentes. O modelo avalia se a solicitação atual realmente depende desse histórico; mensagens sem relação devem ser ignoradas.
+O comportamento vigente isola cada consulta. A interface apresenta uma pergunta e sua resposta e, depois da conclusão, oferece **Fazer outra pergunta**. A nova operação não recebe input, resposta, população, embedding, análise do CIE ou interação da anterior.
 
-Essa continuidade não altera a fronteira epistemológica. Inputs e respostas anteriores podem esclarecer referências anafóricas, mas não são fontes documentais e nunca autorizam afirmações. A nova resposta permanece limitada às evidências primárias recuperadas para o request atual. O transcript visual completo não é persistido e desaparece em reinício do chat, logout, novo login ou recarregamento. Para observabilidade, `audit_events` registra metadados sanitizados da consulta concluída, inclusive contagens de interações; quando existe módulo assinante, `module_events` pode registrar o envelope permitido de `interaction.completed`, que inclui o input contextual usado pelo Core e a resposta validada sem alterar a memória documental.
+Esse isolamento preserva a fronteira epistemológica e impede que texto gerado influencie a recuperação seguinte. Cada resposta permanece limitada às evidências primárias recuperadas para o request atual. O resultado visual desaparece ao iniciar outra pergunta, em logout, novo login ou recarregamento. Para observabilidade, `audit_events` registra metadados sanitizados da consulta concluída, inclusive contagens de interações; quando existe módulo assinante, `module_events` pode registrar o envelope permitido de `interaction.completed`, cujos campos `current_input` e `contextual_input` contêm o mesmo input independente.
 
 ### 7.9 Custo externo por rota
 
@@ -537,11 +537,11 @@ Mesmo com contexto válido, o provedor pode omitir aspectos, produzir estrutura 
 
 A implementação documentada cobre Markdown, JSON e XML. Outros formatos exigem parsers capazes de preservar estrutura e referências equivalentes.
 
-### 14.6 Contexto conversacional curto e não persistente
+### 14.6 Consultas isoladas
 
-O EVA vigente resolve perguntas anafóricas por meio de até três rodadas anteriores anexadas ao input. Esse mecanismo depende da capacidade do modelo de distinguir continuidade de mudança de assunto e não executa resolução linguística adicional. Como o input composto também participa da rota de recuperação, termos anteriores podem influenciar os candidatos; o limite curto e o descarte integral das rodadas mais antigas reduzem, mas não eliminam, essa possibilidade.
+O EVA vigente não resolve referências anafóricas a respostas anteriores. Cada pergunta precisa ser autossuficiente e produz sua própria rota, população, contexto e interações. Essa decisão impede que termos gerados em uma resposta anterior alterem os candidatos da consulta seguinte.
 
-O transcript completo existe somente na memória da interface aberta. Não há continuidade entre dispositivos, abas, recarregamentos ou novas sessões, nem identidade persistente de conversa. Essa limitação preserva a distinção entre contexto de diálogo e memória documental.
+Não há continuidade entre perguntas, dispositivos, abas, recarregamentos ou novas sessões, nem identidade persistente de conversa. O resultado anterior é apenas uma apresentação visual substituída quando o usuário inicia outra pergunta.
 
 ### 14.7 Sem ontologia persistente
 

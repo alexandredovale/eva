@@ -97,13 +97,13 @@ POST /api/documents/{id}/process            <- EVA internal API
 PHASE 2 — USER INPUT AND ANSWER
 ===============================================================================
 
-[USER SENDS CURRENT INPUT]
+[USER SENDS ONE INDEPENDENT QUESTION]
            |
            v
-[BROWSER COMPOSES CONVERSATIONAL CONTEXT]
-- current input first
-- up to 3 prior rounds
-- discard the oldest complete round above 20,000 bytes
+[BROWSER SENDS INPUT AND SCOPES]
+- current input only
+- no prior round
+- no inherited population or interaction
            |
            v
 POST /api/query                              <- EVA internal API
@@ -194,8 +194,8 @@ POST /api/query                              <- EVA internal API
                      - limitations
                                |
                                v
-                     [BROWSER TRANSCRIPT]
-                     - retains every round on the page
+                     [SINGLE BROWSER RESULT]
+                     - Ask another question starts from zero
                      - never becomes documentary memory
 ```
 
@@ -336,11 +336,11 @@ NOT PERSISTED AS DOCUMENTARY MEMORY:
 - recovered context;
 - generated answer;
 - cognitive interactions;
-- conversational history.
+- transient state of the completed query.
 ```
 
 This does not mean zero observability. `audit_events` retains sanitized completed-query metadata, including `simetry_count` and `assimetry_count`, without pairs or excerpts. When a module subscribes, consolidated-schema `module_events` may receive the permitted `interaction.completed` envelope with current input, contextual input, validated answer, public evidence references, and limitations; each module governs private state. Legacy databases use migration `20260803_010_module_events.sql`. A missing table in an incomplete installation or module failure yields safe diagnostics but does not invalidate an already validated answer. None of these records changes documents, primary evidence, or embeddings.
 
 Physical and logical relationships are mapped in [Database relationships](../../docs/en/18_DATABASE_RELATIONSHIPS.md).
 
-The complete transcript exists only in JavaScript memory on the open page. Only the three most recent completed rounds are attached to the next input. They may clarify conversational references but never gain evidence authority. **Reset chat**, logout, login, or reload discards visual state without altering projects or documents. The API always returns validated transient interactions; the current UI shows CIE, `simetry`, `assimetry`, and technical limitations only to superadmin, while normal users see the answer and used evidence.
+The current result exists only in JavaScript memory on the open page. **Ask another question** removes that presentation, preserves selected scopes, and starts an independent query without inherited input, population, embedding, CIE state, or interactions. Logout, login, or reload also discards visual state without altering projects or documents. The API always returns validated transient interactions; the current UI shows CIE, `simetry`, `assimetry`, and technical limitations only to superadmin, while normal users see the answer and used evidence.

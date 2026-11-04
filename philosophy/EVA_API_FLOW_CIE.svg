@@ -115,15 +115,15 @@
 
   <g transform="translate(55 485)">
     <rect width="220" height="92" rx="14" class="node"/>
-    <text x="110" y="27" class="label">Input no navegador</text>
-    <text x="110" y="50" class="small">input atual + até 3 rodadas</text>
-    <text x="110" y="70" class="tiny">teto total de 20.000 bytes</text>
+    <text x="110" y="27" class="label">Pergunta independente</text>
+    <text x="110" y="50" class="small">somente o input atual</text>
+    <text x="110" y="70" class="tiny">nenhum contexto herdado</text>
   </g>
   <path d="M275 531 H310" class="arrow"/>
   <g transform="translate(310 485)">
     <rect width="190" height="92" rx="14" class="node"/>
     <text x="95" y="27" class="label">POST /api/query</text>
-    <text x="95" y="50" class="small">current_input + input</text>
+    <text x="95" y="50" class="small">input</text>
     <text x="95" y="70" class="tiny">escopos selecionados</text>
   </g>
   <path d="M500 531 H535" class="arrow"/>

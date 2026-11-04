@@ -15,6 +15,7 @@ if (!is_string($html) || !is_string($script) || !is_string($style) || !is_string
 $assertions = [
     [$html, 'https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css', 'A fonte regular do Phosphor deve permanecer fixada na versão aprovada.'],
     [$script, '<i class="ph ph-copy" aria-hidden="true"></i>', 'O botão de cópia deve usar o glifo Phosphor Copy U+E1CA.'],
+    [$script, '<i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i>', 'O botão de nova pergunta deve usar um ícone Phosphor.'],
     [$style, '.button-copy-result .ph-copy', 'O ícone Phosphor deve manter o alinhamento visual do botão.'],
     [$index, 'style-src \'self\' \'nonce-{$styleNonce}\' https://fonts.googleapis.com https://cdn.jsdelivr.net', 'A CSP deve autorizar a folha de estilo Phosphor fixada.'],
     [$index, 'font-src https://fonts.gstatic.com https://cdn.jsdelivr.net', 'A CSP deve autorizar a webfont Phosphor fixada.'],

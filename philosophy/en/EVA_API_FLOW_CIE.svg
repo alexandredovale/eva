@@ -23,7 +23,7 @@
   <g transform="translate(1200 135)"><rect width="350" height="92" rx="14" class="ai"/><text x="175" y="28" text-anchor="middle" class="label">Collection embeddings</text><text x="175" y="51" text-anchor="middle" class="text">complete structured source units</text><text x="175" y="73" text-anchor="middle" class="tiny">batched external calls · versioned vectors</text></g>
 
   <text x="40" y="275" class="section">2 · QUERY ROUTING AND RETRIEVAL</text>
-  <g transform="translate(40 300)"><rect width="240" height="100" rx="14" class="panel"/><text x="120" y="28" text-anchor="middle" class="label">Current input</text><text x="120" y="52" text-anchor="middle" class="text">POST /api/query</text><text x="120" y="75" text-anchor="middle" class="tiny">up to 3 prior transient rounds</text></g>
+  <g transform="translate(40 300)"><rect width="240" height="100" rx="14" class="panel"/><text x="120" y="28" text-anchor="middle" class="label">Independent input</text><text x="120" y="52" text-anchor="middle" class="text">POST /api/query</text><text x="120" y="75" text-anchor="middle" class="tiny">no inherited query context</text></g>
   <path d="M280 350H320" class="line"/>
   <g transform="translate(320 300)"><rect width="240" height="100" rx="14" class="panel"/><text x="120" y="28" text-anchor="middle" class="label">Local route detection</text><text x="120" y="53" text-anchor="middle" class="text">direct · structural · broad</text><text x="120" y="75" text-anchor="middle" class="text">conceptual · relational</text></g>
   <path d="M560 350H610" class="branch"/><path d="M610 350V305H665" class="line"/><path d="M610 350V405H665" class="line"/>

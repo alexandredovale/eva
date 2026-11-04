@@ -59,7 +59,7 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 55. Apply CIE only to vector distributions from conceptual and relational routes.
 56. Score the complete validated and embedded `primary:node_content` population, globally order it, and derive κq without a configured Top-k, semantic thresholds, or weights.
 57. Calculate population mean and population standard deviation over the κq-legitimized population — or the complete population when no break exists — and calculate `CV = σ / μ`, using `null` when `μ = 0`.
-58. Classify `s < μ + σ/2` as discard, `μ + σ/2 ≤ s < μ + σ` as convergence, and `s ≥ μ + σ` as core.
+58. Classify `s < μ` as discard, `μ ≤ s < μ + σ` as convergence, and `s ≥ μ + σ` as core.
 59. Keep core as the elected cutoff at every CIE and promote convergence only when core is empty; after the global cutoff, append its convergence only as auxiliary context without changing κq, κe, or the `μ + σ` threshold.
 60. Preserve Retriever order within regions; do not create a subjective score, weight, heuristic, or AI reranking stage.
 61. Apply κe and primary CIE to the forwarded sources by work, then submit the deduplicated union of local nuclei to global CIE before calling the answer provider.
@@ -85,4 +85,4 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 80. Keep the physical availability of documentary figures a manual operation by an authorized collection manager: ingestion and processing may recognize the textual contract but must not create directories, copy, import, or publish images automatically; institutional procedure and restricted permissions on `storage/figures/` must enforce that exclusivity.
 81. Require every `Figura`/`Figure` contract in Markdown, JSON, or XML to be the immediate child of a non-visual thematic node; reject figures at the document root or under another figure during ingestion, preserve fields in the Markdown visual node or as direct children of the structured container, and accept only the documented Portuguese or English field names.
 
-Related explanations are available in [Architecture](02_ARCHITECTURE.md), [Query and conversational continuity](05_QUERY_AND_CHAT.md), [Cnode as an EVA conceptual derivation](10_CNODE.md), [Context Intelligence Engine](09_CONTEXT_INTELLIGENCE_ENGINE.md), and [Connector modules](17_MODULE_CONNECTORS.md).
+Related explanations are available in [Architecture](02_ARCHITECTURE.md), [Query and single-turn chat](05_QUERY_AND_CHAT.md), [Cnode as an EVA conceptual derivation](10_CNODE.md), [Context Intelligence Engine](09_CONTEXT_INTELLIGENCE_ENGINE.md), and [Connector modules](17_MODULE_CONNECTORS.md).

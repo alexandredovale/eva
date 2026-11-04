@@ -10,7 +10,7 @@ English is the primary language of the public repository. The original Portugues
 2. [Architecture](en/02_ARCHITECTURE.md)
 3. [Installation](en/03_INSTALLATION.md)
 4. [Ingestion and cognitive build](en/04_INGESTION_AND_BUILD.md)
-5. [Query and conversational continuity](en/05_QUERY_AND_CHAT.md)
+5. [Query and single-turn chat](en/05_QUERY_AND_CHAT.md)
 6. [API and operations](en/06_API_AND_OPERATIONS.md)
 7. [Security and deployment](en/07_SECURITY_AND_DEPLOYMENT.md)
 8. [Scientific scope and energy sustainability](en/08_SCIENTIFIC_AND_ENERGY.md)
@@ -43,7 +43,7 @@ The English edition is organized by reader task rather than as filename-for-file
 | `02_ARQUITETURA.md` | [Architecture](en/02_ARCHITECTURE.md) |
 | `03_INGESTAO.md` | [Ingestion and cognitive build](en/04_INGESTION_AND_BUILD.md) |
 | `04_CONSTRUCAO_COGNITIVA.md` | [Ingestion and cognitive build](en/04_INGESTION_AND_BUILD.md) |
-| `05_CONSULTA.md` | [Query and conversational continuity](en/05_QUERY_AND_CHAT.md) |
+| `05_CONSULTA.md` | [Query and single-turn chat](en/05_QUERY_AND_CHAT.md) |
 | `06_CNODE.md` | [Cnode as an EVA conceptual derivation](en/10_CNODE.md) |
 | `07_BANCO_DE_DADOS.md` | [Database](en/11_DATABASE.md) |
 | `08_REGRAS.md` | [Mandatory rules](en/12_MANDATORY_RULES.md) |

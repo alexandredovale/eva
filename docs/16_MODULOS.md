@@ -123,7 +123,7 @@ Um módulo não pode chamar outro módulo. O processamento deve ser idempotente 
   },
   "interaction": {
     "current_input": "Pergunta atual",
-    "contextual_input": "Pergunta atual e contexto conversacional usado pelo Core",
+    "contextual_input": "Pergunta atual independente, idêntica a current_input",
     "answer": "Resposta final"
   },
   "evidences": [{"id": "EVA-E000120", "document": "Documento A"}],

@@ -2,6 +2,18 @@
 
 Use this checklist for every public release. Always start from a fresh clone of the canonical GitHub repository in an exclusive local analysis directory, inspect the remote state, and copy only an explicit source allowlist.
 
+## Release v7.0.3
+
+- [x] Replace conversational continuity with one isolated query per request, without inherited input, population, embedding, CIE analysis, or interaction.
+- [x] Restore the complete convergence interval (`μ ≤ s < μ + σ`) while keeping intermediate core forwarding and global-only complementary convergence.
+- [x] Refine answer generation into an evidence-grounded, conclusion-first pedagogical progression.
+- [x] Hide the query composer throughout processing and expose **Ask another question** below the completed response controls.
+- [x] Preserve the current project/work scope while resetting every transient query artifact.
+- [x] Update bilingual documentation, public version metadata, citation metadata, changelog, health endpoint, and asset cache markers.
+- [x] Validate PHP and JavaScript syntax plus the affected offline regression suites; validate the semantic flow with one explicitly authorized short real-AI call.
+- [x] Confirm that credentials, operational data, uploads, `storage/documents`, logs, dumps, backups, private connectors, and Runtime state remain outside the public commit.
+- [x] Commit and push `main`, create annotated tag `v7.0.3`, and publish the GitHub release after explicit authorization.
+
 ## Release v7.0.2
 
 - [x] Bind every validated answer citation deterministically to the evidence object from its own conversation turn.

@@ -21,7 +21,7 @@ $logger = new FileLogger($container['logging']['path']);
 $arguments = array_slice($argv, 1);
 $documentId = isset($arguments[0]) && ctype_digit($arguments[0]) ? (int) $arguments[0] : 0;
 $liveConfirmed = in_array('--live', $arguments, true);
-$maxEvidence = (int) $container['ai']['query']['max_evidence'];
+$maxEvidence = (int) $container['ai']['query']['non_semantic_max_evidence'];
 $maxInteractions = (int) $container['ai']['query']['max_interactions'];
 $inputParts = [];
 

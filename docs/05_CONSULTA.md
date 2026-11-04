@@ -16,29 +16,13 @@ Um input pode combinar tipos. Essa identificação local não avalia intenção,
 
 A intenção relacional é identificada localmente e sem chamada adicional de IA. O detector normaliza caixa e diacríticos, reconhece famílias morfológicas completas, como `relação`, `relacionam`, `relacionado`, `interage`, `interação` e `interaction`, e aceita operadores formais como `↔` e `→`. Essa estratégia é determinística e extensível, mas não pretende inferir universalmente a semântica de qualquer idioma: novos radicais linguísticos precisam ser adicionados explicitamente e protegidos por testes de regressão.
 
-## Continuidade conversacional
+## Consulta de rodada única
 
-O chat conserva visualmente todas as rodadas concluídas enquanto a interface atual permanece aberta. Cada rodada apresenta separadamente o input do usuário, a resposta documental, as evidências utilizadas e, para o superadmin, os detalhes técnicos permitidos. Uma nova consulta é acrescentada ao transcript sem substituir as anteriores, e a rolagem acompanha a rodada mais recente.
+O chat aceita uma pergunta independente por vez. O navegador envia ao `POST /api/query` somente o `input` digitado e os escopos selecionados; nenhuma pergunta, resposta, população recuperada, análise do CIE ou interação anterior é anexada à requisição.
 
-O transcript visual completo não é enviado integralmente ao backend. A partir da segunda consulta, o navegador compõe o campo `input` com a solicitação atual no início e, em seguida, no máximo as três rodadas concluídas mais recentes no formato:
+O formulário e o seletor de obras desaparecem imediatamente após o envio, inclusive enquanto a resposta é processada. Depois da resposta, **Fazer outra pergunta** aparece logo abaixo de **Copiar pergunta e resposta**. Essa ação limpa o resultado visual e o input, preserva os projetos e obras selecionados, reexibe o formulário completo e inicia uma consulta integralmente nova. A classificação do input, o eventual embedding transitório, κq, os CIEs, as evidências e `simetry`/`assimetry` são recalculados do zero.
 
-```text
-<input atual>
-
-# Interação Anterior:
-## Usuário
-<input anterior>
-## Resposta
-<resposta anterior>
-```
-
-Quando mais de uma rodada é anexada, os blocos permanecem em ordem cronológica. O limite da API continua sendo 20.000 bytes; se os três blocos não couberem integralmente, o bloco mais antigo é descartado inteiro até que o payload respeite o teto.
-
-O `SYSTEM_PROMPT` do `QueryAnswerProvider` orienta a IA a decidir se o input atual realmente continua alguma rodada anterior. Quando houver continuidade, o histórico pode resolver referências conversacionais e esclarecer o pedido atual; quando não houver, deve ser ignorado. Não existe tratamento linguístico ou semântico adicional no frontend.
-
-Perguntas e respostas anteriores nunca são evidências documentais, mesmo quando contêm citações. Toda afirmação da nova resposta continua limitada às `primary_evidences` recuperadas para a consulta atual e submetida às mesmas validações locais de IDs, citações e fragmentos.
-
-O botão **Reiniciar chat** limpa o transcript, as rodadas disponíveis para contexto e o input atual, mas preserva a seleção de projetos e obras. O estado visual da conversa reside apenas na memória JavaScript da página, não é restaurado do banco, da auditoria ou de `sessionStorage`, e é reiniciado em logout, novo login ou recarregamento da aplicação. Isso não impede os registros operacionais sanitizados nem o evento modular opcional descritos na seção de saída; esses registros não reconstituem o chat na interface e não transformam rodadas anteriores em evidência.
+O `SYSTEM_PROMPT` do `QueryAnswerProvider` trata o input como autossuficiente e não pressupõe memória conversacional. O resultado visual reside apenas na memória JavaScript da página, não é restaurado do banco, da auditoria ou de `sessionStorage`, e é reiniciado em logout, novo login ou recarregamento da aplicação. Registros operacionais sanitizados e o evento modular opcional não reconstituem uma conversa; por compatibilidade contratual, `current_input` e `contextual_input` recebem o mesmo input independente.
 
 ## Cobertura parcial do input
 
@@ -56,7 +40,7 @@ Resultados literais, lexicais e estruturais são candidatos, não conclusões. N
 
 `simetry` e `assimetry` são operadores cognitivos internos e permanecem no contexto integral da consulta relacional. Eles orientam a compreensão da IA, mas não são tratados como expressões que a fonte documental precise conter.
 
-Na recuperação semântica, o Retriever calcula cosine para toda a população primária elegível, ordena globalmente e determina κq pela geometria normalizada e pelos gaps query-locais. Quando não existe ruptura identificável, a população completa segue ao primeiro CIE. Só então o Context Intelligence Engine calcula média, desvio padrão populacional e coeficiente de variação. O núcleo acima ou igual a `μ + σ` continua sendo o corte que segue para a próxima etapa; a metade superior da faixa, entre `μ + σ/2` e `μ + σ`, permanece como fallback nesse estágio.
+Na recuperação semântica, o Retriever calcula cosine para toda a população primária elegível, ordena globalmente e determina κq pela geometria normalizada e pelos gaps query-locais. Quando não existe ruptura identificável, a população completa segue ao primeiro CIE. Só então o Context Intelligence Engine calcula média, desvio padrão populacional e coeficiente de variação. O núcleo acima ou igual a `μ + σ` continua sendo o corte que segue para a próxima etapa; a faixa entre `μ` e `μ + σ` permanece como fallback nesse estágio.
 
 Como a primeira população já contém evidências primárias, não há expansão inicial de resumos selecionados. O embedding transitório é reutilizado para κe e CIE primário, sem chamada externa adicional. O CIE global compara os núcleos locais pelo cosine primário e atribui a cada fonte final o papel global `core` ou `convergence`; o primeiro tem precedência e o segundo funciona como contexto complementar.
 

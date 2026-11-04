@@ -53,15 +53,13 @@ A tabela reflete o dispatcher implementado. Os corpos de requisição e resposta
 
 Rotas desconhecidas retornam 404. Rotas conhecidas recusam métodos não suportados com 405 e o cabeçalho `Allow`. Autenticação, autorização, validação, conflitos de fila, violações do contrato de consulta, indisponibilidade do provedor e falhas inesperadas permanecem condições HTTP distintas com mensagens seguras ao cliente.
 
-## Chat conversacional
+## Consulta de rodada única
 
-O box de consulta funciona como um transcript durante a permanência na página. Cada input aparece como mensagem do usuário e cada resultado como resposta documental independente. Rodadas concluídas permanecem visíveis, a interface rola para a mais recente e cada resposta mantém sua própria ação de cópia com pergunta, resposta e referências.
+O box de consulta apresenta uma pergunta e sua resposta documental independente. Durante a requisição, o estado `Consultando evidências…` é acompanhado por três pontos amarelos animados; a preferência de redução de movimento desativa a animação.
 
-Durante uma nova requisição, o transcript preserva as rodadas anteriores e acrescenta o estado `Consultando evidências…`, acompanhado por três pontos amarelos animados. A preferência de redução de movimento do navegador desativa a animação. Se a requisição falhar, as rodadas já concluídas permanecem no box. Em caso de sucesso, o input é limpo e recebe foco para a próxima mensagem.
+O formulário e o seletor de obras são ocultados assim que a consulta é enviada e permanecem ausentes durante o processamento. Em caso de sucesso, **Fazer outra pergunta** aparece abaixo de **Copiar pergunta e resposta**. O botão limpa o resultado atual, preserva projetos e obras selecionados, reexibe o formulário completo e abre uma nova consulta sem herdar input, população, embedding, CIE ou interações. Em caso de falha, o formulário é reativado para correção do input.
 
-O estado visual pode conter todas as rodadas da conversa atual, mas somente as três rodadas concluídas mais recentes participam do próximo `POST /api/query`. Elas são anexadas ao próprio campo `input`; nenhuma nova rota, tabela ou entidade de conversa foi criada. Se o limite de 20.000 bytes exigir redução, a rodada mais antiga é removida por inteiro.
-
-**Reiniciar chat** limpa o transcript e o contexto curto sem desmarcar os projetos ou obras selecionados. O estado não sobrevive a logout, novo login ou recarregamento e não é persistido no banco, na auditoria ou no armazenamento do navegador.
+O resultado visual não sobrevive a logout, novo login ou recarregamento e não é persistido como conversa no banco, na auditoria ou no armazenamento do navegador.
 
 ## Figuras documentais
 

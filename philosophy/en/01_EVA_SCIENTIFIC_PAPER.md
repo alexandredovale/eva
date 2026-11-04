@@ -9,7 +9,7 @@
 
 This paper presents EVA (Evidence Algorithm), an architecture for language-model-assisted documentary queries whose persistent memory is organized as traceable evidence rather than answers, cognitive relationships, or inferred graphs. The system transforms structured documents into a normalized tree, preserves literal content as primary evidence, and generates embeddings for these complete semantic units. The representation respects document organization instead of fragmenting it by arbitrary character or token limits.
 
-At query time, EVA selects a retrieval route compatible with input type. Direct, structural, and broad questions may navigate hierarchy; conceptual and relational questions use a transient vector representation. On semantic routes, κq emerges from the complete primary population before the first Context Intelligence Engine (CIE). That stage keeps core `s ≥ μ + σ` as the cutoff, with convergence as fallback; surviving sources pass through κe and primary CIE, and the union of local nuclei receives global CIE. Global core forms the primary basis and global convergence `μ + σ/2 ≤ s < μ + σ` is appended as auxiliary context without a configured Top-k or evidence count. Only sources incorporated into prose with visible citations enter the final basis. If no sufficient primary evidence is found, the flow stops without calling the answer provider.
+At query time, EVA selects a retrieval route compatible with input type. Direct, structural, and broad questions may navigate hierarchy; conceptual and relational questions use a transient vector representation. On semantic routes, κq emerges from the complete primary population before the first Context Intelligence Engine (CIE). That stage keeps core `s ≥ μ + σ` as the cutoff, with convergence as fallback; surviving sources pass through κe and primary CIE, and the union of local nuclei receives global CIE. Global core forms the primary basis and global convergence `μ ≤ s < μ + σ` is appended as auxiliary context without a configured Top-k or evidence count. Only sources incorporated into prose with visible citations enter the final basis. If no sufficient primary evidence is found, the flow stops without calling the answer provider.
 
 Cognitive relationships are transient **simetry** or **assimetry** interactions produced only within the query, without weights, judgmental taxonomies, or persistence. In multidisciplinary projects, evidence from different specialized documents may support emergent conceptual syntheses without promoting the resulting interpretation to evidence or memory. Citations and interaction participants are validated locally against recovered context. The proposal separates documentary memory, retrieval, interpretation, and presentation while keeping models and providers externally configured and replaceable. This paper describes the current architecture, its testable hypotheses, limitations, and a protocol for future evaluation.
 
@@ -202,7 +202,7 @@ For `N` similarities `sᵢ`, CIE calculates:
 CV = \frac{\sigma}{\mu}
 \]
 
-When `μ = 0`, CV is `null`. `s < μ + σ/2` is discard; `μ + σ/2 ≤ s < μ + σ` is convergence; `s ≥ μ + σ` is core. Core remains the cutoff at every CIE and convergence acts as fallback; after the global cutoff, it is also appended as auxiliary context. Minimal numerical tolerance protects threshold comparisons without changing values.
+When `μ = 0`, CV is `null`. `s < μ` is discard; `μ ≤ s < μ + σ` is convergence; `s ≥ μ + σ` is core. Core remains the cutoff at every CIE and convergence acts as fallback; after the global cutoff, it is also appended as auxiliary context. Minimal numerical tolerance protects threshold comparisons without changing values.
 
 The transformation is deterministic, preserves Retriever order within regions, and creates no additional grade, weight, or rank. Query output may expose regions and statistics for audit, but the answer provider receives only resolved final primary context.
 
@@ -232,7 +232,7 @@ Limitation & \text{if } E_P^* = \varnothing
 
 ### 7.6 Joint answer and interaction generation
 
-When evidence exists, the nominal provider attempt receives current input, up to three prior conversational rounds attached by the interface, and available primary context. The same generation produces answer text, used evidence identifiers, `simetry` and `assimetry` interactions when at least two evidence records and a positive configured interaction limit exist, and relevant routing points or limitations.
+When evidence exists, the nominal provider attempt receives only the current independent input and available primary context. The same generation produces answer text, used evidence identifiers, `simetry` and `assimetry` interactions when at least two evidence records and a positive configured interaction limit exist, and relevant routing points or limitations.
 
 There is no separate relationship provider or graph-persistence analysis. Truncated output permits at most one compact regeneration within an attempt. Local validation separately permits at most three total attempts with the same context; each rejected output is discarded completely.
 
@@ -246,9 +246,9 @@ Provider output is a proposal. The backend verifies that every used ID belongs t
 
 Input embedding, similarities, CIE statistics and regions, assembled context, answer, and interactions do not return to documentary memory. `simetry`/`assimetry` pairs, roles, descriptions, and excerpts are discarded after the request.
 
-Current behavior supports short transient continuity. The interface keeps the complete transcript only in page memory and attaches at most the three latest completed rounds. The model decides whether the current request depends on them and should ignore unrelated messages.
+Current behavior isolates every query. The interface presents one question and its answer and then offers **Ask another question**. A new operation receives no prior input, answer, recovered population, embedding, CIE analysis, or interaction.
 
-Prior inputs and answers may clarify anaphoric references but never become documentary sources. The new answer remains limited to primary evidence recovered for the current request. The visual transcript disappears on chat reset, logout, login, or reload. Sanitized `audit_events` may record completed-query metadata and interaction counts; subscribed modules may store the permitted `interaction.completed` envelope without altering documentary memory.
+This isolation prevents generated text from influencing later retrieval. Every answer remains limited to primary evidence recovered for the current request. The visual result disappears when another question starts, on logout, login, or reload. Sanitized `audit_events` may record completed-query metadata and interaction counts; subscribed modules may store the permitted `interaction.completed` envelope, where `current_input` and `contextual_input` contain the same independent input.
 
 ### 7.9 External cost by route
 
@@ -428,9 +428,9 @@ Even with valid context, the provider may omit aspects, return invalid structure
 
 The documented implementation covers Markdown, JSON, and XML. Other formats require structure- and reference-preserving parsers.
 
-### 14.7 Short, non-persistent conversational context
+### 14.7 Isolated queries
 
-EVA resolves anaphoric questions through up to three prior rounds attached to input. The model must distinguish continuity from subject change. Prior terms may affect retrieval; the short limit reduces but does not eliminate that possibility. The transcript exists only in the open interface and does not continue across devices, tabs, reloads, or sessions.
+EVA does not resolve anaphoric references to prior answers. Every question must be self-contained and produces its own route, population, context, and interactions. There is no continuity across questions, devices, tabs, reloads, or sessions; the prior result is only a visual presentation replaced when the user starts another question.
 
 ### 14.8 No persistent ontology
 

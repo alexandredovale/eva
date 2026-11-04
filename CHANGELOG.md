@@ -7,6 +7,23 @@ and the project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [7.0.3] - 2026-11-04
+
+### Changed
+
+- The web query flow now accepts one independent question at a time. **Ask another question** preserves selected scopes but starts retrieval, embeddings, CIE analysis, and transient interactions from zero.
+- The query composer disappears immediately after submission and returns only when **Ask another question** is selected below the completed response controls.
+- Answer generation now follows a conclusion-first pedagogical progression: an initial evidence-grounded synthesis, documentary development, and a final consolidation without semantic repetition.
+
+### Added
+
+- Added regression coverage for isolated single-turn requests, composer visibility, action placement, and current-input compatibility for module events.
+
+### Fixed
+
+- Restored the complete CIE convergence range (`μ ≤ s < μ + σ`) while keeping core as the elected cutoff in intermediate stages and appending convergence only after the global CIE.
+- Updated the document-query CLI to use the current non-semantic evidence-limit configuration key.
+
 ## [7.0.2] - 2026-10-01
 
 ### Added

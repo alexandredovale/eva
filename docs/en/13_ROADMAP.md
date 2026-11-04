@@ -120,10 +120,10 @@ CV = σ / μ
 Based on these values, the population is divided into three regions:
 
 ```text
-s < μ + σ/2
+s < μ
 → discard
 
-μ + σ/2 ≤ s < μ + σ
+μ ≤ s < μ + σ
 → convergence
 
 s ≥ μ + σ
@@ -141,10 +141,10 @@ Therefore:
 
 ```text
 Discard:
-s < 0.74
+s < 0.70
 
 Convergence:
-0.74 ≤ s < 0.78
+0.70 ≤ s < 0.78
 
 Core:
 s ≥ 0.78
@@ -154,7 +154,7 @@ The **core** represents the region that is statistically most concentrated in re
 
 **Convergence** represents the intermediate region.
 
-**Discard** represents candidates below the distribution mean plus half its standard deviation.
+**Discard** represents candidates below the distribution mean.
 
 At this initial stage, only the `s ≥ μ + σ` core is forwarded. Convergence is used only as fallback when that core is empty. The diagnostic contract continues to expose this stage as `hierarchical` for compatibility.
 
@@ -162,7 +162,7 @@ At this initial stage, only the `s ≥ μ + σ` core is forwarded. Convergence i
 
 # 3. From first selection to primary refinement
 
-From the first calculation onward, EVA works exclusively with **primary evidence**.
+From the first calculation onward, EVA 6.0.0 works exclusively with **primary evidence**.
 
 The first CIE forwards its upper core or, when that core is empty, its convergence. There is no intermediate summary or lineage-resolution stage.
 

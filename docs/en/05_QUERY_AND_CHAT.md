@@ -1,4 +1,4 @@
-# Query and conversational continuity
+# Query and single-turn chat
 
 ## Input routes
 
@@ -88,13 +88,13 @@ The local layer rejects or discards an interaction when its type, roles, orienta
 
 The public result exposes `selection_region` on each used evidence and an `evidence_selection` object containing only the cited core and convergence IDs, so the accepted documentary basis remains auditable after generation.
 
-## Conversational continuity
+## Single-turn query
 
-The interface keeps the visible transcript while the current page remains open. Starting with the second query, it appends at most the three latest completed turns to the current input in chronological order. If the 20,000-byte API input ceiling would be exceeded, the oldest complete turn is removed.
+The interface accepts one independent question at a time. The browser sends only the typed `input` and selected scopes to `POST /api/query`; no prior question, answer, recovered population, CIE analysis, or interaction is appended.
 
-The answer provider decides whether the current request continues an earlier turn. Previous questions and answers can clarify conversational references, but they never become documentary evidence. Every new response remains restricted to primary evidence recovered for that query.
+The form and work selector disappear immediately after submission, including while the answer is being processed. After completion, **Ask another question** appears directly below **Copy question and answer**. That action clears the visual result and input, preserves selected projects and works, restores the complete form, and starts a completely new query. Input classification, transient embedding when applicable, κq, every CIE stage, evidence, and `simetry`/`assimetry` are recalculated from zero.
 
-**Reset chat** clears the transcript and temporary browser context while preserving selected projects and works. The complete visual transcript is not persisted as chat state. Sanitized query metadata may still be recorded in `audit_events`, and an active subscribed module may receive the allowed `interaction.completed` envelope, including the contextual input used by the Core; neither mechanism turns prior turns into documentary evidence.
+The answer provider treats input as self-contained and assumes no conversational memory. The visual result is not restored from the database, audit trail, or `sessionStorage`. Sanitized query metadata and an optional `interaction.completed` event do not reconstruct a conversation; for contract compatibility, `current_input` and `contextual_input` carry the same independent input.
 
 ## Result contract
 

@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cascadia+Mono:wght@400;500;600;700&family=Share+Tech&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
-    <link rel="stylesheet" href="assets/app.css?v=7.0.2">
+    <link rel="stylesheet" href="assets/app.css?v=7.0.3">
     <link rel="icon" type="image/png" href="logo/icone.png">
     <link rel="apple-touch-icon" href="logo/icone.png">
     <link rel="shortcut icon" href="logo/icone.png">
@@ -63,10 +63,10 @@
         </section>
 
         <section class="view view-query" id="view-query" data-view-panel="query" hidden>
-            <div class="page-heading query-heading"><div><p class="eyebrow">Consulta documental</p><h1>Converse com<br><span>as evidências.</span></h1></div><p>A resposta é limitada às obras permitidas e mantém a rastreabilidade das fontes.</p></div>
+            <div class="page-heading query-heading"><div><p class="eyebrow">Consulta documental</p><h1>Consulte<br><span>as evidências.</span></h1></div><p>A resposta é limitada às obras permitidas e mantém a rastreabilidade das fontes.</p></div>
             <div class="chat-shell">
                 <div id="query-result" class="query-result" aria-live="polite"><div class="chat-empty"><span class="chat-empty-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-right-text" viewBox="0 0 16 16"><path d="M2 1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h9.586a2 2 0 0 1 1.414.586l2 2V2a1 1 0 0 0-1-1zm12-1a2 2 0 0 1 2 2v12.793a.5.5 0 0 1-.854.353l-2.853-2.853a1 1 0 0 0-.707-.293H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2z"/><path d="M3 3.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M3 6a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 6m0 2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5"/></svg></span><h2>Pronta para investigar.</h2><p>Selecione um projeto ou uma obra e faça uma pergunta.</p></div></div>
-                <form id="query-form" class="query-form"><div class="composer-document"><span class="composer-label">Projetos e obras</span><button class="scope-picker-toggle" id="query-scope-toggle" type="button" aria-expanded="false" aria-controls="query-scope-panel"><span id="query-scope-summary">Selecione o escopo da consulta</span><svg class="scope-picker-chevron" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"></path></svg></button><div class="query-scope-panel" id="query-scope-panel" hidden><div id="query-scopes" class="permission-tree query-scope-tree"></div></div></div><div class="composer-input"><label class="sr-only" for="query-input">Pergunta ou referência</label><textarea id="query-input" rows="2" maxlength="2000" required placeholder="Pergunte sobre o acervo…"></textarea><div class="composer-actions"><button type="button" class="button button-quiet" id="restart-chat">Reiniciar chat</button><button type="submit" class="button button-primary">Consultar <span aria-hidden="true">↗</span></button></div></div></form>
+                <form id="query-form" class="query-form"><div class="composer-document"><span class="composer-label">Projetos e obras</span><button class="scope-picker-toggle" id="query-scope-toggle" type="button" aria-expanded="false" aria-controls="query-scope-panel"><span id="query-scope-summary">Selecione o escopo da consulta</span><svg class="scope-picker-chevron" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"></path></svg></button><div class="query-scope-panel" id="query-scope-panel" hidden><div id="query-scopes" class="permission-tree query-scope-tree"></div></div></div><div class="composer-input"><label class="sr-only" for="query-input">Pergunta ou referência</label><textarea id="query-input" rows="2" maxlength="2000" required placeholder="Pergunte sobre o acervo…"></textarea><div class="composer-actions"><button type="submit" class="button button-primary">Consultar <span aria-hidden="true">↗</span></button></div></div></form>
             </div>
         </section>
 
@@ -181,6 +181,6 @@
         </form>
     </div>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-    <script src="assets/app.js?v=7.0.2" defer></script>
+    <script src="assets/app.js?v=7.0.3" defer></script>
 </body>
 </html>

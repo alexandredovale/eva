@@ -49,7 +49,7 @@ assertContextIntelligence(
 );
 assertContextIntelligence(
     array_column($analysis->convergenceCandidates, 'publicId') === ['EVA-E000002'],
-    'A faixa de convergência deve conter candidatos em média + metade do desvio padrão <= s < média + desvio padrão.'
+    'A faixa de convergência deve conter candidatos em média <= s < média + desvio padrão.'
 );
 assertContextIntelligence(
     array_column($analysis->discardedCandidates, 'publicId') === [
@@ -57,15 +57,12 @@ assertContextIntelligence(
         'EVA-E000004',
         'EVA-E000005',
     ],
-    'A região abaixo da metade superior da faixa deve ser descartada.'
+    'A região abaixo da média deve ser descartada.'
 );
 assertContextIntelligence(
     $analysis->selectedRegion === 'core'
-        && array_column($analysis->selectedCandidates, 'publicId') === [
-            'EVA-E000001',
-            'EVA-E000002',
-        ],
-    'O núcleo deve preceder a convergência complementar no contexto final.'
+        && array_column($analysis->selectedCandidates, 'publicId') === ['EVA-E000001'],
+    'O núcleo deve permanecer como corte eleito antes do CIE global.'
 );
 
 $fallback = $engine->analyze([
@@ -109,10 +106,10 @@ assertContextIntelligence(
 $serialized = $analysis->toArray();
 assertContextIntelligence(
     $serialized['candidate_count'] === 5
-        && $serialized['selected_count'] === 2
+        && $serialized['selected_count'] === 1
         && $serialized['selected_region'] === 'core'
         && abs($serialized['convergence_range']['lower_bound']
-            - ($analysis->mean + ($analysis->standardDeviation / 2.0))) < 1e-12,
+            - $analysis->mean) < 1e-12,
     'A saída auditável do CIE perdeu suas contagens ou região selecionada.'
 );
 
@@ -141,7 +138,7 @@ for ($round = 0; $round < 300; $round++) {
     sort($partitionIds);
     sort($inputIds);
     $expectedSelection = $propertyAnalysis->coreCandidates !== []
-        ? [...$propertyAnalysis->coreCandidates, ...$propertyAnalysis->convergenceCandidates]
+        ? $propertyAnalysis->coreCandidates
         : $propertyAnalysis->convergenceCandidates;
 
     if ($partitionIds !== $inputIds

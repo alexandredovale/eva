@@ -341,9 +341,8 @@ final readonly class ProductApi
 
             $payload = (new JsonRequestParser())->parse($rawBody);
             $input = is_string($payload['input'] ?? null) ? trim($payload['input']) : '';
-            $currentInput = is_string($payload['current_input'] ?? null) ? trim($payload['current_input']) : $input;
 
-            if ($input === '' || strlen($input) > 20_000 || $currentInput === '' || strlen($currentInput) > 20_000) {
+            if ($input === '' || strlen($input) > 20_000) {
                 throw new ProductHttpException('Os dados da consulta são inválidos.', 422);
             }
 
@@ -396,7 +395,6 @@ final readonly class ProductApi
                 $actor,
                 $selectedScopes,
                 $documentIds,
-                $currentInput,
                 $input,
                 $result
             );
@@ -825,8 +823,7 @@ final readonly class ProductApi
         ActorContext $actor,
         array $selectedScopes,
         array $documentIds,
-        string $currentInput,
-        string $contextualInput,
+        string $input,
         \Eva\Application\Query\DocumentQueryResult $result
     ): void {
         try {
@@ -855,8 +852,8 @@ final readonly class ProductApi
                 ['user_id' => $actor->userId, 'role' => $actor->role],
                 (new CoreEventSnapshotBuilder($this->database))->build($selectedScopes, $documentIds),
                 [
-                    'current_input' => $currentInput,
-                    'contextual_input' => $contextualInput,
+                    'current_input' => $input,
+                    'contextual_input' => $input,
                     'answer' => $result->answer,
                     'input_types' => $result->understanding->toArray()['types'],
                     'direct_references' => $result->understanding->directReferences,

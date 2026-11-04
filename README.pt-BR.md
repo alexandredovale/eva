@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Versão atual:** `7.0.2`
+**Versão atual:** `7.0.3`
 
-**Destaque da versão:** o EVA 7.0.2 transforma cada marcador de evidência validado da resposta em uma referência interativa determinística que abre o breadcrumb exato da fonte em um modal acessível.
+**Destaque da versão:** o EVA 7.0.3 introduz consultas isoladas de rodada única, restaura a faixa completa de convergência global como contexto complementar e adota respostas pedagógicas orientadas por uma conclusão inicial.
 
 O EVA é uma plataforma para construir, organizar e consultar memória cognitiva documental verificável. O EVA (Evidence Algorithm) transforma documentos estruturados em evidências hierárquicas. Cnode é a compreensão transitória de uma interação explícita entre essas evidências durante a consulta, não uma entidade persistente.
 
@@ -24,7 +24,7 @@ A base atual contém:
 - recuperação vetorial transitória orientada diretamente às evidências primárias;
 - Context Intelligence Engine determinístico entre o Retriever e as camadas cognitivas;
 - consulta adaptativa que produz interações `simetry`/`assimetry` validadas por fragmentos literais;
-- chat conversacional com transcript temporário completo e contexto limitado às três rodadas anteriores;
+- consulta de rodada única, sem herança de input, população, embedding ou interação entre perguntas;
 - produto white label com interface administrativa, API autenticada, fila e retomada explícita;
 - métricas descritivas e auditoria sanitizada, sem exposição de segredos ou conteúdo consultado;
 - execução real de IA bloqueada por padrão e reaproveitamento por modelo/hash;
@@ -90,7 +90,7 @@ A ingestão não produz embeddings. A construção cognitiva é uma etapa poster
 
 `EvidenceEmbeddingService` vetoriza exclusivamente evidências primárias com título do documento, caminho, nó e conteúdo literal organizado. Antes de chamar o provedor, todas as unidades pendentes são validadas contra `AI_EMBEDDING_MAX_INPUT_TOKENS`, com margem preventiva de 10%. Lotes técnicos agrupam unidades completas e nunca fragmentam nenhuma delas. Unidades maiores exigem subdivisão estrutural real para ingressar na população semântica. Uma versão já existente para o mesmo modelo e hash é reutilizada antes de chamar o provedor.
 
-Na consulta conceitual ou relacional, `DocumentContextRetriever` compara o embedding transitório do input com todas as evidências primárias `primary:node_content` elegíveis. A distribuição determina a fronteira query-local κq; quando não há ruptura identificável, a população completa segue ao primeiro CIE. Esse estágio calcula média, desvio padrão populacional e CV e encaminha o núcleo (`s ≥ μ + σ`), usando a metade superior da convergência (`μ + σ/2 ≤ s < μ + σ`) apenas como fallback quando o núcleo estiver vazio. O CIE global mantém esse corte e acrescenta sua convergência somente como contexto complementar para a resposta. Similaridades e estatísticas são transitórias.
+Na consulta conceitual ou relacional, `DocumentContextRetriever` compara o embedding transitório do input com todas as evidências primárias `primary:node_content` elegíveis. A distribuição determina a fronteira query-local κq; quando não há ruptura identificável, a população completa segue ao primeiro CIE. Esse estágio calcula média, desvio padrão populacional e CV e encaminha o núcleo (`s ≥ μ + σ`), usando a convergência (`μ ≤ s < μ + σ`) apenas como fallback quando o núcleo estiver vazio. O CIE global mantém esse corte e acrescenta sua convergência somente como contexto complementar para a resposta. Similaridades e estatísticas são transitórias.
 
 `QueryAnswerProvider` pode declarar interações `simetry` ou `assimetry` na mesma chamada que produz a resposta e orienta que cada viés de análise seja apresentado em novo parágrafo. `DocumentQueryService` aceita cada interação somente quando os participantes pertencem ao contexto, foram citados e seus fragmentos existem literalmente nas evidências. Nada disso é persistido como Cnode.
 
@@ -121,9 +121,9 @@ Além de `--live`, `AI_LIVE_ENABLED=true` deve estar configurado.
 
 `DocumentQueryService` aceita somente identificadores pertencentes ao contexto recuperado. Citações desconhecidas, marcadores omitidos e inventários sem incorporação analítica são rejeitados; a aplicação não acrescenta citações ausentes para aparentar conformidade. Uma saída rejeitada pela validação local é regenerada silenciosamente até o limite de três tentativas totais com o mesmo contexto eleito. Da segunda tentativa em diante, o provedor recebe somente um código seguro da falha e, quando aplicável, o ID de uma evidência já eleita que deixou de ser incorporada. Somente a terceira falha consecutiva chega ao usuário como mensagem genérica, sem identificador de evidência. Evidências utilizadas, `simetry`, `assimetry` e limitações permanecem em campos separados.
 
-Na interface web, todas as rodadas concluídas permanecem visíveis no box do chat durante a sessão atual. A partir da segunda consulta, o navegador anexa ao input no máximo as três rodadas anteriores, em ordem cronológica, para que a IA avalie se o pedido atual é continuidade. Esse histórico auxilia referências conversacionais, mas não constitui evidência: perguntas e respostas anteriores nunca substituem nem ampliam as evidências primárias recuperadas para a consulta atual.
+Na interface web, cada resposta encerra uma consulta independente. O compositor desaparece imediatamente após o envio, inclusive durante o processamento. Depois da resposta, **Fazer outra pergunta** aparece abaixo do controle de cópia; essa ação preserva o escopo de projetos e obras, limpa o resultado anterior, reexibe o formulário completo e inicia uma recuperação do zero. A nova pergunta não herda input, população, embedding, CIE ou interações da consulta anterior.
 
-O botão **Reiniciar chat** limpa o transcript, o contexto conversacional e o input, preservando o escopo de projetos e obras selecionado. Durante a espera, o estado **Consultando evidências** apresenta três pontos amarelos animados e respeita a preferência de movimento reduzido. O histórico não é enviado para tabelas, auditoria ou `sessionStorage`; logout, novo login ou recarregamento da aplicação iniciam uma conversa vazia.
+Durante a espera, o estado **Consultando evidências** apresenta três pontos amarelos animados e respeita a preferência de movimento reduzido. O resultado visual não é persistido como estado de chat no banco, na auditoria ou em `sessionStorage`; logout, novo login ou recarregamento da aplicação iniciam uma consulta vazia.
 
 A consulta real também exige dupla confirmação:
 

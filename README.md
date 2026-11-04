@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Current version:** `7.0.2`
+**Current version:** `7.0.3`
 
-**Version highlight:** EVA 7.0.2 turns every validated evidence marker in an answer into a deterministic interactive reference that opens the exact source breadcrumb in an accessible modal.
+**Version highlight:** EVA 7.0.3 introduces isolated single-turn queries, restores the complete global convergence range as complementary context, and adopts a conclusion-first pedagogical answer structure.
 
 EVA is a provider-neutral PHP system for building and querying **verifiable documentary memory**. It preserves document hierarchy, stores literal source evidence, and validates every answer against the primary evidence recovered for the current query.
 
@@ -31,14 +31,14 @@ Core properties:
 - Direct, structural, and broad queries can avoid a transient query embedding.
 - Conceptual and relational queries calculate their initial semantic distribution directly over validated primary-evidence embeddings.
 - The query-local κq boundary emerges from the complete eligible primary score distribution; the upper core then passes through the primary and multidocument refinement stages. There is no configured semantic Top-k or evidence count.
-- The global CIE keeps core (`s ≥ μ + σ`) as the cutoff and adds the upper half of convergence (`μ + σ/2 ≤ s < μ + σ`) only as complementary context for the answer provider.
+- The global CIE keeps core (`s ≥ μ + σ`) as the cutoff and adds convergence (`μ ≤ s < μ + σ`) only as complementary context for the answer provider.
 - The answer model may use only the relevant subset of the available primary context and presents each analytical perspective in a separate paragraph. Every retained source must be cited where its analytical contribution is explained; uncited candidates are discarded, and citation-only inventories are rejected.
 - Locally rejected answer generations are retried silently up to three total attempts; only the third consecutive validation failure reaches the user as a generic error.
 - Answer generation is skipped when no primary evidence is recovered.
 - `simetry` and `assimetry` interactions exist only for the current query and require two cited primary sources with literal excerpts.
 - Provider endpoints, models, and credential-variable names remain environment configuration.
 - Real AI use is disabled by default and requires two explicit confirmations.
-- The chat displays the current transcript while sending at most the three previous completed turns as temporary conversational context.
+- The chat accepts one independent question at a time; the composer disappears on submission, and **Ask another question** below the completed response restores it for a new query with no inherited input, population, or interaction.
 - Superadmin-managed project response profiles specialize answer behavior without weakening evidence, citation, or output rules.
 - Zero, one, or many independent connector modules can subscribe to completed interactions without adding domain knowledge to the Core.
 
@@ -226,7 +226,7 @@ The public schema and all versioned migrations remain included so a new installa
 - [Context Intelligence Engine](docs/en/09_CONTEXT_INTELLIGENCE_ENGINE.md)
 - [Installation](docs/en/03_INSTALLATION.md)
 - [Ingestion and cognitive build](docs/en/04_INGESTION_AND_BUILD.md)
-- [Query and conversational continuity](docs/en/05_QUERY_AND_CHAT.md)
+- [Query and single-turn chat](docs/en/05_QUERY_AND_CHAT.md)
 - [API and operations](docs/en/06_API_AND_OPERATIONS.md)
 - [Security and deployment](docs/en/07_SECURITY_AND_DEPLOYMENT.md)
 - [Scientific scope and energy sustainability](docs/en/08_SCIENTIFIC_AND_ENERGY.md)

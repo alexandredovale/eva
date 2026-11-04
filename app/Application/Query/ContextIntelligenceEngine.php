@@ -33,7 +33,7 @@ final readonly class ContextIntelligenceEngine
 
         $standardDeviation = sqrt($squaredDeviationSum / $count);
         $coefficientOfVariation = $mean == 0.0 ? null : $standardDeviation / $mean;
-        $convergenceLowerBound = $mean + ($standardDeviation / 2.0);
+        $convergenceLowerBound = $mean;
         $upperBound = $mean + $standardDeviation;
         $comparisonTolerance = max(
             1.0,
@@ -54,7 +54,7 @@ final readonly class ContextIntelligenceEngine
             }
         }
 
-        $selected = $core !== [] ? [...$core, ...$convergence] : $convergence;
+        $selected = $core !== [] ? $core : $convergence;
 
         return new ContextIntelligenceAnalysis(
             $mean,

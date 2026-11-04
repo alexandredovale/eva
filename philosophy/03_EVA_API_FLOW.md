@@ -98,13 +98,13 @@ POST /api/documents/{id}/process            <- API interna do EVA
 FASE 2 — INPUT E RESPOSTA AO USUÁRIO
 ===============================================================================
 
-[USUÁRIO ENVIA O INPUT ATUAL]
+[USUÁRIO ENVIA UMA PERGUNTA INDEPENDENTE]
            |
            v
-[NAVEGADOR COMPÕE O CONTEXTO CONVERSACIONAL]
-- input atual no início
-- até 3 rodadas anteriores
-- descarte da mais antiga se exceder 20.000 bytes
+[NAVEGADOR ENVIA INPUT E ESCOPOS]
+- somente o input atual
+- nenhuma rodada anterior
+- nenhuma população ou interação herdada
            |
            v
 POST /api/query                              <- API interna do EVA
@@ -196,8 +196,8 @@ POST /api/query                              <- API interna do EVA
                                     - limitações
                                             |
                                             v
-                                    [TRANSCRIPT NO NAVEGADOR]
-                                    - mantém todas as rodadas da página
+                                    [RESULTADO ÚNICO NO NAVEGADOR]
+                                    - Fazer outra pergunta inicia do zero
                                     - não persiste memória documental
 ```
 
@@ -342,11 +342,11 @@ NÃO SÃO PERSISTIDOS COMO MEMÓRIA DOCUMENTAL:
 - contexto recuperado;
 - resposta gerada;
 - interações cognitivas;
-- histórico conversacional.
+- estado transitório da consulta concluída.
 ```
 
 Essa regra não significa ausência absoluta de observabilidade. `audit_events` mantém metadados sanitizados da consulta concluída, inclusive `simetry_count` e `assimetry_count`, sem pares ou fragmentos. Quando existe módulo ativo assinante, `module_events`, incluída no schema consolidado, pode receber o envelope permitido de `interaction.completed`, com input atual, input contextual, resposta validada, referências públicas de evidência e limitações; cada módulo governa seu próprio estado privado. Bancos legados usam a migration `20260803_010_module_events.sql`. Ausência da tabela em uma instalação incompleta ou falha modular gera diagnóstico seguro, mas não derruba a resposta já validada. Nenhum desses registros altera documentos, evidências primárias ou embeddings.
 
 As relações físicas e lógicas que sustentam essa fronteira estão mapeadas em [`docs/17_RELACIONAMENTO_BANCO_DADOS.md`](../docs/17_RELACIONAMENTO_BANCO_DADOS.md).
 
-O transcript completo existe apenas na memória JavaScript da página aberta. Para continuidade, somente as três rodadas concluídas mais recentes são anexadas ao próximo input; elas ajudam o modelo a interpretar referências conversacionais, mas não adquirem autoridade de evidência. **Reiniciar chat**, logout, novo login ou recarregamento descartam esse estado visual sem alterar projetos e documentos persistidos. A API sempre devolve as interações transitórias validadas; na interface vigente, CIE, `simetry`, `assimetry` e limitações técnicas são exibidos somente ao superadmin, enquanto o usuário comum vê a resposta e as evidências utilizadas.
+O resultado atual existe apenas na memória JavaScript da página aberta. **Fazer outra pergunta** remove essa apresentação, preserva o escopo selecionado e inicia uma consulta independente, sem herdar input, população, embedding, CIE ou interações. Logout, novo login ou recarregamento também descartam o estado visual sem alterar projetos e documentos persistidos. A API sempre devolve as interações transitórias validadas; na interface vigente, CIE, `simetry`, `assimetry` e limitações técnicas são exibidos somente ao superadmin, enquanto o usuário comum vê a resposta e as evidências utilizadas.

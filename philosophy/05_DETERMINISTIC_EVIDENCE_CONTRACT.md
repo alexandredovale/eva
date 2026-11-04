@@ -74,7 +74,7 @@ São persistidos documentos, nós, evidências, derivações, embeddings e audit
 - similaridades e diagnósticos κ;
 - análises inicial (`hierarchical` por compatibilidade), primária e global do CIE;
 - contexto autorizado e resposta;
-- `simetry`, `assimetry` e continuidade conversacional.
+- `simetry`, `assimetry` e qualquer estado transitório da consulta concluída.
 
 Consultar o acervo é leitura, não autorização para reescrever sua memória.
 
