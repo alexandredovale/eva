@@ -64,7 +64,7 @@ In this context, reliability does not mean infallibility, probability of truth, 
 1. preservation of each source's identity and integrity;
 2. separation of literal evidence and query interpretation;
 3. local validation of citations, participants, and excerpts;
-4. explicit declaration of what lacks sufficient support;
+4. explicit declaration when no documentary answer has sufficient support;
 5. disposal of transient relationships after the answer.
 
 Adding documents expands the candidate universe but does not alter existing evidence or create permanent connections among all works. This property preserves memory health and prevents cumulative contamination: later queries may reveal other multidisciplinary encounters without turning earlier interpretations into silent premises for future queries.
@@ -73,7 +73,7 @@ Adding documents expands the candidate universe but does not alter existing evid
 
 EVA must not fill gaps with plausibility. If sufficient primary evidence is absent, the correct operation is to declare the limitation and stop generation of a documentary answer.
 
-Documentary sufficiency may be partial. If a question combines X, Y, and Z but only X and Y have support, EVA describes the supported relationship between X and Y, cites their sources, and identifies Z as an aspect without sufficient evidence. A gap in one part restricts that part; it does not erase what the document permits the system to answer about the others.
+Documentary sufficiency may be partial. If a question combines X, Y, and Z but only X and Y have support, EVA describes the supported relationship between X and Y, cites their sources, and omits Z from the prose without filling the gap through plausibility. Complete absence stops the documentary answer with a limitation; a gap in one part restricts only that part and does not erase what the document permits the system to answer about the others.
 
 Recovering a candidate does not mean retaining it as final support. Retriever orders the complete primary population; κq legitimizes its boundary; the first CIE forwards the upper core or its convergence fallback; κe and primary CIE elect local nuclei; and global CIE consolidates their union without a configured count. AI receives global core as the primary basis and global convergence as auxiliary context, cannot introduce external sources, and may omit candidates that do not contribute to the prose. The global `core` or `convergence` role accompanies each source, exact literal anchors remain protected, and only effectively cited evidence remains in the final basis.
 
@@ -82,7 +82,7 @@ When input contradicts, shifts, or challenges recovered content, the system desc
 This discipline constitutes the principle of **anti-evasion**:
 
 1. do not answer beyond recovered evidence;
-2. do not hide the absence of documentary support;
+2. do not present an unsupported aspect as documentary support;
 3. do not invent citations, relationships, or participants;
 4. do not turn statistical similarity into certainty;
 5. do not persist interpretations produced during conversation.

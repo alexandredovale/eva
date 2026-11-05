@@ -6,7 +6,7 @@
 4. Persistir evidências com `evidence_class` e `evidence_type` explícitos.
 5. Persistir somente evidências primárias literais do tipo `node_content`.
 6. Gerar embeddings somente de unidades organizadas, nunca por cortes arbitrários de tamanho.
-7. Tratar EVA — Evidence Algorithm — como nome e arquitetura principal do sistema, mantendo evidências primárias e embeddings como seu núcleo persistente.
+7. Tratar EVA — Evidence Algorithm — como nome e arquitetura principal do sistema, mantendo documentos, nós, evidências primárias literais e seus embeddings como núcleo persistente.
 8. Tratar Cnode somente como derivação conceitual interna e transitória do EVA, nunca como sistema, camada hierárquica superior, nó documental ou entidade persistente; não persistir pares candidatos, análises de interação ou métricas relacionais como memória/ranking. `audit_events` pode manter apenas contagens sanitizadas por consulta, sem participantes, fragmentos ou reconstrução do par.
 9. Avaliar interações quando houver ao menos duas evidências recuperadas e produzir somente relações entre evidências efetivamente citadas, dentro do limite solicitado.
 10. Usar exclusivamente `simetry` e `assimetry` para descrever interações.
@@ -19,7 +19,7 @@
 17. Exigir fragmento literal de cada participante.
 18. Não atribuir confiança, intensidade, prioridade, relevância, importância ou peso.
 19. Não responder como fato documental sem evidência primária suficiente.
-20. Informar quando o documento não sustenta uma conclusão.
+20. Informar ausência de fundamento quando nenhuma conclusão documental puder ser produzida; em inputs parcialmente sustentados, omitir do campo `answer` somente os aspectos sem suporte.
 21. Exibir as evidências usadas e separar `simetry`, `assimetry` e limitações.
 22. Preservar histórico quando modelos ou vetores mudarem.
 23. Manter provedores substituíveis e configuráveis por capacidade.
@@ -36,7 +36,7 @@
 34. Informar limitação relacional quando nenhuma interação `simetry` ou `assimetry` puder ser validada.
 35. Permitir que o usuário combine livremente aspectos sustentados e não sustentados no mesmo input.
 36. Responder cada aspecto sustentado com evidências citadas.
-37. Nomear separadamente cada aspecto sem evidência suficiente no contexto recuperado.
+37. Omitir silenciosamente do campo `answer` cada aspecto sem evidência suficiente quando outros aspectos estiverem sustentados, sem preencher a lacuna com conhecimento externo nem apagar a parcela válida.
 38. Nunca apagar uma relação parcial válida apenas porque outro aspecto do input não possui evidência.
 39. Tratar resultados recuperados como candidatos até a composição determinística do contexto disponível concluída pela aplicação.
 40. Entregar ao provedor somente o contexto final autorizado: núcleo do CIE global como base principal, sua convergência como contexto auxiliar e âncoras literais protegidas, preservando os papéis globais `core` e `convergence`.
@@ -45,7 +45,7 @@
 43. Nunca acrescentar automaticamente uma citação omitida pelo provedor para fazer a resposta aparentar conformidade.
 44. Nas rotas semânticas, formar o contexto final pelo núcleo e pela convergência do CIE global sobre os núcleos primários locais; `QUERY_NON_SEMANTIC_MAX_EVIDENCE` não pode participar dessas populações.
 45. Não confundir contexto recuperado com evidência utilizada; a aplicação autoriza o conjunto disponível e conserva no resultado somente as fontes efetivamente citadas.
-46. Tratar `QUERY_MAX_INTERACTIONS` como limite de saída relacional transitória, nunca como quantidade de evidências, pares persistidos ou combinações antecipadas.
+46. Tratar `QUERY_MAX_INTERACTIONS` como teto técnico de saída relacional transitória, nunca como quantidade de evidências, pares persistidos ou combinações antecipadas; o comando atual deve solicitar no máximo três interações essenciais e não redundantes.
 47. Desativar interações quando `QUERY_MAX_INTERACTIONS` for zero sem desativar a resposta documental baseada em evidências.
 48. Detectar a intenção relacional localmente, por regras determinísticas normalizadas, sem criar uma chamada de IA anterior à recuperação.
 49. Nunca aceitar, reparar ou completar uma resposta cujo `finish_reason` seja `length`.

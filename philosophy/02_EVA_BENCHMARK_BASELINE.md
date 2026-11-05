@@ -299,7 +299,7 @@ Cada resposta deverá ser avaliada quanto a:
 - estabilidade da resposta sob variações do input;
 - invariância da memória documental antes e depois das consultas.
 
-A invariância deverá ser verificada comparando contagens e hashes de documentos, nós, evidências, derivações e embeddings antes e depois do conjunto de consultas. Respostas, contextos e interações não poderão produzir novos registros de memória.
+A invariância deverá ser verificada comparando contagens e hashes de documentos, nós, evidências primárias e embeddings antes e depois do conjunto de consultas. Respostas, contextos e interações não poderão produzir novos registros de memória.
 
 O estudo também deverá distinguir três conceitos:
 

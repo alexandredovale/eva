@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Current version:** `7.0.3`
+**Current version:** `8.0.0`
 
-**Version highlight:** EVA 7.0.3 introduces isolated single-turn queries, restores the complete global convergence range as complementary context, and adopts a conclusion-first pedagogical answer structure.
+**Version highlight:** EVA 8.0.0 establishes one isolated question per request as a breaking interaction contract, restores the complete global convergence range as complementary context, and adopts a conclusion-first pedagogical answer structure.
 
 EVA is a provider-neutral PHP system for building and querying **verifiable documentary memory**. It preserves document hierarchy, stores literal source evidence, and validates every answer against the primary evidence recovered for the current query.
 

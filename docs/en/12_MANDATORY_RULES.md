@@ -8,7 +8,7 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 4. Persist evidence with explicit `evidence_class` and `evidence_type` values.
 5. Persist only literal primary evidence of type `node_content`.
 6. Generate embeddings only from organized units, never from arbitrary size-based cuts.
-7. Treat EVA — Evidence Algorithm — as the principal system name and architecture, keeping evidence, derivations, and embeddings as its persistent core.
+7. Treat EVA — Evidence Algorithm — as the principal system name and architecture, keeping documents, nodes, literal primary evidence, and primary-evidence embeddings as its persistent core.
 8. Treat Cnode only as an internal transient conceptual derivation of EVA, never as a system, superior hierarchical layer, documentary node, or persistent entity; do not persist candidate pairs, interaction analyses, or relational metrics as memory/ranking. `audit_events` may retain only sanitized per-query counts without participants, excerpts, or pair reconstruction.
 9. Evaluate interactions when at least two evidence records are recovered, and emit only relationships between evidence records actually cited, within the requested limit.
 10. Use only `simetry` and `assimetry` to describe interactions.
@@ -21,7 +21,7 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 17. Require one literal excerpt from each participant.
 18. Do not assign confidence, intensity, priority, relevance, importance, or weight.
 19. Do not answer a claim as documentary fact without sufficient primary evidence.
-20. State when the document does not support a conclusion.
+20. State the lack of grounding when no documentary conclusion can be produced; for partially supported inputs, omit only unsupported aspects from `answer`.
 21. Expose the evidence used and separate `simetry`, `assimetry`, and limitations.
 22. Preserve history when models or vectors change.
 23. Keep providers replaceable and configurable by capability.
@@ -38,7 +38,7 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 34. Report a relational limitation when no `simetry` or `assimetry` interaction can be validated.
 35. Allow a user to combine supported and unsupported aspects freely in one input.
 36. Answer each supported aspect with cited evidence.
-37. Name each aspect for which the recovered context contains insufficient evidence.
+37. Silently omit from `answer` each insufficiently supported aspect when other aspects are supported, without filling the gap from external knowledge or erasing the valid portion.
 38. Never erase a valid partial relationship only because another input aspect lacks evidence.
 39. Treat retrieved results as candidates until the application completes deterministic composition of the available context.
 40. Deliver only the authorized final context to the provider: the global CIE core as the primary basis, its convergence as auxiliary context, and protected literal anchors, preserving the global `core` and `convergence` roles.
@@ -47,7 +47,7 @@ These invariants define the implemented Evidence Algorithm. Product profiles, pr
 43. Never add a citation omitted by the provider merely to make the response appear compliant.
 44. On semantic routes, form final context from the global CIE core and convergence over local primary nuclei; `QUERY_NON_SEMANTIC_MAX_EVIDENCE` must not participate in those populations.
 45. Do not confuse recovered context with used evidence. The application authorizes the available set and retains only effectively cited sources in the result.
-46. Treat `QUERY_MAX_INTERACTIONS` as a transient relational-output limit, never as an evidence count, persisted-pair count, or instruction to precompute combinations.
+46. Treat `QUERY_MAX_INTERACTIONS` as a technical transient relational-output ceiling, never as an evidence count, persisted-pair count, or instruction to precompute combinations; the current command must request at most three essential, nonredundant interactions.
 47. A zero `QUERY_MAX_INTERACTIONS` disables interactions without disabling the evidence-based documentary answer.
 48. Detect relational intent locally through normalized deterministic rules without an AI call before retrieval.
 49. Never accept, repair, or complete a response whose `finish_reason` is `length`.

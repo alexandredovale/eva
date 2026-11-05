@@ -149,13 +149,13 @@ Audit records contain event type, entity, identifier, and sanitized operational 
 
 Every public request receives a random `X-Request-Id`, which is also available to internal diagnostics. Safe categories distinguish truncated AI output, provider HTTP errors, transport failures, invalid responses, database failures, and general application failures without storing exception text or raw provider output.
 
-Metrics are descriptive counts of documents, evidence classes/types, derivations, embeddings, and jobs. They do not assign relevance, confidence, quality, intensity, or cognitive weight.
+Metrics are descriptive counts of documents, evidence classes/types, embeddings, jobs, and audit events. They do not assign relevance, confidence, quality, intensity, or cognitive weight.
 
-Successful query payloads include `context_intelligence`. It is empty for non-vector routes and otherwise contains `hierarchical` analyses per work, up to two `primary` analyses per work, and one `global` analysis. Each item reports population, mean, population standard deviation, coefficient of variation, bounds, regions, and κ diagnostics where applicable. This supports reconstruction of the mathematical selection but is not written to documentary memory or the sanitized audit log.
+Successful query payloads include `context_intelligence`. It is empty for non-vector routes and otherwise contains one `hierarchical` and one `primary` analysis for each work with an eligible semantic population, plus one `global` analysis. Each item reports population, mean, population standard deviation, coefficient of variation, bounds, regions, and κ diagnostics where applicable. This supports reconstruction of the mathematical selection but is not written to documentary memory or the sanitized audit log.
 
 ## Deletion
 
-Deleting a work cascades through its nodes, evidence, derivations, embeddings, jobs, permissions, and project links, then removes its private source file. Deleting a project also removes every work still contained in it, including works shared with another project. Shared works that must survive need to be detached and saved before project deletion.
+Deleting a work cascades through its nodes, evidence, embeddings, jobs, permissions, and project links, then removes its private source file. Deleting a project also removes every work still contained in it, including works shared with another project. Shared works that must survive need to be detached and saved before project deletion.
 
 ## Operational limits
 

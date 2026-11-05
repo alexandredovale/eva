@@ -68,7 +68,7 @@ If no primary evidence exists, EVA returns a limitation without calling the answ
 
 ## Persistence boundary
 
-Documents, nodes, evidence, derivations, embeddings, and sanitized audit events are persistent. The following remain transient:
+Documents, nodes, primary evidence, primary-evidence embeddings, and sanitized audit events are persistent. The following remain transient:
 
 - query embedding;
 - similarities and κ diagnostics;

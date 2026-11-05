@@ -32,7 +32,7 @@ if (str_contains($script, "elements.accessPanel.setAttribute('aria-hidden'")) {
     throw new RuntimeException('O painel de acesso não deve ocultar do leitor de tela um foco ainda ativo.');
 }
 
-if (!preg_match('~assets/app\.js\?v=7\.0\.3~', $html)) {
+if (!preg_match('~assets/app\.js\?v=8\.0\.0~', $html)) {
     throw new RuntimeException('A versão pública do JavaScript não foi atualizada.');
 }
 

@@ -64,7 +64,7 @@ Nesse contexto, confiabilidade não significa infalibilidade, probabilidade de v
 1. preservação da identidade e da integridade de cada fonte;
 2. separação entre evidência literal e interpretação de consulta;
 3. validação local de citações, participantes e fragmentos;
-4. declaração explícita do que não possui fundamento suficiente;
+4. declaração explícita quando nenhuma resposta documental possui fundamento suficiente;
 5. descarte das relações transitórias após a resposta.
 
 Adicionar documentos amplia o universo de candidatos, mas não altera evidências existentes nem cria conexões permanentes entre todas as obras. Essa propriedade preserva a saúde da memória e evita contaminação cumulativa: novas consultas podem revelar outros encontros multidisciplinares sem transformar interpretações anteriores em premissas silenciosas das consultas futuras.
@@ -73,7 +73,7 @@ Adicionar documentos amplia o universo de candidatos, mas não altera evidência
 
 O EVA não deve preencher lacunas com plausibilidade. Se não houver evidência primária suficiente, a operação correta é declarar a limitação e interromper a geração de uma resposta documental.
 
-Suficiência documental pode ser parcial. Se uma pergunta combina X, Y e Z, mas apenas X e Y encontram fundamento, o EVA descreve a relação sustentada entre X e Y, cita suas fontes e identifica Z como aspecto sem evidência suficiente. A lacuna de uma parte restringe essa parte; não apaga aquilo que o documento permite responder sobre as demais.
+Suficiência documental pode ser parcial. Se uma pergunta combina X, Y e Z, mas apenas X e Y encontram fundamento, o EVA descreve a relação sustentada entre X e Y, cita suas fontes e omite Z da prosa, sem preencher a lacuna por plausibilidade. A ausência integral encerra a resposta documental com limitação; a lacuna de uma parte restringe somente essa parte e não apaga aquilo que o documento permite responder sobre as demais.
 
 Recuperar um candidato não equivale a mantê-lo como fundamento final. O Retriever ordena a população primária completa; κq legitima sua fronteira; o primeiro CIE encaminha o núcleo superior ou sua convergência de fallback; κe e CIE primário elegem núcleos locais; e o CIE global consolida sua união sem quantidade configurada. A IA recebe o núcleo global como base principal e sua convergência como contexto auxiliar, não pode introduzir fontes externas e pode omitir candidatas que não contribuam para a prosa. O papel global `core` ou `convergence` acompanha cada fonte, âncoras literais exatas permanecem protegidas e somente as evidências efetivamente citadas permanecem na base final.
 
@@ -82,7 +82,7 @@ Quando o input contradiz, desloca ou questiona o conteúdo recuperado, o sistema
 Essa disciplina constitui o princípio de **antievasão**:
 
 1. não responder além das evidências recuperadas;
-2. não ocultar a ausência de fundamento documental;
+2. não apresentar como sustentado o aspecto sem fundamento documental;
 3. não inventar citações, relações ou participantes;
 4. não converter semelhança estatística em certeza;
 5. não persistir interpretações produzidas durante a conversa.

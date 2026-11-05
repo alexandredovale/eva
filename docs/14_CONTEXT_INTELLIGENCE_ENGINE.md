@@ -78,7 +78,7 @@ Não existe configuração de quantidade para evidências semânticas. `QUERY_NO
 
 ## Saída auditável
 
-Respostas incluem uma análise `hierarchical`, até duas análises `primary` por obra e uma análise `global`, identificadas por `stage` e `source_region`. Cada item informa:
+Respostas incluem uma análise `hierarchical` e uma análise `primary` por obra com população semântica elegível, além de uma análise `global`, identificadas por `stage` e `source_region`. O CIE inicial encaminha somente uma região — núcleo ou convergência de fallback —, por isso o fluxo vigente não produz duas análises primárias na mesma obra. Cada item informa:
 
 - quantidade de candidatos;
 - diagnóstico `retrieval_boundary` com população primária total, scores ordenados, normalização, gaps, estatísticas dos gaps, estado, candidato e κq efetivo;

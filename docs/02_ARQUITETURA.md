@@ -32,13 +32,28 @@ Pergunta → roteamento → população `primary:node_content` completa
          → contrato determinístico → resposta + interações transitórias → validação
 ```
 
+## Fluxo ponta a ponta verificado
+
+1. `POST /api/documents` valida o upload, escolhe o parser pela extensão e lê integralmente a fonte Markdown, JSON ou XML.
+2. O parser produz a árvore normalizada. A aplicação registra o documento como `received`, grava a fonte original em armazenamento privado, persiste nós e evidências `primary:node_content` em transação e encerra o documento como `ready`.
+3. A ingestão não gera embeddings nem agenda processamento automaticamente. `POST /api/documents/{id}/process` agenda somente a etapa `embeddings`, de forma idempotente por documento e versão da capacidade.
+4. O worker organiza cada evidência primária completa com título da obra, caminho, nó, referência e conteúdo literal. Todas as unidades pendentes são verificadas antes da primeira chamada; versões existentes por modelo e hash são reutilizadas, e as demais são vetorizadas em lotes sem fragmentação arbitrária.
+5. O navegador envia a `POST /api/query` apenas os escopos selecionados e o input atual. A API autoriza e deduplica as obras, aplica somente os perfis dos projetos explicitamente selecionados e não recebe estado de pergunta anterior.
+6. `InputTypeDetector` escolhe localmente as rotas. Inputs diretos, estruturais e amplos usam identificadores, conteúdo literal e árvore; inputs conceituais ou relacionais também criam um único embedding transitório reutilizado entre as obras da mesma requisição.
+7. Em cada obra semântica, o Retriever calcula cosine contra toda evidência primária validada com embedding compatível, ordena a população, aplica κq e executa o CIE inicial. Apenas o núcleo, ou a convergência como fallback quando o núcleo estiver vazio, segue para κe e para um CIE primário local.
+8. `DocumentQueryService` deduplica a união dos núcleos locais e executa o CIE global. Seu núcleo recebe precedência; sua convergência é anexada como contexto auxiliar. Correspondências literais exatas fora da população primária analisada permanecem protegidas.
+9. Se não houver evidência, a resposta documental é encerrada localmente sem chamada generativa. Caso exista contexto, `QueryAnswerProvider` recebe somente o input atual, evidências autorizadas completas, papéis `core`/`convergence`, limitações conhecidas e governanças aplicáveis.
+10. A mesma chamada produz um JSON com resposta pedagógica orientada por conclusão, IDs utilizados, interações e limitações. O prompt solicita no máximo três interações essenciais; separadamente, o backend rejeita saídas acima de `QUERY_MAX_INTERACTIONS`. Ele deriva a base efetivamente usada das citações visíveis e valida IDs, incorporação analítica, participantes, orientação e fragmentos literais.
+11. Uma saída localmente inválida pode ser regenerada até três tentativas totais com o mesmo contexto. Dentro de cada tentativa, `finish_reason=length` admite uma única regeneração integral compacta; nenhuma saída parcial é aceita.
+12. Depois da validação, a API registra apenas metadados sanitizados, emite opcionalmente `interaction.completed` aos módulos assinantes e devolve o resultado. A interface mantém somente essa pergunta e resposta; **Fazer outra pergunta** descarta o resultado transitório, preserva os escopos e inicia outra requisição do zero.
+
 ## Separação de responsabilidades
 
 Embeddings localizam evidências primárias semanticamente compatíveis. Nas rotas semânticas, toda a população primária elegível é ordenada e κq emerge da geometria query-local antes do primeiro CIE. Esse estágio encaminha somente seu núcleo (`s ≥ μ + σ`), com fallback para a convergência (`μ ≤ s < μ + σ`) quando o núcleo estiver vazio. As fontes sobreviventes passam pelos cálculos posteriores de κe e CIE primário. A união deduplicada dos núcleos locais recebe o CIE global. Seu núcleo continua sendo o corte principal, mas a convergência global é anexada como contexto complementar para o provedor. Correspondências literais exatas externas à população vetorial permanecem como âncoras protegidas.
 
 Depois da seleção das fontes primárias, o contexto disponível está concluído. A IA não pode introduzir fontes externas ou IDs fora desse conjunto. A base final da resposta contém somente as fontes efetivamente incorporadas à prosa com citações visíveis; uma fonte recuperada mas não citada é descartada, sem invalidar toda a resposta. Citação inexistente, fora do contexto ou apresentada apenas como inventário continua inválida, e a aplicação não completa marcadores omitidos.
 
-As interações são produzidas pela mesma capacidade linguística que responde à consulta. O Cnode resultante é uma derivação conceitual interna do EVA, não um sistema, módulo hierárquico superior, nó documental ou entidade persistente. Essas interações não recebem identidade permanente e não são analisadas antecipadamente por combinação massiva de pares. A camada local valida tipo, orientação, participantes citados e literalidade dos fragmentos.
+As interações são produzidas pela mesma capacidade linguística que responde à consulta. O Cnode resultante é uma derivação conceitual interna do EVA, não um sistema, módulo hierárquico superior, nó documental ou entidade persistente. Essas interações não recebem identidade permanente e não são analisadas antecipadamente por combinação massiva de pares. O comando atual solicita no máximo três interações essenciais, ainda que o teto técnico configurado seja maior; a rejeição local por quantidade usa o teto configurado. A camada local também valida tipo, orientação, participantes citados e literalidade dos fragmentos.
 
 ## Neutralidade de fornecedores
 

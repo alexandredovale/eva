@@ -289,7 +289,7 @@ Não há tabelas para CNodes, pares `simetry`/`assimetry`, chat, mensagens, simi
 
 ## Instalação e verificação
 
-No estado versionado atual, `database/schema.sql` cria as 14 tabelas do banco principal, inclusive `module_events`. Uma instalação nova importa somente esse arquivo. Uma instalação existente aplica, em ordem, todas as migrations ainda ausentes; `20260803_010_module_events.sql` permanece idempotente e atende bancos criados antes de a caixa postal entrar no schema consolidado.
+No estado versionado atual, `database/schema.sql` cria as 13 tabelas do banco principal, inclusive `module_events`. Uma instalação nova importa somente esse arquivo. Uma instalação existente aplica, em ordem, todas as migrations ainda ausentes; `20260803_010_module_events.sql` permanece idempotente e atende bancos criados antes de a caixa postal entrar no schema consolidado.
 
 Verificação estrutural mínima, sem consultar conteúdo:
 

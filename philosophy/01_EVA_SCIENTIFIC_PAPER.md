@@ -38,7 +38,7 @@ A questão central é:
 Essa questão contém sete problemas interdependentes:
 
 1. **segmentação semântica:** representar o documento sem depender de cortes arbitrários;
-2. **proveniência:** distinguir conteúdo literal de sínteses e registrar suas derivações;
+2. **proveniência:** preservar a fonte e a origem estrutural de cada evidência literal;
 3. **recuperação adaptativa:** não impor busca vetorial a perguntas que podem ser resolvidas estruturalmente;
 4. **fundamentação:** impedir respostas documentais quando nenhuma evidência primária foi recuperada;
 5. **fronteira epistemológica:** impedir que similaridades, respostas e relações inferidas sejam promovidas automaticamente a memória.
@@ -49,9 +49,9 @@ O EVA aborda esses problemas como uma cadeia única. A qualidade final não depe
 
 ## 3. Princípios de projeto
 
-### 3.1 Fonte antes de síntese
+### 3.1 Fonte antes de interpretação
 
-O conteúdo literal permanece distinguível de qualquer transformação produzida por modelo. Uma síntese auxilia a navegação sem substituir a fonte que lhe deu origem.
+O conteúdo literal permanece distinguível de qualquer transformação produzida por modelo. A recuperação opera diretamente sobre a fonte indexada, sem usar um resumo intermediário como substituto.
 
 ### 3.2 Estrutura antes de tamanho
 
@@ -377,9 +377,9 @@ A barreira de evidência deve reduzir respostas a perguntas sem suporte no acerv
 
 O uso de navegação hierárquica em perguntas diretas e estruturais deve reduzir chamadas de embedding e latência em comparação com uma rota vetorial obrigatória para todos os inputs.
 
-### H5 — Resolução derivada
+### H5 — Recuperação primária direta
 
-Indexar sínteses, mas responder com suas fontes primárias, deve ampliar recall conceitual sem perder verificabilidade literal.
+Indexar e recuperar diretamente evidências primárias deve reduzir a perda de informação introduzida por uma etapa intermediária de sumarização, preservando verificabilidade literal.
 
 ### H6 — Neutralidade relacional
 
@@ -405,12 +405,11 @@ Uma avaliação controlada deve comparar:
 
 1. RAG por blocos de tamanho fixo;
 2. RAG por blocos com sobreposição;
-3. recuperação somente sobre evidências primárias;
-4. recuperação sobre primárias e derivadas sem resolução de linhagem;
-5. EVA com roteamento, linhagem e barreira de evidência, mas sem CIE;
-6. EVA completo com CIE;
-7. reranker de referência sobre um orçamento de candidatos declarado, quando aplicável;
-8. contexto longo, quando tecnicamente e economicamente comparável.
+3. recuperação somente sobre evidências primárias sem roteamento do EVA;
+4. EVA com roteamento e barreira de evidência, mas sem CIE;
+5. EVA completo com CIE;
+6. reranker de referência sobre um orçamento de candidatos declarado, quando aplicável;
+7. contexto longo, quando tecnicamente e economicamente comparável.
 
 Todos os baselines devem usar, na medida do possível, os mesmos documentos, provedor de embeddings, provedor de resposta e orçamento de contexto.
 
@@ -421,7 +420,7 @@ O conjunto experimental deve incluir:
 - documentos longos e hierárquicos em Markdown;
 - documentos JSON com objetos, listas e profundidades distintas;
 - documentos XML com atributos, elementos repetidos e namespaces quando suportados;
-- documentos curtos cuja estrutura não produz naturalmente muitas sínteses;
+- documentos curtos com poucas unidades primárias;
 - versões modificadas de um mesmo documento para testar hashes e reconstrução;
 - projetos multidisciplinares compostos por documentos especializados, incluindo pares com convergência explícita, tensão conceitual, vocabulários diferentes e ausência real de relação.
 

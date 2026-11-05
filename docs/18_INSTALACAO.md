@@ -20,7 +20,7 @@ Nunca copie segredos de produção para exemplos, relatos de incidentes, saída 
 
 ## 3. Banco de dados
 
-Crie um banco vazio em UTF-8 e importe `database/schema.sql`. O schema consolidado cria as 14 tabelas atuais do banco principal, inclusive a caixa postal do Module Runtime. O repositório não exige dados iniciais e não inclui dump operacional, usuários, fontes enviadas ou evidências geradas.
+Crie um banco vazio em UTF-8 e importe `database/schema.sql`. O schema consolidado cria as 13 tabelas atuais do banco principal, inclusive a caixa postal do Module Runtime. O repositório não exige dados iniciais e não inclui dump operacional, usuários, fontes enviadas ou evidências geradas.
 
 ```bash
 mysql -u root -p -e "CREATE DATABASE eva CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"

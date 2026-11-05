@@ -68,7 +68,7 @@ Se não houver evidência primária, o EVA retorna limitação sem chamar o prov
 
 ## Fronteira de persistência
 
-São persistidos documentos, nós, evidências, derivações, embeddings e auditoria sanitizada. Permanecem transitórios:
+São persistidos documentos, nós, evidências primárias, seus embeddings e auditoria sanitizada. Permanecem transitórios:
 
 - embedding da consulta;
 - similaridades e diagnósticos κ;

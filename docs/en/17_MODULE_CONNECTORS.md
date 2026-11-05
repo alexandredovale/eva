@@ -81,7 +81,7 @@ AI keys, database credentials, bearer tokens, and raw Core PDO access are not pr
 
 ## Events and deterministic processing
 
-The first official event is `interaction.completed`. It contains actor identity, occurrence time, contextual project and document snapshots, the current question, the conversational input used by the Core, the validated answer, public evidence references, and limitations.
+The first official event is `interaction.completed`. It contains actor identity, occurrence time, contextual project and document snapshots, the independent current question in both compatibility input fields, the validated answer, public evidence references, and limitations.
 
 ```json
 {

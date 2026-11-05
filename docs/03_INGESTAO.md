@@ -15,7 +15,7 @@ Antes do processamento, o sistema confirma:
 - JSON ou XML bem-formado;
 - ausência de `DOCTYPE` no XML;
 - hierarquia válida para figuras Markdown, JSON e XML: todo nó `Figura`/`Figure` deve possuir um nó temático não visual como pai imediato;
-- hash SHA-256 da fonte.
+- cálculo do hash SHA-256 da fonte para identidade e rastreabilidade; o upload não fornece um hash externo para comparação.
 
 ## Parsers
 

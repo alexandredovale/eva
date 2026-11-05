@@ -256,7 +256,7 @@ The baseline used one work and does not measure EVA's multidisciplinary capacity
 
 Evaluate source/discipline provenance, multi-document precision/recall, interaction fragments and participants, claims beyond cited sources, non-evasive declarations of unsupported fields, document diversity in final global core and convergence, stability under input variation, and documentary-memory invariance before and after queries.
 
-Invariance must compare counts and hashes of documents, nodes, evidence, derivations, and embeddings. Distinguish process reliability, semantic correctness evaluated by annotators, and multidisciplinary completeness. Emergent synthesis is valid only when components are traceable and formulation stays within citations; it remains transient, not new evidence.
+Invariance must compare counts and hashes of documents, nodes, primary evidence, and embeddings. Distinguish process reliability, semantic correctness evaluated by annotators, and multidisciplinary completeness. Emergent synthesis is valid only when components are traceable and formulation stays within citations; it remains transient, not new evidence.
 
 ## 12. Context Intelligence Engine baseline to execute
 

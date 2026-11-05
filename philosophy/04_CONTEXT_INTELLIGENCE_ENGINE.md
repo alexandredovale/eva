@@ -100,7 +100,7 @@ Dadas as mesmas populações ordenadas e similaridades, a saída é invariável.
 - usa histórico, feedback ou reranking por IA;
 - faz chamadas extras de embedding ou múltiplas chamadas de resposta em lotes;
 - persiste vetores do input, scores, estatísticas, regiões ou contexto;
-- altera evidências, derivações ou embeddings;
+- altera evidências ou embeddings;
 - usa similaridade como confiança epistêmica.
 
 `QUERY_NON_SEMANTIC_MAX_EVIDENCE` atua somente nas rotas direta, estrutural e ampla. Não participa de κq, κe ou de qualquer CIE.
@@ -121,7 +121,7 @@ Cada item expõe transitoriamente população, `μ`, `σ`, `CV`, limites, regiã
 
 ## Limite científico
 
-Determinismo não prova relevância. O fluxo continua dependente da qualidade do corpus, da estrutura documental, das sínteses, dos embeddings e da capacidade de κ identificar rupturas úteis. CIE usa fronteiras relativas e não possui um limiar absoluto de “nenhum candidato relacionado”. O núcleo global também não garante cobertura equilibrada de todas as disciplinas.
+Determinismo não prova relevância. O fluxo continua dependente da qualidade do corpus, da estrutura documental, dos embeddings e da capacidade de κ identificar rupturas úteis. CIE usa fronteiras relativas e não possui um limiar absoluto de “nenhum candidato relacionado”. O núcleo global também não garante cobertura equilibrada de todas as disciplinas.
 
 A hipótese falsificável é que, sob o mesmo corpus, modelos e protocolo, o fluxo atual reduza ruído, tokens e instabilidade entre paráfrases sem perda inaceitável de recall. Isso exige comparação representativa com baselines de Top-k fixo, reranking e contexto longo; o teste funcional atual não demonstra superioridade estatística.
 

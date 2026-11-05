@@ -26,9 +26,9 @@ O `SYSTEM_PROMPT` do `QueryAnswerProvider` trata o input como autossuficiente e 
 
 ## Cobertura parcial do input
 
-O usuário pode combinar livremente conceitos e relações. A suficiência documental é avaliada por aspecto: se uma relação solicitada envolve X, Y e Z, mas somente X e Y possuem evidências recuperadas, o sistema responde a relação entre X e Y com citações e informa que não encontrou evidência suficiente para Z.
+O usuário pode combinar livremente conceitos e relações. A suficiência documental é avaliada por aspecto: se uma relação solicitada envolve X, Y e Z, mas somente X e Y possuem evidências recuperadas, o sistema responde à parcela sustentada entre X e Y com citações e omite silenciosamente Z do campo `answer`. O prompt proíbe avisos de ausência dentro da prosa quando outros aspectos possuem suporte, para que a resposta permaneça direta e não gaste tokens repetindo limitações parciais.
 
-A ausência de um aspecto nunca autoriza conhecimento externo e não apaga os demais aspectos sustentados. O bloqueio integral antes da geração ocorre somente quando nenhuma evidência primária é recuperada.
+A ausência de um aspecto nunca autoriza conhecimento externo e não apaga os demais aspectos sustentados. Limitações técnicas continuam disponíveis no campo separado `limitations`; o bloqueio integral antes da geração ocorre somente quando nenhuma evidência primária é recuperada.
 
 ## Recuperação
 
@@ -90,12 +90,12 @@ Esse valor não altera a quantidade de evidências de uma consulta semântica.
 
 Define a quantidade máxima de interações transitórias `simetry` e `assimetry` que podem ser aceitas na resposta de uma consulta relacional.
 
-- **Função:** limitar a saída relacional produzida sobre as evidências recuperadas e citadas.
+- **Função:** estabelecer o teto técnico da saída relacional produzida sobre as evidências recuperadas e citadas.
 - **Fallback do código:** `20` quando a variável não estiver definida.
 - **Intervalo efetivo:** de `0` a `100`; a configuração carregada é normalizada para esse intervalo.
 - **Ativação:** interações são analisadas sempre que há pelo menos duas evidências recuperadas no contexto e o limite é maior que zero, independentemente do tipo inicial do input; somente pares citados podem ser aceitos.
 - **Desativação:** o valor `0` desativa a geração de interações; a resposta documental e suas citações continuam funcionando.
-- **Contrato com a IA:** o valor é enviado ao `QueryAnswerProvider` como `interaction_limit`. Uma resposta acima do limite é rejeitada.
+- **Contrato com a IA:** o valor é enviado ao `QueryAnswerProvider` como `interaction_limit`. O comando atual pede no máximo três interações essenciais e não redundantes, mas a rejeição local por quantidade usa o teto configurado. Assim, uma resposta conforme ao prompt contém até três; se o provedor desobedecer a essa instrução sem ultrapassar `QUERY_MAX_INTERACTIONS`, a quantidade isoladamente não causa rejeição.
 - **Validação:** cada interação aceita deve usar exatamente duas evidências pertencentes ao contexto, declaradas como utilizadas e citadas, além de conter fragmentos literais verificáveis de ambas.
 - **Persistência:** o limite não cria pares antecipadamente, não executa combinação massiva e não altera o banco. As interações existem somente durante aquela consulta.
 - **Independência:** aumentar esse valor não altera κq, κe ou qualquer análise do CIE.
@@ -106,7 +106,7 @@ Exemplo:
 QUERY_MAX_INTERACTIONS=20
 ```
 
-Nesse caso, qualquer consulta com ao menos duas evidências pode retornar no máximo vinte interações validadas, desde que a relação seja demonstrada literalmente.
+Nesse caso, o prompt solicita no máximo três interações validadas, desde que a relação seja demonstrada literalmente. O valor `20` permanece como teto técnico de aceitação local, não como meta nem como quantidade solicitada ao modelo.
 
 ### `AI_QUERY_MAX_OUTPUT_TOKENS`
 
@@ -131,7 +131,7 @@ O valor foi calibrado a partir da matriz relacional real. Reduzi-lo exige nova v
 
 ### Regeneração silenciosa por falha de validação
 
-Quando uma geração chega completa ao backend, mas viola o contrato local de citações, incorporação analítica ou interações, `DocumentQueryService` descarta integralmente essa saída e solicita nova geração com o mesmo contexto recuperado. A partir da segunda tentativa, o provedor recebe somente um código técnico conhecido da falha. Uma evidência recuperada que não aparece citada é apenas descartada; ela não provoca regeneração. São permitidas no máximo três tentativas totais de resposta validada dentro da mesma requisição da API.
+Quando uma geração chega completa ao backend, mas viola o contrato local de citações, incorporação analítica ou interações, `DocumentQueryService` descarta integralmente essa saída e solicita nova geração com o mesmo contexto recuperado. A partir da segunda tentativa, o provedor recebe somente um código técnico conhecido da falha. Uma evidência recuperada que não aparece citada é apenas descartada; ela não provoca regeneração. São permitidas no máximo três tentativas totais de resposta validada dentro da mesma requisição da API. Cada tentativa pode conter, internamente, a única regeneração compacta reservada a truncamento; por isso, “três tentativas de validação” não significa necessariamente “três requisições HTTP externas”.
 
 As tentativas rejeitadas não aparecem no transcript, não alteram a seleção do CIE e não reutilizam texto parcial. O feedback corretivo não contém input, conteúdo documental, resposta rejeitada, similaridade, peso, valor subjetivo ou identificador de evidência. Enquanto houver tentativa disponível, a interface permanece em **Consultando evidências…** e não exibe a regra técnica que causou a rejeição.
 

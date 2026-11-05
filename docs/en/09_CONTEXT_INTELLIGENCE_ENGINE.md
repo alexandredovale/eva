@@ -61,7 +61,7 @@ Semantic evidence count has no configured limit. `QUERY_NON_SEMANTIC_MAX_EVIDENC
 
 ## Auditable output and tests
 
-Query responses identify hierarchical, primary, and global analyses through `stage`; primary analyses also expose `source_region`. Every analysis reports mean, population standard deviation, CV, convergence bounds, selected region, and candidate groups, while κ diagnostics remain attached where applicable.
+Query responses contain one `hierarchical` and one `primary` analysis for each work with an eligible semantic population, plus one `global` analysis. They are identified through `stage`, and primary analyses also expose `source_region`. Because the first CIE forwards only one region—core or convergence fallback—the current path does not produce two primary analyses for the same work. Every analysis reports mean, population standard deviation, CV, convergence bounds, selected region, and candidate groups, while κ diagnostics remain attached where applicable.
 
 Run the database-independent mathematical test with:
 

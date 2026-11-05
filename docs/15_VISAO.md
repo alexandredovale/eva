@@ -8,7 +8,7 @@ A pergunta central é:
 
 > Qual utilidade real tem o sistema EVA hoje para o progresso no mundo?
 
-A análise distingue explicitamente capacidades implementadas, resultados internos observados, limitações atuais e impacto futuro condicionado. O objetivo não é tratar o EVA como um sistema livre de vieses — nenhuma arquitetura baseada em embeddings, sínteses e modelos generativos pode sustentar essa afirmação —, mas avaliar o produto sem viés promocional.
+A análise distingue explicitamente capacidades implementadas, resultados internos observados, limitações atuais e impacto futuro condicionado. O objetivo não é tratar o EVA como um sistema livre de vieses — nenhuma arquitetura baseada em embeddings e modelos generativos pode sustentar essa afirmação —, mas avaliar o produto sem viés promocional.
 
 ## Parecer executivo
 
@@ -40,15 +40,14 @@ O fluxo implementado é:
 1. O sistema recebe documentos Markdown, JSON ou XML.
 2. O conteúdo é convertido para uma árvore documental comum, preservando ordem, hierarquia e referência de origem.
 3. Evidências primárias literais são criadas para os nós com conteúdo documental direto.
-4. Sínteses ascendentes versionadas podem ser produzidas, mantendo a linhagem entre cada síntese e suas fontes.
-5. Embeddings são gerados para unidades documentais completas e previamente estruturadas.
-6. Na consulta, o input é encaminhado para rotas diretas, estruturais, amplas ou semânticas.
-7. Nas rotas semânticas, κq e o primeiro CIE atuam diretamente sobre a população primária completa; somente o núcleo superior, ou a convergência como fallback, segue adiante.
-8. κe e CIE primário preservam os cálculos posteriores e elegem núcleos locais sobre as fontes sobreviventes.
-9. O CIE global consolida os núcleos locais, e o modelo recebe seu núcleo como base principal, sua convergência como contexto auxiliar e âncoras literais protegidas.
-10. A base final mantém apenas evidências incorporadas à prosa com citações visíveis; candidatas recuperadas mas não citadas são descartadas.
-11. Quando há interação demonstrável entre evidências citadas, Cnode existe apenas como derivação conceitual transitória do EVA, não como sistema, camada hierárquica ou entidade.
-12. A consulta e suas interações não alteram a memória documental persistente.
+4. Embeddings versionados são gerados exclusivamente para evidências primárias completas e previamente estruturadas.
+5. Na consulta, o input é encaminhado para rotas diretas, estruturais, amplas ou semânticas.
+6. Nas rotas semânticas, κq e o primeiro CIE atuam diretamente sobre a população primária completa; somente o núcleo superior, ou a convergência como fallback, segue adiante.
+7. κe e CIE primário preservam os cálculos posteriores e elegem núcleos locais sobre as fontes sobreviventes.
+8. O CIE global consolida os núcleos locais, e o modelo recebe seu núcleo como base principal, sua convergência como contexto auxiliar e âncoras literais protegidas.
+9. A base final mantém apenas evidências incorporadas à prosa com citações visíveis; candidatas recuperadas mas não citadas são descartadas.
+10. Quando há interação demonstrável entre evidências citadas, Cnode existe apenas como derivação conceitual transitória do EVA, não como sistema, camada hierárquica ou entidade.
+11. A consulta e suas interações não alteram a memória documental persistente.
 
 Essa separação entre fonte original, conteúdo gerado e resultado transitório é o principal mérito do sistema.
 
@@ -56,7 +55,7 @@ Essa separação entre fonte original, conteúdo gerado e resultado transitório
 
 | Dimensão | Situação atual | Parecer |
 |---|---|---|
-| Proveniência e rastreabilidade | Evidência literal, identificadores estáveis, caminhos e derivações | Forte |
+| Proveniência e rastreabilidade | Evidência literal, identificadores estáveis, caminhos e referências de origem | Forte |
 | Proteção contra respostas sem fonte | Barreiras de IDs, citações e fragmentos | Forte, mas não garante correção semântica |
 | Organização estrutural | Árvore, projetos, obras e perfis de respostas | Boa para acervo curado |
 | Gestão do ciclo de vida | Sem versão documental explícita, aprovação, validade, tags ou atualização incremental da obra | Limitada |
@@ -115,8 +114,8 @@ A validação local pode solicitar até três gerações completas com o mesmo c
 ### Pontos fortes
 
 - A hierarquia original é preservada em vez de ser substituída por chunks arbitrários.
-- Evidência primária e síntese gerada permanecem distinguíveis.
-- Derivações permitem retornar de uma síntese às fontes que a originaram.
+- A memória operacional permanece literal e primária; interpretações geradas não são promovidas a evidência.
+- Cada evidência permanece ligada diretamente ao nó documental e à referência de origem.
 - Embeddings são versionados por modelo e hash.
 - Projetos agrupam obras sem alterar a estrutura cognitiva dos documentos.
 - Escopos de usuário limitam quais obras podem participar de uma consulta.
@@ -191,7 +190,7 @@ O EVA escolhe o caminho oposto: não materializa Cnode porque ele é apenas uma 
 
 ### Neutralidade de fornecedor
 
-O domínio possui interfaces separadas para embeddings, sínteses e respostas. Essa é uma boa separação arquitetural. Entretanto, [`CognitiveProviderFactory.php`](../app/Infrastructure/Ai/CognitiveProviderFactory.php) sempre instancia os mesmos adaptadores, cujos payloads utilizam campos como `messages`, `response_format`, `thinking` e `max_tokens`.
+O domínio possui interfaces separadas para embeddings e respostas. Essa é uma boa separação arquitetural. Entretanto, [`CognitiveProviderFactory.php`](../app/Infrastructure/Ai/CognitiveProviderFactory.php) sempre instancia os mesmos adaptadores, cujos payloads utilizam campos como `messages`, `response_format`, `thinking` e `max_tokens`.
 
 Na prática, a portabilidade atual é compatibilidade com APIs de formato semelhante, não neutralidade universal entre fornecedores.
 
@@ -199,7 +198,7 @@ Na prática, a portabilidade atual é compatibilidade com APIs de formato semelh
 
 O EVA possui mecanismos relevantes de contenção:
 
-- reaproveitamento de sínteses e embeddings;
+- reaproveitamento de embeddings;
 - dispensa de embedding em rotas não semânticas;
 - encerramento sem chamada generativa quando nenhuma evidência é recuperada;
 - ausência de construção antecipada de pares relacionais;
@@ -236,7 +235,7 @@ Ele pode ajudar o progresso quando:
 - torna conhecimento especializado mais acessível sem apagar sua origem;
 - reduz o risco de decisões baseadas em afirmações sem fonte;
 - permite auditoria de respostas em educação, ciência, indústria e administração pública;
-- preserva diferenças entre documento original, síntese e interpretação;
+- preserva a diferença entre documento original e interpretação transitória;
 - impede que cada conversa reescreva silenciosamente a memória institucional;
 - oferece uma arquitetura aberta para experimentar RAG verificável;
 - permite substituir modelos sem reconstruir toda a lógica documental;
@@ -256,7 +255,7 @@ O estado `validated` de uma evidência primária comprova que o conteúdo foi ex
 
 ### Determinismo não significa ausência de viés
 
-O CIE é determinístico para o mesmo conjunto de similaridades, mas os embeddings são produzidos por modelos, as sínteses são interpretações geradas e as regras locais refletem decisões de projeto. O sistema reduz arbitrariedade em etapas específicas; ele não elimina vieses linguísticos, documentais ou de modelo.
+O CIE é determinístico para o mesmo conjunto de similaridades, mas os embeddings são produzidos por modelos e as regras locais refletem decisões de projeto. O sistema reduz arbitrariedade em etapas específicas; ele não elimina vieses linguísticos, documentais ou de modelo.
 
 ### Citação não significa implicação semântica
 

@@ -1525,7 +1525,7 @@ elements.documentsBody.addEventListener('click', async event => {
     if (!document || !await confirmTypedDeletion(
         'Documento',
         document.title,
-        'Esta ação excluirá permanentemente a obra, seus nós, evidências, derivações, embeddings, filas e todas as permissões relacionadas.'
+        'Esta ação excluirá permanentemente a obra, seus nós, evidências, embeddings, filas e todas as permissões relacionadas.'
     )) return;
 
     deleteButton.disabled = true;

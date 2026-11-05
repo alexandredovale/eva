@@ -2,7 +2,7 @@
 
 ## Input validation
 
-The upload layer accepts Markdown, JSON, and XML. It verifies extension, configured size, name/title constraints, UTF-8 where applicable, well-formed JSON/XML, absence of XML `DOCTYPE`, valid figure hierarchy, and the SHA-256 source hash. Every `Figura`/`Figure` node must have an immediate non-visual thematic node as its parent.
+The upload layer accepts Markdown, JSON, and XML. It verifies extension, configured size, name/title constraints, UTF-8 where applicable, well-formed JSON/XML, absence of XML `DOCTYPE`, and valid figure hierarchy. It calculates the SHA-256 source hash for identity and traceability; the upload does not supply an external hash for comparison. Every `Figura`/`Figure` node must have an immediate non-visual thematic node as its parent.
 
 The original filename is metadata only. Physical storage uses an internal identifier outside the public web directory.
 

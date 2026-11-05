@@ -7,6 +7,18 @@ and the project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [8.0.0] - 2026-11-05
+
+### Changed
+
+- Classified the isolated single-question request model as a breaking interaction contract: every new question starts without inherited input, recovered population, embedding, CIE state, answer, or interaction.
+- Audited the documented path from Markdown ingestion through normalized primary evidence, embedding construction, query-local boundaries, CIE consolidation, answer generation, local validation, and the one-result browser lifecycle.
+- Corrected current documentation to reflect primary-only construction and queueing, one primary CIE analysis per work in the implemented forwarding path, the three-interaction generation policy versus the separately configured backend ceiling, silent omission of unsupported partial aspects, and the actual 13-table consolidated schema.
+
+### Fixed
+
+- Corrected the public release line from the mistakenly classified `7.0.3` release to semantic version `8.0.0`. The `7.0.3` tag remains as immutable release history and is superseded by this release.
+
 ## [7.0.3] - 2026-11-04
 
 ### Changed

@@ -56,7 +56,7 @@ This separation between original source, generated content, and transient result
 
 | Dimension | Current state | Assessment |
 |---|---|---|
-| Provenance and traceability | Literal evidence, stable identifiers, paths, and derivations | Strong |
+| Provenance and traceability | Literal evidence, stable identifiers, paths, and source references | Strong |
 | Protection against unsupported answers | ID, citation, and excerpt barriers | Strong, but does not guarantee semantic correctness |
 | Structural organization | Tree, projects, works, and response profiles | Good for curated collections |
 | Content lifecycle management | No explicit documentary version, approval, validity, tags, or incremental work update | Limited |

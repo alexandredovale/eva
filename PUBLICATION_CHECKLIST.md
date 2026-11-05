@@ -2,6 +2,16 @@
 
 Use this checklist for every public release. Always start from a fresh clone of the canonical GitHub repository in an exclusive local analysis directory, inspect the remote state, and copy only an explicit source allowlist.
 
+## Release v8.0.0
+
+- [x] Classify the isolated one-question request model as a breaking interaction contract under Semantic Versioning.
+- [x] Audit the complete implemented flow from documentary ingestion and primary embeddings through retrieval, CIE, answer generation, validation, and browser reset.
+- [x] Correct bilingual operational documentation, primary-only persistence and queue descriptions, interaction-output limits, partial-coverage behavior, CIE analysis counts, and schema table counts.
+- [x] Update public version metadata, citation metadata, changelog, health endpoint, and asset cache markers.
+- [x] Validate PHP and JavaScript syntax plus affected offline regression suites with real AI calls disabled.
+- [x] Confirm that credentials, operational data, uploads, `storage/documents`, logs, dumps, backups, private connectors, and Runtime state remain outside the public commit.
+- [x] Commit and push `main`, create annotated tag `v8.0.0`, and publish the GitHub release after explicit authorization.
+
 ## Release v7.0.3
 
 - [x] Replace conversational continuity with one isolated query per request, without inherited input, population, embedding, CIE analysis, or interaction.

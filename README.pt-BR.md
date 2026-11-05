@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Versão atual:** `7.0.3`
+**Versão atual:** `8.0.0`
 
-**Destaque da versão:** o EVA 7.0.3 introduz consultas isoladas de rodada única, restaura a faixa completa de convergência global como contexto complementar e adota respostas pedagógicas orientadas por uma conclusão inicial.
+**Destaque da versão:** o EVA 8.0.0 estabelece uma pergunta isolada por requisição como novo contrato incompatível de interação, restaura a faixa completa de convergência global como contexto complementar e adota respostas pedagógicas orientadas por uma conclusão inicial.
 
 O EVA é uma plataforma para construir, organizar e consultar memória cognitiva documental verificável. O EVA (Evidence Algorithm) transforma documentos estruturados em evidências hierárquicas. Cnode é a compreensão transitória de uma interação explícita entre essas evidências durante a consulta, não uma entidade persistente.
 
@@ -53,7 +53,7 @@ Um Cnode apenas descreve uma interação semântica explícita no contexto consu
 4. Configure o Apache para servir a pasta `public` como raiz pública.
 5. Acesse `/` para abrir o produto. O diagnóstico público está em `GET /api/health`.
 
-Em uma instalação vazia, importe somente `database/schema.sql`, que já contém as 14 tabelas atuais, inclusive `module_events`. Bancos existentes devem receber, em ordem, apenas as migrations ainda ausentes; a migration `20260803_010_module_events.sql` permanece necessária para instalações criadas antes dessa consolidação.
+Em uma instalação vazia, importe somente `database/schema.sql`, que já contém as 13 tabelas atuais, inclusive `module_events`. Bancos existentes devem receber, em ordem, apenas as migrations ainda ausentes; a migration `20260803_010_module_events.sql` permanece necessária para instalações criadas antes dessa consolidação.
 
 Nenhuma chave de API deve ser gravada no código, na documentação, nos logs ou no repositório. O `.env` é a única fonte local de configuração e contém os placeholders comentados das credenciais neutras; cada instalação deve preencher esses valores somente em seu arquivo privado.
 

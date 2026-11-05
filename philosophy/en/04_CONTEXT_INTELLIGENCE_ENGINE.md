@@ -100,7 +100,7 @@ Given the same ordered populations and similarities, output is invariant. The fl
 - use history, feedback, or AI reranking;
 - add embedding calls or split response generation into multiple batches;
 - persist the query vector, scores, statistics, regions, or context;
-- alter evidence, derivations, or embeddings;
+- alter evidence or embeddings;
 - use similarity as epistemic confidence.
 
 `QUERY_NON_SEMANTIC_MAX_EVIDENCE` applies only to direct, structural, and broad routes. It never participates in κq, κe, or any CIE stage.

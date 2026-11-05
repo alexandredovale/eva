@@ -45,7 +45,7 @@ A tabela reflete o dispatcher implementado. Os corpos de requisição e resposta
 | Superadmin | `GET` | `/api/documents` | Lista obras e contagens descritivas |
 | Superadmin | `POST` | `/api/documents` | Ingere upload multipart Markdown, JSON ou XML |
 | Superadmin | `DELETE` | `/api/documents/{id}` | Exclui uma obra e seu estado dependente |
-| Superadmin | `POST` | `/api/documents/{id}/process` | Agenda sínteses e embeddings de forma idempotente |
+| Superadmin | `POST` | `/api/documents/{id}/process` | Agenda embeddings de evidências primárias de forma idempotente |
 | Superadmin | `GET` | `/api/jobs` | Lista o estado da fila |
 | Superadmin | `POST` | `/api/jobs/{EVA-J...}/retry` | Retoma explicitamente um trabalho elegível com falha |
 | Superadmin | `GET` | `/api/metrics` | Retorna apenas contagens descritivas |
@@ -145,7 +145,7 @@ Projetos selecionados podem compartilhar documentos. Antes de executar a recuper
 
 O agendamento é idempotente por documento, etapa e versão gerencial da capacidade. Repetir o agendamento com a mesma configuração devolve os mesmos trabalhos. A chave interna de versão não é exposta pela API.
 
-O worker reivindica um trabalho por execução. Sínteses interrompidas pelo limite seguro voltam à fila com seu progresso preservado. Falhas não são retomadas automaticamente: a retomada precisa ser solicitada e respeita `QUEUE_MAX_FAILURES`.
+O worker reivindica um trabalho por execução. A única etapa cognitiva operacional é `embeddings`; lotes concluídos permanecem persistidos, e uma nova execução reutiliza versões já existentes por modelo e hash. Falhas não são retomadas automaticamente: a retomada precisa ser solicitada e respeita `QUEUE_MAX_FAILURES`.
 
 Chamadas externas continuam exigindo simultaneamente `AI_LIVE_ENABLED=true` e a opção `--live` no comando:
 
@@ -159,7 +159,7 @@ A opção adicional `--drain` executa sucessivamente os trabalhos até esvaziar 
 php bin/queue-worker.php --live --drain
 ```
 
-A interface consulta a fila automaticamente a cada três segundos enquanto houver etapas `queued` ou `running`. O progresso de sínteses é calculado pelas unidades hierárquicas persistidas; embeddings são persistidos por lote para que a barra avance durante o processamento.
+A interface consulta a fila automaticamente a cada três segundos enquanto houver etapas `queued` ou `running`. O total corresponde às evidências primárias elegíveis, e embeddings são persistidos por lote para que a barra avance durante o processamento.
 
 O superadmin também pode usar **Processar fila no navegador**. A interface confirma o possível consumo real e envia `POST /api/admin/queue/run` com `confirm_live: true` sucessivamente até o worker retornar `idle`. Cada requisição executa somente uma passagem, `AI_LIVE_ENABLED=true` continua obrigatório no servidor e a aba deve permanecer aberta. A rota instancia `CognitiveQueueWorker` diretamente e não expõe execução arbitrária de comandos.
 
@@ -177,13 +177,13 @@ A auditoria registra tipo de evento, entidade, identificador e metadados operaci
 
 Cada requisição pública recebe um `X-Request-Id` aleatório, também disponível ao diagnóstico interno. Falhas são classificadas por categorias seguras, como `ai_output_truncated`, `ai_provider_http`, `ai_transport`, `ai_invalid_response`, `database` e `application`. Mensagens de exceção, respostas brutas do provedor e conteúdo documental não são gravados como diagnóstico.
 
-As métricas são contagens agrupadas de documentos, classes e tipos de evidência, derivações, embeddings e trabalhos. Interações transitórias não são convertidas em métricas persistentes. As contagens não produzem ranking, relevância, confiança, intensidade ou qualquer peso cognitivo.
+As métricas são contagens agrupadas de documentos, classes e tipos de evidência, embeddings, trabalhos e eventos de auditoria. Interações transitórias não são convertidas em métricas persistentes. As contagens não produzem ranking, relevância, confiança, intensidade ou qualquer peso cognitivo.
 
-A resposta de `POST /api/query` inclui `context_intelligence`. Em rotas semânticas, o campo contém análises `hierarchical` por obra, até duas análises `primary` por obra e uma análise `global`; cada item expõe população, média, desvio padrão, CV, limites, regiões e diagnóstico κ quando aplicável. Em rotas não vetoriais, ele é uma lista vazia. O detalhamento pertence à resposta atual e não é persistido como métrica, evento ou memória.
+A resposta de `POST /api/query` inclui `context_intelligence`. Em rotas semânticas, o campo contém uma análise `hierarchical` e uma análise `primary` por obra com população semântica elegível, além de uma análise `global`; cada item expõe população, média, desvio padrão, CV, limites, regiões e diagnóstico κ quando aplicável. Em rotas não vetoriais, ele é uma lista vazia. O detalhamento pertence à resposta atual e não é persistido como métrica, evento ou memória.
 
 ## Exclusão
 
-Excluir uma obra remove em cascata seus nós, evidências, derivações, embeddings, trabalhos, permissões e vínculos com projetos; depois, remove o arquivo-fonte privado e o diretório privado de figuras. Excluir um projeto pela camada de produto também remove todas as obras ainda vinculadas a ele, inclusive obras compartilhadas com outro projeto. Uma obra compartilhada que precise sobreviver deve ser desvinculada e preservada antes da exclusão do projeto.
+Excluir uma obra remove em cascata seus nós, evidências, embeddings, trabalhos, permissões e vínculos com projetos; depois, remove o arquivo-fonte privado e o diretório privado de figuras. Excluir um projeto pela camada de produto também remove todas as obras ainda vinculadas a ele, inclusive obras compartilhadas com outro projeto. Uma obra compartilhada que precise sobreviver deve ser desvinculada e preservada antes da exclusão do projeto.
 
 ## Limites operacionais
 

@@ -40,7 +40,7 @@ O custo inicial de construção pode, portanto, ser amortizado por consultas pos
 
 O EVA não materializa antecipadamente combinações de pares entre evidências, não cria embeddings relacionais e não transforma a derivação conceitual Cnode em entidade persistente. `simetry` e `assimetry` existem somente durante a consulta que as justifica.
 
-Essa delimitação evita crescimento combinatório de armazenamento e processamento sem demanda real. A memória persistente termina em evidências, derivações e embeddings de unidades documentais organizadas.
+Essa delimitação evita crescimento combinatório de armazenamento e processamento sem demanda real. A memória cognitiva persistente termina nas evidências primárias e em seus embeddings de unidades documentais organizadas.
 
 ### Neutralidade de fornecedores
 
@@ -86,7 +86,7 @@ Durante uma crise, a recuperação rastreável pode reduzir o tempo necessário 
 
 ## Limite científico
 
-Os mecanismos arquiteturais estão implementados, mas a economia energética líquida ainda não foi demonstrada experimentalmente. Sínteses, embeddings, armazenamento, consultas e respostas também consomem energia. O resultado depende, no mínimo, de:
+Os mecanismos arquiteturais estão implementados, mas a economia energética líquida ainda não foi demonstrada experimentalmente. Construção de embeddings, armazenamento, consultas e respostas também consomem energia. O resultado depende, no mínimo, de:
 
 - volume e composição das consultas;
 - frequência de atualização e reutilização do acervo;
@@ -112,7 +112,7 @@ As métricas mínimas são:
 - tamanhos de κq e κe, descartes nos estágios hierárquico/primário/global, união dos núcleos locais, núcleo e convergência globais finais e tokens em cada estágio;
 - tokens de entrada e saída;
 - tempo de GPU e latências p50, p95 e p99;
-- taxa de reutilização de sínteses e embeddings;
+- taxa de reutilização de embeddings;
 - taxa de consultas encerradas sem geração;
 - precisão, recall, validade das citações e taxa de recusa correta;
 - energia ajustada pelo PUE da infraestrutura, quando disponível.

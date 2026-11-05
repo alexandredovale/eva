@@ -14,9 +14,9 @@ Relational detection normalizes case and diacritics, recognizes tested morpholog
 
 ## Partial input coverage
 
-A user may combine supported and unsupported concepts or relationships. Documentary sufficiency is evaluated per aspect. If a requested relationship involves X, Y, and Z but recovered evidence covers only X and Y, EVA answers the supported X–Y portion with citations and names the missing support for Z.
+A user may combine supported and unsupported concepts or relationships. Documentary sufficiency is evaluated per aspect. If a requested relationship involves X, Y, and Z but recovered evidence covers only X and Y, EVA answers the supported X–Y portion with citations and silently omits Z from `answer`. The prompt forbids partial-missing-support notices inside otherwise supported prose so the response remains direct and avoids spending tokens repeating partial limitations.
 
-An unsupported aspect never authorizes external knowledge and does not erase other supported aspects. Generation is blocked completely only when no primary evidence is recovered.
+An unsupported aspect never authorizes external knowledge and does not erase other supported aspects. Technical limitations remain available in the separate `limitations` field. Generation is blocked completely only when no primary evidence is recovered.
 
 ## Retrieval
 
@@ -50,7 +50,7 @@ If retrieval finds no primary evidence, EVA returns an explicit documentary limi
 ## Query limits
 
 - `QUERY_NON_SEMANTIC_MAX_EVIDENCE`: limit used only by direct, structural, or broad routes, default `8`, effective range `1..50`.
-- `QUERY_MAX_INTERACTIONS`: accepted transient-interaction limit, default `20`, effective range `0..100`.
+- `QUERY_MAX_INTERACTIONS`: locally accepted transient-interaction ceiling, default `20`, effective range `0..100`; the current generation command separately requests at most three essential, nonredundant interactions. A prompt-compliant response therefore contains at most three, but quantity-only backend rejection uses the configured ceiling.
 - `AI_QUERY_MAX_OUTPUT_TOKENS`: per-attempt output ceiling, default `1800`, effective range `100..3000`.
 
 Semantic evidence quantity is fully query-local: the global CIE nucleus replaces the former configured count.
@@ -61,7 +61,7 @@ The per-attempt output limit is a ceiling, not a generation target. The retry us
 
 ## Silent regeneration after validation failure
 
-When a generation reaches the backend intact but violates the local contract for citations, analytical incorporation, or interactions, `DocumentQueryService` discards that output completely and requests another generation with the same recovered context. A single API request permits at most three total attempts to obtain a validated answer.
+When a generation reaches the backend intact but violates the local contract for citations, analytical incorporation, or interactions, `DocumentQueryService` discards that output completely and requests another generation with the same recovered context. A single API request permits at most three total attempts to obtain a validated answer. Each validation attempt may internally contain the one compact regeneration reserved for truncation, so three validation attempts do not necessarily mean three external HTTP calls.
 
 From the second attempt onward, the provider receives only a safe corrective code. A recovered evidence record omitted from the answer is discarded instead of triggering a retry. Raw validator messages, internal rules, and rejected text are never returned to the provider or browser.
 
@@ -73,7 +73,7 @@ This mechanism is separate from provider truncation recovery. One answer attempt
 
 ## Interactions
 
-Whenever at least two recovered evidence records are available and the interaction limit is greater than zero, the answer call must analyze potential interactions; only cited pairs may enter the result:
+Whenever at least two recovered evidence records are available and the interaction limit is greater than zero, the answer call must analyze potential interactions; only cited pairs may enter the result, and the current command requests no more than three essential, nonredundant interactions:
 
 ```text
 simetry:    participant ↔ participant
