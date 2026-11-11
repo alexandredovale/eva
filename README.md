@@ -14,6 +14,8 @@ EVA is a provider-neutral PHP system for building and querying **verifiable docu
 
 ## Why EVA
 
+The proliferation of large-scale language models has imposed unprecedented challenges on global computational infrastructure, manifested in the intensive consumption of water and energy resources for data center cooling. The traditional approach, relying on the maintenance of extensive context windows and continuous reprocessing, exacerbates the carbon footprint and perpetuates operational vulnerabilities, such as hallucinations and inefficiencies stemming from user digital illiteracy. In contrast, the implementation of Retrieval-Augmented Generation (RAG) systems establishes a paradigm of surgical efficiency. By decoupling vector storage from generative inference, such architecture retrieves strictly the pertinent semantic data fragments, minimizing the volume of tokens processed per interaction. This mechanism not only substantially mitigates operational energy consumption and associated computational costs, but also elevates systemic response accuracy and efficacy, bypassing user digital literacy limitations. Thus, the RAG technology consolidates itself not merely as a cost-optimization strategy, but as a fundamental pillar for the sustainability and reliability of global artificial intelligence ecosystems.
+
 Many retrieval systems begin with arbitrary token chunks and later try to reconstruct context. EVA begins with documentary structure:
 
 ```text
