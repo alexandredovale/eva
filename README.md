@@ -8,8 +8,6 @@
 
 EVA is a provider-neutral PHP system for building and querying **verifiable documentary memory**. It preserves document hierarchy, stores literal source evidence, and validates every answer against the primary evidence recovered for the current query.
 
-`Cnode` is the transient understanding of an explicit semantic interaction between recovered evidence. It is not a persistent entity, score, graph edge, or embedding.
-
 > The repository is English-first. The original Portuguese documentation remains available in [`docs/`](docs/), and the Portuguese project overview is available as [`README.pt-BR.md`](README.pt-BR.md).
 
 ## Why EVA
@@ -37,7 +35,7 @@ Core properties:
 - The answer model may use only the relevant subset of the available primary context and presents each analytical perspective in a separate paragraph. Every retained source must be cited where its analytical contribution is explained; uncited candidates are discarded, and citation-only inventories are rejected.
 - Locally rejected answer generations are retried silently up to three total attempts; only the third consecutive validation failure reaches the user as a generic error.
 - Answer generation is skipped when no primary evidence is recovered.
-- `simetry` and `assimetry` interactions exist only for the current query and require two cited primary sources with literal excerpts.
+- `simetry` and `assimetry` interactions exist only for the current query and require two cited primary sources with literal excerpts. `Cnode` is the transient understanding of an explicit semantic interaction between recovered evidence. It is not a persistent entity, score, graph edge, or embedding.
 - Provider endpoints, models, and credential-variable names remain environment configuration.
 - Real AI use is disabled by default and requires two explicit confirmations.
 - The chat accepts one independent question at a time; the composer disappears on submission, and **Ask another question** below the completed response restores it for a new query with no inherited input, population, or interaction.
