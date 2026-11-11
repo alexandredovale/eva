@@ -4,11 +4,11 @@
 
 **Versão atual:** `8.0.0`
 
-A proliferação de modelos de linguagem de larga escala tem imposto desafios sem precedentes à infraestrutura computacional global, manifestados no consumo intensivo de recursos hídricos e energéticos para resfriamento de data centers. A abordagem tradicional, que depende da manutenção de extensas janelas de contexto e reprocessamento contínuo, exacerba a pegada de carbono e perpetua vulnerabilidades operacionais, como alucinações e ineficiências decorrentes do letramento digital deficitário. Em contrapartida, a implementação de sistemas de Geração Recuperada por Consulta (RAG), estabelece um paradigma de eficiência cirúrgica. Ao desacoplar o armazenamento vetorial da inferência generativa, tal arquitetura recupera estritamente os fragmentos de dados semânticos pertinentes, minimizando o volume de tokens processados a cada interação. Este mecanismo não apenas mitiga substancialmente o consumo energético operacional e os custos computacionais associados, mas também eleva a precisão e a eficácia sistêmica das respostas, contornando as limitações de letramento digital do usuário. Desta forma, a tecnologia RAG se consolida não apenas como uma estratégia de otimização de custo, mas como um pilar fundamental para a sustentabilidade e confiabilidade dos ecossistemas de inteligência artificial em escala global.
-
 **Destaque da versão:** o EVA 8.0.0 estabelece uma pergunta isolada por requisição como novo contrato incompatível de interação, restaura a faixa completa de convergência global como contexto complementar e adota respostas pedagógicas orientadas por uma conclusão inicial.
 
-O EVA é uma plataforma para construir, organizar e consultar memória cognitiva documental verificável. O EVA (Evidence Algorithm) transforma documentos estruturados em evidências hierárquicas. Cnode é a compreensão transitória de uma interação explícita entre essas evidências durante a consulta, não uma entidade persistente.
+A proliferação de modelos de linguagem de larga escala tem imposto desafios sem precedentes à infraestrutura computacional global, manifestados no consumo intensivo de recursos hídricos e energéticos para resfriamento de data centers. A abordagem tradicional, que depende da manutenção de extensas janelas de contexto e reprocessamento contínuo, exacerba a pegada de carbono e perpetua vulnerabilidades operacionais, como alucinações e ineficiências decorrentes do letramento digital deficitário. Em contrapartida, a implementação de sistemas de Geração Recuperada por Consulta (RAG), estabelece um paradigma de eficiência cirúrgica. Ao desacoplar o armazenamento vetorial da inferência generativa, tal arquitetura recupera estritamente os fragmentos de dados semânticos pertinentes, minimizando o volume de tokens processados a cada interação. Este mecanismo não apenas mitiga substancialmente o consumo energético operacional e os custos computacionais associados, mas também eleva a precisão e a eficácia sistêmica das respostas, contornando as limitações de letramento digital do usuário. Desta forma, a tecnologia RAG se consolida não apenas como uma estratégia de otimização de custo, mas como um pilar fundamental para a sustentabilidade e confiabilidade dos ecossistemas de inteligência artificial em escala global.
+
+O EVA é uma plataforma para construir, organizar e consultar memória cognitiva documental verificável. O EVA (Evidence Algorithm) transforma documentos estruturados em evidências hierárquicas.
 
 ## Estado atual
 
@@ -39,7 +39,7 @@ As Fases 1 a 5 estão funcionais e o roadmap original está concluído. O estado
 
 Embeddings são gerados por unidades documentais previamente organizadas, nunca por cortes arbitrários de caracteres ou tokens.
 
-Um Cnode apenas descreve uma interação semântica explícita no contexto consultado. Ele não possui identidade persistente, nota de importância, confiança ou intensidade. A quantidade de interações retornadas é descritiva e não determina verdade, qualidade, prioridade ou relevância.
+Um Cnode (nó cognitivo) apenas descreve uma interação semântica explícita no contexto consultado. Ele não possui identidade persistente, nota de importância, confiança ou intensidade. A quantidade de interações retornadas é descritiva e não determina verdade, qualidade, prioridade ou relevância.
 
 ## Requisitos
 
