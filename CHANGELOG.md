@@ -7,6 +7,13 @@ and the project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [8.0.1] - 2026-11-12
+
+### Changed
+
+- Consolidated `README.pt-BR.md` and `README.md` into equivalent Portuguese and English presentations with the same structure, operational coverage, tables, commands, and release information, while removing internal repetition.
+- Expanded the energy-efficiency introduction to describe how RAG limits the context supplied to the model and how the EVA technique structures, refines, and validates that context through complete documentary units, κq, CIE, literal evidence, and local answer validation.
+
 ## [8.0.0] - 2026-11-05
 
 ### Changed

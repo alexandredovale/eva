@@ -1,67 +1,121 @@
-# EVA
+# EVA — Evidence Algorithm
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Versão atual:** `8.0.0`
+**Versão atual:** `8.0.1`
 
-**Destaque da versão:** o EVA 8.0.0 estabelece uma pergunta isolada por requisição como novo contrato incompatível de interação, restaura a faixa completa de convergência global como contexto complementar e adota respostas pedagógicas orientadas por uma conclusão inicial.
+**Destaque da versão:** o EVA 8.0.1 consolida os arquivos de apresentação em português e inglês como espelhos editoriais, reúne as informações antes complementares sem repetições e explicita a contribuição conjunta da técnica EVA e do RAG para eficiência, sustentabilidade e controle da IA.
 
-A proliferação de modelos de linguagem de larga escala tem imposto desafios sem precedentes à infraestrutura computacional global, manifestados no consumo intensivo de recursos hídricos e energéticos para resfriamento de data centers. A abordagem tradicional, que depende da manutenção de extensas janelas de contexto e reprocessamento contínuo, exacerba a pegada de carbono e perpetua vulnerabilidades operacionais, como alucinações e ineficiências decorrentes do letramento digital deficitário. Em contrapartida, a implementação de sistemas de Geração Recuperada por Consulta (RAG), estabelece um paradigma de eficiência cirúrgica. Ao desacoplar o armazenamento vetorial da inferência generativa, tal arquitetura recupera estritamente os fragmentos de dados semânticos pertinentes, minimizando o volume de tokens processados a cada interação. Este mecanismo não apenas mitiga substancialmente o consumo energético operacional e os custos computacionais associados, mas também eleva a precisão e a eficácia sistêmica das respostas, contornando as limitações de letramento digital do usuário. Desta forma, a tecnologia RAG se consolida não apenas como uma estratégia de otimização de custo, mas como um pilar fundamental para a sustentabilidade e confiabilidade dos ecossistemas de inteligência artificial em escala global.
+O EVA é um sistema PHP neutro em relação a fornecedores para construir, organizar e consultar **memória cognitiva documental verificável**. O EVA (Evidence Algorithm) preserva a hierarquia dos documentos, armazena evidências literais das fontes e valida cada resposta contra as evidências primárias recuperadas para a consulta atual.
 
-O EVA é uma plataforma para construir, organizar e consultar memória cognitiva documental verificável. O EVA (Evidence Algorithm) transforma documentos estruturados em evidências hierárquicas.
+> Esta é a apresentação em português. A versão equivalente em inglês está em [`README.md`](README.md).
 
-## Estado atual
+## Por que EVA
 
-A base atual contém:
+A proliferação de modelos de linguagem de larga escala tem imposto desafios sem precedentes à infraestrutura computacional global, manifestados no consumo intensivo de recursos hídricos e energéticos para resfriamento de data centers. A abordagem tradicional, que depende da manutenção de extensas janelas de contexto e do reprocessamento contínuo, exacerba a pegada de carbono e perpetua vulnerabilidades operacionais, como alucinações e ineficiências decorrentes do letramento digital deficitário. Em contrapartida, sistemas de Geração Aumentada por Recuperação (RAG) estabelecem um paradigma de eficiência cirúrgica ao desacoplar o armazenamento vetorial da inferência generativa e recuperar somente os fragmentos semânticos pertinentes, reduzindo o volume de tokens processados em cada interação. A técnica EVA amplia esse benefício: antes da recuperação, transforma a estrutura documental em unidades semânticas completas, literais e rastreáveis; durante a consulta, calcula uma fronteira local κq e aplica o Context Intelligence Engine (CIE) para refinar deterministicamente a população; depois da geração, aceita apenas respostas, citações e interações sustentadas pelas evidências eleitas. Assim, o RAG controla **quanto contexto** chega ao modelo, enquanto o EVA controla **como esse contexto é formado, selecionado e comprovado**. A atuação conjunta reduz processamento redundante, consumo energético e custos computacionais, ao mesmo tempo que aumenta precisão, auditabilidade e resistência a alucinações e às limitações de formulação do usuário. RAG e EVA tornam-se, portanto, componentes complementares para ecossistemas de inteligência artificial sustentáveis, confiáveis e operados sob controle documental.
 
-- documentação funcional e arquitetural;
-- estrutura PHP mínima e executável;
-- conexão segura com o banco por variáveis de ambiente;
-- esquema versionado do banco de dados;
-- endpoint de diagnóstico e upload documental;
-- parsers funcionais de Markdown, JSON e XML com árvore normalizada comum;
-- persistência transacional da fonte, da árvore e das evidências primárias;
-- adaptadores substituíveis por capacidade: embeddings e respostas;
-- embeddings contextuais versionados das evidências primárias;
-- recuperação vetorial transitória orientada diretamente às evidências primárias;
-- Context Intelligence Engine determinístico entre o Retriever e as camadas cognitivas;
-- consulta adaptativa que produz interações `simetry`/`assimetry` validadas por fragmentos literais;
-- consulta de rodada única, sem herança de input, população, embedding ou interação entre perguntas;
-- produto white label com interface administrativa, API autenticada, fila e retomada explícita;
-- métricas descritivas e auditoria sanitizada, sem exposição de segredos ou conteúdo consultado;
-- execução real de IA bloqueada por padrão e reaproveitamento por modelo/hash;
-- Runtime de módulos conectores independentes, com descoberta, ativação, desativação, exclusão confirmada e SQLite próprio por pacote;
-- cartucho público independente `com.eva.explorer`, sem dependência de domínio no Core.
+Muitos sistemas de recuperação começam com cortes arbitrários de tokens e tentam reconstruir o contexto posteriormente. O EVA começa pela estrutura documental:
 
-As Fases 1 a 5 estão funcionais e o roadmap original está concluído. O estado de cada entrega está em [docs/09_ROADMAP.md](docs/09_ROADMAP.md).
+```text
+Fonte → árvore normalizada → evidência primária literal → embeddings contextuais
+
+Consulta semântica → roteamento local → evidências primárias completas → κq → CIE do núcleo superior → fontes primárias
+      → uma resposta delimitada → validação local de citações e interações
+```
+
+## Como o EVA funciona
+
+- Markdown, JSON e XML convergem para uma única árvore documental normalizada.
+- Cada evidência operacional é literal, primária e vinculada à sua origem.
+- Embeddings representam unidades semânticas completas e previamente organizadas, nunca cortes arbitrários de caracteres ou tokens.
+- Consultas diretas, estruturais e amplas podem dispensar o embedding transitório da pergunta.
+- Consultas conceituais e relacionais calculam a distribuição semântica inicial diretamente sobre embeddings validados de evidências primárias.
+- A fronteira query-local κq emerge da distribuição completa de similaridades elegíveis; o núcleo superior passa pelos estágios de refinamento primário e multidocumental, sem Top-k semântico ou quantidade configurada de evidências.
+- O CIE global mantém o núcleo (`s ≥ μ + σ`) como corte e acrescenta a convergência (`μ ≤ s < μ + σ`) somente como contexto complementar para o provedor de respostas.
+- O modelo pode reter apenas o subconjunto relevante do contexto primário disponível. Cada perspectiva analítica ocupa um novo parágrafo, toda fonte mantida é citada onde contribui e inventários apenas citacionais são rejeitados.
+- Gerações rejeitadas localmente são refeitas silenciosamente até o limite de três tentativas totais; somente a terceira falha consecutiva produz um erro genérico para o usuário.
+- A geração é ignorada quando nenhuma evidência primária é recuperada.
+- Interações `simetry` e `assimetry` existem apenas na consulta atual e exigem duas fontes primárias citadas com fragmentos literais.
+- Fornecedores, endpoints, modelos e nomes de variáveis de credencial permanecem na configuração do ambiente.
+- O uso real de IA fica desativado por padrão e requer duas confirmações explícitas.
+- O chat aceita uma pergunta independente por vez, sem herdar input, população, embedding, CIE, resposta ou interação da consulta anterior.
+- Perfis de resposta administrados pelo superadmin especializam o comportamento por projeto sem enfraquecer as regras de evidência, citação ou saída.
+- Zero, um ou vários módulos conectores independentes podem observar interações concluídas sem acrescentar conhecimento de domínio ao Core.
+- O produto white label inclui interface administrativa, API autenticada, fila, retomada explícita, métricas descritivas e auditoria sanitizada.
+
+As Fases 1 a 5 estão funcionais e o roadmap original está concluído. O estado de cada entrega está em [Roadmap](docs/09_ROADMAP.md).
 
 ## Princípio cognitivo
 
-Embeddings são gerados por unidades documentais previamente organizadas, nunca por cortes arbitrários de caracteres ou tokens.
-
-Um Cnode (nó cognitivo) apenas descreve uma interação semântica explícita no contexto consultado. Ele não possui identidade persistente, nota de importância, confiança ou intensidade. A quantidade de interações retornadas é descritiva e não determina verdade, qualidade, prioridade ou relevância.
+Embeddings são gerados por unidades documentais previamente organizadas. Um `Cnode` é somente a compreensão transitória de uma interação semântica explícita entre evidências recuperadas. Ele não é entidade persistente, pontuação, aresta de grafo ou embedding e não possui identidade duradoura, nota de importância, confiança ou intensidade. A quantidade de interações retornadas é descritiva e não determina verdade, qualidade, prioridade ou relevância.
 
 ## Requisitos
 
 - PHP 8.2 ou superior;
 - MariaDB 10.4 ou MySQL compatível;
-- extensões PHP `pdo`, `pdo_mysql`, `pdo_sqlite`, `json`, `dom`, `mbstring` e `curl`.
+- extensões PHP `curl`, `dom`, `json`, `mbstring`, `pdo`, `pdo_mysql` e `pdo_sqlite`;
+- Apache com `mod_rewrite` e `mod_headers`, ou outro servidor configurado para expor somente `public/`.
 
-## Configuração local
+O projeto não possui dependência de runtime do Composer ou Node.js.
 
-1. Revise o `.env`, que contém o inventário completo e comentado das configurações reconhecidas pelo sistema.
-2. Ajuste os valores para o ambiente atual, inclusive aplicação, branding, banco, IA, consulta, ingestão e fila.
-3. Configure no próprio `.env` o fornecedor, endpoint, modelo e nome da variável de credencial para cada capacidade.
-4. Configure o Apache para servir a pasta `public` como raiz pública.
-5. Acesse `/` para abrir o produto. O diagnóstico público está em `GET /api/health`.
+## Início rápido
 
-Em uma instalação vazia, importe somente `database/schema.sql`, que já contém as 13 tabelas atuais, inclusive `module_events`. Bancos existentes devem receber, em ordem, apenas as migrations ainda ausentes; a migration `20260803_010_module_events.sql` permanece necessária para instalações criadas antes dessa consolidação.
+1. Clone o repositório e entre no diretório:
 
-Nenhuma chave de API deve ser gravada no código, na documentação, nos logs ou no repositório. O `.env` é a única fonte local de configuração e contém os placeholders comentados das credenciais neutras; cada instalação deve preencher esses valores somente em seu arquivo privado.
+   ```bash
+   git clone https://github.com/alexandredovale/eva.git
+   cd eva
+   ```
 
-As classes da aplicação são white label e conhecem apenas capacidades. Todos os vínculos com fornecedores, endpoints, modelos e variáveis de credencial ficam exclusivamente no `.env`; `config/ai.php` apenas lê essas variáveis genéricas. Os testes usam provedores simulados e não consomem créditos.
+2. Crie o arquivo local de ambiente:
 
-## Uso dos parsers
+   ```bash
+   cp .env.example .env
+   ```
+
+   No PowerShell:
+
+   ```powershell
+   Copy-Item .env.example .env
+   ```
+
+3. Crie um banco vazio e importe o esquema público consolidado:
+
+   ```bash
+   mysql -u root -p -e "CREATE DATABASE eva CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+   mysql -u root -p eva < database/schema.sql
+   ```
+
+   Instalações existentes devem aplicar apenas as migrations ainda ausentes, na ordem dos nomes dos arquivos. A migration `010` permanece disponível para bancos criados antes da consolidação de `module_events` no esquema.
+
+4. Revise o `.env`, que contém o inventário comentado das configurações reconhecidas, e ajuste aplicação, branding, banco, IA, consulta, ingestão e fila. Gere um token exclusivo de superadmin com pelo menos 24 caracteres, por exemplo:
+
+   ```bash
+   php -r "echo bin2hex(random_bytes(24)), PHP_EOL;"
+   ```
+
+   Armazene o resultado apenas em `ADMIN_API_TOKEN` no `.env`. Nenhuma chave ou credencial deve ser gravada no código, na documentação, nos logs ou no repositório.
+
+5. Configure o servidor para servir `public/` como raiz pública. No XAMPP, com o projeto em `htdocs`, o `.htaccess` da raiz encaminha rotas virtuais para `public/` e bloqueia acesso direto aos arquivos privados.
+
+6. Mantenha `AI_LIVE_ENABLED=false` na instalação e nos testes offline. Acesse `/api/health` e depois `/`.
+
+Consulte [Instalação](docs/18_INSTALACAO.md) e [Produto e implantação](docs/10_PRODUTO.md) para a sequência completa.
+
+## Configuração de capacidades de IA
+
+O EVA nomeia capacidades, não fornecedores:
+
+- `EmbeddingProvider`;
+- `QueryAnswerProvider`.
+
+Configure cada capacidade no `.env` com o identificador do fornecedor, endpoint, modelo e o **nome** da variável de ambiente que contém a credencial. `config/ai.php` apenas lê essas variáveis genéricas. As classes da aplicação conhecem capacidades, e os testes usam provedores simulados sem consumir créditos.
+
+## Ingestão e persistência documental
+
+O endpoint `POST /api/documents` recebe `multipart/form-data` com `document`, um arquivo obrigatório `.md`, `.json` ou `.xml`, e `title`, um título opcional derivado do nome do arquivo quando ausente. O sucesso retorna HTTP `201`. Arquivos ausentes, incompletos, acima do limite, com multipart inválido ou conteúdo incompatível são rejeitados antes da persistência.
+
+O parser recebe o conteúdo já lido e nunca acessa caminhos por conta própria:
 
 ```php
 use Eva\Application\Ingestion\Parser\ParserFactory;
@@ -71,32 +125,19 @@ $document = $parser->parse($content, $title);
 $normalizedTree = $document->toArray();
 ```
 
-O parser recebe o conteúdo já lido e nunca acessa caminhos de arquivo por conta própria.
+`DocumentIngestionService` seleciona o parser, armazena a fonte fora da pasta pública, persiste a árvore e gera evidências primárias literais. O limite padrão é 10 MB e pode ser ajustado por `DOCUMENT_MAX_BYTES`. A ingestão não produz embeddings; a construção cognitiva é uma etapa posterior e explícita.
 
-## Upload HTTP
+## Construção cognitiva e recuperação
 
-O endpoint `POST /api/documents` recebe `multipart/form-data`:
+`EvidenceEmbeddingService` vetoriza exclusivamente evidências `primary:node_content` com título do documento, caminho, nó e conteúdo literal organizado. Antes de chamar o provedor, todas as unidades pendentes são validadas contra `AI_EMBEDDING_MAX_INPUT_TOKENS`, com margem preventiva de 10%. Lotes técnicos agrupam unidades completas e nunca as fragmentam. Unidades maiores exigem subdivisão estrutural real. Uma versão já existente para o mesmo modelo e hash é reutilizada antes de chamar o provedor.
 
-- `document`: arquivo obrigatório `.md`, `.json` ou `.xml`;
-- `title`: título opcional; quando ausente, deriva do nome do arquivo.
+Na consulta conceitual ou relacional, `DocumentContextRetriever` compara o embedding transitório do input com todas as evidências primárias elegíveis. A distribuição determina κq; quando não há ruptura identificável, a população completa segue ao primeiro CIE. Esse estágio calcula média, desvio padrão populacional e coeficiente de variação e encaminha o núcleo (`s ≥ μ + σ`), usando a convergência (`μ ≤ s < μ + σ`) como fallback somente se o núcleo estiver vazio. O CIE global mantém o corte e acrescenta sua convergência apenas como contexto complementar. Similaridades e estatísticas são transitórias.
 
-Sucesso retorna HTTP `201`. Arquivos ausentes, incompletos, acima do limite, com estrutura multipart inválida ou conteúdo incompatível são rejeitados antes da persistência.
+`QueryAnswerProvider` pode declarar `simetry` ou `assimetry` na mesma chamada que produz a resposta. `DocumentQueryService` aceita uma interação somente quando os participantes pertencem ao contexto, foram citados e seus fragmentos existem literalmente nas evidências. Nada disso é persistido como `Cnode`.
 
-## Persistência documental
+## Governança das respostas por projeto
 
-`DocumentIngestionService` seleciona o parser, armazena a fonte fora da pasta pública, persiste a árvore e gera evidências primárias literais. O limite padrão é 10 MB e pode ser ajustado por `DOCUMENT_MAX_BYTES`.
-
-A ingestão não produz embeddings. A construção cognitiva é uma etapa posterior e explícita.
-
-## Construção cognitiva
-
-`EvidenceEmbeddingService` vetoriza exclusivamente evidências primárias com título do documento, caminho, nó e conteúdo literal organizado. Antes de chamar o provedor, todas as unidades pendentes são validadas contra `AI_EMBEDDING_MAX_INPUT_TOKENS`, com margem preventiva de 10%. Lotes técnicos agrupam unidades completas e nunca fragmentam nenhuma delas. Unidades maiores exigem subdivisão estrutural real para ingressar na população semântica. Uma versão já existente para o mesmo modelo e hash é reutilizada antes de chamar o provedor.
-
-Na consulta conceitual ou relacional, `DocumentContextRetriever` compara o embedding transitório do input com todas as evidências primárias `primary:node_content` elegíveis. A distribuição determina a fronteira query-local κq; quando não há ruptura identificável, a população completa segue ao primeiro CIE. Esse estágio calcula média, desvio padrão populacional e CV e encaminha o núcleo (`s ≥ μ + σ`), usando a convergência (`μ ≤ s < μ + σ`) apenas como fallback quando o núcleo estiver vazio. O CIE global mantém esse corte e acrescenta sua convergência somente como contexto complementar para a resposta. Similaridades e estatísticas são transitórias.
-
-`QueryAnswerProvider` pode declarar interações `simetry` ou `assimetry` na mesma chamada que produz a resposta e orienta que cada viés de análise seja apresentado em novo parágrafo. `DocumentQueryService` aceita cada interação somente quando os participantes pertencem ao contexto, foram citados e seus fragmentos existem literalmente nas evidências. Nada disso é persistido como Cnode.
-
-Projetos podem definir um **Perfil de respostas** administrado pelo superadmin. Quando um projeto é marcado explicitamente no chat, esse perfil é acrescentado ao `SYSTEM_PROMPT` como uma camada complementar identificada pelo projeto e por suas obras. Selecionar somente uma obra não ativa implicitamente o perfil do projeto. Em consultas com vários projetos, os perfis são enviados separadamente e permanecem subordinados às regras de evidência, citação, limitação e saída JSON da EVA.
+O superadmin pode atribuir a cada projeto um **Perfil de respostas** opcional. O perfil pode especializar público, papel assistencial, vocabulário, tom, foco ou apresentação, mas permanece subordinado às regras-base de evidência primária, citação, limitação, validação de interações e saída JSON.
 
 | Seleção no chat | Obras consultadas | Perfis aplicados |
 |---|---|---|
@@ -105,87 +146,87 @@ Projetos podem definir um **Perfil de respostas** administrado pelo superadmin. 
 | Vários projetos marcados | União das obras prontas dos projetos | Perfis configurados de todos os projetos marcados |
 | Projeto marcado e obra avulsa | Obras do projeto mais a obra avulsa | Somente o perfil do projeto marcado |
 
-Quando dois projetos marcados compartilham a mesma obra, o ID documental é deduplicado antes da recuperação: a obra e suas evidências são consultadas uma única vez, enquanto os perfis dos dois projetos continuam ativos. Orientações compatíveis podem ser combinadas; se incidirem sobre o mesmo aspecto de forma incompatível, prevalecem as regras-base e a resposta adota formulação neutra.
-
-## Execução cognitiva responsável
-
-A construção com provedores reais pode ser iniciada pela linha de comando ou pela interface administrativa e sempre exige confirmação explícita:
-
-```powershell
-php bin/build-cognitive.php <document-id> --stage=embeddings --live
-```
-
-Além de `--live`, `AI_LIVE_ENABLED=true` deve estar configurado.
+Quando projetos selecionados compartilham uma obra, o ID documental é deduplicado antes da recuperação e as evidências são consultadas uma única vez, enquanto todos os perfis continuam ativos. Orientações compatíveis podem ser combinadas; conflitos sobre o mesmo aspecto retornam às regras-base e a uma formulação neutra.
 
 ## Consulta documental
 
-`InputTypeDetector` reconhece inputs diretos, estruturais, conceituais, relacionais e amplos sem consumir IA. `DocumentContextRetriever` escolhe a rota correspondente, usa embedding transitório e CIE apenas nas buscas conceituais/relacionais e retorna evidências primárias completas por acesso direto ou pela recuperação vetorial orientada às fontes.
+`InputTypeDetector` reconhece inputs diretos, estruturais, conceituais, relacionais e amplos sem consumir IA. `DocumentContextRetriever` escolhe a rota, usa embedding transitório e CIE somente nas buscas conceituais e relacionais e retorna evidências primárias completas por acesso direto ou recuperação vetorial.
 
-`DocumentQueryService` aceita somente identificadores pertencentes ao contexto recuperado. Citações desconhecidas, marcadores omitidos e inventários sem incorporação analítica são rejeitados; a aplicação não acrescenta citações ausentes para aparentar conformidade. Uma saída rejeitada pela validação local é regenerada silenciosamente até o limite de três tentativas totais com o mesmo contexto eleito. Da segunda tentativa em diante, o provedor recebe somente um código seguro da falha e, quando aplicável, o ID de uma evidência já eleita que deixou de ser incorporada. Somente a terceira falha consecutiva chega ao usuário como mensagem genérica, sem identificador de evidência. Evidências utilizadas, `simetry`, `assimetry` e limitações permanecem em campos separados.
+`DocumentQueryService` aceita somente identificadores do contexto recuperado. Citações desconhecidas, marcadores omitidos e inventários sem incorporação analítica são rejeitados; a aplicação não acrescenta citações ausentes. Uma saída rejeitada é regenerada silenciosamente até três tentativas com o mesmo contexto. Da segunda tentativa em diante, o provedor recebe apenas um código seguro da falha e, quando aplicável, o ID de uma evidência já eleita que não foi incorporada. Somente a terceira falha consecutiva chega ao usuário como mensagem genérica. Evidências usadas, `simetry`, `assimetry` e limitações permanecem em campos separados.
 
-Na interface web, cada resposta encerra uma consulta independente. O compositor desaparece imediatamente após o envio, inclusive durante o processamento. Depois da resposta, **Fazer outra pergunta** aparece abaixo do controle de cópia; essa ação preserva o escopo de projetos e obras, limpa o resultado anterior, reexibe o formulário completo e inicia uma recuperação do zero. A nova pergunta não herda input, população, embedding, CIE ou interações da consulta anterior.
+Na interface web, o compositor desaparece imediatamente após o envio. Depois da resposta, **Fazer outra pergunta** preserva o escopo de projetos e obras, limpa o resultado, reexibe o formulário e inicia uma recuperação do zero. Durante a espera, **Consultando evidências** apresenta três pontos amarelos animados e respeita movimento reduzido. O resultado não é persistido como estado de chat no banco, na auditoria ou em `sessionStorage`; logout, novo login ou recarregamento iniciam uma consulta vazia.
 
-Durante a espera, o estado **Consultando evidências** apresenta três pontos amarelos animados e respeita a preferência de movimento reduzido. O resultado visual não é persistido como estado de chat no banco, na auditoria ou em `sessionStorage`; logout, novo login ou recarregamento da aplicação iniciam uma consulta vazia.
+A consulta real exige dupla confirmação:
 
-A consulta real também exige dupla confirmação:
-
-```powershell
-php bin/query-document.php <document-id> --live "pergunta"
+```bash
+php bin/query-document.php <document-id> --live "sua pergunta"
 ```
 
-Não existe Top-k nem limite numérico configurável para evidências semânticas. κq, o primeiro CIE sobre fontes, κe, CIE primário e CIE global determinam a população query-local; o corte principal permanece no núcleo, e a convergência global é acrescentada apenas como contexto complementar. `QUERY_NON_SEMANTIC_MAX_EVIDENCE` e `--evidence-limit=N` atuam somente nas rotas direta, estrutural e ampla. `QUERY_MAX_INTERACTIONS` e `--interaction-limit=N` limitam apenas interações transitórias.
+Não existe Top-k nem limite numérico configurável para evidências semânticas. κq, o primeiro CIE sobre fontes, κe, CIE primário e CIE global determinam a população query-local. `QUERY_NON_SEMANTIC_MAX_EVIDENCE` e `--evidence-limit=N` atuam apenas nas rotas direta, estrutural e ampla. `QUERY_MAX_INTERACTIONS` e `--interaction-limit=N` limitam somente interações transitórias.
 
-## Módulos conectores
+## Execução cognitiva responsável e fila
 
-Um módulo funciona como um cartucho instalável: é um pacote independente em `modules/<module-id>/`, hierarquicamente acima de projetos, mas sem pertencer a projeto, documento ou usuário. Zero, um ou vários módulos podem permanecer ativos e observar o mesmo evento versionado de forma independente.
+A construção com provedores reais exige `AI_LIVE_ENABLED=true`, a opção `--live` e confirmação explícita:
 
-Cada pacote declara `module.json`, implementa o EVA Module Contract v1 e grava seu histórico privado em `modules/.runtime/data/<module-id>/module.sqlite`. O Core persiste uma única caixa postal neutra em `module_events`; cada assinante mantém cursor próprio. O módulo recebe uma API de leitura limitada e uma capacidade de linguagem neutra, nunca chaves de IA ou credenciais do banco principal.
-
-O superadmin apenas ativa, desativa ou exclui definitivamente os pacotes encontrados em `modules/`. Desativar preserva o código e o SQLite. Excluir exige confirmação digitada e remove pacote e histórico. Para atualizar, substitui-se somente `modules/<module-id>/`; os dados permanecem fora do pacote.
-
-Interfaces modulares fornecem o próprio HTML e CSS. O Core conhece somente o contrato genérico de dashboard e o nome do manifesto. Assim, um conector futuro pode acrescentar sua própria interface sem inserir menu, renderer, estilo ou regra de domínio específica no Core.
-
-A distribuição pública atual inclui `com.eva.explorer` como cartucho independente de referência. Ele utiliza somente os contratos genéricos do Runtime, não constitui dependência do Core e pode ser removido sem invalidar a camada de produto ou testes não relacionados.
-
-Consulte [Módulos do EVA](docs/16_MODULOS.md) para instalação, contratos, operação, backup, atualização e remoção.
-
-## Produto administrativo
-
-A interface web é servida em `/` e usa a mesma origem da API. Configure um `ADMIN_API_TOKEN` com pelo menos 24 caracteres antes do primeiro acesso. O navegador conserva o token somente em `sessionStorage`, e as rotas administrativas exigem `Authorization: Bearer`.
-
-O token identifica o superadmin. Pela área **Usuários**, ele cadastra username e senha, redefine senhas, ativa ou desativa contas e concede acesso por projeto completo ou por obra individual. Pela área **Projetos**, documentos podem ser agrupados sem alterar sua ingestão ou estrutura cognitiva, e um perfil complementar de respostas pode ser gerenciado para cada projeto.
-
-Usuários cadastrados acessam apenas o chat e a alteração de senha. Cada senha é persistida exclusivamente por `password_hash()`. Na criação, redefinição ou rotação é exibido uma única vez um código de recuperação de 16 caracteres, cujo valor também é armazenado somente como hash. Sem SMTP, a recuperação exige username, código vigente e nova senha; ao concluir, todas as sessões anteriores são revogadas e um novo código de recuperação é emitido.
-
-As tabelas dessa camada estão na migração `database/migrations/20260721_008_user_access.sql`; o perfil de respostas foi acrescentado por `database/migrations/20260731_009_project_response_profile.sql`. A permissão de projeto inclui todas as obras associadas a ele; a permissão de obra não libera as demais obras do mesmo projeto.
-
-O mapa completo de cardinalidades, chaves estrangeiras, tabelas de junção, relações lógicas e cascatas está em [Relacionamento do banco de dados](docs/17_RELACIONAMENTO_BANCO_DADOS.md).
-
-O superadmin também pode excluir uma obra ou um projeto mediante confirmação digitada. Excluir uma obra remove em cascata seus nós, evidências, embeddings, trabalhos de processamento, permissões e vínculos com projetos. Excluir um projeto remove igualmente todas as obras nele contidas, mesmo que alguma também esteja associada a outro projeto, e depois remove suas fontes do armazenamento privado.
-
-Para preservar uma obra compartilhada antes de excluir um projeto, o superadmin deve editar esse projeto, desmarcar a obra, salvar o projeto sem o vínculo e somente então excluí-lo. O modal de exclusão identifica as obras compartilhadas e apresenta essa orientação antes da confirmação destrutiva.
-
-No XAMPP com o projeto dentro de `htdocs`, a raiz `http://localhost/eva.your-domain.com/` é encaminhada internamente para `public`. O `.htaccess` da raiz bloqueia qualquer arquivo ou diretório real fora dessa superfície, desativa listagens e impede acesso HTTP a credenciais, código, banco, documentação, testes e armazenamento. Essa proteção exige `mod_rewrite`, `mod_headers` e `AllowOverride All`.
-
-Diretivas globais do Apache, como `TraceEnable Off` e `ServerTokens Prod`, devem ser configuradas no servidor quando o ambiente deixar de ser exclusivamente local; elas não são permitidas em `.htaccess`.
-
-O produto permite enviar e listar documentos, agendar embeddings primários, consultar evidências, acompanhar trabalhos, retomar falhas permitidas e inspecionar auditoria e métricas. Fornecedor, endpoint, modelo e variável de credencial são definidos exclusivamente no `.env` e não aparecem na interface ou nas respostas administrativas.
+```bash
+php bin/build-cognitive.php <document-id> --stage=embeddings --live
+```
 
 Cada execução do worker processa no máximo um trabalho:
 
-```powershell
+```bash
 php bin/queue-worker.php --live
 ```
 
-Para consumir toda a fila atual em uma única sessão explícita, use `--drain`. Esse modo pode realizar muitas chamadas reais e deve permanecer aberto enquanto a interface acompanha o progresso:
+Use `--drain` somente para consumir intencionalmente toda a fila atual. Na área administrativa, **Processar fila no navegador** chama `POST /api/admin/queue/run` repetidamente até a fila ficar ociosa. Cada requisição realiza uma passagem, exige `confirm_live: true` e continua sujeita a `AI_LIVE_ENABLED=true`. A aba deve permanecer aberta durante o processamento.
 
-```powershell
-php bin/queue-worker.php --live --drain
-```
+## Módulos conectores
 
-A execução continua protegida pela dupla confirmação `AI_LIVE_ENABLED=true` e `--live`.
+Um módulo funciona como cartucho instalável: é um pacote independente em `modules/<module-id>/`, hierarquicamente acima de projetos, mas sem pertencer a projeto, documento ou usuário. Zero, um ou vários módulos podem observar o mesmo evento versionado de forma independente.
 
-Na área administrativa, o botão **Processar fila no navegador** chama `POST /api/admin/queue/run` repetidamente até a fila ficar ociosa. Cada requisição executa uma única passagem do worker e exige `confirm_live: true`; o servidor continua exigindo `AI_LIVE_ENABLED=true`. A aba deve permanecer aberta durante o processamento.
+Cada pacote declara `module.json`, implementa o EVA Module Contract v1 e grava seu histórico privado em `modules/.runtime/data/<module-id>/module.sqlite`. O Core persiste cada evento neutro uma única vez em `module_events`; assinantes ativos mantêm cursores próprios. O módulo recebe uma API de leitura limitada e uma capacidade de linguagem neutra, nunca credenciais do banco ou chaves de IA.
+
+O superadmin pode ativar, desativar ou excluir definitivamente pacotes descobertos em `modules/`. Desativar preserva pacote e SQLite; excluir exige confirmação digitada e remove ambos. Para atualizar, substitui-se somente `modules/<module-id>/`, pois os dados permanecem fora do pacote.
+
+Interfaces modulares fornecem seu próprio HTML e CSS. O Core conhece apenas o contrato genérico de dashboard e o nome do manifesto. A distribuição pública inclui `com.eva.explorer` como conector independente de referência; removê-lo não invalida o produto nem testes não relacionados. Consulte [Módulos do EVA](docs/16_MODULOS.md).
+
+## Produto administrativo e segurança
+
+A interface é servida em `/` e usa a mesma origem da API. O navegador conserva o token de superadmin somente em `sessionStorage`, e rotas administrativas exigem `Authorization: Bearer`. O superadmin cadastra usuários, redefine senhas, ativa ou desativa contas e concede acesso por projeto ou obra. Usuários comuns acessam apenas o chat e a alteração de senha.
+
+Senhas são persistidas exclusivamente por `password_hash()`. Na criação, redefinição ou rotação, um código de recuperação de 16 caracteres é exibido uma única vez e armazenado somente como hash. Sem SMTP, a recuperação exige username, código vigente e nova senha; a conclusão revoga sessões anteriores e emite novo código.
+
+As tabelas de acesso estão em `database/migrations/20260721_008_user_access.sql`, e perfis de resposta em `database/migrations/20260731_009_project_response_profile.sql`. A permissão de projeto inclui todas as obras associadas; a permissão de obra não libera as demais obras do projeto. O mapa de cardinalidades, chaves, relações e cascatas está em [Relacionamento do banco de dados](docs/17_RELACIONAMENTO_BANCO_DADOS.md).
+
+O superadmin pode excluir obra ou projeto mediante confirmação digitada. Excluir uma obra remove em cascata nós, evidências, embeddings, trabalhos, permissões e vínculos. Excluir um projeto remove também todas as obras nele contidas, mesmo se compartilhadas. Para preservar uma obra compartilhada, remova antes o vínculo no projeto; o modal identifica esses casos e apresenta a orientação.
+
+No XAMPP, o `.htaccess` da raiz bloqueia arquivos e diretórios reais fora de `public/`, desativa listagens e impede acesso HTTP a credenciais, código, banco, documentação, testes e armazenamento. Essa proteção exige `mod_rewrite`, `mod_headers` e `AllowOverride All`. Diretivas globais como `TraceEnable Off` e `ServerTokens Prod` devem ser configuradas no servidor, não no `.htaccess`. Fornecedor, endpoint, modelo e nome da variável de credencial permanecem no `.env` e não aparecem na interface nem nas respostas administrativas.
+
+## Superfície da API
+
+| Método | Rota | Finalidade |
+|---|---|---|
+| `GET` | `/api/health` | Saúde pública da aplicação e do banco |
+| `GET` | `/api/branding` | Branding público sanitizado |
+| `POST` | `/api/auth/login` | Iniciar sessão de usuário comum |
+| `POST` | `/api/auth/recover` | Recuperar senha de usuário comum |
+| `GET` | `/api/scopes` | Listar projetos e obras disponíveis ao ator autenticado |
+| `POST` | `/api/query` | Executar consulta validada nos escopos autorizados |
+| `GET` | `/api/modules` | Descobrir dashboards modulares ativos |
+| `GET` | `/api/modules/{id}/dashboard` | Renderizar um dashboard pelo contrato genérico |
+| `GET` | `/api/admin/modules` | Inspecionar conectores instalados (superadmin) |
+| `PATCH` | `/api/admin/modules/{id}` | Ativar ou desativar conector (superadmin) |
+| `DELETE` | `/api/admin/modules/{id}` | Excluir conector e dados após confirmação (superadmin) |
+| `GET` | `/api/documents` | Listar obras e contagens (superadmin) |
+| `POST` | `/api/documents` | Ingerir Markdown, JSON ou XML (superadmin) |
+| `POST` | `/api/documents/{id}/process` | Enfileirar embeddings primários (superadmin) |
+| `POST` | `/api/admin/queue/run` | Executar uma passagem confirmada do worker (superadmin) |
+| `GET` | `/api/jobs` | Inspecionar a fila (superadmin) |
+| `POST` | `/api/jobs/{id}/retry` | Retomar explicitamente um trabalho permitido (superadmin) |
+| `GET` | `/api/metrics` | Retornar contagens descritivas (superadmin) |
+| `GET` | `/api/audit` | Retornar eventos administrativos sanitizados (superadmin) |
+
+Saúde, branding, login e recuperação são públicos conforme seus contratos. As demais rotas exigem sessão autenticada ou token administrativo e aplicam políticas específicas de papel e escopo. A matriz completa está em [Produto e operações](docs/10_PRODUTO.md).
 
 ## Pastas
 
@@ -201,3 +242,71 @@ public/         Única pasta exposta pelo servidor web
 storage/        Documentos e logs locais não versionados
 tests/          Testes automatizados
 ```
+
+## Testes
+
+O repositório inclui testes offline com provedores simulados. A fixture pública [`tests/fixtures/synthetic_systems_manual.md`](tests/fixtures/synthetic_systems_manual.md) é material original; livros de terceiros, fontes enviadas, bancos de produção e logs privados não são distribuídos.
+
+Valide a sintaxe:
+
+```bash
+find app bin bootstrap config modules public tests -name '*.php' -print0 | xargs -0 -n1 php -l
+```
+
+Execute os testes relevantes individualmente após configurar um banco isolado, por exemplo:
+
+```bash
+php tests/ParsersTest.php
+php tests/DocumentIngestionTest.php
+php tests/CognitiveBuildTest.php
+php tests/ContextIntelligenceEngineTest.php
+php tests/ContextIntelligenceIntegrationTest.php
+php tests/QueryTest.php
+```
+
+Testes devem usar `AI_LIVE_ENABLED=false`, salvo quando documentarem explicitamente comportamento real.
+
+## Limites do repositório
+
+A distribuição pública exclui intencionalmente:
+
+- `.env` com configurações e credenciais locais;
+- dumps de bancos operacionais;
+- documentos enviados e logs de runtime;
+- estado de ativação, SQLite, WAL e logs dos módulos;
+- usuários privados e registros de acesso;
+- corpora de livros de terceiros usados em regressões privadas.
+
+O esquema público e todas as migrations versionadas permanecem incluídos para instalações vazias.
+
+## Documentação
+
+- [Índice da documentação](docs/README.md)
+- [Visão geral](docs/01_VISAO_GERAL.md)
+- [Arquitetura](docs/02_ARQUITETURA.md)
+- [Instalação](docs/18_INSTALACAO.md)
+- [Ingestão](docs/03_INGESTAO.md)
+- [Construção cognitiva](docs/04_CONSTRUCAO_COGNITIVA.md)
+- [Consulta](docs/05_CONSULTA.md)
+- [Context Intelligence Engine](docs/14_CONTEXT_INTELLIGENCE_ENGINE.md)
+- [Cnode](docs/06_CNODE.md)
+- [Banco de dados](docs/07_BANCO_DE_DADOS.md)
+- [Relacionamentos do banco](docs/17_RELACIONAMENTO_BANCO_DADOS.md)
+- [Regras obrigatórias](docs/08_REGRAS.md)
+- [Sustentabilidade energética](docs/13_SUSTENTABILIDADE_ENERGETICA.md)
+- [Roadmap](docs/09_ROADMAP.md)
+- [Validação de prontidão](docs/11_VALIDACAO_GO_LIVE.md)
+- [Homologação pré-implantação](docs/12_HOMOLOGACAO_PRE_DEPLOY.md)
+- [Visão e impacto](docs/15_VISAO.md)
+- [Módulos conectores](docs/16_MODULOS.md)
+- [Material científico e filosófico](philosophy/README.md)
+
+## Contribuição e segurança
+
+Leia [`CONTRIBUTING.md`](CONTRIBUTING.md) antes de abrir uma contribuição. Relate vulnerabilidades de forma privada conforme [`SECURITY.md`](SECURITY.md). A participação da comunidade segue [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
+
+## Licença
+
+Copyright 2026 EVA Project contributors.
+
+Licenciado sob a [Apache License 2.0](LICENSE). A licença permite uso, modificação e distribuição nos termos estabelecidos, mas não concede direitos sobre marcas; consulte [`NOTICE`](NOTICE).
