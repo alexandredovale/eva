@@ -1,6 +1,5 @@
 # Filosofia do EVA — Evidence Algorithm
 
-Versão: 6.0.0
 Estado conceitual: arquitetura vigente
 English: [EVA Philosophy](en/00_EVA_PHILOSOPHY.md)
 
