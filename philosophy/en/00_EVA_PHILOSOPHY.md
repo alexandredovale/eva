@@ -1,6 +1,5 @@
 # EVA Philosophy — Evidence Algorithm
 
-Version: 6.0.0
 Conceptual status: current architecture
 Português: [Filosofia do EVA](../00_EVA_PHILOSOPHY.md)
 
