@@ -200,6 +200,8 @@ O EVA gerou 2.645 tokens de saída, contra 1.472 do baseline. Portanto, a econom
 
 ## Resultados completos
 
+As chamadas retornaram originalmente respostas em português. No espelho inglês, esses textos são traduções editoriais fiéis, não novas gerações do modelo, e não alteram as métricas registradas.
+
 <details>
 <summary>Q1 — O que é Deus e quais atributos definem a natureza divina?</summary>
 
@@ -316,6 +318,7 @@ Com base no documento, após a morte, a alma volta a ser Espírito, isto é, ret
 - A latência inclui rede e carga externa e não foi repetida o suficiente para produzir percentis estatísticos.
 - Não houve avaliação cega por especialistas nem cálculo de acurácia doutrinária. A análise qualitativa descreve propriedades observáveis das respostas.
 - O baseline direto não implementou validação programática dos números de questões citados.
+- As respostas completas do espelho inglês são traduções editoriais das saídas originais em português, não novas chamadas ao modelo.
 
 ## Conclusão
 
