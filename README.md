@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Current version:** `8.0.1`
+**Current version:** `8.0.2`
 
-**Version highlight:** EVA 8.0.1 consolidates the Portuguese and English project presentations as editorial mirrors, combines their previously complementary information without repetition, and makes explicit the joint contribution of the EVA technique and RAG to AI efficiency, sustainability, and control.
+**Version highlight:** EVA 8.0.2 publishes a reproducible five-query benchmark comparing EVA retrieval with full-document context, completes the Portuguese and English documentation mirrors, and updates the product presentation to reflect only modules present in the public repository.
 
 EVA is a provider-neutral PHP system for building, organizing, and querying **verifiable documentary cognitive memory**. EVA (Evidence Algorithm) preserves document hierarchy, stores literal source evidence, and validates every answer against the primary evidence recovered for the current query.
 
@@ -281,7 +281,7 @@ The public schema and all versioned migrations remain included for empty install
 
 ## Documentation
 
-- [Documentation index](docs/README.md)
+- [Documentation index](docs/en/README.md)
 - [Overview](docs/en/01_OVERVIEW.md)
 - [Architecture](docs/en/02_ARCHITECTURE.md)
 - [Installation](docs/en/03_INSTALLATION.md)
@@ -298,6 +298,8 @@ The public schema and all versioned migrations remain included for empty install
 - [Pre-deployment acceptance](docs/en/15_PRE_DEPLOYMENT_ACCEPTANCE.md)
 - [Project vision and impact assessment](docs/en/16_VISION.md)
 - [Connector modules](docs/en/17_MODULE_CONNECTORS.md)
+- [EVA versus full-context benchmark](docs/en/19_EVA_VS_FULL_CONTEXT_BENCHMARK.md)
+- [Product, market applications, and impact](docs/en/EVA_MARKETING.md)
 - [Scientific and philosophical material](philosophy/README.md)
 
 ## Contributing and security

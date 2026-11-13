@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21500611.svg)](https://doi.org/10.5281/zenodo.21500611)
 
-**Versão atual:** `8.0.1`
+**Versão atual:** `8.0.2`
 
-**Destaque da versão:** o EVA 8.0.1 consolida os arquivos de apresentação em português e inglês como espelhos editoriais, reúne as informações antes complementares sem repetições e explicita a contribuição conjunta da técnica EVA e do RAG para eficiência, sustentabilidade e controle da IA.
+**Destaque da versão:** o EVA 8.0.2 publica um benchmark reproduzível de cinco consultas que compara a recuperação do EVA ao contexto documental integral, completa os espelhos da documentação em português e inglês e atualiza a apresentação do produto para refletir somente os módulos presentes no repositório público.
 
 O EVA é um sistema PHP neutro em relação a fornecedores para construir, organizar e consultar **memória cognitiva documental verificável**. O EVA (Evidence Algorithm) preserva a hierarquia dos documentos, armazena evidências literais das fontes e valida cada resposta contra as evidências primárias recuperadas para a consulta atual.
 
@@ -299,6 +299,8 @@ O esquema público e todas as migrations versionadas permanecem incluídos para 
 - [Homologação pré-implantação](docs/12_HOMOLOGACAO_PRE_DEPLOY.md)
 - [Visão e impacto](docs/15_VISAO.md)
 - [Módulos conectores](docs/16_MODULOS.md)
+- [Benchmark EVA versus contexto integral](docs/19_BENCHMARK_EVA_VS_CONTEXTO_INTEGRAL.md)
+- [Produto, aplicações de mercado e impacto](docs/EVA_MARKETING.md)
 - [Material científico e filosófico](philosophy/README.md)
 
 ## Contribuição e segurança

@@ -1,92 +1,71 @@
-# EVA documentation
+# Documentação do EVA
 
-English is the primary language of the public repository. The original Portuguese technical documents are preserved in this directory because they record the implemented system in greater historical detail.
+Esta pasta reúne a documentação técnica, operacional, científica e de produto do EVA. A edição principal está em português; a versão inglesa integral e equivalente está em [`en/`](en/README.md).
 
-## English documentation
+## Documentos de apresentação
 
-### System and operation
+- [EVA — visão de produto, aplicações de mercado e impacto](EVA_MARKETING.md)
+- [Benchmark EVA 8.0.2: recuperação documental versus contexto integral](19_BENCHMARK_EVA_VS_CONTEXTO_INTEGRAL.md)
 
-1. [Overview](en/01_OVERVIEW.md)
-2. [Architecture](en/02_ARCHITECTURE.md)
-3. [Installation](en/03_INSTALLATION.md)
-4. [Ingestion and cognitive build](en/04_INGESTION_AND_BUILD.md)
-5. [Query and single-turn chat](en/05_QUERY_AND_CHAT.md)
-6. [API and operations](en/06_API_AND_OPERATIONS.md)
-7. [Security and deployment](en/07_SECURITY_AND_DEPLOYMENT.md)
-8. [Scientific scope and energy sustainability](en/08_SCIENTIFIC_AND_ENERGY.md)
-9. [Context Intelligence Engine](en/09_CONTEXT_INTELLIGENCE_ENGINE.md)
-10. [Cnode as an EVA conceptual derivation](en/10_CNODE.md)
-11. [Database](en/11_DATABASE.md)
-12. [Mandatory rules](en/12_MANDATORY_RULES.md)
-13. [Roadmap](en/13_ROADMAP.md)
-18. [Database relationships](en/18_DATABASE_RELATIONSHIPS.md)
+## Sistema e operação
 
-### Validation records
+1. [Visão geral](01_VISAO_GERAL.md)
+2. [Arquitetura](02_ARQUITETURA.md)
+3. [Ingestão](03_INGESTAO.md)
+4. [Construção cognitiva](04_CONSTRUCAO_COGNITIVA.md)
+5. [Consulta](05_CONSULTA.md)
+6. [Cnode](06_CNODE.md)
+7. [Banco de dados](07_BANCO_DE_DADOS.md)
+8. [Regras obrigatórias](08_REGRAS.md)
+9. [Roadmap](09_ROADMAP.md)
+10. [Produto e operações](10_PRODUTO.md)
+11. [Validação de prontidão](11_VALIDACAO_GO_LIVE.md)
+12. [Homologação pré-implantação](12_HOMOLOGACAO_PRE_DEPLOY.md)
+13. [Sustentabilidade energética](13_SUSTENTABILIDADE_ENERGETICA.md)
+14. [Context Intelligence Engine](14_CONTEXT_INTELLIGENCE_ENGINE.md)
+15. [Visão e impacto](15_VISAO.md)
+16. [Módulos conectores](16_MODULOS.md)
+17. [Relacionamentos do banco de dados](17_RELACIONAMENTO_BANCO_DADOS.md)
+18. [Instalação](18_INSTALACAO.md)
 
-14. [Go-live readiness validation](en/14_GO_LIVE_VALIDATION.md)
-15. [Pre-deployment acceptance](en/15_PRE_DEPLOYMENT_ACCEPTANCE.md)
+## Registros de validação
 
-### Platform evolution
+Os documentos [Validação de prontidão](11_VALIDACAO_GO_LIVE.md) e [Homologação pré-implantação](12_HOMOLOGACAO_PRE_DEPLOY.md) preservam data, ambiente, resultados e limitações das execuções originais. São registros históricos e não substituem a validação de uma nova implantação.
 
-16. [Project vision and impact assessment](en/16_VISION.md)
-17. [Connector modules](en/17_MODULE_CONNECTORS.md)
+O [benchmark da versão 8.0.2](19_BENCHMARK_EVA_VS_CONTEXTO_INTEGRAL.md) registra corpus, modelos, configuração, perguntas, tokens, cache, custo, latência, evidências e limitações. O ensaio mede redução de tokens e custo no cenário executado; não mede diretamente consumo de energia nem estabelece superioridade universal.
 
-The English collection covers the complete current technical scope. The two validation records preserve the date, environment, results, and limitations of the original executions; they are historical evidence, not a substitute for validating a new deployment.
+## Correspondência com a edição inglesa
 
-### Source coverage
-
-The English edition is organized by reader task rather than as filename-for-filename duplication. This map shows where each original specification is covered.
-
-| Original Portuguese specification | English edition |
+| Documento em português | Versão inglesa |
 |---|---|
-| `01_VISAO_GERAL.md` | [Overview](en/01_OVERVIEW.md) |
-| `02_ARQUITETURA.md` | [Architecture](en/02_ARCHITECTURE.md) |
-| `03_INGESTAO.md` | [Ingestion and cognitive build](en/04_INGESTION_AND_BUILD.md) |
-| `04_CONSTRUCAO_COGNITIVA.md` | [Ingestion and cognitive build](en/04_INGESTION_AND_BUILD.md) |
-| `05_CONSULTA.md` | [Query and single-turn chat](en/05_QUERY_AND_CHAT.md) |
-| `06_CNODE.md` | [Cnode as an EVA conceptual derivation](en/10_CNODE.md) |
-| `07_BANCO_DE_DADOS.md` | [Database](en/11_DATABASE.md) |
-| `08_REGRAS.md` | [Mandatory rules](en/12_MANDATORY_RULES.md) |
-| `09_ROADMAP.md` | [Roadmap](en/13_ROADMAP.md) |
-| `10_PRODUTO.md` | [API and operations](en/06_API_AND_OPERATIONS.md) |
-| `11_VALIDACAO_GO_LIVE.md` | [Go-live readiness validation](en/14_GO_LIVE_VALIDATION.md) |
-| `12_HOMOLOGACAO_PRE_DEPLOY.md` | [Pre-deployment acceptance](en/15_PRE_DEPLOYMENT_ACCEPTANCE.md) |
-| `13_SUSTENTABILIDADE_ENERGETICA.md` | [Scientific scope and energy sustainability](en/08_SCIENTIFIC_AND_ENERGY.md) |
-| `14_CONTEXT_INTELLIGENCE_ENGINE.md` | [Context Intelligence Engine](en/09_CONTEXT_INTELLIGENCE_ENGINE.md) |
-| `15_VISAO.md` | [Project vision and impact assessment](en/16_VISION.md) |
-| `16_MODULOS.md` | [Connector modules](en/17_MODULE_CONNECTORS.md) |
-| `17_RELACIONAMENTO_BANCO_DADOS.md` | [Database relationships](en/18_DATABASE_RELATIONSHIPS.md) |
-| `18_INSTALACAO.md` | [Installation](en/03_INSTALLATION.md) |
+| [Visão geral](01_VISAO_GERAL.md) | [Overview](en/01_OVERVIEW.md) |
+| [Arquitetura](02_ARQUITETURA.md) | [Architecture](en/02_ARCHITECTURE.md) |
+| [Ingestão](03_INGESTAO.md) e [Construção cognitiva](04_CONSTRUCAO_COGNITIVA.md) | [Ingestion and cognitive build](en/04_INGESTION_AND_BUILD.md) |
+| [Consulta](05_CONSULTA.md) | [Query and single-turn chat](en/05_QUERY_AND_CHAT.md) |
+| [Cnode](06_CNODE.md) | [Cnode as an EVA conceptual derivation](en/10_CNODE.md) |
+| [Banco de dados](07_BANCO_DE_DADOS.md) | [Database](en/11_DATABASE.md) |
+| [Regras obrigatórias](08_REGRAS.md) | [Mandatory rules](en/12_MANDATORY_RULES.md) |
+| [Roadmap](09_ROADMAP.md) | [Roadmap](en/13_ROADMAP.md) |
+| [Produto e operações](10_PRODUTO.md) | [API and operations](en/06_API_AND_OPERATIONS.md) |
+| [Validação de prontidão](11_VALIDACAO_GO_LIVE.md) | [Go-live readiness validation](en/14_GO_LIVE_VALIDATION.md) |
+| [Homologação pré-implantação](12_HOMOLOGACAO_PRE_DEPLOY.md) | [Pre-deployment acceptance](en/15_PRE_DEPLOYMENT_ACCEPTANCE.md) |
+| [Sustentabilidade energética](13_SUSTENTABILIDADE_ENERGETICA.md) | [Scientific scope and energy sustainability](en/08_SCIENTIFIC_AND_ENERGY.md) |
+| [Context Intelligence Engine](14_CONTEXT_INTELLIGENCE_ENGINE.md) | [Context Intelligence Engine](en/09_CONTEXT_INTELLIGENCE_ENGINE.md) |
+| [Visão e impacto](15_VISAO.md) | [Project vision and impact assessment](en/16_VISION.md) |
+| [Módulos conectores](16_MODULOS.md) | [Connector modules](en/17_MODULE_CONNECTORS.md) |
+| [Relacionamentos do banco de dados](17_RELACIONAMENTO_BANCO_DADOS.md) | [Database relationships](en/18_DATABASE_RELATIONSHIPS.md) |
+| [Instalação](18_INSTALACAO.md) | [Installation](en/03_INSTALLATION.md) |
+| [Benchmark EVA versus contexto integral](19_BENCHMARK_EVA_VS_CONTEXTO_INTEGRAL.md) | [EVA versus full-context benchmark](en/19_EVA_VS_FULL_CONTEXT_BENCHMARK.md) |
+| [Produto, aplicações de mercado e impacto](EVA_MARKETING.md) | [Product, market applications, and impact](en/EVA_MARKETING.md) |
 
-The installation guide is maintained as a paired operational document in both languages.
+A coleção inglesa reorganiza parte da especificação por tarefa do leitor, mas cobre o mesmo escopo técnico atual. Os documentos de apresentação e benchmark são espelhos editoriais completos, com a mesma estrutura e o mesmo conteúdo factual.
 
-## Figure contract templates
+## Contratos de figuras
 
-Ready-to-ingest Portuguese and English examples for Markdown, JSON, and XML are indexed in [`examples/figure-contracts/`](examples/figure-contracts/README.md). The matching operational specifications are [API and operations](en/06_API_AND_OPERATIONS.md#document-figures) and [Produto](10_PRODUTO.md#figuras-documentais).
+Exemplos prontos para ingestão em Markdown, JSON e XML estão indexados em [`examples/figure-contracts/`](examples/figure-contracts/README.md). As especificações correspondentes estão em [Produto](10_PRODUTO.md#figuras-documentais) e [API and operations](en/06_API_AND_OPERATIONS.md#document-figures).
 
-## Original Portuguese specifications
+## Limites do repositório
 
-| Document | Subject |
-|---|---|
-| [`01_VISAO_GERAL.md`](01_VISAO_GERAL.md) | Project and Evidence Algorithm overview |
-| [`02_ARQUITETURA.md`](02_ARQUITETURA.md) | Modules, boundaries, and provider neutrality |
-| [`03_INGESTAO.md`](03_INGESTAO.md) | Parsing, normalization, upload, and persistence |
-| [`04_CONSTRUCAO_COGNITIVA.md`](04_CONSTRUCAO_COGNITIVA.md) | Primary-evidence embeddings and versioning |
-| [`05_CONSULTA.md`](05_CONSULTA.md) | Query routes, chat context, limits, and validation |
-| [`06_CNODE.md`](06_CNODE.md) | Cnode as a transient conceptual derivation of EVA, `simetry`, and `assimetry` |
-| [`07_BANCO_DE_DADOS.md`](07_BANCO_DE_DADOS.md) | Persistent data model |
-| [`08_REGRAS.md`](08_REGRAS.md) | System invariants and security rules |
-| [`09_ROADMAP.md`](09_ROADMAP.md) | Completed phases and experimental roadmap |
-| [`10_PRODUTO.md`](10_PRODUTO.md) | Product, API, queue, audit, and metrics |
-| [`11_VALIDACAO_GO_LIVE.md`](11_VALIDACAO_GO_LIVE.md) | Go-live validation record |
-| [`12_HOMOLOGACAO_PRE_DEPLOY.md`](12_HOMOLOGACAO_PRE_DEPLOY.md) | Pre-deployment acceptance record |
-| [`13_SUSTENTABILIDADE_ENERGETICA.md`](13_SUSTENTABILIDADE_ENERGETICA.md) | Energy-efficiency mechanisms and validation protocol |
-| [`14_CONTEXT_INTELLIGENCE_ENGINE.md`](14_CONTEXT_INTELLIGENCE_ENGINE.md) | Statistical stabilization between vector retrieval and cognitive layers |
-| [`15_VISAO.md`](15_VISAO.md) | Visão crítica, impacto potencial, limites atuais e prioridades de evolução |
-| [`16_MODULOS.md`](16_MODULOS.md) | Instalação, contratos, SDK, operação, backup e remoção de módulos |
-| [`17_RELACIONAMENTO_BANCO_DADOS.md`](17_RELACIONAMENTO_BANCO_DADOS.md) | Cardinalidades, chaves estrangeiras, relações lógicas, fluxos e efeitos de exclusão |
-| [`18_INSTALACAO.md`](18_INSTALACAO.md) | Plataforma, ambiente, banco, permissões, servidor web e ativação de provedores |
+Corpora privados de teste, livros de terceiros, documentos enviados, credenciais, bancos operacionais e logs de runtime não integram a distribuição pública.
 
-The complete English philosophical and scientific collection is available in [`philosophy/en/`](../philosophy/en/README.md), including the [full scientific paper](../philosophy/en/01_EVA_SCIENTIFIC_PAPER.md), [API flow](../philosophy/en/03_EVA_API_FLOW.md), [Context Intelligence Engine](../philosophy/en/04_CONTEXT_INTELLIGENCE_ENGINE.md), and [deterministic evidence contract](../philosophy/en/05_DETERMINISTIC_EVIDENCE_CONTRACT.md).
-
-Private test books and operational corpora are intentionally not part of this repository.
+A coleção científica e filosófica está em [`philosophy/`](../philosophy/README.md), com edição inglesa integral em [`philosophy/en/`](../philosophy/en/README.md).
