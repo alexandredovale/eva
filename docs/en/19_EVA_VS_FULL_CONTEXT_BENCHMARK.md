@@ -79,6 +79,16 @@ The document was placed before the question to form an identical prefix across c
 
 The five questions were defined before execution. For each question, EVA ran first and the direct call followed. No answer was used as input to another question. None of the ten generations required a retry, was truncated, or failed.
 
+### Effect of the one-question-per-request contract
+
+The benchmark fully respected EVA's operational contract of one independent question per request. Each of the five queries generated a new question embedding and restarted retrieval, κq, and CIE without inheriting the input, recovered population, transient embedding, answer, or interaction from the preceding query.
+
+This restart does not reconstruct documentary memory. Primary evidence and its embeddings, produced earlier during cognitive construction, remained stored and were reused in every query. Starting a question from zero therefore means repeating only the query-local election; it does not mean reprocessing the complete Markdown, regenerating the work's embeddings, or resending the complete work to the answer model.
+
+The contract also prevents the cumulative growth of a conversational window. Instead of carrying prior questions, answers, and contexts, each call contains only fixed instructions, the current question, and the evidence elected for it. Across the measured set, the five new question embeddings totaled 104 tokens, while the context sent to the answer model totaled 25,805 input tokens.
+
+The direct baseline followed the same isolation of one question per call but received the complete document again as a prefix. Its cache was deliberately favored for the next four calls, yet the provider still accounted for 1,246,430 input tokens across the set. The savings observed in this benchmark therefore already include the cost of restarting every query and do not depend on conversational memory between questions.
+
 ## Questions
 
 | ID | Category | EVA local classification | Question |
@@ -323,6 +333,8 @@ Based on the document, after death the soul becomes a Spirit again, returning to
 ## Conclusion
 
 In this test, EVA replaced the repeated submission of a full context accounting for 1,246,430 input tokens with 25,805 answer-context tokens and 104 embedding tokens. The gain remained substantial even against a direct baseline with optimized caching: 97.71% fewer operational tokens and 89.99% lower aggregate cost.
+
+These figures already reflect five isolated questions, each with a new embedding and new retrieval. The efficiency resulted from reusing previously constructed documentary memory and from the absence of accumulated conversational history, not from inheriting the context of a preceding question.
 
 Full context was 13.11% faster across the set and produced shorter answers. EVA answered in greater depth and added verifiable IDs, deterministic selection, local validation, and an explicit declaration when cognitive interactions could not be supported literally.
 

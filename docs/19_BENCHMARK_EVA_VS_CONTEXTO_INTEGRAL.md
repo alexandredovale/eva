@@ -79,6 +79,16 @@ O documento foi colocado antes da pergunta para formar um prefixo idêntico entr
 
 As cinco perguntas foram definidas antes da execução. Para cada pergunta, o EVA foi executado primeiro e a chamada direta em seguida. Nenhuma resposta foi usada como entrada de outra pergunta. Não houve retry, truncamento ou falha nas dez gerações.
 
+### Efeito do contrato de uma pergunta por vez
+
+O benchmark respeitou integralmente o contrato operacional do EVA de uma pergunta independente por requisição. Cada uma das cinco consultas gerou um novo embedding da pergunta e reiniciou recuperação, κq e CIE sem herdar input, população recuperada, embedding transitório, resposta ou interação da consulta anterior.
+
+Esse reinício não reconstrói a memória documental. As evidências primárias e seus embeddings, produzidos anteriormente durante a construção cognitiva, permaneceram armazenados e foram reutilizados em todas as consultas. Portanto, começar uma pergunta do zero significa refazer somente a eleição query-local; não significa reprocessar o Markdown integral, gerar novamente os embeddings da obra ou reenviar a obra completa ao modelo de respostas.
+
+O contrato também impede o crescimento acumulativo de uma janela conversacional. Em vez de carregar perguntas, respostas e contextos anteriores, cada chamada contém apenas as instruções fixas, a pergunta atual e as evidências eleitas para ela. No conjunto medido, os cinco novos embeddings das perguntas somaram 104 tokens, enquanto o contexto enviado ao modelo de respostas somou 25.805 tokens de input.
+
+O baseline direto seguiu o mesmo isolamento de uma pergunta por chamada, mas recebeu novamente o documento integral como prefixo. Seu cache foi deliberadamente favorecido nas quatro chamadas seguintes, porém o provedor ainda contabilizou 1.246.430 tokens de input no conjunto. Assim, a economia observada neste benchmark já incorpora o custo de reiniciar todas as consultas e não depende de memória conversacional entre perguntas.
+
 ## Perguntas
 
 | ID | Categoria | Classificação local do EVA | Pergunta |
@@ -323,6 +333,8 @@ Com base no documento, após a morte, a alma volta a ser Espírito, isto é, ret
 ## Conclusão
 
 Neste ensaio, o EVA substituiu o envio repetido de um contexto integral de 1.246.430 tokens contabilizados por 25.805 tokens de contexto de resposta e 104 tokens de embeddings. O ganho permaneceu expressivo mesmo contra um baseline direto com cache otimizado: 97,71% menos tokens operacionais e 89,99% menos custo agregado.
+
+Esses números já refletem cinco perguntas isoladas, cada uma com novo embedding e nova recuperação. A eficiência decorreu da reutilização da memória documental previamente construída e da ausência de histórico conversacional acumulado, não da herança do contexto de uma pergunta anterior.
 
 O contexto integral foi 13,11% mais rápido no conjunto e produziu respostas mais curtas. O EVA respondeu com maior desenvolvimento e acrescentou IDs verificáveis, seleção determinística, validação local e declaração explícita quando interações cognitivas não podiam ser sustentadas literalmente.
 
